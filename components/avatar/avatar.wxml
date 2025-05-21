@@ -1,0 +1,14 @@
+<!-- avatar.wxml -->
+<view 
+  class="avatar-container" 
+  style="width: {{size}}rpx; height: {{size}}rpx;"
+  bindtap="handleTap">
+  <block wx:if="{{avatar}}">
+    <image src="{{avatar}}" mode="aspectFill" class="avatar-image"></image>
+  </block>
+  <block wx:else>
+    <view class="avatar-placeholder">
+      <text style="font-size: {{fontSize}}rpx;">{{initial}}</text>
+    </view>
+  </block>
+</view>

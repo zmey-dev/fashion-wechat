@@ -1,0 +1,16 @@
+<!-- components/search-bar/search-bar.wxml -->
+<view class="search-container">
+  <view class="search-bar">
+    <icon type="search" size="14" color="#999999" class="search-icon"></icon>
+    <input 
+      class="search-input" 
+      placeholder="搜索" 
+      placeholder-class="search-placeholder"
+      confirm-type="search"
+      value="{{searchValue}}"
+      bindinput="onInput"
+      bindconfirm="onSearch"
+    />
+    <view wx:if="{{searchValue}}" class="clear-icon" bindtap="onClear"></view>
+  </view>
+</view>

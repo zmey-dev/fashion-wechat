@@ -1,0 +1,22 @@
+{
+  "pages": [
+    "pages/index/index"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#111111",
+    "navigationBarTitleText": "时装秀平台",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#111111"
+  },
+  
+  "usingComponents": {
+    "avatar":"/components/avatar/avatar",
+    "media-card":"/components/media-card/media-card"
+  },
+  "darkmode": true,
+  "themeLocation": "theme.json",
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

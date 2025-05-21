@@ -1,0 +1,4 @@
+<!-- layouts/main-footer/main-footer.wxml -->
+<view class="footer">
+  <text class="footer-text">- {{year}} 时装秀平台 -</text>
+</view>

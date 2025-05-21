@@ -1,0 +1,40 @@
+/* components/search-bar/search-bar.wxss */
+.search-container {
+  padding: 0 20rpx;
+  margin: 0 auto;
+  max-width: 600rpx;
+  width: 100%;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 30rpx;
+  padding: 0 20rpx;
+  height: 60rpx;
+}
+
+.search-icon {
+  margin-right: 10rpx;
+}
+
+.search-input {
+  flex: 1;
+  height: 60rpx;
+  color: #FFFFFF;
+  font-size: 28rpx;
+}
+
+.search-placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.clear-icon {
+  width: 32rpx;
+  height: 32rpx;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23999999' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'%3E%3C/circle%3E%3Cline x1='15' y1='9' x2='9' y2='15'%3E%3C/line%3E%3Cline x1='9' y1='9' x2='15' y2='15'%3E%3C/line%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}

@@ -1,0 +1,49 @@
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  height: 100vh;
+  background-color: #f8f8f8;
+}
+
+.header {
+  width: 100%;
+  height: 100rpx;
+  background-color: #07C160;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.title {
+  color: white;
+  font-size: 36rpx;
+  font-weight: bold;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 60rpx;
+}
+
+.logo {
+  width: 200rpx;
+  height: 200rpx;
+}
+
+.welcome-text {
+  margin-top: 40rpx;
+  font-size: 32rpx;
+  color: #333;
+}
+
+.primary-btn {
+  margin-top: 60rpx;
+  background-color: #07C160;
+  color: white;
+  border-radius: 10rpx;
+}

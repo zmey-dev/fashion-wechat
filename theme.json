@@ -1,0 +1,16 @@
+{
+  "light": {
+    "navBgColor": "#FFFFFF",
+    "navTxtStyle": "black",
+    "backgroundColor": "#F6F6F6",
+    "textColor": "#333333",
+    "borderColor": "#EEEEEE"
+  },
+  "dark": {
+    "navBgColor": "#111111",
+    "navTxtStyle": "white",
+    "backgroundColor": "#111111",
+    "textColor": "#FFFFFF",
+    "borderColor": "rgba(255, 255, 255, 0.2)"
+  }
+}

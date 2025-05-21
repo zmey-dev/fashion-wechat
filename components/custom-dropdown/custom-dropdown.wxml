@@ -1,0 +1,15 @@
+<!-- components/custom-dropdown/custom-dropdown.wxml -->
+<view class="dropdown-container">
+  <view class="trigger" bindtap="toggle">
+    <slot name="trigger"></slot>
+  </view>
+  
+  <view 
+    class="dropdown {{isOpen ? 'open' : ''}} {{position}}" 
+    style="width: {{width}}" 
+    wx:if="{{isOpen}}" 
+    catchtap="stopPropagation"
+  >
+    <slot></slot>
+  </view>
+</view>

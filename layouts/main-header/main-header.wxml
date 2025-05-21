@@ -1,0 +1,113 @@
+<!-- layouts/main-header/main-header.wxml -->
+<view class="header">
+  <!-- Left side - Logo and hamburger menu -->
+  <view class="header-left">
+    <view class="hamburger" bindtap="toggleSideBar">
+      <view class="{{isOpenSideBar ? 'hamburger-line-open' : 'hamburger-line'}}"></view>
+      <view class="{{isOpenSideBar ? 'hamburger-line-open' : 'hamburger-line'}}"></view>
+      <view class="{{isOpenSideBar ? 'hamburger-line-open' : 'hamburger-line'}}"></view>
+    </view>
+    <navigator url="/pages/index/index" open-type="switchTab" class="logo-container">
+      <image src="/images/logo.png" mode="aspectFit" class="logo"></image>
+    </navigator>
+  </view>
+
+  <!-- Middle - Search Bar -->
+  <view class="search-container">
+    <icon type="search" size="14" color="#999999"></icon>
+    <input type="text" confirm-type="search" placeholder="搜索" placeholder-class="search-placeholder" class="search-input"></input>
+  </view>
+
+  <!-- Right side - User Actions -->
+  <view class="header-right">
+    <block wx:if="{{hasLogin}}">
+      <!-- Notification -->
+      <view class="icon-container" bindtap="toggleNotificationDropdown">
+        <view class="icon">
+          <view class="bell-icon"></view>
+          <view wx:if="{{notifications.length > 0}}" class="badge">{{notifications.length}}</view>
+        </view>
+        
+        <!-- Notification Dropdown -->
+        <view wx:if="{{showNotificationDropdown}}" class="dropdown notification-dropdown">
+          <view class="dropdown-item" wx:for="{{notifications}}" wx:key="index" bindtap="navigateToNotification">
+            <view class="notification-content">{{item.content}}</view>
+          </view>
+          <view wx:if="{{notifications.length === 0}}" class="dropdown-empty">没有通知</view>
+        </view>
+      </view>
+
+      <!-- Messages -->
+      <view class="icon-container" bindtap="toggleMessageDropdown">
+        <view class="icon">
+          <view class="message-icon"></view>
+          <view wx:if="{{unreadMessages.length > 0}}" class="badge">
+            22
+          </view>
+        </view>
+        
+        <!-- Message Dropdown -->
+        <view wx:if="{{showMessageDropdown}}" class="dropdown message-dropdown">
+          <view class="dropdown-item" wx:for="{{unreadMessages}}" wx:key="index" bindtap="navigateToChat">
+            
+            <view class="message-count">{{item.count}}条信息</view>
+          </view>
+          <view wx:if="{{unreadMessages.length === 0}}" class="dropdown-empty">没有未读消息</view>
+        </view>
+      </view>
+
+      <!-- Create Post/Event -->
+      <view class="icon-container" bindtap="toggleCreateDropdown">
+        <view class="icon">
+          <view class="plus-icon"></view>
+        </view>
+        
+        <!-- Create Dropdown -->
+        <view wx:if="{{showCreateDropdown}}" class="dropdown create-dropdown">
+          <view wx:if="{{user.role === 'user'}}" class="dropdown-item" bindtap="createPost">
+            <view class="create-text">普通帖子</view>
+          </view>
+          <view wx:if="{{user.role === 'teacher'}}" class="dropdown-item" bindtap="createEvent">
+            <view class="create-text">创建活动</view>
+          </view>
+        </view>
+      </view>
+
+      <!-- User Profile -->
+      <view class="icon-container" bindtap="toggleUserDropdown">
+        <view class="user-avatar">
+          <image src="{{user.avatar}}" class="avatar"></image>
+        </view>
+        
+        <!-- User Dropdown -->
+        <view wx:if="{{showUserDropdown}}" class="dropdown user-dropdown">
+          <view class="dropdown-header">
+            <view class="username">{{user.username}}</view>
+          </view>
+          <view class="dropdown-divider"></view>
+          <view class="dropdown-item" bindtap="editProfile">
+            <view class="user-edit-icon"></view>
+            <view class="dropdown-text">个人资料</view>
+          </view>
+          <view class="dropdown-divider"></view>
+          <view class="dropdown-item" bindtap="changePassword">
+            <view class="lock-icon"></view>
+            <view class="dropdown-text">密码</view>
+          </view>
+          <view class="dropdown-divider"></view>
+          <view class="dropdown-item" bindtap="logOut">
+            <view class="logout-icon"></view>
+            <view class="dropdown-text">注销</view>
+          </view>
+        </view>
+      </view>
+    </block>
+
+    <!-- Login button for logged out users -->
+    <block wx:else>
+      <view class="login-button" bindtap="navigateToLogin">
+        <view class="lock-icon"></view>
+      </view>
+    </block>
+  </view>
+</view>

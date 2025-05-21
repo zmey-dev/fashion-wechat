@@ -1,0 +1,32 @@
+<!-- pages/index/index.wxml -->
+<view class="{{isOpenSideBar ? 'sidebar-open' : ''}}">
+  <!-- Main Header -->
+  <main-header isOpenSideBar="{{isOpenSideBar}}" bind:toggleSideBar="toggleSideBar" />
+
+  <!-- Main Content Area -->
+  <view class="content-area">
+    <view class="content">
+      <!-- Loading State -->
+      <view wx:if="{{isLoading}}" class="loading-container">
+        <view class="loading">
+          <view class="loading-spinner"></view>
+          <text class="loading-text">加载中…</text>
+        </view>
+      </view>
+
+      <!-- Posts -->
+      <view wx:elif="{{posts.length > 0}}" style="height: 100%; width: 100%;">
+        <media-card wx:for="{{posts}}" wx:key="id" wx:for-item="item" item="{{item}}" />
+      </view>
+
+      <!-- Empty State -->
+      <view wx:else class="empty-container">
+        <view class="empty-image"></view>
+        <view class="empty-text">还没有内容</view>
+      </view>
+    </view>
+
+    <!-- Main Footer -->
+    <main-footer />
+  </view>
+</view>

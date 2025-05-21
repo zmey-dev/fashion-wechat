@@ -1,0 +1,48 @@
+<!-- modals/login-modal/login-modal.wxml -->
+<view class="modal-container {{visible ? 'visible' : ''}}">
+  <view class="modal-backdrop" bindtap="close"></view>
+  
+  <view class="modal-content">
+    <view class="modal-header">
+      <text class="modal-title">{{isRegisterMode ? '注册' : '登录'}}</text>
+      <view class="modal-close" bindtap="close">×</view>
+    </view>
+    
+    <view class="modal-body">
+      <view class="form-group">
+        <input 
+          class="form-input" 
+          placeholder="用户名" 
+          value="{{username}}" 
+          bindinput="onInputUsername"
+        />
+      </view>
+      
+      <view class="form-group">
+        <input 
+          class="form-input" 
+          placeholder="密码" 
+          password="true" 
+          value="{{password}}" 
+          bindinput="onInputPassword"
+        />
+      </view>
+      
+      <view class="error-message" wx:if="{{errorMessage}}">
+        {{errorMessage}}
+      </view>
+      
+      <button 
+        class="submit-button {{isLoading ? 'loading' : ''}}" 
+        disabled="{{isLoading}}" 
+        bindtap="submit"
+      >
+        {{isLoading ? '处理中...' : (isRegisterMode ? '注册' : '登录')}}
+      </button>
+      
+      <view class="toggle-mode" bindtap="toggleMode">
+        {{isRegisterMode ? '已有账号？ 去登录' : '没有账号？ 去注册'}}
+      </view>
+    </view>
+  </view>
+</view>

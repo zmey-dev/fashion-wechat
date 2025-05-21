@@ -1,0 +1,61 @@
+<!-- media-card/media-card.wxml -->
+<view class="media-card-container {{item.active === false ? 'inactive' : ''}}" bindtap="onClickCard">
+  <!-- Gold crown for top 3 in event -->
+  <view wx:if="{{index < 3 && isEvent}}" class="crown-container">
+    <image src="/images/crown{{index + 4}}.png" class="crown-image" mode="aspectFit"></image>
+  </view>
+
+  <!-- Inactive badge -->
+  <view wx:if="{{item.active === false}}" class="inactive-badge">
+    <view class="inactive-icon"></view>
+    <text class="inactive-text">已阻止</text>
+  </view>
+
+  <!-- Media content -->
+  <view class="media-content">
+    <image wx:if="{{item.type !== 'video'}}" src="{{item.media[0].url}}" mode="aspectFill" class="media-image" lazy-load="{{true}}"></image>
+    <image wx:else src="{{item.media[0].preview_url}}" mode="aspectFill" class="media-image" lazy-load="{{true}}"></image>
+  </view>
+
+  <!-- Info section -->
+  <view class="info-section">
+    <!-- Title -->
+    <view class="title-container">
+      <text class="title-text">{{truncateTitle(item.title)}}</text>
+    </view>
+
+    <view class="actions-container">
+      <!-- User profile section (not shown for events) -->
+      <view wx:if="{{!isEvent}}" class="user-section" catchtap="onUserClick">
+        <view class="avatar-container">
+          <avatar avatar="{{item.user.avatar}}" name="{{item.user.username}}" mode="aspectFill" />
+        </view>
+        <text class="username-text">@{{item.user.username}}</text>
+      </view>
+
+      <!-- Action buttons -->
+      <view class="action-buttons">
+        <!-- Like button (for normal users) -->
+        <view wx:if="{{userRole === 'user'}}" class="like-button" catchtap="onHeartClick">
+          <view class="heart-icon {{isLiked ? 'liked' : ''}}"></view>
+          <text class="like-count">{{item.likes}}</text>
+        </view>
+
+        <!-- Edit button -->
+        <view wx:if="{{canEdit}}" class="edit-button" catchtap="onEditClick">
+          <view class="edit-icon"></view>
+        </view>
+
+        <!-- Delete button -->
+        <view wx:if="{{canDelete}}" class="delete-button" catchtap="onDeleteClick">
+          <view class="delete-icon"></view>
+        </view>
+
+        <!-- Restore button -->
+        <view wx:if="{{canRestore}}" class="restore-button" catchtap="onRestoreClick">
+          <view class="restore-icon"></view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>
