@@ -1,0 +1,447 @@
+<!-- components/media-player/media-player.wxml -->
+<view class="media-player-container" 
+      bindtouchstart="onTouchStart" 
+      bindtouchend="onTouchEnd">
+  
+  <!-- Loading indicator -->
+  <view wx:if="{{isLoading}}" class="loading-overlay">
+    <view class="loading-spinner">
+      <view class="spinner-ring"></view>
+    </view>
+    <text class="loading-text">Loading...</text>
+  </view>
+
+  <!-- Main media container (Full Screen) -->
+  <view class="main-content" wx:if="{{!isLoading && selectedPost}}">
+    
+    <!-- Interactive dots for images (only when not paused) -->
+    <view wx:if="{{!showDetail && selectedPost.type === 'image' && dots.length > 0}}" class="dots-container">
+      <view wx:for="{{realDotsPosition}}" 
+            wx:key="index"
+            class="interactive-dot {{selectedDot && selectedDot.id === dots[index].id ? 'selected' : ''}}"
+            style="top: {{item.top}}px; left: {{item.left}}px;"
+            bindtap="onDotTap"
+            data-index="{{index}}">
+        
+        <!-- Pulsing animations -->
+        <view class="dot-ring-pulse"></view>
+        <view class="dot-ring-rotate"></view>
+        <view class="dot-shadow"></view>
+        
+        <!-- Main dot -->
+        <view class="dot-main">
+          <view class="dot-center"></view>
+        </view>
+        
+        <!-- Highlight effect -->
+        <view class="dot-highlight"></view>
+      </view>
+    </view>
+
+    <!-- Media swiper -->
+    <swiper class="media-swiper"
+            current="{{currentSlideIndex}}"
+            bindchange="onSlideChange"
+            circular="{{false}}"
+            indicator-dots="{{false}}"
+            autoplay="{{false}}"
+            duration="300">
+      
+      <swiper-item wx:for="{{selectedPost.media}}" wx:key="index">
+        <view class="media-item">
+          
+          <!-- Image media -->
+          <view wx:if="{{selectedPost.type === 'image'}}" class="image-container">
+            <image id="media-image"
+                   class="media-image"
+                   src="{{item.url}}"
+                   mode="aspectFit"
+                   bindtap="onImagePreview"
+                   bindload="calculateDotsPosition"
+                   lazy-load="{{true}}" />
+          </view>
+          
+          <!-- Video media -->
+          <video wx:if="{{selectedPost.type === 'video'}}"
+                 class="media-video"
+                 src="{{item.url}}"
+                 poster="{{item.preview_url}}"
+                 controls="{{true}}"
+                 autoplay="{{isPlaying && !showDetail}}"
+                 loop="{{true}}"
+                 show-play-btn="{{true}}"
+                 bindplay="onVideoPlay"
+                 bindpause="onVideoPause"
+                 bindended="onVideoEnded" />
+        </view>
+      </swiper-item>
+    </swiper>
+
+    <!-- Media controls for images (only when detail panel is hidden) -->
+    <view wx:if="{{selectedPost.type === 'image' && !showDetail}}" class="media-controls">
+      <view class="progress-container">
+        <!-- Progress indicators -->
+        <view class="progress-indicators">
+          <view wx:for="{{selectedPost.media}}" 
+                wx:key="index"
+                class="progress-dot {{currentSlideIndex >= index ? 'active' : ''}}"
+                bindtap="onSlideChange"
+                data-current="{{index}}">
+          </view>
+        </view>
+        
+        <!-- Control buttons -->
+        <view class="control-buttons">
+          <view class="play-pause-btn" bindtap="onPlayPause">
+            <text class="control-icon">{{isPlaying ? '⏸️' : '▶️'}}</text>
+          </view>
+          
+          <view class="continue-toggle">
+            <switch class="continue-switch" 
+                    checked="{{isContinue}}" 
+                    bindchange="onContinueToggle" 
+                    color="#ff4757" />
+            <text class="continue-text">连播</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- Title overlay (only when detail panel is hidden) -->
+    <view wx:if="{{selectedPost.title && !showDetail}}" class="title-overlay">
+      <text class="title-text">{{truncateTitle(selectedPost.title, 30)}}</text>
+    </view>
+
+    <!-- Action buttons (only when detail panel is hidden) -->
+    <view wx:if="{{!showDetail}}" class="action-buttons">
+      <!-- User avatar and follow -->
+      <view class="user-action" bindtap="onUserProfile">
+        <image class="user-avatar" 
+               src="{{selectedPostUser.avatar || '/images/default-avatar.png'}}" 
+               mode="aspectFill" />
+        <view wx:if="{{selectedPostUser.id !== authUser.id && authUser && authUser.role === 'user'}}" 
+              class="follow-btn {{selectedPostUser.is_followed ? 'following' : ''}}"
+              bindtap="handleFollow"
+              catchtap="true">
+          <text class="follow-icon">{{selectedPostUser.is_followed ? '➖' : '➕'}}</text>
+        </view>
+      </view>
+
+      <!-- Like button -->
+      <view wx:if="{{authUser && authUser.role === 'user'}}" 
+            class="action-item" 
+            bindtap="handleLike">
+        <text class="action-icon like-icon {{selectedPost.likes_exists ? 'liked' : ''}}">❤️</text>
+        <text class="action-count">{{formatNumber(selectedPost.likes)}}</text>
+      </view>
+
+      <!-- Comment button -->
+      <view class="action-item" bindtap="onToggleDetail">
+        <text class="action-icon">💬</text>
+        <text class="action-count">{{formatNumber(selectedPost.comments)}}</text>
+      </view>
+
+      <!-- Favorite button -->
+      <view wx:if="{{authUser && authUser.role === 'user'}}" 
+            class="action-item" 
+            bindtap="handleFavorite">
+        <text class="action-icon favorite-icon {{selectedPost.favorites_exists ? 'favorited' : ''}}">⭐</text>
+        <text class="action-count">{{formatNumber(selectedPost.favorites)}}</text>
+      </view>
+
+      <!-- Share button -->
+      <view class="action-item" bindtap="handleShare">
+        <text class="action-icon">📤</text>
+        <text class="action-count">{{formatNumber(selectedPost.shares)}}</text>
+      </view>
+
+      <!-- Report button -->
+      <view class="action-item" bindtap="onShowReportModal">
+        <text class="action-icon">⚠️</text>
+      </view>
+    </view>
+
+    <!-- Right edge swipe area indicator (only when detail panel is hidden) -->
+    <view wx:if="{{!showDetail}}" class="right-edge-indicator">
+      <view class="swipe-hint">
+        <text class="hint-text">👈</text>
+        <text class="hint-label">滑动查看</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- Detail panel overlay (Full screen overlay when shown) -->
+  <view wx:if="{{showDetail}}" class="detail-panel-overlay" bindtap="onCloseDetail">
+    <view class="detail-panel" catchtap="stopPropagation">
+      <!-- Close button -->
+      <view class="close-btn" bindtap="onCloseDetail">
+        <text class="close-icon">✖️</text>
+      </view>
+
+      <!-- Tab navigation -->
+      <view class="tab-navigation">
+        <view class="tab-item {{tabIndex === 0 ? 'active' : ''}}" 
+              bindtap="onTabChange" 
+              data-index="0">
+          <text class="tab-text">{{selectedPostUser.username}}的作品</text>
+        </view>
+        <view class="tab-item {{tabIndex === 1 ? 'active' : ''}}" 
+              bindtap="onTabChange" 
+              data-index="1">
+          <text class="tab-text">评论</text>
+        </view>
+        <view class="tab-item {{tabIndex === 2 ? 'active' : ''}}" 
+              bindtap="onTabChange" 
+              data-index="2">
+          <text class="tab-text">详情</text>
+        </view>
+      </view>
+
+      <!-- Tab content -->
+      <view class="tab-content">
+        
+        <!-- User posts tab -->
+        <scroll-view wx:if="{{tabIndex === 0}}" 
+                     class="user-posts-tab" 
+                     scroll-y="true">
+          <!-- User info -->
+          <view class="user-info">
+            <view class="user-details">
+              <text class="username">@{{selectedPostUser.username}}</text>
+              <text class="user-stats">
+                粉丝: {{formatNumber(selectedPostUser.follower_number)}}, 
+                获赞: {{formatNumber(selectedPostUser.like_number)}}
+              </text>
+            </view>
+            <button wx:if="{{selectedPostUser.id !== authUser.id && authUser}}" 
+                    class="follow-button {{selectedPostUser.is_followed ? 'following' : ''}}"
+                    bindtap="handleFollow">
+              <text>{{selectedPostUser.is_followed ? '取消关注' : '关注'}}</text>
+            </button>
+          </view>
+
+          <view class="divider"></view>
+
+          <!-- Posts grid -->
+          <view class="posts-grid">
+            <view wx:for="{{selectedUserPosts.posts}}" 
+                  wx:key="id"
+                  class="post-item"
+                  bindtap="onSelectPost"
+                  data-post="{{item}}">
+              <image class="post-thumbnail" 
+                     src="{{item.type === 'video' ? item.media[0].preview_url : item.media[0].url}}" 
+                     mode="aspectFill" />
+              <view wx:if="{{item.type === 'video'}}" class="video-indicator">
+                <text class="video-icon">▶️</text>
+              </view>
+            </view>
+          </view>
+        </scroll-view>
+
+        <!-- Comments tab -->
+        <view wx:if="{{tabIndex === 1}}" class="comments-tab">
+          <!-- Post info -->
+          <view class="post-info">
+            <view class="post-title">
+              <text class="info-label">标题:</text>
+              <text class="info-content">{{selectedPost.title}}</text>
+            </view>
+            <view wx:if="{{selectedPost.content}}" class="post-content">
+              <text class="content-text">{{selectedPost.content}}</text>
+            </view>
+          </view>
+
+          <view class="divider"></view>
+
+          <!-- Comments list -->
+          <scroll-view class="comments-list" scroll-y="true">
+            <view wx:for="{{userComments}}" wx:key="id" class="comment-item">
+              <!-- Comment content -->
+              <view class="comment-header">
+                <image class="comment-avatar" 
+                       src="{{item.sender.avatar || '/images/default-avatar.png'}}" 
+                       mode="aspectFill" />
+                <view class="comment-info">
+                  <text class="comment-username">{{item.sender.username}}</text>
+                  <text class="comment-time">{{item.created_at}}</text>
+                </view>
+              </view>
+              
+              <view class="comment-content">
+                <text wx:if="{{item.comment_text}}" class="comment-text">{{item.comment_text}}</text>
+                <image wx:if="{{item.url}}" 
+                       class="comment-image" 
+                       src="{{item.url}}" 
+                       mode="aspectFit"
+                       bindtap="onImagePreview"
+                       data-url="{{item.url}}" />
+              </view>
+
+              <!-- Comment actions -->
+              <view class="comment-actions">
+                <view class="action-group">
+                  <view class="comment-action-btn" 
+                        bindtap="onReplyComment" 
+                        data-comment-id="{{item.id}}">
+                    <text class="action-icon">💬</text>
+                    <text class="action-text">回复</text>
+                  </view>
+                  
+                  <view wx:if="{{item.sender.id === authUser.id}}" 
+                        class="comment-action-btn"
+                        bindtap="onEditComment"
+                        data-comment="{{item}}">
+                    <text class="action-icon">✏️</text>
+                    <text class="action-text">编辑</text>
+                  </view>
+                  
+                  <view wx:if="{{item.sender.id === authUser.id}}" 
+                        class="comment-action-btn delete-btn"
+                        bindtap="onDeleteComment"
+                        data-comment-id="{{item.id}}">
+                    <text class="action-icon">🗑️</text>
+                    <text class="action-text">删除</text>
+                  </view>
+                </view>
+
+                <view class="like-actions">
+                  <view class="like-btn" 
+                        bindtap="onLikeComment"
+                        data-comment-id="{{item.id}}"
+                        data-type="like">
+                    <text class="like-icon">👍</text>
+                    <text class="like-count">{{item.like || 0}}</text>
+                  </view>
+                  <view class="like-btn" 
+                        bindtap="onLikeComment"
+                        data-comment-id="{{item.id}}"
+                        data-type="unlike">
+                    <text class="like-icon">👎</text>
+                    <text class="like-count">{{item.unlike || 0}}</text>
+                  </view>
+                </view>
+              </view>
+            </view>
+
+            <!-- Empty state -->
+            <view wx:if="{{userComments.length === 0}}" class="empty-comments">
+              <text class="empty-text">暂无评论，快来抢沙发吧！</text>
+            </view>
+          </scroll-view>
+
+          <!-- Comment input -->
+          <view wx:if="{{authUser && authUser.role === 'user'}}" class="comment-input">
+            <!-- Reply indicator -->
+            <view wx:if="{{commentId}}" class="reply-indicator">
+              <text class="reply-text">{{isUpdate ? '编辑评论' : '回复评论'}}</text>
+              <view class="cancel-reply" bindtap="onCancelReply">
+                <text class="cancel-icon">✖️</text>
+              </view>
+            </view>
+
+            <!-- Input area -->
+            <view class="input-container">
+              <textarea class="comment-textarea"
+                        placeholder="{{commentId ? (isUpdate ? '编辑你的评论...' : '写下你的回复...') : '说点什么...'}}"
+                        value="{{personalComment}}"
+                        bindinput="onCommentInput"
+                        maxlength="500"
+                        auto-height="{{true}}"
+                        cursor-spacing="10" />
+              
+              <view class="input-actions">
+                <button class="submit-btn {{personalComment.trim() ? 'active' : ''}}" 
+                        bindtap="onCommentSubmit"
+                        disabled="{{!personalComment.trim()}}">
+                  <text class="submit-text">{{isUpdate ? '更新' : '发送'}}</text>
+                </button>
+              </view>
+            </view>
+          </view>
+
+          <!-- Login prompt for non-logged users -->
+          <view wx:if="{{!authUser}}" class="login-prompt">
+            <text class="prompt-text">登录后可发表评论</text>
+            <button class="login-btn" bindtap="onLoginPrompt">
+              <text>登录</text>
+            </button>
+          </view>
+        </view>
+
+        <!-- Details tab -->
+        <view wx:if="{{tabIndex === 2}}" class="details-tab">
+          <view class="details-container">
+            <!-- Title section -->
+            <view class="detail-section">
+              <view class="section-header">
+                <text class="section-title">标题</text>
+              </view>
+              <view class="section-content">
+                <text wx:if="{{selectedDot}}" class="detail-text">{{selectedDot.title}}</text>
+                <text wx:else class="placeholder-text">未选择任何点。请点击图片上的标记查看详情。</text>
+              </view>
+            </view>
+
+            <!-- Description section -->
+            <view class="detail-section">
+              <view class="section-header">
+                <text class="section-title">说明</text>
+              </view>
+              <view class="section-content">
+                <text wx:if="{{selectedDot}}" class="detail-text">{{selectedDot.description}}</text>
+                <text wx:else class="placeholder-text">未选择任何점。请点击图片上의 标记查看详情。</text>
+              </view>
+            </view>
+
+            <!-- Additional info when dot is selected -->
+            <view wx:if="{{selectedDot}}" class="selected-dot-info">
+              <view class="dot-id">
+                <text class="info-label">点 ID:</text>
+                <text class="info-value">{{selectedDot.id}}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Report modal -->
+  <view wx:if="{{showReportModal}}" class="modal-overlay" bindtap="onCloseReportModal">
+    <view class="report-modal" catchtap="stopPropagation">
+      <view class="modal-header">
+        <text class="modal-title">举报内容</text>
+        <view class="modal-close" bindtap="onCloseReportModal">
+          <text class="close-icon">✖️</text>
+        </view>
+      </view>
+      
+      <view class="modal-content">
+        <view class="report-options">
+          <view class="report-option" bindtap="onReport" data-type="spam">
+            <text class="option-text">垃圾信息</text>
+          </view>
+          <view class="report-option" bindtap="onReport" data-type="inappropriate">
+            <text class="option-text">内容不当</text>
+          </view>
+          <view class="report-option" bindtap="onReport" data-type="harassment">
+            <text class="option-text">骚扰他人</text>
+          </view>
+          <view class="report-option" bindtap="onReport" data-type="fake">
+            <text class="option-text">虚假信息</text>
+          </view>
+          <view class="report-option" bindtap="onReport" data-type="other">
+            <text class="option-text">其他原因</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Empty state -->
+  <view wx:if="{{!isLoading && !selectedPost}}" class="empty-state">
+    <text class="empty-text">没有作品可展示</text>
+  </view>
+
+</view>

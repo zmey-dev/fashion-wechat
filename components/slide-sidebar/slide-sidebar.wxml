@@ -1,0 +1,206 @@
+<!-- filepath: components/slide-sidebar/slide-sidebar.wxml -->
+<view class="sidebar-container" wx:if="{{isVisible}}">
+  <!-- Overlay with fade-in/fade-out animation -->
+  <view class="sidebar-overlay {{isVisible ? 'show' : ''}}" 
+        bindtap="hideSidebar" catchtouchmove="preventMove"></view>
+  
+  <!-- Sidebar with slide animation -->
+  <view class="sidebar {{isVisible ? 'show' : ''}} {{dragging ? 'dragging' : ''}}" 
+        bindtouchstart="onTouchStart" 
+        bindtouchmove="onTouchMove" 
+        bindtouchend="onTouchEnd"
+        style="{{dragging ? 'transition: none;' : ''}}">
+    
+    <!-- Header -->
+    <view class="sidebar-header">
+      <view class="user-avatar">
+        <image wx:if="{{userInfo.avatar}}" src="{{userInfo.avatar}}" class="avatar-img" />
+        <view wx:else class="avatar-placeholder">
+          <!-- User Default SVG -->
+          <view class="svg-icon">
+            <view class="svg-content">
+              <view class="svg-circle"></view>
+              <view class="svg-body"></view>
+            </view>
+          </view>
+        </view>
+      </view>
+      <view class="user-info">
+        <text class="username">{{userInfo.nickname || '用户'}}</text>
+        <text class="user-role">学生</text>
+      </view>
+      <view class="close-btn" bindtap="hideSidebar">
+        <!-- Close SVG -->
+        <view class="close-svg">
+          <view class="close-line-1"></view>
+          <view class="close-line-2"></view>
+        </view>
+      </view>
+    </view>
+
+    <!-- Navigation Menu with staggered animation -->
+    <view class="nav-menu">
+      <!-- Discover -->
+      <view class="nav-item {{currentPath === 'discover' ? 'active' : ''}}" 
+            bindtap="onNavItemTap" 
+            data-index="1"
+            data-destination="navigateToDiscover">
+        <view class="nav-icon">
+          <!-- Thumbs Up SVG -->
+          <view class="thumbs-up-svg">
+            <view class="thumb-main"></view>
+            <view class="thumb-finger"></view>
+          </view>
+        </view>
+        <text class="nav-label">精选</text>
+        <view class="arrow-svg">
+          <view class="arrow-line"></view>
+        </view>
+      </view>
+      
+      <!-- Recommend -->
+      <view class="nav-item {{currentPath === 'recommend' ? 'active' : ''}}" 
+            bindtap="onNavItemTap"
+            data-index="2"
+            data-destination="navigateToRecommend">
+        <view class="nav-icon">
+          <!-- Sparkles SVG -->
+          <view class="sparkles-svg">
+            <view class="spark spark-1"></view>
+            <view class="spark spark-2"></view>
+            <view class="spark spark-3"></view>
+            <view class="spark spark-4"></view>
+          </view>
+        </view>
+        <text class="nav-label">推荐</text>
+        <view class="arrow-svg">
+          <view class="arrow-line"></view>
+        </view>
+      </view>
+      
+      <!-- Follow -->
+      <view class="nav-item {{currentPath === 'follow' ? 'active' : ''}}" 
+            bindtap="onNavItemTap"
+            data-index="3"
+            data-destination="navigateToFollow">
+        <view class="nav-icon">
+          <!-- User Check SVG -->
+          <view class="user-check-svg">
+            <view class="user-circle"></view>
+            <view class="user-body"></view>
+            <view class="check-mark"></view>
+          </view>
+        </view>
+        <text class="nav-label">关注</text>
+        <view class="arrow-svg">
+          <view class="arrow-line"></view>
+        </view>
+      </view>
+      
+      <!-- Chat -->
+      <view class="nav-item {{currentPath === 'chat' ? 'active' : ''}}" 
+            bindtap="onNavItemTap"
+            data-index="4"
+            data-destination="navigateToChat">
+        <view class="nav-icon">
+          <!-- Message SVG -->
+          <view class="message-svg">
+            <view class="message-bubble"></view>
+            <view class="message-tail"></view>
+          </view>
+        </view>
+        <text class="nav-label">对话</text>
+        <view class="arrow-svg">
+          <view class="arrow-line"></view>
+        </view>
+      </view>
+      
+      <!-- Friend -->
+      <view class="nav-item {{currentPath === 'friend' ? 'active' : ''}}" 
+            bindtap="onNavItemTap"
+            data-index="5"
+            data-destination="navigateToFriend">
+        <view class="nav-icon">
+          <!-- Users SVG -->
+          <view class="users-svg">
+            <view class="user-1">
+              <view class="user-circle"></view>
+              <view class="user-body"></view>
+            </view>
+            <view class="user-2">
+              <view class="user-circle"></view>
+              <view class="user-body"></view>
+            </view>
+          </view>
+        </view>
+        <text class="nav-label">朋友</text>
+        <view class="arrow-svg">
+          <view class="arrow-line"></view>
+        </view>
+      </view>
+      
+      <!-- Me -->
+      <view class="nav-item {{currentPath === 'me' ? 'active' : ''}}" 
+            bindtap="onNavItemTap"
+            data-index="6"
+            data-destination="navigateToMe">
+        <view class="nav-icon">
+          <!-- User SVG -->
+          <view class="user-svg">
+            <view class="user-circle"></view>
+            <view class="user-body"></view>
+          </view>
+        </view>
+        <text class="nav-label">我的</text>
+        <view class="arrow-svg">
+          <view class="arrow-line"></view>
+        </view>
+      </view>
+      
+      <!-- Event -->
+      <view class="nav-item {{currentPath === 'event' ? 'active' : ''}}" 
+            bindtap="onNavItemTap"
+            data-index="7"
+            data-destination="navigateToEvent">
+        <view class="nav-icon">
+          <!-- Flag SVG -->
+          <view class="flag-svg">
+            <view class="flag-pole"></view>
+            <view class="flag-cloth"></view>
+          </view>
+        </view>
+        <text class="nav-label">比赛</text>
+        <view class="arrow-svg">
+          <view class="arrow-line"></view>
+        </view>
+      </view>
+      
+      <!-- Contact -->
+      <view class="nav-item {{currentPath === 'contact' ? 'active' : ''}}" 
+            bindtap="onNavItemTap"
+            data-index="8"
+            data-destination="navigateToContact">
+        <view class="nav-icon">
+          <!-- Heart Handshake SVG -->
+          <view class="handshake-svg">
+            <view class="hand-1"></view>
+            <view class="hand-2"></view>
+            <view class="heart"></view>
+          </view>
+        </view>
+        <text class="nav-label">联系我们</text>
+        <view class="arrow-svg">
+          <view class="arrow-line"></view>
+        </view>
+      </view>
+    </view>
+
+    <!-- Footer with fade-in animation -->
+    <view class="sidebar-footer">
+      <view class="app-info">
+        <text class="app-name">学习助手</text>
+        <text class="app-version">v1.0.0</text>
+      </view>
+    </view>
+  </view>
+</view>

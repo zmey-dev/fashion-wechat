@@ -1,30 +1,58 @@
-// pages/index/index.js
 import config from '../../config';
+const app = getApp();
+
 Page({
   data: {
-    isOpenSideBar: false,
+    isOpenSidebar: false,
+    currentPath: 'discover',
+    userInfo: {},
+    
     posts: [],
-    isLoading: true
+    isLoading: true,
+    
+    touchStartX: 0,
+    touchStartY: 0
   },
   
   onLoad: function() {
-    // Initialize page
     this.getPosts();
+    
+    const currentPath = app.determineCurrentPath();
+    const userInfo = app.getUserInfo();
+    
+    this.setData({
+      isOpenSidebar: app.globalData.isOpenSidebar,
+      currentPath: currentPath,
+      userInfo: userInfo
+    });
   },
   
-  onShow: function() {
-    // Update selected tab
-    // if (typeof this.getTabBar === 'function') {
-    //   this.getTabBar().setData({
-    //     selected: 0
-    //   });
-    // }
+  updateSidebar: function(data) {
+    this.setData({
+      isOpenSidebar: data.isOpenSidebar,
+      currentPath: data.currentPath,
+      userInfo: data.userInfo
+    });
+  },
+  
+  onTouchStart: function(e) {
+    this.setData({
+      touchStartX: e.touches[0].clientX,
+      touchStartY: e.touches[0].clientY
+    });
+  },
+  
+  onTouchEnd: function(e) {
+    app.handleSwipe(
+      this.data.touchStartX,
+      this.data.touchStartY,
+      e.changedTouches[0].clientX,
+      e.changedTouches[0].clientY
+    );
   },
   
   toggleSideBar: function() {
-    this.setData({
-      isOpenSideBar: !this.data.isOpenSideBar
-    });
+    app.toggleSidebar();
   },
   
   getPosts: function() {
@@ -33,7 +61,6 @@ Page({
       title: '加载中...',
     });
     
-    // Call API to get posts
     wx.request({
       url: `${config.BACKEND_URL}/post/get_posts_discover`,
       method: 'GET',

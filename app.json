@@ -12,7 +12,8 @@
   
   "usingComponents": {
     "avatar":"/components/avatar/avatar",
-    "media-card":"/components/media-card/media-card"
+    "media-card":"/components/media-card/media-card",
+    "slide-sidebar": "/components/slide-sidebar/slide-sidebar"
   },
   "darkmode": true,
   "themeLocation": "theme.json",
