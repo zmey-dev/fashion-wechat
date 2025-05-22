@@ -6,28 +6,27 @@
   <!-- Main Header -->
   <main-header isOpenSidebar="{{isOpenSidebar}}" bind:toggleSidebar="toggleSideBar" />
   
-  <!-- Main Content Area -->
-  <view class="content-area">
-    <view class="content">
-      <!-- Loading State -->
-      <view wx:if="{{isLoading}}" class="loading-container">
-        <view class="loading">
-          <view class="loading-spinner"></view>
-          <text class="loading-text">加载中…</text>
-        </view>
-      </view>
-      <!-- Posts -->
-      <view wx:elif="{{posts.length > 0}}" style="height: 100%; width: 100%;">
-        <media-card wx:for="{{posts}}" wx:key="id" wx:for-item="item" item="{{item}}" />
-      </view>
-      <!-- Empty State -->
-      <view wx:else class="empty-container">
-        <view class="empty-image"></view>
-        <view class="empty-text">还没有内容</view>
-      </view>
-    </view>
-    <!-- Main Footer -->
-    <main-footer />
+  <view class="post-viewer-container">
+  <media-player 
+    wx:if="{{currentPost}}"
+    selectedPost="{{currentPost}}"
+    selectedPostUser="{{currentPostUser}}"
+    authUser="{{userInfo}}"
+    index="{{currentIndex}}"
+    totalCount="{{totalPosts}}"
+    bind:postNavigation="handlePostNavigation"
+    bind:likeUpdated="handleLikeUpdated"
+    bind:favoriteUpdated="handleFavoriteUpdated"
+    bind:shareUpdated="handleShareUpdated"
+    bind:followUpdated="handleFollowUpdated"
+    bind:showLogin="showLoginModal"
+    bind:navigateToProfile="navigateToUserProfile">
+  </media-player>
+
+  <!-- Loading indicator -->
+  <view wx:if="{{isLoading}}" class="loading-container">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">加载中...</text>
   </view>
   <!-- Slide Sidebar Component -->
   <slide-sidebar 
