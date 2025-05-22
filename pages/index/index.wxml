@@ -1,36 +1,20 @@
 <!-- pages/index/index.wxml -->
-<view class="page-container {{isOpenSidebar ? 'sidebar-open' : ''}}"
-      bindtouchstart="onTouchStart" 
-      bindtouchend="onTouchEnd">
-  
+<view class="page-container {{isOpenSidebar ? 'sidebar-open' : ''}}" bindtouchstart="onTouchStart" bindtouchend="onTouchEnd">
+
   <!-- Main Header -->
   <main-header isOpenSidebar="{{isOpenSidebar}}" bind:toggleSidebar="toggleSideBar" />
-  
-  <view class="post-viewer-container">
-  <media-player 
-    wx:if="{{currentPost}}"
-    selectedPost="{{currentPost}}"
-    selectedPostUser="{{currentPostUser}}"
-    authUser="{{userInfo}}"
-    index="{{currentIndex}}"
-    totalCount="{{totalPosts}}"
-    bind:postNavigation="handlePostNavigation"
-    bind:likeUpdated="handleLikeUpdated"
-    bind:favoriteUpdated="handleFavoriteUpdated"
-    bind:shareUpdated="handleShareUpdated"
-    bind:followUpdated="handleFollowUpdated"
-    bind:showLogin="showLoginModal"
-    bind:navigateToProfile="navigateToUserProfile">
-  </media-player>
 
-  <!-- Loading indicator -->
-  <view wx:if="{{isLoading}}" class="loading-container">
-    <view class="loading-spinner"></view>
-    <text class="loading-text">加载中...</text>
+  <view class="post-viewer-container">
+    <media-player wx:if="{{currentPost}}" selectedPost="{{currentPost}}" selectedPostUser="{{currentPostUser}}" authUser="{{userInfo}}" index="{{currentIndex}}" totalCount="{{totalPosts}}" bind:postNavigation="handlePostNavigation" bind:likeUpdated="handleLikeUpdated" bind:favoriteUpdated="handleFavoriteUpdated" bind:shareUpdated="handleShareUpdated" bind:followUpdated="handleFollowUpdated" bind:showLogin="showLoginModal" bind:navigateToProfile="navigateToUserProfile">
+    </media-player>
+
+    <!-- Loading indicator -->
+    <view wx:if="{{isLoading}}" class="loading-container">
+      <view class="loading-spinner"></view>
+      <text class="loading-text">加载中...</text>
+    </view>
   </view>
+
   <!-- Slide Sidebar Component -->
-  <slide-sidebar 
-    current-path="{{currentPath}}" 
-    is-visible="{{isOpenSidebar}}"
-    bind:hideSidebar="closeSideBar" />
+  <slide-sidebar current-path="{{currentPath}}" is-visible="{{isOpenSidebar}}" bind:hideSidebar="closeSideBar" />
 </view>

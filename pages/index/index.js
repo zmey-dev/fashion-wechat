@@ -23,8 +23,8 @@ Page({
   onLoad: function () {
     this.setData({
       isOpenSidebar: app.globalData.isOpenSidebar,
-      currentPath: currentPath,
-      userInfo: userInfo,
+      // currentPath: currentPath,
+      // userInfo: userInfo,
     });
 
     this.loadPostData(0);
@@ -66,7 +66,7 @@ Page({
 
     // Fetch post data from API
     wx.request({
-      url: `${config.BACKEND_URL}/post/get_post_recommend`,
+      url: `${config.BACKEND_URL}/post/get_post_in_discover`,
       method: "GET",
       data: {
         index: index,

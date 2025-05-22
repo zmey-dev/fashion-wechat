@@ -25,6 +25,10 @@ Component({
     totalCount: {
       type: Number,
       value: 0
+    },
+    selectedUserPosts: {
+      type: Object,
+      value: null
     }
   },
 
@@ -34,9 +38,28 @@ Component({
   data: {
     // Media state
     currentSlideIndex: 0,
-    isPlaying: false,
+    isPlaying: true,
     isContinue: true,
     isLoading: false,
+    showPlayIndicator: false,
+    playIndicatorTimer: null,
+    
+    // Computed data for template binding
+    currentPost: null,
+    currentPostUser: null,
+    currentMedia: [],
+    mediaLength: 0,
+    
+    // Computed display values
+    displayTitle: '',
+    displayContent: '',
+    displayLikes: '',
+    displayComments: '',
+    displayFavorites: '',
+    displayShares: '',
+    displayFollowerCount: '',
+    displayLikeCount: '',
+    replyIndicatorText: '',
     
     // UI state
     showDetail: false,
@@ -60,19 +83,149 @@ Component({
     systemInfo: {},
     windowWidth: 0,
     windowHeight: 0,
+    safeAreaHeight: 0,
     
     // Touch gesture
     touchStartX: 0,
     touchStartY: 0,
     touchStartTime: 0,
     isPanelSwipe: false,
-    panelSwipeThreshold: 100, // pixels from right edge to trigger panel swipe
+    panelSwipeThreshold: 80,
     
     // Animation
     autoPlayTimer: null,
     
     // Background audio manager
-    backgroundAudioManager: null
+    backgroundAudioManager: null,
+
+    // Mock data for demonstration
+    mockPost: {
+      id: 36,
+      user_id: 11,
+      event_id: null,
+      title: "Beautiful Heart ❤️",
+      content: "A stunning heart-shaped artwork that symbolizes love and passion",
+      views: 1240,
+      shares: 8,
+      favorites: 23,
+      likes: 156,
+      comments: 24,
+      type: "image",
+      active: true,
+      is_liked: false,
+      is_favorited: false,
+      user: {
+        id: 11,
+        avatar: "https://thirdwx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTKotq0ZkPLic6yEicqMD3Fk3PuNvnaJF8phUSJjz9K7SOYEtKGUQN8CzbJ3yO4o6kV4TXBiaKX8OhCEA/132",
+        username: "artcreator",
+        is_followed: false,
+        follower_number: 1250,
+        like_number: 8940
+      },
+      media: [
+        {
+          id: 35,
+          post_id: 36,
+          url: "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=800&h=600&fit=crop",
+          preview_url: "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=400&h=300&fit=crop",
+          dots: [
+            { id: 1, x: 0.3, y: 0.2, title: "Beautiful Heart", description: "This stunning heart decoration symbolizes love and affection. Made with premium materials." },
+            { id: 2, x: 0.7, y: 0.6, title: "Red Rose", description: "A beautiful red rose that complements the heart perfectly, representing passion and romance." }
+          ]
+        },
+        {
+          id: 36,
+          post_id: 36,
+          url: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800&h=600&fit=crop",
+          preview_url: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=400&h=300&fit=crop",
+          dots: [
+            { id: 3, x: 0.5, y: 0.3, title: "Nature Scene", description: "A peaceful nature landscape that brings tranquility to the soul." }
+          ]
+        }
+      ],
+      audio: null
+    },
+
+    mockComments: [
+      {
+        id: 1,
+        sender_id: 12,
+        post_id: 36,
+        comment_text: "这个爱心很好看！太美了",
+        created_at: "2025-05-09T13:27:32.000000Z",
+        updated_at: "2025-05-09T13:27:32.000000Z",
+        parent_id: null,
+        like: "5",
+        unlike: "0",
+        url: null,
+        sender: {
+          id: 12,
+          username: "user123",
+          avatar: "https://thirdwx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTKotq0ZkPLic6yEicqMD3Fk3PuNvnaJF8phUSJjz9K7SOYEtKGUQN8CzbJ3yO4o6kV4TXBiaKX8OhCEA/132"
+        }
+      },
+      {
+        id: 2,
+        sender_id: 11,
+        post_id: 36,
+        comment_text: "过奖了，谢谢大家的支持！",
+        created_at: "2025-05-09T13:28:12.000000Z",
+        updated_at: "2025-05-09T13:28:12.000000Z",
+        parent_id: 1,
+        like: "2",
+        unlike: "0",
+        url: null,
+        sender: {
+          id: 11,
+          username: "artcreator",
+          avatar: "https://thirdwx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTKotq0ZkPLic6yEicqMD3Fk3PuNvnaJF8phUSJjz9K7SOYEtKGUQN8CzbJ3yO4o6kV4TXBiaKX8OhCEA/132"
+        }
+      },
+      {
+        id: 3,
+        sender_id: 13,
+        post_id: 36,
+        comment_text: "太棒了！求教程",
+        created_at: "2025-05-09T13:29:03.000000Z",
+        updated_at: "2025-05-09T13:29:03.000000Z",
+        parent_id: null,
+        like: "8",
+        unlike: "1",
+        url: null,
+        sender: {
+          id: 13,
+          username: "artlover",
+          avatar: "https://thirdwx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTKotq0ZkPLic6yEicqMD3Fk3PuNvnaJF8phUSJjz9K7SOYEtKGUQN8CzbJ3yO4o6kV4TXBiaKX8OhCEA/132"
+        }
+      }
+    ],
+
+    mockUserPosts: [
+      {
+        id: 36,
+        title: "Heart Art",
+        type: "image",
+        media: [{ url: "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=300&h=300&fit=crop" }]
+      },
+      {
+        id: 37,
+        title: "Nature Beauty",
+        type: "image", 
+        media: [{ url: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=300&h=300&fit=crop" }]
+      },
+      {
+        id: 38,
+        title: "Sunset",
+        type: "image",
+        media: [{ url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&h=300&fit=crop" }]
+      },
+      {
+        id: 39,
+        title: "Ocean Waves", 
+        type: "image",
+        media: [{ url: "https://images.unsplash.com/photo-1439066615861-d1af74d74000?w=300&h=300&fit=crop" }]
+      }
+    ]
   },
 
   /**
@@ -96,11 +249,10 @@ Component({
       }
     },
     'showDetail': function(isShowing) {
-      // Pause/resume media when detail panel is shown/hidden
       if (isShowing) {
-        this.pauseMedia()
+        this.pauseAutoPlay()
       } else {
-        this.resumeMedia()
+        this.resumeAutoPlay()
       }
     }
   },
@@ -115,10 +267,13 @@ Component({
     initializeComponent() {
       // Get system info
       const systemInfo = wx.getSystemInfoSync()
+      const safeAreaHeight = systemInfo.safeArea ? systemInfo.safeArea.height : systemInfo.screenHeight
+      
       this.setData({
         systemInfo,
         windowWidth: systemInfo.windowWidth,
-        windowHeight: systemInfo.windowHeight
+        windowHeight: systemInfo.windowHeight,
+        safeAreaHeight
       })
 
       // Initialize background audio manager
@@ -128,9 +283,80 @@ Component({
       // Setup audio event listeners
       this.setupAudioListeners()
 
-      // Load initial post data
-      if (this.properties.selectedPost) {
-        this.loadPostData()
+      // Use mock data for demonstration
+      this.loadMockData()
+    },
+
+    /**
+     * Load mock data for demonstration
+     */
+    loadMockData() {
+      const post = this.properties.selectedPost || this.data.mockPost
+      const postUser = this.properties.selectedPostUser || this.data.mockPost.user
+      
+      this.setData({
+        currentPost: post,
+        currentPostUser: postUser,
+        currentMedia: post.media || [],
+        mediaLength: post.media ? post.media.length : 0,
+        userComments: this.data.mockComments,
+        isLoading: false
+      })
+      
+      // Update computed display values
+      this.updateDisplayValues()
+      
+      // Setup media with mock data
+      this.setupMedia()
+      
+      // Setup dots if image type
+      if (post.type === 'image') {
+        this.setupImageDots()
+        this.startAutoPlay()
+      }
+    },
+
+    /**
+     * Update computed display values for template
+     */
+    updateDisplayValues() {
+      const { currentPost, currentPostUser } = this.data
+      
+      this.setData({
+        displayTitle: this.truncateTitle(currentPost.title, 50),
+        displayContent: currentPost.content ? this.truncateTitle(currentPost.content, 100) : '',
+        displayLikes: this.formatNumber(currentPost.likes),
+        displayComments: this.formatNumber(currentPost.comments),
+        displayFavorites: this.formatNumber(currentPost.favorites),
+        displayShares: this.formatNumber(currentPost.shares),
+        displayFollowerCount: this.formatNumber(currentPostUser.follower_number),
+        displayLikeCount: this.formatNumber(currentPostUser.like_number)
+      })
+      
+      this.updateReplyIndicatorText()
+    },
+
+    /**
+     * Update reply indicator text
+     */
+    updateReplyIndicatorText() {
+      const { commentId, isUpdate, userComments } = this.data
+      
+      if (!commentId) {
+        this.setData({ replyIndicatorText: '' })
+        return
+      }
+      
+      if (isUpdate) {
+        this.setData({ replyIndicatorText: '编辑评论' })
+        return
+      }
+      
+      const comment = userComments.find(c => c.id === commentId)
+      if (comment) {
+        this.setData({ replyIndicatorText: `回复 ${comment.sender.username}` })
+      } else {
+        this.setData({ replyIndicatorText: '回复' })
       }
     },
 
@@ -156,11 +382,93 @@ Component({
       
       backgroundAudioManager.onError((err) => {
         console.error('Background audio error:', err)
-        wx.showToast({
-          title: 'Audio playback failed',
-          icon: 'none'
-        })
       })
+    },
+
+    /**
+     * Handle screen tap to toggle play/pause
+     */
+    onScreenTap(e) {
+      // Prevent bubbling to avoid conflicts with other tap events
+      e.stopPropagation()
+      
+      // Only handle screen tap for image posts
+      const { currentPost } = this.data
+      if (currentPost.type !== 'image') {
+        return
+      }
+      
+      // Toggle play/pause
+      this.togglePlayPause()
+      
+      // Show play indicator temporarily
+      this.showPlayIndicatorBriefly()
+    },
+
+    /**
+     * Toggle play/pause state
+     */
+    togglePlayPause() {
+      const { isPlaying } = this.data
+      
+      if (isPlaying) {
+        this.pausePlayback()
+      } else {
+        this.resumePlayback()
+      }
+    },
+
+    /**
+     * Pause playback
+     */
+    pausePlayback() {
+      this.setData({ isPlaying: false })
+      this.clearAutoPlayTimer()
+      
+      const { backgroundAudioManager } = this.data
+      if (backgroundAudioManager) {
+        backgroundAudioManager.pause()
+      }
+    },
+
+    /**
+     * Resume playback
+     */
+    resumePlayback() {
+      this.setData({ isPlaying: true })
+      this.startAutoPlay()
+      
+      const { backgroundAudioManager } = this.data
+      const { selectedPost } = this.properties
+      const { mockPost } = this.data
+      const post = selectedPost || mockPost
+      
+      if (backgroundAudioManager && post.audio) {
+        backgroundAudioManager.play()
+      }
+    },
+
+    /**
+     * Show play indicator briefly
+     */
+    showPlayIndicatorBriefly() {
+      // Clear existing timer
+      if (this.data.playIndicatorTimer) {
+        clearTimeout(this.data.playIndicatorTimer)
+      }
+      
+      // Show indicator
+      this.setData({ showPlayIndicator: true })
+      
+      // Hide after 1 second
+      const timer = setTimeout(() => {
+        this.setData({ 
+          showPlayIndicator: false,
+          playIndicatorTimer: null
+        })
+      }, 1000)
+      
+      this.setData({ playIndicatorTimer: timer })
     },
 
     /**
@@ -170,6 +478,8 @@ Component({
       const { selectedPost } = this.properties
       if (!selectedPost) return
 
+      const postUser = this.properties.selectedPostUser || selectedPost.user
+
       this.setData({
         isLoading: true,
         currentSlideIndex: 0,
@@ -177,7 +487,11 @@ Component({
         personalComment: '',
         selectedDot: null,
         dots: [],
-        showDetail: false // Close detail panel when loading new post
+        showDetail: false,
+        currentPost: selectedPost,
+        currentPostUser: postUser,
+        currentMedia: selectedPost.media || [],
+        mediaLength: selectedPost.media ? selectedPost.media.length : 0
       })
 
       // Reset audio
@@ -211,39 +525,34 @@ Component({
      */
     setupMedia() {
       const { selectedPost } = this.properties
-      const { backgroundAudioManager } = this.data
+      const { backgroundAudioManager, mockPost } = this.data
       
-      if (selectedPost.audio) {
-        backgroundAudioManager.title = selectedPost.title || 'Media Player'
-        backgroundAudioManager.src = selectedPost.audio
+      const post = selectedPost || mockPost
+      
+      if (post.audio) {
+        backgroundAudioManager.title = post.title || 'Media Player'
+        backgroundAudioManager.src = post.audio
       }
       
       this.setData({ isPlaying: true })
     },
 
     /**
-     * Pause media when detail panel is shown
+     * Pause auto play when detail panel is shown
      */
-    pauseMedia() {
-      const { backgroundAudioManager } = this.data
-      if (this.data.isPlaying) {
-        backgroundAudioManager.pause()
-      }
+    pauseAutoPlay() {
       this.clearAutoPlayTimer()
     },
 
     /**
-     * Resume media when detail panel is hidden
+     * Resume auto play when detail panel is hidden
      */
-    resumeMedia() {
-      const { backgroundAudioManager } = this.data
+    resumeAutoPlay() {
       const { selectedPost } = this.properties
+      const { mockPost } = this.data
+      const post = selectedPost || mockPost
       
-      if (selectedPost.audio) {
-        backgroundAudioManager.play()
-      }
-      
-      if (selectedPost.type === 'image') {
+      if (post.type === 'image') {
         this.startAutoPlay()
       }
     },
@@ -253,13 +562,15 @@ Component({
      */
     setupImageDots() {
       const { selectedPost } = this.properties
-      const { currentSlideIndex } = this.data
+      const { currentSlideIndex, mockPost } = this.data
       
-      if (selectedPost.media && 
-          selectedPost.media[currentSlideIndex] && 
-          selectedPost.media[currentSlideIndex].dots) {
+      const post = selectedPost || mockPost
+      
+      if (post.media && 
+          post.media[currentSlideIndex] && 
+          post.media[currentSlideIndex].dots) {
         this.setData({
-          dots: selectedPost.media[currentSlideIndex].dots
+          dots: post.media[currentSlideIndex].dots
         })
         this.calculateDotsPosition()
       } else {
@@ -278,29 +589,23 @@ Component({
         return
       }
 
-      // Use selector query to get image dimensions
-      wx.createSelectorQuery().in(this)
-        .select('#media-image')
-        .boundingClientRect((rect) => {
-          if (rect && rect.width && rect.height) {
-            const realPositions = dots.map(dot => ({
-              top: dot.y * rect.height + rect.top,
-              left: dot.x * rect.width + rect.left
-            }))
-            
-            this.setData({ realDotsPosition: realPositions })
-          }
-        })
-        .exec()
+      // Simulate image bounds for demo
+      const imageWidth = windowWidth
+      const imageHeight = windowHeight - 160 // Account for UI elements
+      
+      const realPositions = dots.map(dot => ({
+        top: dot.y * imageHeight + 80, // Offset for top UI
+        left: dot.x * imageWidth
+      }))
+      
+      this.setData({ realDotsPosition: realPositions })
     },
 
     /**
      * Start auto play for images
      */
     startAutoPlay() {
-      if (this.data.isPlaying && 
-          this.properties.selectedPost.type === 'image' && 
-          !this.data.showDetail) {
+      if (this.data.isPlaying && !this.data.showDetail) {
         this.clearAutoPlayTimer()
         const timer = setInterval(() => {
           this.moveToNextSlide()
@@ -323,102 +628,8 @@ Component({
      * Load comments for the post
      */
     loadComments() {
-      const { selectedPost } = this.properties
-      
-      // Simulate API call - replace with actual API endpoint
-      wx.request({
-        url: `${app.globalData.apiBase}/posts/${selectedPost.id}/comments`,
-        method: 'GET',
-        header: {
-          'Authorization': `Bearer ${app.globalData.token || ''}`
-        },
-        success: (res) => {
-          if (res.statusCode === 200) {
-            this.setData({ userComments: res.data.comments || [] })
-          }
-        },
-        fail: (err) => {
-          console.error('Failed to load comments:', err)
-          this.setData({ userComments: [] })
-        }
-      })
-    },
-
-    /**
-     * Touch event handlers
-     */
-    onTouchStart(e) {
-      const touch = e.touches[0]
-      const { windowWidth, panelSwipeThreshold } = this.data
-      
-      // Check if touch started from right edge (for panel swipe)
-      const isPanelSwipe = touch.clientX > windowWidth - panelSwipeThreshold
-      
-      this.setData({
-        touchStartX: touch.clientX,
-        touchStartY: touch.clientY,
-        touchStartTime: Date.now(),
-        isPanelSwipe
-      })
-    },
-
-    onTouchEnd(e) {
-      const { touchStartX, touchStartY, touchStartTime, isPanelSwipe, showDetail } = this.data
-      const touch = e.changedTouches[0]
-      const touchEndX = touch.clientX
-      const touchEndY = touch.clientY
-      const touchEndTime = Date.now()
-      
-      const deltaX = touchEndX - touchStartX
-      const deltaY = touchEndY - touchStartY
-      const deltaTime = touchEndTime - touchStartTime
-      
-      // Minimum distance and maximum time for valid swipe
-      const minDistance = 50
-      const maxTime = 500
-      
-      if (deltaTime > maxTime) return
-      
-      const absDeltaX = Math.abs(deltaX)
-      const absDeltaY = Math.abs(deltaY)
-      
-      // Handle panel swipe from right edge
-      if (isPanelSwipe && absDeltaX > minDistance && absDeltaX > absDeltaY) {
-        if (deltaX < 0) {
-          // Swiped left from right edge - show detail panel
-          this.setData({ showDetail: true })
-        }
-        return
-      }
-      
-      // Handle panel close swipe
-      if (showDetail && absDeltaX > minDistance && absDeltaX > absDeltaY) {
-        if (deltaX > 0) {
-          // Swiped right - hide detail panel
-          this.setData({ showDetail: false })
-        }
-        return
-      }
-      
-      // Don't handle media swipes when detail panel is shown
-      if (showDetail) return
-      
-      // Determine swipe direction for media navigation
-      if (absDeltaX > absDeltaY && absDeltaX > minDistance) {
-        // Horizontal swipe - slide navigation
-        if (deltaX > 0) {
-          this.moveToPreviousSlide()
-        } else {
-          this.moveToNextSlide()
-        }
-      } else if (absDeltaY > absDeltaX && absDeltaY > minDistance) {
-        // Vertical swipe - post navigation
-        if (deltaY > 0) {
-          this.moveToPreviousPost()
-        } else {
-          this.moveToNextPost()
-        }
-      }
+      // Use mock data for demonstration
+      this.setData({ userComments: this.data.mockComments })
     },
 
     /**
@@ -427,12 +638,13 @@ Component({
     moveToPreviousSlide() {
       const { currentSlideIndex } = this.data
       const { selectedPost } = this.properties
+      const { mockPost } = this.data
+      const post = selectedPost || mockPost
       
       if (currentSlideIndex > 0) {
         this.setData({ currentSlideIndex: currentSlideIndex - 1 })
         this.onSlideChange(currentSlideIndex - 1)
       } else {
-        // If at first slide, move to previous post
         this.moveToPreviousPost()
       }
     },
@@ -440,16 +652,16 @@ Component({
     moveToNextSlide() {
       const { currentSlideIndex, isContinue } = this.data
       const { selectedPost } = this.properties
+      const { mockPost } = this.data
+      const post = selectedPost || mockPost
       
-      if (currentSlideIndex + 1 < selectedPost.media.length) {
+      if (currentSlideIndex + 1 < post.media.length) {
         this.setData({ currentSlideIndex: currentSlideIndex + 1 })
         this.onSlideChange(currentSlideIndex + 1)
       } else {
-        // If at last slide
         if (isContinue) {
           this.moveToNextPost()
         } else {
-          // Loop back to first slide
           this.setData({ currentSlideIndex: 0 })
           this.onSlideChange(0)
         }
@@ -460,23 +672,19 @@ Component({
      * Post navigation methods
      */
     moveToPreviousPost() {
-      const { index } = this.properties
-      if (index > 0) {
-        this.triggerEvent('postNavigation', {
-          direction: 'previous',
-          newIndex: index - 1
-        })
-      }
+      wx.showToast({
+        title: '已是第一个',
+        icon: 'none',
+        duration: 1000
+      })
     },
 
     moveToNextPost() {
-      const { index, totalCount } = this.properties
-      if (index + 1 < totalCount) {
-        this.triggerEvent('postNavigation', {
-          direction: 'next', 
-          newIndex: index + 1
-        })
-      }
+      wx.showToast({
+        title: '已是最后一个',
+        icon: 'none', 
+        duration: 1000
+      })
     },
 
     /**
@@ -492,8 +700,11 @@ Component({
       
       this.setData({ currentSlideIndex: newIndex })
       
-      // Update dots for new image
-      if (this.properties.selectedPost.type === 'image') {
+      const { selectedPost } = this.properties
+      const { mockPost } = this.data
+      const post = selectedPost || mockPost
+      
+      if (post.type === 'image') {
         this.setupImageDots()
       }
     },
@@ -502,16 +713,7 @@ Component({
      * Media control methods
      */
     onPlayPause() {
-      const { backgroundAudioManager, isPlaying } = this.data
-      
-      if (isPlaying) {
-        backgroundAudioManager.pause()
-      } else {
-        if (this.properties.selectedPost.audio) {
-          backgroundAudioManager.play()
-        }
-        this.startAutoPlay()
-      }
+      this.togglePlayPause()
     },
 
     onContinueToggle(e) {
@@ -523,142 +725,92 @@ Component({
      */
     handleLike() {
       if (!this.properties.authUser) {
-        this.triggerEvent('showLogin')
+        this.showLoginToast()
         return
       }
 
-      const { selectedPost } = this.properties
-      
-      wx.request({
-        url: `${app.globalData.apiBase}/posts/${selectedPost.id}/like`,
-        method: 'POST',
-        header: {
-          'Authorization': `Bearer ${app.globalData.token}`
-        },
-        success: (res) => {
-          if (res.statusCode === 200) {
-            this.triggerEvent('likeUpdated', res.data)
-            wx.showToast({
-              title: res.data.liked ? 'Liked!' : 'Unliked!',
-              icon: 'success',
-              duration: 1000
-            })
-          }
-        },
-        fail: (err) => {
-          console.error('Like failed:', err)
-          wx.showToast({
-            title: 'Operation failed',
-            icon: 'none'
-          })
-        }
+      const { currentPost } = this.data
+      const newLikeStatus = !currentPost.is_liked
+      const newLikeCount = newLikeStatus ? currentPost.likes + 1 : currentPost.likes - 1
+
+      this.setData({
+        'currentPost.is_liked': newLikeStatus,
+        'currentPost.likes': newLikeCount,
+        displayLikes: this.formatNumber(newLikeCount)
+      })
+
+      wx.vibrateShort()
+      wx.showToast({
+        title: newLikeStatus ? '已点赞' : '取消点赞',
+        icon: 'success',
+        duration: 1000
       })
     },
 
     handleFavorite() {
       if (!this.properties.authUser) {
-        this.triggerEvent('showLogin')
+        this.showLoginToast()
         return
       }
 
-      const { selectedPost } = this.properties
+      const { currentPost } = this.data
+      const newFavoriteStatus = !currentPost.is_favorited
+      const newFavoriteCount = newFavoriteStatus ? currentPost.favorites + 1 : currentPost.favorites - 1
 
-      wx.request({
-        url: `${app.globalData.apiBase}/posts/${selectedPost.id}/favorite`,
-        method: 'POST',
-        header: {
-          'Authorization': `Bearer ${app.globalData.token}`
-        },
-        success: (res) => {
-          if (res.statusCode === 200) {
-            this.triggerEvent('favoriteUpdated', res.data)
-            wx.showToast({
-              title: res.data.favorited ? 'Added to favorites!' : 'Removed from favorites!',
-              icon: 'success',
-              duration: 1000
-            })
-          }
-        },
-        fail: (err) => {
-          console.error('Favorite failed:', err)
-          wx.showToast({
-            title: 'Operation failed',
-            icon: 'none'
-          })
-        }
+      this.setData({
+        'currentPost.is_favorited': newFavoriteStatus,
+        'currentPost.favorites': newFavoriteCount,
+        displayFavorites: this.formatNumber(newFavoriteCount)
+      })
+
+      wx.vibrateShort()
+      wx.showToast({
+        title: newFavoriteStatus ? '已收藏' : '取消收藏',
+        icon: 'success',
+        duration: 1000
       })
     },
 
     handleShare() {
-      const { selectedPost } = this.properties
-      const { currentSlideIndex } = this.data
-      
-      const shareUrl = selectedPost.media[currentSlideIndex].url
-      
-      // Copy to clipboard
-      wx.setClipboardData({
-        data: shareUrl,
-        success: () => {
+      wx.showActionSheet({
+        itemList: ['分享给朋友', '分享到朋友圈', '复制链接'],
+        success: (res) => {
+          const actions = ['分享给朋友', '分享到朋友圈', '复制链接']
           wx.showToast({
-            title: 'Link copied!',
+            title: actions[res.tapIndex],
             icon: 'success',
             duration: 1000
           })
-        }
-      })
-
-      // Update share count
-      this.updateShareCount()
-    },
-
-    updateShareCount() {
-      const { selectedPost } = this.properties
-      
-      wx.request({
-        url: `${app.globalData.apiBase}/posts/${selectedPost.id}/share`,
-        method: 'POST',
-        header: {
-          'Authorization': `Bearer ${app.globalData.token || ''}`
-        },
-        success: (res) => {
-          if (res.statusCode === 200) {
-            this.triggerEvent('shareUpdated', res.data)
-          }
+          
+          // Update share count
+          const { currentPost } = this.data
+          const newShareCount = currentPost.shares + 1
+          this.setData({
+            'currentPost.shares': newShareCount,
+            displayShares: this.formatNumber(newShareCount)
+          })
         }
       })
     },
 
     handleFollow() {
       if (!this.properties.authUser) {
-        this.triggerEvent('showLogin')
+        this.showLoginToast()
         return
       }
 
-      const { selectedPostUser } = this.properties
+      const { currentPostUser } = this.data
+      const newFollowStatus = !currentPostUser.is_followed
 
-      wx.request({
-        url: `${app.globalData.apiBase}/users/${selectedPostUser.id}/follow`,
-        method: 'POST',
-        header: {
-          'Authorization': `Bearer ${app.globalData.token}`
-        },
-        success: (res) => {
-          if (res.statusCode === 200) {
-            this.triggerEvent('followUpdated', res.data)
-            wx.showToast({
-              title: res.data.is_followed ? 'Followed!' : 'Unfollowed!',
-              icon: 'success',
-              duration: 1000
-            })
-          }
-        },
-        fail: (err) => {
-          console.error('Follow failed:', err)
-          wx.showToast({
-            title: 'Operation failed',
-            icon: 'none'
-          })
-        }
+      this.setData({
+        'currentPostUser.is_followed': newFollowStatus
+      })
+
+      wx.vibrateShort()
+      wx.showToast({
+        title: newFollowStatus ? '已关注' : '取消关注',
+        icon: 'success',
+        duration: 1000
       })
     },
 
@@ -670,77 +822,97 @@ Component({
     },
 
     onCommentSubmit() {
-      const { personalComment, commentId, isUpdate } = this.data
-      const { authUser, selectedPost } = this.properties
+      const { personalComment, commentId, isUpdate, userComments } = this.data
+      const { authUser } = this.properties
 
       if (!authUser) {
-        this.triggerEvent('showLogin')
+        this.showLoginToast()
         return
       }
 
       if (!personalComment.trim()) {
         wx.showToast({
-          title: 'Please enter a comment',
+          title: '请输入评论内容',
           icon: 'none'
         })
         return
       }
 
-      const url = isUpdate 
-        ? `${app.globalData.apiBase}/comments/${commentId}`
-        : `${app.globalData.apiBase}/posts/${selectedPost.id}/comments`
-
-      const method = isUpdate ? 'PUT' : 'POST'
-
-      wx.request({
-        url,
-        method,
-        header: {
-          'Authorization': `Bearer ${app.globalData.token}`
-        },
-        data: {
-          content: personalComment,
-          parent_id: commentId
-        },
-        success: (res) => {
-          if (res.statusCode === 200) {
-            this.setData({
-              personalComment: '',
-              commentId: null,
-              isUpdate: false
-            })
-            this.loadComments()
-            wx.showToast({
-              title: isUpdate ? 'Comment updated!' : 'Comment posted!',
-              icon: 'success',
-              duration: 1000
-            })
+      if (isUpdate) {
+        // Update existing comment
+        const updatedComments = userComments.map(comment => {
+          if (comment.id === commentId) {
+            return { ...comment, comment_text: personalComment }
           }
-        },
-        fail: (err) => {
-          console.error('Comment operation failed:', err)
-          wx.showToast({
-            title: 'Operation failed',
-            icon: 'none'
-          })
+          return comment
+        })
+        this.setData({ userComments: updatedComments })
+      } else {
+        // Add new comment
+        const newComment = {
+          id: Date.now(),
+          sender_id: authUser.id,
+          post_id: this.data.mockPost.id,
+          comment_text: personalComment,
+          created_at: new Date().toISOString(),
+          parent_id: commentId,
+          like: "0",
+          unlike: "0",
+          url: null,
+          sender: authUser
         }
+
+        if (commentId) {
+          // It's a reply - find parent and add to replies
+          const updatedComments = [...userComments]
+          const parentComment = updatedComments.find(c => c.id === commentId)
+          if (parentComment) {
+            if (!parentComment.replies) parentComment.replies = []
+            parentComment.replies.push(newComment)
+          }
+          this.setData({ userComments: updatedComments })
+        } else {
+          // It's a new top-level comment
+          this.setData({ userComments: [...userComments, newComment] })
+        }
+
+        // Update comment count
+        const newCommentCount = this.data.currentPost.comments + 1
+        this.setData({
+          'currentPost.comments': newCommentCount,
+          displayComments: this.formatNumber(newCommentCount)
+        })
+      }
+
+      this.setData({
+        personalComment: '',
+        commentId: null,
+        isUpdate: false
+      })
+
+      wx.showToast({
+        title: isUpdate ? '评论已更新' : '评论已发布',
+        icon: 'success',
+        duration: 1000
       })
     },
 
     onReplyComment(e) {
       const { commentId } = e.currentTarget.dataset
       if (!this.properties.authUser) {
-        this.triggerEvent('showLogin')
+        this.showLoginToast()
         return
       }
       
-      this.setData({ 
+      this.setData({
         commentId,
         isUpdate: false,
         personalComment: '',
         showDetail: true,
         tabIndex: 1
       })
+      
+      this.updateReplyIndicatorText()
     },
 
     onEditComment(e) {
@@ -748,41 +920,35 @@ Component({
       this.setData({
         commentId: comment.id,
         isUpdate: true,
-        personalComment: comment.content || comment.comment_text || '',
+        personalComment: comment.comment_text || '',
         showDetail: true,
         tabIndex: 1
       })
+      
+      this.updateReplyIndicatorText()
     },
 
     onDeleteComment(e) {
       const { commentId } = e.currentTarget.dataset
       
       wx.showModal({
-        title: 'Delete Comment',
-        content: 'Are you sure you want to delete this comment?',
+        title: '删除评论',
+        content: '确定要删除这条评论吗？',
         success: (res) => {
           if (res.confirm) {
-            wx.request({
-              url: `${app.globalData.apiBase}/comments/${commentId}`,
-              method: 'DELETE',
-              header: {
-                'Authorization': `Bearer ${app.globalData.token}`
-              },
-              success: () => {
-                this.loadComments()
-                wx.showToast({
-                  title: 'Comment deleted',
-                  icon: 'success',
-                  duration: 1000
-                })
-              },
-              fail: (err) => {
-                console.error('Delete comment failed:', err)
-                wx.showToast({
-                  title: 'Delete failed',
-                  icon: 'none'
-                })
-              }
+            const { userComments } = this.data
+            const updatedComments = userComments.filter(comment => comment.id !== commentId)
+            const newCommentCount = this.data.currentPost.comments - 1
+            this.setData({ 
+              userComments: updatedComments,
+              'currentPost.comments': newCommentCount,
+              displayComments: this.formatNumber(newCommentCount)
+            })
+            
+            wx.showToast({
+              title: '评论已删除',
+              icon: 'success',
+              duration: 1000
             })
           }
         }
@@ -793,7 +959,8 @@ Component({
       this.setData({
         commentId: null,
         isUpdate: false,
-        personalComment: ''
+        personalComment: '',
+        replyIndicatorText: ''
       })
     },
 
@@ -823,46 +990,31 @@ Component({
 
     onToggleDetail() {
       if (!this.properties.authUser) {
-        this.triggerEvent('showLogin')
+        this.showLoginToast()
         return
       }
       this.setData({ showDetail: !this.data.showDetail })
     },
 
     onCloseDetail() {
-      this.setData({ showDetail: false })
-    },
-
-    onImagePreview() {
-      const { selectedPost } = this.properties
-      const { currentSlideIndex } = this.data
-      
-      wx.previewImage({
-        current: selectedPost.media[currentSlideIndex].url,
-        urls: selectedPost.media.map(media => media.url)
+      this.setData({ 
+        showDetail: false,
+        selectedDot: null
       })
     },
 
-    onVideoPlay() {
-      this.setData({ isPlaying: true })
+    onImagePreview() {
+      const { currentSlideIndex, currentMedia } = this.data
+      
+      wx.previewImage({
+        current: currentMedia[currentSlideIndex].url,
+        urls: currentMedia.map(media => media.url)
+      })
     },
 
-    onVideoPause() {
-      this.setData({ isPlaying: false })
-    },
-
-    onVideoEnded() {
-      if (this.data.isContinue) {
-        this.moveToNextPost()
-      }
-    },
-
-    /**
-     * Report methods
-     */
     onShowReportModal() {
       if (!this.properties.authUser) {
-        this.triggerEvent('showLogin')
+        this.showLoginToast()
         return
       }
       this.setData({ showReportModal: true })
@@ -872,26 +1024,39 @@ Component({
       this.setData({ showReportModal: false })
     },
 
-    /**
-     * Navigation to user profile
-     */
     onUserProfile() {
-      const { selectedPostUser, authUser } = this.properties
-      
-      if (!authUser) {
-        this.triggerEvent('showLogin')
+      if (!this.properties.authUser) {
+        this.showLoginToast()
         return
       }
 
-      this.triggerEvent('navigateToProfile', {
-        userId: selectedPostUser.id,
-        username: selectedPostUser.username
+      wx.showToast({
+        title: '跳转到用户主页',
+        icon: 'none',
+        duration: 1000
+      })
+    },
+
+    onSelectUserPost(e) {
+      const { post } = e.currentTarget.dataset
+      wx.showToast({
+        title: `选择了作品: ${post.title}`,
+        icon: 'none',
+        duration: 1000
       })
     },
 
     /**
      * Utility methods
      */
+    showLoginToast() {
+      wx.showToast({
+        title: '请先登录',
+        icon: 'none',
+        duration: 1500
+      })
+    },
+
     truncateTitle(title, maxLength = 30) {
       if (!title) return ''
       return title.length > maxLength ? title.substring(0, maxLength) + '...' : title
@@ -899,12 +1064,30 @@ Component({
 
     formatNumber(num) {
       if (!num) return '0'
-      if (num >= 1000000) {
-        return (num / 1000000).toFixed(1) + 'M'
+      if (num >= 10000) {
+        return (num / 10000).toFixed(1) + '万'
       } else if (num >= 1000) {
         return (num / 1000).toFixed(1) + 'K'
       }
       return num.toString()
+    },
+
+    formatTime(timestamp) {
+      const now = new Date()
+      const time = new Date(timestamp)
+      const diff = now - time
+      
+      if (diff < 60000) return '刚刚'
+      if (diff < 3600000) return `${Math.floor(diff / 60000)}分钟前`
+      if (diff < 86400000) return `${Math.floor(diff / 3600000)}小时前`
+      return `${Math.floor(diff / 86400000)}天前`
+    },
+
+    /**
+     * Build comment tree structure
+     */
+    buildCommentTree(commentList, parentId = null) {
+      return commentList.filter(comment => comment.parent_id === parentId)
     },
 
     /**
@@ -912,6 +1095,12 @@ Component({
      */
     cleanup() {
       this.clearAutoPlayTimer()
+      
+      // Clear play indicator timer
+      if (this.data.playIndicatorTimer) {
+        clearTimeout(this.data.playIndicatorTimer)
+        this.setData({ playIndicatorTimer: null })
+      }
       
       if (this.data.backgroundAudioManager) {
         this.data.backgroundAudioManager.stop()

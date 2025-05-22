@@ -1,447 +1,499 @@
-<!-- components/media-player/media-player.wxml -->
-<view class="media-player-container" 
-      bindtouchstart="onTouchStart" 
-      bindtouchend="onTouchEnd">
+<!-- components/MediaPlayer/MediaPlayer.wxml -->
+<view class="media-player" style="height: {{windowHeight}}px;">
   
   <!-- Loading indicator -->
-  <view wx:if="{{isLoading}}" class="loading-overlay">
-    <view class="loading-spinner">
-      <view class="spinner-ring"></view>
-    </view>
-    <text class="loading-text">Loading...</text>
+  <view wx:if="{{isLoading}}" class="loading-container">
+    <view class="loading-spinner"></view>
   </view>
-
-  <!-- Main media container (Full Screen) -->
-  <view class="main-content" wx:if="{{!isLoading && selectedPost}}">
+  
+  <!-- Main media display area -->
+  <view class="media-container" 
+        bindtap="onScreenTap">
     
-    <!-- Interactive dots for images (only when not paused) -->
-    <view wx:if="{{!showDetail && selectedPost.type === 'image' && dots.length > 0}}" class="dots-container">
-      <view wx:for="{{realDotsPosition}}" 
-            wx:key="index"
-            class="interactive-dot {{selectedDot && selectedDot.id === dots[index].id ? 'selected' : ''}}"
-            style="top: {{item.top}}px; left: {{item.left}}px;"
-            bindtap="onDotTap"
-            data-index="{{index}}">
-        
-        <!-- Pulsing animations -->
-        <view class="dot-ring-pulse"></view>
-        <view class="dot-ring-rotate"></view>
-        <view class="dot-shadow"></view>
-        
-        <!-- Main dot -->
-        <view class="dot-main">
-          <view class="dot-center"></view>
-        </view>
-        
-        <!-- Highlight effect -->
-        <view class="dot-highlight"></view>
-      </view>
-    </view>
-
-    <!-- Media swiper -->
-    <swiper class="media-swiper"
-            current="{{currentSlideIndex}}"
+    <!-- Media content -->
+    <swiper class="media-swiper" 
+            current="{{currentSlideIndex}}" 
             bindchange="onSlideChange"
             circular="{{false}}"
-            indicator-dots="{{false}}"
-            autoplay="{{false}}"
-            duration="300">
+            indicator-dots="{{mediaLength > 1}}"
+            indicator-color="rgba(255,255,255,0.3)"
+            indicator-active-color="#ffffff">
       
-      <swiper-item wx:for="{{selectedPost.media}}" wx:key="index">
-        <view class="media-item">
+      <swiper-item wx:for="{{currentMedia}}" wx:key="id" class="media-item">
+        <view class="media-wrapper">
+          <!-- Image display -->
+          <image wx:if="{{currentPost.type === 'image'}}" 
+                 class="media-image" 
+                 id="media-image"
+                 src="{{item.url}}" 
+                 mode="aspectFit"
+                 bindtap="onImagePreview"
+                 lazy-load="{{true}}"/>
           
-          <!-- Image media -->
-          <view wx:if="{{selectedPost.type === 'image'}}" class="image-container">
-            <image id="media-image"
-                   class="media-image"
-                   src="{{item.url}}"
-                   mode="aspectFit"
-                   bindtap="onImagePreview"
-                   bindload="calculateDotsPosition"
-                   lazy-load="{{true}}" />
-          </view>
-          
-          <!-- Video media -->
-          <video wx:if="{{selectedPost.type === 'video'}}"
-                 class="media-video"
+          <!-- Video display -->
+          <video wx:elif="{{currentPost.type === 'video'}}" 
+                 class="media-video" 
                  src="{{item.url}}"
                  poster="{{item.preview_url}}"
                  controls="{{true}}"
-                 autoplay="{{isPlaying && !showDetail}}"
+                 autoplay="{{isPlaying}}"
                  loop="{{true}}"
-                 show-play-btn="{{true}}"
+                 binddurationchange="onVideoDurationChange"
                  bindplay="onVideoPlay"
                  bindpause="onVideoPause"
-                 bindended="onVideoEnded" />
+                 bindended="onVideoEnded"/>
+        </view>
+        
+        <!-- Interactive dots overlay -->
+        <view wx:if="{{item.dots && item.dots.length > 0 && !isPlaying}}" class="dots-overlay">
+          <view wx:for="{{item.dots}}" 
+                wx:for-item="dot" 
+                wx:for-index="dotIndex"
+                wx:key="id"
+                class="interactive-dot {{selectedDot && selectedDot.id === dot.id ? 'active' : ''}}"
+                style="left: {{dot.x * 100}}; top: {{dot.y * 100}};"
+                data-index="{{dotIndex}}"
+                bindtap="onDotTap">
+            <view class="dot-pulse"></view>
+            <view class="dot-core"></view>
+          </view>
         </view>
       </swiper-item>
     </swiper>
-
-    <!-- Media controls for images (only when detail panel is hidden) -->
-    <view wx:if="{{selectedPost.type === 'image' && !showDetail}}" class="media-controls">
-      <view class="progress-container">
-        <!-- Progress indicators -->
-        <view class="progress-indicators">
-          <view wx:for="{{selectedPost.media}}" 
-                wx:key="index"
-                class="progress-dot {{currentSlideIndex >= index ? 'active' : ''}}"
-                bindtap="onSlideChange"
-                data-current="{{index}}">
-          </view>
+    
+    <!-- Play/Pause overlay indicator -->
+    <view class="play-indicator {{showPlayIndicator ? 'show' : ''}}" wx:if="{{currentPost.type === 'image'}}">
+      <view class="play-icon-container">
+        <view wx:if="{{isPlaying}}" class="svg-icon pause-icon">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="6" y="4" width="4" height="16" fill="currentColor"/>
+            <rect x="14" y="4" width="4" height="16" fill="currentColor"/>
+          </svg>
+        </view>
+        <view wx:else class="svg-icon play-icon">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="8,5 19,12 8,19" fill="currentColor"/>
+          </svg>
+        </view>
+      </view>
+    </view>
+    
+    <!-- Media controls overlay -->
+    <view class="media-controls" wx:if="{{currentPost.type === 'image'}}">
+      <view class="controls-bottom">
+        <view class="progress-bars">
+          <view wx:for="{{currentMedia}}" 
+                wx:key="id" 
+                class="progress-bar {{index <= currentSlideIndex ? 'active' : ''}}"
+                bindtap="onSlideChange" 
+                data-index="{{index}}"></view>
         </view>
         
-        <!-- Control buttons -->
         <view class="control-buttons">
-          <view class="play-pause-btn" bindtap="onPlayPause">
-            <text class="control-icon">{{isPlaying ? '⏸️' : '▶️'}}</text>
+          <view class="play-control" bindtap="onPlayPause">
+            <view wx:if="{{isPlaying}}" class="svg-icon control-svg">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="6" y="4" width="4" height="16" fill="currentColor"/>
+                <rect x="14" y="4" width="4" height="16" fill="currentColor"/>
+              </svg>
+            </view>
+            <view wx:else class="svg-icon control-svg">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <polygon points="8,5 19,12 8,19" fill="currentColor"/>
+              </svg>
+            </view>
           </view>
           
-          <view class="continue-toggle">
-            <switch class="continue-switch" 
-                    checked="{{isContinue}}" 
-                    bindchange="onContinueToggle" 
-                    color="#ff4757" />
+          <view class="continue-control">
             <text class="continue-text">连播</text>
+            <switch checked="{{isContinue}}" bindchange="onContinueToggle" color="#ff6b6b"/>
           </view>
         </view>
       </view>
     </view>
-
-    <!-- Title overlay (only when detail panel is hidden) -->
-    <view wx:if="{{selectedPost.title && !showDetail}}" class="title-overlay">
-      <text class="title-text">{{truncateTitle(selectedPost.title, 30)}}</text>
-    </view>
-
-    <!-- Action buttons (only when detail panel is hidden) -->
-    <view wx:if="{{!showDetail}}" class="action-buttons">
-      <!-- User avatar and follow -->
-      <view class="user-action" bindtap="onUserProfile">
-        <image class="user-avatar" 
-               src="{{selectedPostUser.avatar || '/images/default-avatar.png'}}" 
-               mode="aspectFill" />
-        <view wx:if="{{selectedPostUser.id !== authUser.id && authUser && authUser.role === 'user'}}" 
-              class="follow-btn {{selectedPostUser.is_followed ? 'following' : ''}}"
-              bindtap="handleFollow"
-              catchtap="true">
-          <text class="follow-icon">{{selectedPostUser.is_followed ? '➖' : '➕'}}</text>
+    
+    <!-- Navigation arrows -->
+    <view class="nav-arrows" wx:if="{{mediaLength > 1}}">
+      <view class="nav-arrow nav-left" 
+            wx:if="{{currentSlideIndex > 0}}"
+            bindtap="moveToPreviousSlide">
+        <view class="svg-icon arrow-svg">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
         </view>
       </view>
-
-      <!-- Like button -->
-      <view wx:if="{{authUser && authUser.role === 'user'}}" 
-            class="action-item" 
-            bindtap="handleLike">
-        <text class="action-icon like-icon {{selectedPost.likes_exists ? 'liked' : ''}}">❤️</text>
-        <text class="action-count">{{formatNumber(selectedPost.likes)}}</text>
-      </view>
-
-      <!-- Comment button -->
-      <view class="action-item" bindtap="onToggleDetail">
-        <text class="action-icon">💬</text>
-        <text class="action-count">{{formatNumber(selectedPost.comments)}}</text>
-      </view>
-
-      <!-- Favorite button -->
-      <view wx:if="{{authUser && authUser.role === 'user'}}" 
-            class="action-item" 
-            bindtap="handleFavorite">
-        <text class="action-icon favorite-icon {{selectedPost.favorites_exists ? 'favorited' : ''}}">⭐</text>
-        <text class="action-count">{{formatNumber(selectedPost.favorites)}}</text>
-      </view>
-
-      <!-- Share button -->
-      <view class="action-item" bindtap="handleShare">
-        <text class="action-icon">📤</text>
-        <text class="action-count">{{formatNumber(selectedPost.shares)}}</text>
-      </view>
-
-      <!-- Report button -->
-      <view class="action-item" bindtap="onShowReportModal">
-        <text class="action-icon">⚠️</text>
-      </view>
-    </view>
-
-    <!-- Right edge swipe area indicator (only when detail panel is hidden) -->
-    <view wx:if="{{!showDetail}}" class="right-edge-indicator">
-      <view class="swipe-hint">
-        <text class="hint-text">👈</text>
-        <text class="hint-label">滑动查看</text>
+      <view class="nav-arrow nav-right" 
+            wx:if="{{currentSlideIndex < mediaLength - 1}}"
+            bindtap="moveToNextSlide">
+        <view class="svg-icon arrow-svg">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </view>
       </view>
     </view>
   </view>
-
-  <!-- Detail panel overlay (Full screen overlay when shown) -->
-  <view wx:if="{{showDetail}}" class="detail-panel-overlay" bindtap="onCloseDetail">
-    <view class="detail-panel" catchtap="stopPropagation">
-      <!-- Close button -->
-      <view class="close-btn" bindtap="onCloseDetail">
-        <text class="close-icon">✖️</text>
+  
+  <!-- Post information overlay -->
+  <view class="post-info">
+    <view class="post-title">{{displayTitle}}</view>
+    <view class="post-content" wx:if="{{displayContent}}">
+      {{displayContent}}
+    </view>
+  </view>
+  
+  <!-- User profile section -->
+  <view class="user-section">
+    <view class="user-avatar" bindtap="onUserProfile">
+      <image src="{{currentPostUser.avatar || '/images/default-avatar.png'}}" 
+             class="avatar-image"/>
+      <view wx:if="{{!currentPostUser.is_followed && authUser}}" 
+            class="follow-badge" 
+            bindtap="handleFollow">
+        <view class="svg-icon plus-icon">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </view>
       </view>
-
-      <!-- Tab navigation -->
-      <view class="tab-navigation">
-        <view class="tab-item {{tabIndex === 0 ? 'active' : ''}}" 
-              bindtap="onTabChange" 
-              data-index="0">
-          <text class="tab-text">{{selectedPostUser.username}}的作品</text>
+    </view>
+    <text class="username">@{{currentPostUser.username}}</text>
+  </view>
+  
+  <!-- Action buttons -->
+  <view class="action-buttons">
+    <!-- Like button -->
+    <view class="action-item" bindtap="handleLike">
+      <view class="action-icon {{currentPost.is_liked ? 'liked' : ''}}">
+        <view wx:if="{{currentPost.is_liked}}" class="svg-icon">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" fill="currentColor"/>
+          </svg>
+        </view>
+        <view wx:else class="svg-icon">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </view>
+      </view>
+      <text class="action-count">{{displayLikes}}</text>
+    </view>
+    
+    <!-- Comment button -->
+    <view class="action-item" bindtap="onToggleDetail">
+      <view class="action-icon">
+        <view class="svg-icon">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </view>
+      </view>
+      <text class="action-count">{{displayComments}}</text>
+    </view>
+    
+    <!-- Favorite button -->
+    <view class="action-item" bindtap="handleFavorite">
+      <view class="action-icon {{currentPost.is_favorited ? 'favorited' : ''}}">
+        <view wx:if="{{currentPost.is_favorited}}" class="svg-icon">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" fill="currentColor"/>
+          </svg>
+        </view>
+        <view wx:else class="svg-icon">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </view>
+      </view>
+      <text class="action-count">{{displayFavorites}}</text>
+    </view>
+    
+    <!-- Share button -->
+    <view class="action-item" bindtap="handleShare">
+      <view class="action-icon">
+        <view class="svg-icon">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="18" cy="5" r="3" stroke="currentColor" stroke-width="2"/>
+            <circle cx="6" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+            <circle cx="18" cy="19" r="3" stroke="currentColor" stroke-width="2"/>
+            <path d="M8.59 13.51L15.42 17.49M15.41 6.51L8.59 10.49" stroke="currentColor" stroke-width="2"/>
+          </svg>
+        </view>
+      </view>
+      <text class="action-count">{{displayShares}}</text>
+    </view>
+    
+    <!-- Report button -->
+    <view class="action-item" bindtap="onShowReportModal">
+      <view class="action-icon">
+        <view class="svg-icon">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M4 22v-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </view>
+      </view>
+    </view>
+  </view>
+  
+  <!-- Detail panel -->
+  <view class="detail-panel {{showDetail ? 'show' : ''}}" 
+        catchtouchmove="true">
+    
+    <!-- Panel header -->
+    <view class="panel-header">
+      <view class="tab-bar">
+        <view wx:if="{{!currentPost.event_id}}" 
+              class="tab-item {{tabIndex === 0 ? 'active' : ''}}" 
+              data-index="0" 
+              bindtap="onTabChange">
+          <text>{{currentPostUser.username}}的作品</text>
         </view>
         <view class="tab-item {{tabIndex === 1 ? 'active' : ''}}" 
-              bindtap="onTabChange" 
-              data-index="1">
-          <text class="tab-text">评论</text>
+              data-index="1" 
+              bindtap="onTabChange">
+          <text>评论</text>
         </view>
         <view class="tab-item {{tabIndex === 2 ? 'active' : ''}}" 
-              bindtap="onTabChange" 
-              data-index="2">
-          <text class="tab-text">详情</text>
+              data-index="2" 
+              bindtap="onTabChange">
+          <text>详情</text>
         </view>
       </view>
-
-      <!-- Tab content -->
-      <view class="tab-content">
-        
-        <!-- User posts tab -->
-        <scroll-view wx:if="{{tabIndex === 0}}" 
-                     class="user-posts-tab" 
-                     scroll-y="true">
-          <!-- User info -->
-          <view class="user-info">
-            <view class="user-details">
-              <text class="username">@{{selectedPostUser.username}}</text>
-              <text class="user-stats">
-                粉丝: {{formatNumber(selectedPostUser.follower_number)}}, 
-                获赞: {{formatNumber(selectedPostUser.like_number)}}
-              </text>
-            </view>
-            <button wx:if="{{selectedPostUser.id !== authUser.id && authUser}}" 
-                    class="follow-button {{selectedPostUser.is_followed ? 'following' : ''}}"
-                    bindtap="handleFollow">
-              <text>{{selectedPostUser.is_followed ? '取消关注' : '关注'}}</text>
-            </button>
+      
+      <view class="close-button" bindtap="onCloseDetail">
+        <view class="svg-icon close-svg">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </view>
+      </view>
+    </view>
+    
+    <!-- Panel content -->
+    <view class="panel-content">
+      
+      <!-- User posts tab -->
+      <view wx:if="{{tabIndex === 0}}" class="user-posts-tab">
+        <view class="user-info">
+          <view class="user-stats">
+            <text class="stat-item">粉丝: {{displayFollowerCount}}</text>
+            <text class="stat-item">获赞: {{displayLikeCount}}</text>
           </view>
-
-          <view class="divider"></view>
-
-          <!-- Posts grid -->
-          <view class="posts-grid">
-            <view wx:for="{{selectedUserPosts.posts}}" 
-                  wx:key="id"
+          
+          <view wx:if="{{currentPostUser.id !== authUser.id && authUser}}" 
+                class="follow-button {{currentPostUser.is_followed ? 'followed' : ''}}"
+                bindtap="handleFollow">
+            <view wx:if="{{currentPostUser.is_followed}}" class="svg-icon follow-btn-svg">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </view>
+            <view wx:else class="svg-icon follow-btn-svg">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </view>
+            <text>{{currentPostUser.is_followed ? '取消关注' : '关注'}}</text>
+          </view>
+        </view>
+        
+        <scroll-view class="posts-grid" scroll-y="{{true}}">
+          <view class="posts-container">
+            <view wx:for="{{selectedUserPosts ? selectedUserPosts.posts : mockUserPosts}}" 
+                  wx:key="id" 
                   class="post-item"
-                  bindtap="onSelectPost"
-                  data-post="{{item}}">
-              <image class="post-thumbnail" 
-                     src="{{item.type === 'video' ? item.media[0].preview_url : item.media[0].url}}" 
-                     mode="aspectFill" />
+                  data-post="{{item}}"
+                  bindtap="onSelectUserPost">
+              <image src="{{item.type === 'video' ? item.media[0].preview_url : item.media[0].url}}" 
+                     class="post-thumbnail" 
+                     mode="aspectFill"/>
               <view wx:if="{{item.type === 'video'}}" class="video-indicator">
-                <text class="video-icon">▶️</text>
+                <view class="svg-icon video-svg">
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <polygon points="8,5 19,12 8,19" fill="currentColor"/>
+                  </svg>
+                </view>
               </view>
             </view>
           </view>
         </scroll-view>
-
-        <!-- Comments tab -->
-        <view wx:if="{{tabIndex === 1}}" class="comments-tab">
-          <!-- Post info -->
-          <view class="post-info">
-            <view class="post-title">
-              <text class="info-label">标题:</text>
-              <text class="info-content">{{selectedPost.title}}</text>
-            </view>
-            <view wx:if="{{selectedPost.content}}" class="post-content">
-              <text class="content-text">{{selectedPost.content}}</text>
-            </view>
-          </view>
-
-          <view class="divider"></view>
-
-          <!-- Comments list -->
-          <scroll-view class="comments-list" scroll-y="true">
-            <view wx:for="{{userComments}}" wx:key="id" class="comment-item">
-              <!-- Comment content -->
-              <view class="comment-header">
-                <image class="comment-avatar" 
-                       src="{{item.sender.avatar || '/images/default-avatar.png'}}" 
-                       mode="aspectFill" />
-                <view class="comment-info">
-                  <text class="comment-username">{{item.sender.username}}</text>
-                  <text class="comment-time">{{item.created_at}}</text>
-                </view>
-              </view>
-              
-              <view class="comment-content">
-                <text wx:if="{{item.comment_text}}" class="comment-text">{{item.comment_text}}</text>
-                <image wx:if="{{item.url}}" 
-                       class="comment-image" 
-                       src="{{item.url}}" 
-                       mode="aspectFit"
-                       bindtap="onImagePreview"
-                       data-url="{{item.url}}" />
-              </view>
-
-              <!-- Comment actions -->
-              <view class="comment-actions">
-                <view class="action-group">
-                  <view class="comment-action-btn" 
-                        bindtap="onReplyComment" 
-                        data-comment-id="{{item.id}}">
-                    <text class="action-icon">💬</text>
-                    <text class="action-text">回复</text>
-                  </view>
-                  
-                  <view wx:if="{{item.sender.id === authUser.id}}" 
-                        class="comment-action-btn"
-                        bindtap="onEditComment"
-                        data-comment="{{item}}">
-                    <text class="action-icon">✏️</text>
-                    <text class="action-text">编辑</text>
-                  </view>
-                  
-                  <view wx:if="{{item.sender.id === authUser.id}}" 
-                        class="comment-action-btn delete-btn"
-                        bindtap="onDeleteComment"
-                        data-comment-id="{{item.id}}">
-                    <text class="action-icon">🗑️</text>
-                    <text class="action-text">删除</text>
-                  </view>
-                </view>
-
-                <view class="like-actions">
-                  <view class="like-btn" 
-                        bindtap="onLikeComment"
-                        data-comment-id="{{item.id}}"
-                        data-type="like">
-                    <text class="like-icon">👍</text>
-                    <text class="like-count">{{item.like || 0}}</text>
-                  </view>
-                  <view class="like-btn" 
-                        bindtap="onLikeComment"
-                        data-comment-id="{{item.id}}"
-                        data-type="unlike">
-                    <text class="like-icon">👎</text>
-                    <text class="like-count">{{item.unlike || 0}}</text>
-                  </view>
-                </view>
-              </view>
-            </view>
-
-            <!-- Empty state -->
-            <view wx:if="{{userComments.length === 0}}" class="empty-comments">
-              <text class="empty-text">暂无评论，快来抢沙发吧！</text>
-            </view>
-          </scroll-view>
-
-          <!-- Comment input -->
-          <view wx:if="{{authUser && authUser.role === 'user'}}" class="comment-input">
-            <!-- Reply indicator -->
-            <view wx:if="{{commentId}}" class="reply-indicator">
-              <text class="reply-text">{{isUpdate ? '编辑评论' : '回复评论'}}</text>
-              <view class="cancel-reply" bindtap="onCancelReply">
-                <text class="cancel-icon">✖️</text>
-              </view>
-            </view>
-
-            <!-- Input area -->
-            <view class="input-container">
-              <textarea class="comment-textarea"
-                        placeholder="{{commentId ? (isUpdate ? '编辑你的评论...' : '写下你的回复...') : '说点什么...'}}"
-                        value="{{personalComment}}"
-                        bindinput="onCommentInput"
-                        maxlength="500"
-                        auto-height="{{true}}"
-                        cursor-spacing="10" />
-              
-              <view class="input-actions">
-                <button class="submit-btn {{personalComment.trim() ? 'active' : ''}}" 
-                        bindtap="onCommentSubmit"
-                        disabled="{{!personalComment.trim()}}">
-                  <text class="submit-text">{{isUpdate ? '更新' : '发送'}}</text>
-                </button>
-              </view>
-            </view>
-          </view>
-
-          <!-- Login prompt for non-logged users -->
-          <view wx:if="{{!authUser}}" class="login-prompt">
-            <text class="prompt-text">登录后可发表评论</text>
-            <button class="login-btn" bindtap="onLoginPrompt">
-              <text>登录</text>
-            </button>
-          </view>
-        </view>
-
-        <!-- Details tab -->
-        <view wx:if="{{tabIndex === 2}}" class="details-tab">
-          <view class="details-container">
-            <!-- Title section -->
-            <view class="detail-section">
-              <view class="section-header">
-                <text class="section-title">标题</text>
-              </view>
-              <view class="section-content">
-                <text wx:if="{{selectedDot}}" class="detail-text">{{selectedDot.title}}</text>
-                <text wx:else class="placeholder-text">未选择任何点。请点击图片上的标记查看详情。</text>
-              </view>
-            </view>
-
-            <!-- Description section -->
-            <view class="detail-section">
-              <view class="section-header">
-                <text class="section-title">说明</text>
-              </view>
-              <view class="section-content">
-                <text wx:if="{{selectedDot}}" class="detail-text">{{selectedDot.description}}</text>
-                <text wx:else class="placeholder-text">未选择任何점。请点击图片上의 标记查看详情。</text>
-              </view>
-            </view>
-
-            <!-- Additional info when dot is selected -->
-            <view wx:if="{{selectedDot}}" class="selected-dot-info">
-              <view class="dot-id">
-                <text class="info-label">点 ID:</text>
-                <text class="info-value">{{selectedDot.id}}</text>
-              </view>
-            </view>
-          </view>
-        </view>
       </view>
-    </view>
-  </view>
-
-  <!-- Report modal -->
-  <view wx:if="{{showReportModal}}" class="modal-overlay" bindtap="onCloseReportModal">
-    <view class="report-modal" catchtap="stopPropagation">
-      <view class="modal-header">
-        <text class="modal-title">举报内容</text>
-        <view class="modal-close" bindtap="onCloseReportModal">
-          <text class="close-icon">✖️</text>
+      
+      <!-- Comments tab -->
+      <view wx:if="{{tabIndex === 1}}" class="comments-tab">
+        <scroll-view class="comments-list" scroll-y="{{true}}">
+          <view wx:for="{{userComments}}" wx:key="id" class="comment-item">
+            <view class="comment-main">
+              <image src="{{item.sender.avatar || '/images/default-avatar.png'}}" 
+                     class="comment-avatar"/>
+              <view class="comment-content">
+                <view class="comment-header">
+                  <text class="comment-username">{{item.sender.username}}</text>
+                  <text class="comment-time">{{formatTime(item.created_at)}}</text>
+                </view>
+                <text class="comment-text">{{item.comment_text}}</text>
+                <image wx:if="{{item.url}}" src="{{item.url}}" class="comment-image" mode="aspectFit"/>
+                
+                <view class="comment-actions">
+                  <view class="comment-action" 
+                        data-comment-id="{{item.id}}" 
+                        bindtap="onReplyComment">
+                    <view class="svg-icon action-svg-small">
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 20L21 4M21 4H7M21 4V18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </view>
+                    <text>回复</text>
+                  </view>
+                  
+                  <view wx:if="{{authUser && authUser.id === item.sender_id}}" 
+                        class="comment-action" 
+                        data-comment="{{item}}" 
+                        bindtap="onEditComment">
+                    <view class="svg-icon action-svg-small">
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </view>
+                    <text>编辑</text>
+                  </view>
+                  
+                  <view wx:if="{{authUser && authUser.id === item.sender_id}}" 
+                        class="comment-action" 
+                        data-comment-id="{{item.id}}" 
+                        bindtap="onDeleteComment">
+                    <view class="svg-icon action-svg-small">
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <polyline points="3,6 5,6 21,6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </view>
+                    <text>删除</text>
+                  </view>
+                  
+                  <view class="comment-like">
+                    <view class="svg-icon action-svg-small">
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </view>
+                    <text>{{item.like}}</text>
+                  </view>
+                </view>
+              </view>
+            </view>
+            
+            <!-- Replies -->
+            <view wx:if="{{item.replies && item.replies.length > 0}}" class="comment-replies">
+              <view wx:for="{{item.replies}}" wx:for-item="reply" wx:key="id" class="reply-item">
+                <image src="{{reply.sender.avatar || '/images/default-avatar.png'}}" 
+                       class="reply-avatar"/>
+                <view class="reply-content">
+                  <view class="reply-header">
+                    <text class="reply-username">{{reply.sender.username}}</text>
+                    <text class="reply-time">{{formatTime(reply.created_at)}}</text>
+                  </view>
+                  <text class="reply-text">{{reply.comment_text}}</text>
+                </view>
+              </view>
+            </view>
+          </view>
+        </scroll-view>
+        
+        <!-- Comment input -->
+        <view class="comment-input-container">
+          <view wx:if="{{commentId}}" class="reply-indicator">
+            <text>{{replyIndicatorText}}</text>
+            <view class="cancel-reply" bindtap="onCancelReply">
+              <view class="svg-icon cancel-svg">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </view>
+            </view>
+          </view>
+          
+          <view class="input-wrapper">
+            <textarea class="comment-input" 
+                      placeholder="{{commentId ? '写下你的回复...' : '写下你的评论...'}}"
+                      value="{{personalComment}}"
+                      bindinput="onCommentInput"
+                      auto-height="{{true}}"
+                      maxlength="500"/>
+            <view class="input-actions">
+              <view class="send-button {{personalComment ? 'active' : ''}}" 
+                    bindtap="onCommentSubmit">
+                <view class="svg-icon send-svg">
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </view>
+              </view>
+            </view>
+          </view>
         </view>
       </view>
       
-      <view class="modal-content">
-        <view class="report-options">
-          <view class="report-option" bindtap="onReport" data-type="spam">
-            <text class="option-text">垃圾信息</text>
+      <!-- Details tab -->
+      <view wx:if="{{tabIndex === 2}}" class="details-tab">
+        <view class="detail-section">
+          <view class="detail-header">
+            <text class="detail-title">标题</text>
           </view>
-          <view class="report-option" bindtap="onReport" data-type="inappropriate">
-            <text class="option-text">内容不当</text>
+          <view class="detail-content">
+            <text wx:if="{{selectedDot}}">{{selectedDot.title}}</text>
+            <text wx:else class="no-selection">未选择任何点。请点击图片上的标记查看详情。</text>
           </view>
-          <view class="report-option" bindtap="onReport" data-type="harassment">
-            <text class="option-text">骚扰他人</text>
+        </view>
+        
+        <view class="detail-section">
+          <view class="detail-header">
+            <text class="detail-title">说明</text>
           </view>
-          <view class="report-option" bindtap="onReport" data-type="fake">
-            <text class="option-text">虚假信息</text>
+          <view class="detail-content">
+            <text wx:if="{{selectedDot}}">{{selectedDot.description}}</text>
+            <text wx:else class="no-selection">未选择任何点。请点击图片上的标记查看详情。</text>
           </view>
-          <view class="report-option" bindtap="onReport" data-type="other">
-            <text class="option-text">其他原因</text>
+        </view>
+        
+        <view wx:if="{{selectedDot}}" class="detail-footer">
+          <text class="detail-meta">点 ID: {{selectedDot.id}}</text>
+        </view>
+      </view>
+      
+    </view>
+  </view>
+  
+  <!-- Report modal -->
+  <view wx:if="{{showReportModal}}" class="modal-overlay" bindtap="onCloseReportModal">
+    <view class="modal-content" catchtap="">
+      <view class="modal-header">
+        <text class="modal-title">举报内容</text>
+        <view class="modal-close" bindtap="onCloseReportModal">
+          <view class="svg-icon close-modal-svg">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
           </view>
         </view>
       </view>
+      <view class="modal-body">
+        <view class="report-options">
+          <view class="report-option">色情内容</view>
+          <view class="report-option">暴力内容</view>
+          <view class="report-option">垃圾信息</view>
+          <view class="report-option">侵犯版权</view>
+          <view class="report-option">其他</view>
+        </view>
+      </view>
+      <view class="modal-footer">
+        <button class="cancel-btn" bindtap="onCloseReportModal">取消</button>
+        <button class="confirm-btn">提交</button>
+      </view>
     </view>
   </view>
-
-  <!-- Empty state -->
-  <view wx:if="{{!isLoading && !selectedPost}}" class="empty-state">
-    <text class="empty-text">没有作品可展示</text>
-  </view>
-
+  
 </view>
