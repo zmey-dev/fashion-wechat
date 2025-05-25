@@ -12,7 +12,8 @@
     "avatar": "/components/avatar/avatar",
     "media-card": "/components/media-card/media-card",
     "slide-sidebar": "/components/slide-sidebar/slide-sidebar",
-    "media-player": "/components/media-player/media-player"
+    "media-player": "/components/media-player/media-player",
+    "login-modal": "/components/login-modal/login-modal"
   },
   "darkmode": true,
   "themeLocation": "theme.json",

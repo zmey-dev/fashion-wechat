@@ -1,0 +1,96 @@
+<!-- comment-tree.wxml -->
+<scroll-view class="comment-tree-container" scroll-y="true" enhanced="true">
+  <!-- Comment Input Section -->
+  <view class="comment-input-section">
+    <!-- Reply Header (when replying to someone) -->
+    <view wx:if="{{commentId}}" class="reply-header">
+      <button class="reply-close-btn" bindtap="onCancelReply">
+        <image class="close-icon" src="/images/icons/close.png" />
+      </button>
+      
+      <view class="reply-info">
+        <view class="reply-avatar-container">
+          <image 
+            class="reply-avatar" 
+            src="{{replyToComment.sender.avatar || '/images/default-avatar.png'}}" 
+            mode="aspectFill"
+          />
+        </view>
+        <text class="reply-username">{{replyToComment.sender.username}}:</text>
+        <text wx:if="{{replyToComment.comment_text}}" class="reply-preview">
+          {{replyToComment.comment_text}}
+        </text>
+        <image 
+          wx:if="{{replyToComment.url}}" 
+          class="reply-image-preview" 
+          src="{{replyToComment.url}}" 
+          mode="aspectFit"
+        />
+      </view>
+    </view>
+
+    <!-- Comment Input Area -->
+    <view wx:if="{{authUser.role === 'user'}}" class="comment-input-container">
+      <view class="input-actions">
+        <button class="input-action-btn" bindtap="onChooseImage">
+          <image class="action-icon" src="/images/icons/image.png" />
+        </button>
+        <button class="input-action-btn" bindtap="onToggleEmoji">
+          <image class="action-icon" src="/images/icons/emoji.png" />
+        </button>
+        <button class="input-action-btn" bindtap="onSendComment">
+          <image class="action-icon" src="/images/icons/send.png" />
+        </button>
+      </view>
+
+      <textarea 
+        class="comment-textarea {{commentId ? 'has-reply' : ''}}"
+        placeholder="Enter your comment"
+        value="{{personalComment}}"
+        bindinput="onCommentInput"
+        bindconfirm="onSendComment"
+        maxlength="500"
+        auto-height
+      />
+
+      <!-- Emoji Picker -->
+      <view wx:if="{{showEmojiPicker}}" class="emoji-picker">
+        <view class="emoji-grid">
+          <text 
+            wx:for="{{emojiList}}" 
+            wx:key="*this" 
+            class="emoji-item"
+            bindtap="onEmojiClick"
+            data-emoji="{{item}}"
+          >
+            {{item}}
+          </text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Comments List -->
+  <view class="comments-list">
+    <view wx:if="{{comments.length === 0}}" class="no-comments">
+      <text class="no-comments-text">No comments yet. Be the first to comment!</text>
+    </view>
+    
+    <view wx:else class="comments-container">
+      <comment-tree-item 
+        wx:for="{{rootComments}}" 
+        wx:key="id"
+        comment="{{item}}"
+        all-comments="{{comments}}"
+        logged-user="{{loggedUser}}"
+        depth="{{0}}"
+        bind:like="onCommentLike"
+        bind:edit="onCommentEdit"
+        bind:reply="onCommentReply"
+        bind:delete="onCommentDelete"
+        bind:imagepreview="onImagePreview"
+        bind:imageupload="onImageUpload"
+      />
+    </view>
+  </view>
+</scroll-view>

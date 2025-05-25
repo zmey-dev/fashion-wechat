@@ -1,0 +1,122 @@
+<!-- comment-item.wxml -->
+<view class="comment-container" wx:key="comment-{{index}}">
+  <view class="comment-header">
+    <view wx:if="{{item && item.sender}}" class="user-info">
+      <navigator 
+        url="{{loggedUser.id === item.sender.id ? '/pages/me/posts' : '/pages/profile/index?username=' + item.sender.username}}"
+        class="user-link"
+        hover-class="user-link-hover"
+      >
+        <view class="avatar-container">
+          <avatar
+            class="avatar" 
+            avatar="{{item.sender.avatar||''}}" 
+            name="{{item.sender.username}}"
+            mode="aspectFill"
+          />
+        </view>
+        <text class="username">{{item.sender && item.sender.username ? item.sender.username : ''}}</text>
+      </navigator>
+    </view>
+    <text class="timestamp">{{createdTime}}</text>
+  </view>
+
+  <view class="comment-content">
+    <!-- Comment Image -->
+    <view wx:if="{{item.url}}" class="comment-image-container">
+      <image 
+        class="comment-image" 
+        src="{{item.url}}" 
+        mode="aspectFit"
+        bindtap="onImageTap"
+        data-url="{{item.url}}"
+      />
+    </view>
+
+    <!-- Comment Text -->
+    <text wx:if="{{item.comment_text}}" class="comment-text">{{item.comment_text}}</text>
+
+    <!-- Media Image -->
+    <image wx:if="{{item.media}}" class="media-image" src="/images/12.jpg" mode="aspectFit" />
+
+    <!-- Action Buttons -->
+    <view class="action-buttons">
+      <view class="button-group">
+        <!-- Like Button -->
+        <view 
+          class="action-btn like-btn {{item.like > 0 ? 'active' : ''}}" 
+          bindtap="onLikeHandle"
+          data-item="{{item}}"
+          data-type="1"
+        >
+          <image class="action-icon" src="/images/icons/thumbs-up.svg" />
+          <text class="action-text">{{item.like}}</text>
+        </view>
+
+        <!-- Unlike Button -->
+        <view 
+          class="action-btn unlike-btn {{item.unlike > 0 ? 'active' : ''}}" 
+          bindtap="onLikeHandle"
+          data-item="{{item}}"
+          data-type="0"
+        >
+          <image class="action-icon" src="/images/icons/thumbs-down.svg" />
+          <text class="action-text">{{item.unlike}}</text>
+        </view>
+
+        <!-- Owner Actions -->
+        <block wx:if="{{loggedUser.id === item.sender_id}}">
+          <!-- Edit Button -->
+          <view 
+            class="action-btn edit-btn" 
+            bindtap="{{item.url ? 'onImageEdit' : 'onCommentEdit'}}"
+            data-item="{{item}}"
+            data-index="{{index}}"
+          >
+            <image class="action-icon" src="/images/icons/edit.svg" />
+            <text class="action-text">Edit</text>
+          </view>
+
+          <!-- Delete Button -->
+          <view 
+            class="action-btn delete-btn" 
+            bindtap="onCommentDelete"
+            data-id="{{item.id}}"
+          >
+            <image class="action-icon" src="/images/icons/trash.svg" />
+            <text class="action-text">Delete</text>
+          </view>
+        </block>
+
+        <!-- Non-owner Actions -->
+        <block wx:else>
+          <!-- Reply Button -->
+          <view 
+            class="action-btn reply-btn" 
+            bindtap="onReplyClick"
+            data-item="{{item}}"
+            data-index="{{index}}"
+          >
+            <image class="action-icon" src="/images/icons/reply.svg" />
+            <text class="action-text">Reply</text>
+          </view>
+
+          <!-- Delete Button (if user has permission) -->
+          <view 
+            class="action-btn delete-btn" 
+            bindtap="onCommentDelete"
+            data-id="{{item.id}}"
+          >
+            <image class="action-icon" src="/images/icons/trash.svg" />
+            <text class="action-text">Delete</text>
+          </view>
+        </block>
+      </view>
+    </view>
+  </view>
+
+  <view class="divider"></view>
+</view>
+
+<!-- Children Comments -->
+<slot name="children"></slot>

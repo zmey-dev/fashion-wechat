@@ -1,0 +1,111 @@
+<!-- components/media-display/media-display.wxml -->
+<view class="media-container" bindtap="onScreenTap">
+  <!-- Media content -->
+  <swiper
+    class="media-swiper"
+    current="{{ currentSlideIndex }}"
+    bindchange="onSlideChange"
+    circular="{{ false }}"
+    indicator-dots="{{ mediaLength > 1 }}"
+    indicator-color="rgba(255,255,255,0.3)"
+    indicator-active-color="#ffffff"
+  >
+    <swiper-item wx:for="{{ currentMedia }}" wx:key="id" class="media-item">
+      <view class="media-wrapper">
+        <!-- Image display -->
+        <image
+          wx:if="{{ currentPost.type === 'image' }}"
+          class="media-image"
+          id="media-image"
+          src="{{ item.url }}"
+          mode="aspectFit"
+          lazy-load="{{ true }}"
+        />
+
+        <!-- Video display -->
+        <video
+          wx:elif="{{ currentPost.type === 'video' }}"
+          class="media-video"
+          src="{{ item.url }}"
+          poster="{{ item.preview_url }}"
+          controls="{{ true }}"
+          autoplay="{{ isPlaying }}"
+          loop="{{ true }}"
+        />
+      </view>
+
+      <!-- Interactive dots overlay -->
+      <view
+        wx:if="{{ item.dots && item.dots.length > 0 && !isPlaying }}"
+        class="dots-overlay"
+      >
+        <view
+          wx:for="{{ item.dots }}"
+          wx:for-item="dot"
+          wx:for-index="dotIndex"
+          wx:key="id"
+          class="interactive-dot {{selectedDot && selectedDot.id === dot.id ? 'active' : ''}}"
+          style="left: {{ dot.x * 100 }}%; top: {{ dot.y * 100 }}%;"
+          data-index="{{ dotIndex }}"
+          bindtap="onDotTap"
+        >
+          <view class="dot-pulse"></view>
+          <view class="dot-core"></view>
+        </view>
+      </view>
+    </swiper-item>
+  </swiper>
+
+  <!-- Play/Pause overlay indicator -->
+  <view
+    class="play-indicator {{ showPlayIndicator ? 'show' : '' }}"
+    wx:if="{{ currentPost.type === 'image' }}"
+  >
+    <view class="play-icon-container">
+      <view wx:if="{{ isPlaying }}" class="svg-icon pause-icon">
+        <image
+          src="/images/icons/pause.svg"
+          class="svg-icon"
+          mode="aspectFit"
+        ></image>
+      </view>
+      <view wx:else class="svg-icon play-icon">
+        <image
+          src="/images/icons/play.svg"
+          class="svg-icon"
+          mode="aspectFit"
+        ></image>
+      </view>
+    </view>
+  </view>
+
+  <!-- Navigation arrows -->
+  <view class="nav-arrows" wx:if="{{ mediaLength > 1 }}">
+    <view
+      class="nav-arrow nav-left"
+      wx:if="{{ currentSlideIndex > 0 }}"
+      bindtap="moveToPreviousSlide"
+    >
+      <view class="svg-icon arrow-svg">
+        <image
+          src="/images/icons/arrow-left.svg"
+          class="svg-icon"
+          mode="aspectFit"
+        ></image>
+      </view>
+    </view>
+    <view
+      class="nav-arrow nav-right"
+      wx:if="{{ currentSlideIndex < mediaLength - 1 }}"
+      bindtap="moveToNextSlide"
+    >
+      <view class="svg-icon arrow-svg">
+        <image
+          src="/images/icons/arrow-right.svg"
+          class="svg-icon"
+          mode="aspectFit"
+        ></image>
+      </view>
+    </view>
+  </view>
+</view>

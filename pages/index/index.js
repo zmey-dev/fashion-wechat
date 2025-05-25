@@ -3,9 +3,10 @@ const app = getApp();
 
 Page({
   data: {
-    isOpenSidebar: false,
+    showSidebar: false,
     currentPath: "discover",
-    userInfo: {},
+    showLoginModal: app.globalData.showLoginModal || false,
+    userInfo: app.globalData.userInfo || {},
 
     currentPost: null,
     currentPostUser: null,
@@ -19,10 +20,21 @@ Page({
     touchStartX: 0,
     touchStartY: 0,
   },
-
   onLoad: function () {
+    const app = getApp();
+
+    // Subscribe to state changes
+    this.userInfoHandler = (userInfo) => {
+      this.setData({ userInfo });
+    };
+    app.subscribe("userInfo", this.userInfoHandler);
+    app.subscribe("showLoginModal", (showLoginModal) => {
+      this.setData({ showLoginModal });
+    });
     this.setData({
-      isOpenSidebar: app.globalData.isOpenSidebar,
+      showSidebar: app.globalData.showSidebar,
+      showLoginModal: app.globalData.showLoginModal || false,
+      userInfo: app.globalData.userInfo || {},
       // currentPath: currentPath,
       // userInfo: userInfo,
     });
@@ -30,9 +42,24 @@ Page({
     this.loadPostData(0);
   },
 
+  onUnload: function () {
+    const app = getApp();
+    // Unsubscribe from state changes
+    app.unsubscribe("userInfo", this.userInfoHandler);
+    app.unsubscribe("showLoginModal", this.showLoginModalHandler);
+  },
+
+  setShowLoginModal: function (show) {
+    this.setData({ showLoginModal: show });
+  },
+
+  hideLoginModal: function () {
+    this.setData({ showLoginModal: false });
+  },
+
   updateSidebar: function (data) {
     this.setData({
-      isOpenSidebar: data.isOpenSidebar,
+      showSidebar: data.showSidebar,
       currentPath: data.currentPath,
       userInfo: data.userInfo,
     });
@@ -79,12 +106,11 @@ Page({
       success: (res) => {
         if (res.statusCode === 200 && res.data) {
           // Get post count for navigation
-          const totalPosts = res.data.total_count || 1;
+          const totalPosts = res.data.count || 1;
 
           this.setData({
             currentPost: res.data.post,
-            currentPostUser: res.data.user,
-            currentIndex: res.data.index || 0,
+            currentIndex: index || 0,
             totalPosts: totalPosts,
             isLoading: false,
           });

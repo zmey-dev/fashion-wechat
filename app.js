@@ -1,166 +1,198 @@
 App({
   globalData: {
-    isOpenSidebar: false,
-    userInfo: {
-      nickname: '',
-      avatar: ''
-    },
-    currentPath: 'discover'
+    showSidebar: false,
+    showLoginModal: false,
+    userInfo: null,
+    currentPath: "discover",
+    observers: {},
   },
-  
+
+  // Subscribe to state changes
+  subscribe(key, callback) {
+    if (!this.globalData.observers[key]) {
+      this.globalData.observers[key] = [];
+    }
+    this.globalData.observers[key].push(callback);
+  },
+
+  // Unsubscribe from state changes
+  unsubscribe(key, callback) {
+    if (this.globalData.observers[key]) {
+      const index = this.globalData.observers[key].indexOf(callback);
+      if (index > -1) {
+        this.globalData.observers[key].splice(index, 1);
+      }
+    }
+  },
+
+  // Update state and notify observers
+  setState(key, value) {
+    this.globalData[key] = value;
+    if (this.globalData.observers[key]) {
+      this.globalData.observers[key].forEach(callback => {
+        callback(value);
+      });
+    }
+  },
+
+  // Get current state
+  getState(key) {
+    return this.globalData[key];
+  },
+
   // Toggle sidebar state
   toggleSidebar() {
-    this.globalData.isOpenSidebar = !this.globalData.isOpenSidebar;
+    this.globalData.showSidebar = !this.globalData.showSidebar;
     this.notifyPagesUpdate();
   },
-  
+
   // Set sidebar state
   setSidebar(isOpen) {
-    this.globalData.isOpenSidebar = isOpen;
+    this.globalData.showSidebar = isOpen;
     this.notifyPagesUpdate();
-    
+
     // Optional: Save to storage for persistence
-    wx.setStorageSync('isOpenSidebar', isOpen);
+    wx.setStorageSync("showSidebar", isOpen);
   },
-  
+
   // Set current path
   setCurrentPath(path) {
     this.globalData.currentPath = path;
     this.notifyPagesUpdate();
   },
-  
+
   // Determine current path based on route
   determineCurrentPath() {
     const pages = getCurrentPages();
     const currentPage = pages[pages.length - 1];
     const route = currentPage.route;
-    
-    let currentPath = '';
-    if (route.includes('discover') || route.includes('index')) {
-      currentPath = 'discover';
-    } else if (route.includes('recommend')) {
-      currentPath = 'recommend';
-    } else if (route.includes('follow')) {
-      currentPath = 'follow';
-    } else if (route.includes('chat')) {
-      currentPath = 'chat';
-    } else if (route.includes('friend')) {
-      currentPath = 'friend';
-    } else if (route.includes('me')) {
-      currentPath = 'me';
-    } else if (route.includes('event')) {
-      currentPath = 'event';
-    } else if (route.includes('contact')) {
-      currentPath = 'contact';
+
+    let currentPath = "";
+    if (route.includes("discover") || route.includes("index")) {
+      currentPath = "discover";
+    } else if (route.includes("recommend")) {
+      currentPath = "recommend";
+    } else if (route.includes("follow")) {
+      currentPath = "follow";
+    } else if (route.includes("chat")) {
+      currentPath = "chat";
+    } else if (route.includes("friend")) {
+      currentPath = "friend";
+    } else if (route.includes("me")) {
+      currentPath = "me";
+    } else if (route.includes("event")) {
+      currentPath = "event";
+    } else if (route.includes("contact")) {
+      currentPath = "contact";
     }
-    
+
     this.globalData.currentPath = currentPath;
     return currentPath;
   },
-  
+
   // Sidebar navigation methods
   navigateTo(path) {
-    switch(path) {
-      case 'discover':
-        wx.switchTab({ url: '/pages/index/index' });
+    switch (path) {
+      case "discover":
+        wx.switchTab({ url: "/pages/index/index" });
         break;
-      case 'recommend':
-        wx.navigateTo({ url: '/pages/recommend/recommend' });
+      case "recommend":
+        wx.navigateTo({ url: "/pages/recommend/recommend" });
         break;
-      case 'follow':
-        wx.navigateTo({ url: '/pages/follow/follow' });
+      case "follow":
+        wx.navigateTo({ url: "/pages/follow/follow" });
         break;
-      case 'chat':
-        wx.navigateTo({ url: '/pages/chat/chat' });
+      case "chat":
+        wx.navigateTo({ url: "/pages/chat/chat" });
         break;
-      case 'friend':
-        wx.navigateTo({ url: '/pages/friend/friend' });
+      case "friend":
+        wx.navigateTo({ url: "/pages/friend/friend" });
         break;
-      case 'me':
-        wx.switchTab({ url: '/pages/me/me' });
+      case "me":
+        wx.switchTab({ url: "/pages/me/me" });
         break;
-      case 'event':
-        wx.navigateTo({ url: '/pages/event/event' });
+      case "event":
+        wx.navigateTo({ url: "/pages/event/event" });
         break;
-      case 'contact':
-        wx.navigateTo({ url: '/pages/contact/contact' });
+      case "contact":
+        wx.navigateTo({ url: "/pages/contact/contact" });
         break;
       default:
-        console.log('Unknown path:', path);
+        console.log("Unknown path:", path);
     }
     // Close sidebar after navigation
     this.setSidebar(false);
   },
-  
+
   // Get user info
   getUserInfo() {
     try {
-      const userInfo = wx.getStorageSync('userInfo');
+      const userInfo = wx.getStorageSync("userInfo");
       if (userInfo) {
         this.globalData.userInfo = userInfo;
       }
     } catch (e) {
-      console.log('Failed to get user info from storage');
+      console.log("Failed to get user info from storage");
     }
     return this.globalData.userInfo;
   },
-  
+
   // Set user info
   setUserInfo(userInfo) {
     this.globalData.userInfo = userInfo;
-    wx.setStorageSync('userInfo', userInfo);
+    wx.setStorageSync("userInfo", userInfo);
   },
-  
+
   // Notify all pages about sidebar state change
   notifyPagesUpdate() {
     const pages = getCurrentPages();
     const currentPage = pages[pages.length - 1];
-    
+
     if (currentPage && currentPage.updateSidebar) {
       currentPage.updateSidebar({
-        isOpenSidebar: this.globalData.isOpenSidebar,
+        showSidebar: this.globalData.showSidebar,
         currentPath: this.globalData.currentPath,
-        userInfo: this.globalData.userInfo
+        userInfo: this.globalData.userInfo,
       });
     }
   },
-  
+
   // Swipe detection utility
   handleSwipe(startX, startY, endX, endY) {
     const deltaX = endX - startX;
     const deltaY = Math.abs(endY - startY);
-    
+
     // Right swipe (open sidebar)
     if ((startX < 50 && deltaX > 100) || (deltaX > 150 && deltaY < 100)) {
-      if (!this.globalData.isOpenSidebar) {
+      if (!this.globalData.showSidebar) {
         this.setSidebar(true);
-        return 'right';
+        return "right";
       }
     }
-    
+
     // Left swipe (close sidebar)
     if (deltaX < -100 && deltaY < 100) {
-      if (this.globalData.isOpenSidebar) {
+      if (this.globalData.showSidebar) {
         this.setSidebar(false);
-        return 'left';
+        return "left";
       }
     }
-    
+
     return null;
   },
-  
+
   onLaunch() {
     // Load sidebar state from storage on app launch
     try {
-      const sidebarState = wx.getStorageSync('isOpenSidebar');
-      if (sidebarState !== '') {
-        this.globalData.isOpenSidebar = sidebarState;
+      const sidebarState = wx.getStorageSync("showSidebar");
+      if (sidebarState !== "") {
+        this.globalData.showSidebar = sidebarState;
       }
-      
+
       // Load user info
       this.getUserInfo();
     } catch (e) {
-      console.log('Failed to load app state', e);
+      console.log("Failed to load app state", e);
     }
-  }
+  },
 });

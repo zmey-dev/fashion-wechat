@@ -1,0 +1,58 @@
+<!-- components/user-posts-tab/user-posts-tab.wxml -->
+<view class="user-posts-tab" wx:if="{{ currentPostUser }}">
+  <view class="user-info">
+    <view class="user-stats">
+      <text class="stat-item">Followers: {{ displayFollowerCount }}</text>
+      <text class="stat-item">Likes: {{ displayLikeCount }}</text>
+    </view>
+
+    <view
+      wx:if="{{ currentPostUser.id && authUser && currentPostUser.id !== authUser.id }}"
+      class="follow-button {{currentPostUser.is_followed ? 'followed' : ''}}"
+      bindtap="handleFollow"
+    >
+      <view class="svg-icon follow-btn-svg">
+        <image
+          src="{{currentPostUser.is_followed? '/images/icons/minus.svg': '/images/icons/plus.svg'}}"
+          class="svg-icon"
+          mode="aspectFit"
+        ></image>
+      </view>
+      <text>{{
+        currentPostUser.is_followed ? "Unfollow" : "Follow"
+      }}</text>
+    </view>
+  </view>
+
+  <scroll-view class="posts-grid" scroll-y="{{ true }}">
+    <view class="posts-container">
+      <view
+        wx:for="{{ currentPostUser.posts || [] }}"
+        wx:key="id"
+        class="post-item"
+        data-post="{{ item }}"
+        bindtap="onSelectUserPost"
+      >
+        <image
+          src="{{(item.type === 'video' && item.media && item.media[0] && item.media[0].preview_url) ? item.media[0].preview_url : (item.media && item.media[0] ? item.media[0].url : '/images/placeholder.png')}}"
+          class="post-thumbnail"
+          mode="aspectFill"
+        />
+        <view wx:if="{{ item.type === 'video' }}" class="video-indicator">
+          <view class="svg-icon video-svg">
+            <image
+              src="/images/icons/play-small.svg"
+              class="svg-icon"
+              mode="aspectFit"
+            ></image>
+          </view>
+        </view>
+      </view>
+    </view>
+    
+    <!-- Empty state -->
+    <view wx:if="{{ !currentPostUser.posts || currentPostUser.posts.length === 0 }}" class="empty-posts">
+      <text>No posts available</text>
+    </view>
+  </scroll-view>
+</view>

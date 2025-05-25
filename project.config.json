@@ -40,7 +40,7 @@
   },
   "compileType": "miniprogram",
   "libVersion": "2.25.3",
-  "appid": "wx5247084ab8d78608",
+  "appid": "touristappid",
   "projectname": "fashion-show-platform",
   "condition": {
     "search": {

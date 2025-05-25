@@ -1,0 +1,7 @@
+{
+  "component": true,
+  "usingComponents": {
+    "comment-item": "../comment-item/comment-item",
+    "comment-tree-item-child": "../comment-tree-item-child/comment-tree-item-child"
+  }
+}

@@ -1,0 +1,138 @@
+<view class="login-modal" bindtap="closeModal">
+  <view class="modal-content" catch:tap="preventClose">
+    <!-- Header -->
+    <view class="modal-header">
+      <span class="modal-title">Login</span>
+      <view class="close-btn" bindtap="closeModal">
+        <span class="iconfont icon-close">×</span>
+      </view>
+    </view>
+
+    <!-- Login Type Tabs -->
+    <view class="login-tabs">
+      <view 
+        class="tab-item {{loginType === 'wechat' ? 'active' : ''}}"
+        data-type="wechat"
+        bindtap="switchLoginType"
+      >
+        <span>WeChat</span>
+      </view>
+      <view 
+        class="tab-item {{loginType === 'email' ? 'active' : ''}}"
+        data-type="email"
+        bindtap="switchLoginType"
+      >
+        <span>Email</span>
+      </view>
+      <view 
+        class="tab-item {{loginType === 'phone' ? 'active' : ''}}"
+        data-type="phone"
+        bindtap="switchLoginType"
+      >
+        <span>Phone</span>
+      </view>
+    </view>
+
+    <!-- Login Forms -->
+    <view class="login-forms">
+      <!-- WeChat Login -->
+      <view class="form-container {{loginType === 'wechat' ? 'active' : ''}}">
+        <view class="wechat-login">
+          <view class="wechat-icon">
+            <span class="icon">🔴</span>
+          </view>
+          <span class="wechat-span">One-click login with WeChat</span>
+          <span class="wechat-desc">Secure and convenient</span>
+        </view>
+      </view>
+
+      <!-- Email Login -->
+      <view class="form-container {{loginType === 'email' ? 'active' : ''}}">
+        <view class="input-group">
+          <input
+            class="form-input {{emailError ? 'error' : ''}}"
+            type="span"
+            placeholder="Enter email address"
+            value="{{email}}"
+            bindinput="onEmailInput"
+          />
+          <span class="error-span" wx:if="{{emailError}}">{{emailError}}</span>
+        </view>
+        
+        <view class="input-group">
+          <view class="password-wrapper">
+            <input
+              class="form-input {{passwordError ? 'error' : ''}}"
+              type="{{showPassword ? 'span' : 'password'}}"
+              placeholder="Enter password"
+              value="{{password}}"
+              bindinput="onPasswordInput"
+            />
+            <view class="password-toggle" bindtap="togglePassword">
+              <span class="toggle-icon">{{showPassword ? '👁️' : '👁️‍🗨️'}}</span>
+            </view>
+          </view>
+          <span class="error-span" wx:if="{{passwordError}}">{{passwordError}}</span>
+        </view>
+      </view>
+
+      <!-- Phone Login -->
+      <view class="form-container {{loginType === 'phone' ? 'active' : ''}}">
+        <view class="input-group">
+          <input
+            class="form-input {{phoneError ? 'error' : ''}}"
+            type="number"
+            placeholder="Enter phone number"
+            value="{{phone}}"
+            bindinput="onPhoneInput"
+          />
+          <span class="error-span" wx:if="{{phoneError}}">{{phoneError}}</span>
+        </view>
+        
+        <view class="input-group">
+          <view class="code-wrapper">
+            <input
+              class="form-input code-input {{codeError ? 'error' : ''}}"
+              type="number"
+              placeholder="Enter verification code"
+              value="{{verificationCode}}"
+              bindinput="onCodeInput"
+              maxlength="6"
+            />
+            <button
+              class="code-btn {{countdown > 0 ? 'disabled' : ''}}"
+              bindtap="sendVerificationCode"
+              disabled="{{countdown > 0}}"
+            >
+              {{countdown > 0 ? countdown + 's' : 'Send Code'}}
+            </button>
+          </view>
+          <span class="error-span" wx:if="{{codeError}}">{{codeError}}</span>
+        </view>
+      </view>
+    </view>
+
+    <!-- Login Button -->
+    <view class="login-button-wrapper">
+      <button
+        class="login-btn {{loading ? 'loading' : ''}}"
+        bindtap="handleLogin"
+        disabled="{{loading}}"
+      >
+        <span wx:if="{{!loading}}">
+          {{loginType === 'wechat' ? 'Login with WeChat' : 'Login'}}
+        </span>
+        <span wx:if="{{loading}}">Logging in...</span>
+      </button>
+    </view>
+
+    <!-- Footer -->
+    <view class="modal-footer">
+      <span class="terms-span">
+        By logging in, you agree to our 
+        <span class="link">Terms of Service</span> and 
+        <span class="link">Privacy Policy</span>
+      </span>
+    </view>
+  </view>
+</view>

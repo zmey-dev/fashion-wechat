@@ -1,0 +1,296 @@
+.login-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  visibility: visible;
+  transition: all 0.3s ease;
+  z-index: 9999;
+}
+
+
+.modal-content {
+  width: 90%;
+  max-width: 400px;
+  background: #1a1a1a;
+  border-radius: 16px;
+  padding: 0;
+  position: relative;
+  transform: translateY(50px);
+  transition: transform 0.3s ease;
+  border: 1px solid #333;
+}
+
+.login-modal.show .modal-content {
+  transform: translateY(0);
+}
+
+/* Header */
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 24px 16px;
+  border-bottom: 1px solid #333;
+}
+
+.modal-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.close-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #333;
+  color: #ffffff;
+  font-size: 20px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  line-height: 1;
+}
+
+.close-btn:active {
+  background: #444;
+}
+
+/* Tabs */
+.login-tabs {
+  display: flex;
+  padding: 0 24px;
+  margin-top: 16px;
+}
+
+.tab-item {
+  flex: 1;
+  text-align: center;
+  padding: 12px 0;
+  font-size: 16px;
+  color: #888;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tab-item.active {
+  color: #f06292;
+  border-bottom-color: #f06292;
+  font-weight: 500;
+}
+
+.tab-item:hover {
+  color: #aaa;
+}
+
+/* Forms */
+.login-forms {
+  padding: 24px;
+  min-height: 200px;
+}
+
+.form-container {
+  display: none;
+}
+
+.form-container.active {
+  display: block;
+}
+
+/* WeChat Login */
+.wechat-login {
+  text-align: center;
+  padding: 40px 0;
+}
+
+.wechat-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.wechat-text {
+  display: block;
+  font-size: 18px;
+  color: #ffffff;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.wechat-desc {
+  font-size: 14px;
+  color: #888;
+}
+
+/* Form Inputs */
+.input-group {
+  margin-bottom: 20px;
+}
+
+.form-input {
+  width: 100%;
+  height: 48px;
+  padding: 0 16px;
+  border: 1px solid #444;
+  border-radius: 8px;
+  font-size: 16px;
+  background: #2a2a2a;
+  color: #ffffff;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+  align-items: center;
+  line-height: 48px;
+  vertical-align: middle;
+}
+
+.form-input::placeholder {
+  color: #888;
+}
+
+.form-input:focus {
+  border-color: #00d4aa;
+  outline: none;
+  background: #333;
+}
+
+.form-input.error {
+  border-color: #ff6b6b;
+}
+
+.error-text {
+  display: block;
+  font-size: 12px;
+  color: #ff6b6b;
+  margin-top: 8px;
+  margin-left: 4px;
+}
+
+/* Password Input */
+.password-wrapper {
+  position: relative;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+.toggle-icon {
+  font-size: 18px;
+  color: #888;
+  transition: color 0.2s ease;
+}
+
+.toggle-icon:hover {
+  color: #aaa;
+}
+
+/* Code Input */
+.code-wrapper {
+  display: flex;
+  gap: 12px;
+}
+
+.code-input {
+  flex: 1;
+}
+
+.code-btn {
+  width: 100px;
+  height: 48px;
+  background: #f06292;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.code-btn:active {
+  background: #ec407a;
+  transform: translateY(1px);
+}
+
+.code-btn.disabled {
+  background: #555;
+  color: #888;
+  cursor: not-allowed;
+}
+
+/* Login Button */
+.login-button-wrapper {
+  padding: 0 24px 24px;
+}
+
+.login-btn {
+  width: 100%;
+  height: 48px;
+  background: #f06292;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.login-btn:active {
+  background: #ec407a;
+  transform: translateY(1px);
+}
+
+.login-btn.loading {
+  background: #555;
+  color: #888;
+  cursor: not-allowed;
+}
+
+/* Footer */
+.modal-footer {
+  padding: 0 24px 24px;
+  text-align: center;
+}
+
+.terms-text {
+  font-size: 12px;
+  color: #888;
+  line-height: 1.5;
+}
+
+.link {
+  color: #f06292;
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+.link:hover {
+  color: #f8bbd0;
+}

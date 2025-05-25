@@ -1,0 +1,399 @@
+/* components/action-buttons/action-buttons.wxss */
+
+/* Action Buttons Container */
+.action-buttons {
+  position: absolute;
+  right: 30rpx;
+  bottom: 120rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 40rpx;
+  z-index: 300;
+}
+
+.action-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+  transition: all 0.3s ease;
+}
+
+.action-item:active {
+  transform: scale(0.95);
+}
+
+/* User Avatar Section */
+.user-avatar {
+  position: relative;
+  width: 100rpx;
+  height: 100rpx;
+  margin-bottom: 10rpx;
+}
+
+.follow-badge {
+  position: absolute;
+  bottom: -8rpx;
+  right: -8rpx;
+  width: 40rpx;
+  height: 40rpx;
+  background: #ff6b6b;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 4rpx solid #fff;
+  box-shadow: 0 4rpx 12rpx rgba(255, 107, 107, 0.4);
+  transition: all 0.3s ease;
+  animation: bounceIn 0.5s ease;
+}
+
+.follow-badge:active {
+  transform: scale(0.9);
+  background: #ff5252;
+}
+
+.plus-icon {
+  width: 20rpx;
+  height: 20rpx;
+  color: #fff;
+}
+
+.username {
+  color: #fff;
+  font-size: 24rpx;
+  text-align: center;
+  text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.8);
+  font-weight: 500;
+  margin-bottom: 20rpx;
+  max-width: 120rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Action Icons */
+.action-icon {
+  width: 80rpx;
+  height: 80rpx;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(10rpx);
+  transition: all 0.3s ease;
+  border: 2rpx solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.action-icon::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.action-icon:active::before {
+  opacity: 1;
+}
+
+.action-icon:active {
+  transform: scale(0.95);
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Liked state */
+.action-icon.liked {
+  background: rgba(255, 107, 107, 0.2);
+  border-color: rgba(255, 107, 107, 0.3);
+  animation: heartBeat 0.6s ease;
+}
+
+.action-icon.liked::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(255, 107, 107, 0.3) 0%, transparent 70%);
+  animation: ripple 0.8s ease-out;
+}
+
+/* Favorited state */
+.action-icon.favorited {
+  background: rgba(255, 215, 0, 0.2);
+  border-color: rgba(255, 215, 0, 0.3);
+  animation: starTwinkle 0.6s ease;
+}
+
+.action-icon.favorited::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(255, 215, 0, 0.3) 0%, transparent 70%);
+  animation: ripple 0.8s ease-out;
+}
+
+/* SVG Icons */
+.svg-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  transition: all 0.3s ease;
+}
+
+.svg-icon image {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 2rpx 4rpx rgba(0, 0, 0, 0.3));
+}
+
+.action-icon .svg-icon {
+  width: 40rpx;
+  height: 40rpx;
+  color: #fff;
+}
+
+/* Icon color states */
+.action-icon.liked .svg-icon {
+  color: #ff6b6b;
+  animation: pulse 0.3s ease;
+}
+
+.action-icon.favorited .svg-icon {
+  color: #ffd700;
+  animation: pulse 0.3s ease;
+}
+
+/* Action Count */
+.action-count {
+  color: #fff;
+  font-size: 24rpx;
+  text-align: center;
+  text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.8);
+  font-weight: 600;
+  min-width: 40rpx;
+  transition: all 0.3s ease;
+}
+
+.action-item:active .action-count {
+  transform: scale(1.1);
+}
+
+/* Animations */
+@keyframes heartBeat {
+  0% {
+    transform: scale(1);
+  }
+  20% {
+    transform: scale(1.25);
+  }
+  40% {
+    transform: scale(1.1);
+  }
+  60% {
+    transform: scale(1.25);
+  }
+  80% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes starTwinkle {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+  }
+  25% {
+    transform: scale(1.1) rotate(-5deg);
+  }
+  75% {
+    transform: scale(1.1) rotate(5deg);
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Hover effects for better interaction feedback */
+.action-item {
+  position: relative;
+}
+
+.action-item::before {
+  content: '';
+  position: absolute;
+  top: -10rpx;
+  left: -10rpx;
+  right: -10rpx;
+  bottom: -10rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all 0.3s ease;
+}
+
+.action-item:active::before {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Special effects for specific actions */
+.action-icon[data-action="like"] {
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.action-icon[data-action="favorite"] {
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.action-icon[data-action="share"]::before {
+  background: radial-gradient(circle, rgba(76, 175, 80, 0.2) 0%, transparent 70%);
+}
+
+.action-icon[data-action="comment"]::before {
+  background: radial-gradient(circle, rgba(33, 150, 243, 0.2) 0%, transparent 70%);
+}
+
+.action-icon[data-action="report"]::before {
+  background: radial-gradient(circle, rgba(255, 152, 0, 0.2) 0%, transparent 70%);
+}
+
+/* Responsive adjustments */
+@media (max-width: 750rpx) {
+  .action-buttons {
+    right: 20rpx;
+    gap: 35rpx;
+  }
+
+  .action-icon {
+    width: 70rpx;
+    height: 70rpx;
+  }
+
+  .action-icon .svg-icon {
+    width: 35rpx;
+    height: 35rpx;
+  }
+
+  .user-avatar {
+    width: 90rpx;
+    height: 90rpx;
+  }
+
+  .follow-badge {
+    width: 35rpx;
+    height: 35rpx;
+  }
+
+  .plus-icon {
+    width: 18rpx;
+    height: 18rpx;
+  }
+
+  .username {
+    font-size: 22rpx;
+    max-width: 110rpx;
+  }
+
+  .action-count {
+    font-size: 22rpx;
+  }
+}
+
+/* Loading state for action items */
+.action-item.loading .action-icon {
+  animation: spin 1s linear infinite;
+  opacity: 0.6;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Disabled state */
+.action-item.disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.action-item.disabled .action-icon {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Success feedback animation */
+.action-item.success .action-icon {
+  animation: successPulse 0.6s ease;
+}
+
+@keyframes successPulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
+  }
+  70% {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 20rpx rgba(76, 175, 80, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+  }
+}

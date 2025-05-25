@@ -1,7 +1,7 @@
 // layouts/main-header/main-header.js
 Component({
   properties: {
-    isOpenSideBar: {
+    showSidebar: {
       type: Boolean,
       value: false
     }

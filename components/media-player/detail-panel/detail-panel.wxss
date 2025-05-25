@@ -1,0 +1,352 @@
+/* components/detail-panel/detail-panel.wxss */
+
+/* Detail Panel Container */
+.detail-panel {
+  position: absolute;
+  top: 0;
+  right: -100%;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.95);
+  backdrop-filter: blur(20rpx);
+  transition: right 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  border-left: 1rpx solid rgba(255, 255, 255, 0.1);
+}
+
+.detail-panel.show {
+  right: 0;
+  box-shadow: -10rpx 0 30rpx rgba(0, 0, 0, 0.3);
+}
+
+/* Panel Header */
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30rpx;
+  border-bottom: 2rpx solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10rpx);
+  position: relative;
+}
+
+.panel-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 30rpx;
+  right: 30rpx;
+  height: 1rpx;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+}
+
+/* Tab Bar */
+.tab-bar {
+  display: flex;
+  gap: 40rpx;
+  flex: 1;
+}
+
+.tab-item {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 28rpx;
+  padding: 10rpx 0;
+  border-bottom: 4rpx solid transparent;
+  transition: all 0.3s ease;
+  position: relative;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tab-item::before {
+  content: '';
+  position: absolute;
+  bottom: -4rpx;
+  left: 0;
+  width: 0;
+  height: 4rpx;
+  background: linear-gradient(90deg, #ff6b6b, #ff8e53);
+  transition: width 0.3s ease;
+}
+
+.tab-item.active {
+  color: #fff;
+  font-weight: 500;
+}
+
+.tab-item.active::before {
+  width: 100%;
+}
+
+.tab-item:active {
+  color: rgba(255, 255, 255, 0.8);
+  transform: translateY(1rpx);
+}
+
+/* Close Button */
+.close-button {
+  background-color: rgba(255, 255, 255, 0.1);
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.3s ease;
+  border: 1rpx solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(5rpx);
+}
+
+.close-button:active {
+  background-color: rgba(255, 255, 255, 0.2);
+  transform: scale(0.95);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.close-icon {
+  width: 32rpx;
+  height: 32rpx;
+  filter: drop-shadow(0 1rpx 2rpx rgba(0, 0, 0, 0.3));
+}
+
+/* Panel Content */
+.panel-content {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Comments Tab */
+.comments-tab {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+/* No Comments Placeholder */
+.no-comments-placeholder {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 300rpx;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 28rpx;
+  text-align: center;
+  padding: 40rpx;
+}
+
+.no-comments-placeholder::before {
+  content: '💬';
+  font-size: 80rpx;
+  margin-bottom: 20rpx;
+  opacity: 0.5;
+}
+
+/* Loading Animation for Content */
+.panel-content.loading {
+  position: relative;
+}
+
+.panel-content.loading::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+
+.panel-content.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 40rpx;
+  height: 40rpx;
+  border: 4rpx solid rgba(255, 255, 255, 0.3);
+  border-top: 4rpx solid #fff;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: spin 1s linear infinite;
+  z-index: 11;
+}
+
+@keyframes spin {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+/* Tab Content Animation */
+.tab-content {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Panel Backdrop */
+.detail-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100vw;
+  width: 100vw;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.detail-panel.show::before {
+  opacity: 1;
+}
+
+/* Scrollable Content Areas */
+.panel-content scroll-view {
+  height: 100%;
+}
+
+/* Enhanced Visual Effects */
+.detail-panel {
+  border-left: 1rpx solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  transition: right 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              box-shadow 0.3s ease;
+}
+
+.detail-panel.show {
+  box-shadow: -20rpx 0 60rpx rgba(0, 0, 0, 0.4);
+}
+
+/* Tab Indicator Enhancement */
+.tab-bar {
+  position: relative;
+}
+
+.tab-bar::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1rpx;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Responsive Design */
+@media (max-width: 750rpx) {
+  .panel-header {
+    padding: 25rpx 20rpx;
+  }
+
+  .tab-bar {
+    gap: 30rpx;
+  }
+
+  .tab-item {
+    font-size: 26rpx;
+  }
+
+  .close-button {
+    width: 44rpx;
+    height: 44rpx;
+  }
+
+  .close-icon {
+    width: 28rpx;
+    height: 28rpx;
+  }
+
+  .no-comments-placeholder {
+    font-size: 26rpx;
+    padding: 30rpx;
+  }
+
+  .no-comments-placeholder::before {
+    font-size: 60rpx;
+  }
+}
+
+/* Accessibility Improvements */
+.tab-item {
+  min-width: 80rpx;
+  text-align: center;
+}
+
+.close-button {
+  min-width: 48rpx;
+  min-height: 48rpx;
+}
+
+/* Performance Optimizations */
+.detail-panel {
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+.tab-item {
+  will-change: color, border-color;
+}
+
+.close-button {
+  will-change: background-color, transform;
+}
+
+/* Additional Visual Polish */
+.panel-header {
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.2));
+}
+
+.detail-panel {
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.95), rgba(20, 20, 20, 0.95));
+}
+
+/* Focus States for Better UX */
+.tab-item:focus {
+  outline: 2rpx solid rgba(255, 255, 255, 0.3);
+  outline-offset: 4rpx;
+  border-radius: 4rpx;
+}
+
+.close-button:focus {
+  outline: 2rpx solid rgba(255, 255, 255, 0.3);
+  outline-offset: 2rpx;
+}
+
+/* Error State */
+.panel-content.error {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+  padding: 40rpx;
+}
+
+.panel-content.error::before {
+  content: '⚠️ Failed to load content';
+  font-size: 28rpx;
+}

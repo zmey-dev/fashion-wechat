@@ -1,0 +1,42 @@
+<!-- components/media-controls/media-controls.wxml -->
+<view class="media-controls" wx:if="{{ currentPost.type === 'image' }}">
+  <view class="controls-bottom">
+    <view class="progress-bars">
+      <view
+        wx:for="{{ currentMedia }}"
+        wx:key="id"
+        class="progress-bar {{index <= currentSlideIndex ? 'active' : ''}}"
+        bindtap="onProgressTap"
+        data-index="{{ index }}"
+      ></view>
+    </view>
+
+    <view class="control-buttons">
+      <view class="play-control" bindtap="onPlayPause">
+        <view wx:if="{{ isPlaying }}" class="svg-icon control-svg">
+          <image
+            src="/images/icons/pause.svg"
+            class="svg-icon"
+            mode="aspectFit"
+          ></image>
+        </view>
+        <view wx:else class="svg-icon control-svg">
+          <image
+            src="/images/icons/play.svg"
+            class="svg-icon"
+            mode="aspectFit"
+          ></image>
+        </view>
+      </view>
+
+      <view class="continue-control">
+        <text class="continue-text">Auto-Play</text>
+        <switch
+          checked="{{ isContinue }}"
+          bindchange="onContinueToggle"
+          color="#ff6b6b"
+        />
+      </view>
+    </view>
+  </view>
+</view>

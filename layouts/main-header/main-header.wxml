@@ -3,9 +3,9 @@
   <!-- Left side - Logo and hamburger menu -->
   <view class="header-left">
     <view class="hamburger" bindtap="toggleSideBar">
-      <view class="{{isOpenSideBar ? 'hamburger-line-open' : 'hamburger-line'}}"></view>
-      <view class="{{isOpenSideBar ? 'hamburger-line-open' : 'hamburger-line'}}"></view>
-      <view class="{{isOpenSideBar ? 'hamburger-line-open' : 'hamburger-line'}}"></view>
+      <view class="{{showSidebar ? 'hamburger-line-open' : 'hamburger-line'}}"></view>
+      <view class="{{showSidebar ? 'hamburger-line-open' : 'hamburger-line'}}"></view>
+      <view class="{{showSidebar ? 'hamburger-line-open' : 'hamburger-line'}}"></view>
     </view>
     <navigator url="/pages/index/index" open-type="switchTab" class="logo-container">
       <image src="/images/logo.png" mode="aspectFit" class="logo"></image>

@@ -1,499 +1,89 @@
-<!-- components/MediaPlayer/MediaPlayer.wxml -->
-<view class="media-player" style="height: {{windowHeight}}px;">
-  
+<!-- components/media-player/media-player.wxml -->
+<view class="media-player" style="height: {{ windowHeight }}px;">
   <!-- Loading indicator -->
-  <view wx:if="{{isLoading}}" class="loading-container">
+  <view wx:if="{{ isLoading }}" class="loading-container">
     <view class="loading-spinner"></view>
   </view>
-  
-  <!-- Main media display area -->
-  <view class="media-container" 
-        bindtap="onScreenTap">
-    
-    <!-- Media content -->
-    <swiper class="media-swiper" 
-            current="{{currentSlideIndex}}" 
-            bindchange="onSlideChange"
-            circular="{{false}}"
-            indicator-dots="{{mediaLength > 1}}"
-            indicator-color="rgba(255,255,255,0.3)"
-            indicator-active-color="#ffffff">
-      
-      <swiper-item wx:for="{{currentMedia}}" wx:key="id" class="media-item">
-        <view class="media-wrapper">
-          <!-- Image display -->
-          <image wx:if="{{currentPost.type === 'image'}}" 
-                 class="media-image" 
-                 id="media-image"
-                 src="{{item.url}}" 
-                 mode="aspectFit"
-                 bindtap="onImagePreview"
-                 lazy-load="{{true}}"/>
-          
-          <!-- Video display -->
-          <video wx:elif="{{currentPost.type === 'video'}}" 
-                 class="media-video" 
-                 src="{{item.url}}"
-                 poster="{{item.preview_url}}"
-                 controls="{{true}}"
-                 autoplay="{{isPlaying}}"
-                 loop="{{true}}"
-                 binddurationchange="onVideoDurationChange"
-                 bindplay="onVideoPlay"
-                 bindpause="onVideoPause"
-                 bindended="onVideoEnded"/>
-        </view>
-        
-        <!-- Interactive dots overlay -->
-        <view wx:if="{{item.dots && item.dots.length > 0 && !isPlaying}}" class="dots-overlay">
-          <view wx:for="{{item.dots}}" 
-                wx:for-item="dot" 
-                wx:for-index="dotIndex"
-                wx:key="id"
-                class="interactive-dot {{selectedDot && selectedDot.id === dot.id ? 'active' : ''}}"
-                style="left: {{dot.x * 100}}; top: {{dot.y * 100}};"
-                data-index="{{dotIndex}}"
-                bindtap="onDotTap">
-            <view class="dot-pulse"></view>
-            <view class="dot-core"></view>
-          </view>
-        </view>
-      </swiper-item>
-    </swiper>
-    
-    <!-- Play/Pause overlay indicator -->
-    <view class="play-indicator {{showPlayIndicator ? 'show' : ''}}" wx:if="{{currentPost.type === 'image'}}">
-      <view class="play-icon-container">
-        <view wx:if="{{isPlaying}}" class="svg-icon pause-icon">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="6" y="4" width="4" height="16" fill="currentColor"/>
-            <rect x="14" y="4" width="4" height="16" fill="currentColor"/>
-          </svg>
-        </view>
-        <view wx:else class="svg-icon play-icon">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <polygon points="8,5 19,12 8,19" fill="currentColor"/>
-          </svg>
-        </view>
-      </view>
-    </view>
-    
-    <!-- Media controls overlay -->
-    <view class="media-controls" wx:if="{{currentPost.type === 'image'}}">
-      <view class="controls-bottom">
-        <view class="progress-bars">
-          <view wx:for="{{currentMedia}}" 
-                wx:key="id" 
-                class="progress-bar {{index <= currentSlideIndex ? 'active' : ''}}"
-                bindtap="onSlideChange" 
-                data-index="{{index}}"></view>
-        </view>
-        
-        <view class="control-buttons">
-          <view class="play-control" bindtap="onPlayPause">
-            <view wx:if="{{isPlaying}}" class="svg-icon control-svg">
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="6" y="4" width="4" height="16" fill="currentColor"/>
-                <rect x="14" y="4" width="4" height="16" fill="currentColor"/>
-              </svg>
-            </view>
-            <view wx:else class="svg-icon control-svg">
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <polygon points="8,5 19,12 8,19" fill="currentColor"/>
-              </svg>
-            </view>
-          </view>
-          
-          <view class="continue-control">
-            <text class="continue-text">连播</text>
-            <switch checked="{{isContinue}}" bindchange="onContinueToggle" color="#ff6b6b"/>
-          </view>
-        </view>
-      </view>
-    </view>
-    
-    <!-- Navigation arrows -->
-    <view class="nav-arrows" wx:if="{{mediaLength > 1}}">
-      <view class="nav-arrow nav-left" 
-            wx:if="{{currentSlideIndex > 0}}"
-            bindtap="moveToPreviousSlide">
-        <view class="svg-icon arrow-svg">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </view>
-      </view>
-      <view class="nav-arrow nav-right" 
-            wx:if="{{currentSlideIndex < mediaLength - 1}}"
-            bindtap="moveToNextSlide">
-        <view class="svg-icon arrow-svg">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </view>
-      </view>
-    </view>
-  </view>
-  
-  <!-- Post information overlay -->
-  <view class="post-info">
-    <view class="post-title">{{displayTitle}}</view>
-    <view class="post-content" wx:if="{{displayContent}}">
-      {{displayContent}}
-    </view>
-  </view>
-  
-  <!-- User profile section -->
-  <view class="user-section">
-    <view class="user-avatar" bindtap="onUserProfile">
-      <image src="{{currentPostUser.avatar || '/images/default-avatar.png'}}" 
-             class="avatar-image"/>
-      <view wx:if="{{!currentPostUser.is_followed && authUser}}" 
-            class="follow-badge" 
-            bindtap="handleFollow">
-        <view class="svg-icon plus-icon">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </view>
-      </view>
-    </view>
-    <text class="username">@{{currentPostUser.username}}</text>
-  </view>
-  
-  <!-- Action buttons -->
-  <view class="action-buttons">
-    <!-- Like button -->
-    <view class="action-item" bindtap="handleLike">
-      <view class="action-icon {{currentPost.is_liked ? 'liked' : ''}}">
-        <view wx:if="{{currentPost.is_liked}}" class="svg-icon">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" fill="currentColor"/>
-          </svg>
-        </view>
-        <view wx:else class="svg-icon">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </view>
-      </view>
-      <text class="action-count">{{displayLikes}}</text>
-    </view>
-    
-    <!-- Comment button -->
-    <view class="action-item" bindtap="onToggleDetail">
-      <view class="action-icon">
-        <view class="svg-icon">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </view>
-      </view>
-      <text class="action-count">{{displayComments}}</text>
-    </view>
-    
-    <!-- Favorite button -->
-    <view class="action-item" bindtap="handleFavorite">
-      <view class="action-icon {{currentPost.is_favorited ? 'favorited' : ''}}">
-        <view wx:if="{{currentPost.is_favorited}}" class="svg-icon">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" fill="currentColor"/>
-          </svg>
-        </view>
-        <view wx:else class="svg-icon">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </view>
-      </view>
-      <text class="action-count">{{displayFavorites}}</text>
-    </view>
-    
-    <!-- Share button -->
-    <view class="action-item" bindtap="handleShare">
-      <view class="action-icon">
-        <view class="svg-icon">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="18" cy="5" r="3" stroke="currentColor" stroke-width="2"/>
-            <circle cx="6" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
-            <circle cx="18" cy="19" r="3" stroke="currentColor" stroke-width="2"/>
-            <path d="M8.59 13.51L15.42 17.49M15.41 6.51L8.59 10.49" stroke="currentColor" stroke-width="2"/>
-          </svg>
-        </view>
-      </view>
-      <text class="action-count">{{displayShares}}</text>
-    </view>
-    
-    <!-- Report button -->
-    <view class="action-item" bindtap="onShowReportModal">
-      <view class="action-icon">
-        <view class="svg-icon">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M4 22v-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </view>
-      </view>
-    </view>
-  </view>
-  
-  <!-- Detail panel -->
-  <view class="detail-panel {{showDetail ? 'show' : ''}}" 
-        catchtouchmove="true">
-    
-    <!-- Panel header -->
-    <view class="panel-header">
-      <view class="tab-bar">
-        <view wx:if="{{!currentPost.event_id}}" 
-              class="tab-item {{tabIndex === 0 ? 'active' : ''}}" 
-              data-index="0" 
-              bindtap="onTabChange">
-          <text>{{currentPostUser.username}}的作品</text>
-        </view>
-        <view class="tab-item {{tabIndex === 1 ? 'active' : ''}}" 
-              data-index="1" 
-              bindtap="onTabChange">
-          <text>评论</text>
-        </view>
-        <view class="tab-item {{tabIndex === 2 ? 'active' : ''}}" 
-              data-index="2" 
-              bindtap="onTabChange">
-          <text>详情</text>
-        </view>
-      </view>
-      
-      <view class="close-button" bindtap="onCloseDetail">
-        <view class="svg-icon close-svg">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </view>
-      </view>
-    </view>
-    
-    <!-- Panel content -->
-    <view class="panel-content">
-      
-      <!-- User posts tab -->
-      <view wx:if="{{tabIndex === 0}}" class="user-posts-tab">
-        <view class="user-info">
-          <view class="user-stats">
-            <text class="stat-item">粉丝: {{displayFollowerCount}}</text>
-            <text class="stat-item">获赞: {{displayLikeCount}}</text>
-          </view>
-          
-          <view wx:if="{{currentPostUser.id !== authUser.id && authUser}}" 
-                class="follow-button {{currentPostUser.is_followed ? 'followed' : ''}}"
-                bindtap="handleFollow">
-            <view wx:if="{{currentPostUser.is_followed}}" class="svg-icon follow-btn-svg">
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </view>
-            <view wx:else class="svg-icon follow-btn-svg">
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </view>
-            <text>{{currentPostUser.is_followed ? '取消关注' : '关注'}}</text>
-          </view>
-        </view>
-        
-        <scroll-view class="posts-grid" scroll-y="{{true}}">
-          <view class="posts-container">
-            <view wx:for="{{selectedUserPosts ? selectedUserPosts.posts : mockUserPosts}}" 
-                  wx:key="id" 
-                  class="post-item"
-                  data-post="{{item}}"
-                  bindtap="onSelectUserPost">
-              <image src="{{item.type === 'video' ? item.media[0].preview_url : item.media[0].url}}" 
-                     class="post-thumbnail" 
-                     mode="aspectFill"/>
-              <view wx:if="{{item.type === 'video'}}" class="video-indicator">
-                <view class="svg-icon video-svg">
-                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <polygon points="8,5 19,12 8,19" fill="currentColor"/>
-                  </svg>
-                </view>
-              </view>
-            </view>
-          </view>
-        </scroll-view>
-      </view>
-      
-      <!-- Comments tab -->
-      <view wx:if="{{tabIndex === 1}}" class="comments-tab">
-        <scroll-view class="comments-list" scroll-y="{{true}}">
-          <view wx:for="{{userComments}}" wx:key="id" class="comment-item">
-            <view class="comment-main">
-              <image src="{{item.sender.avatar || '/images/default-avatar.png'}}" 
-                     class="comment-avatar"/>
-              <view class="comment-content">
-                <view class="comment-header">
-                  <text class="comment-username">{{item.sender.username}}</text>
-                  <text class="comment-time">{{formatTime(item.created_at)}}</text>
-                </view>
-                <text class="comment-text">{{item.comment_text}}</text>
-                <image wx:if="{{item.url}}" src="{{item.url}}" class="comment-image" mode="aspectFit"/>
-                
-                <view class="comment-actions">
-                  <view class="comment-action" 
-                        data-comment-id="{{item.id}}" 
-                        bindtap="onReplyComment">
-                    <view class="svg-icon action-svg-small">
-                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M3 20L21 4M21 4H7M21 4V18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                      </svg>
-                    </view>
-                    <text>回复</text>
-                  </view>
-                  
-                  <view wx:if="{{authUser && authUser.id === item.sender_id}}" 
-                        class="comment-action" 
-                        data-comment="{{item}}" 
-                        bindtap="onEditComment">
-                    <view class="svg-icon action-svg-small">
-                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                      </svg>
-                    </view>
-                    <text>编辑</text>
-                  </view>
-                  
-                  <view wx:if="{{authUser && authUser.id === item.sender_id}}" 
-                        class="comment-action" 
-                        data-comment-id="{{item.id}}" 
-                        bindtap="onDeleteComment">
-                    <view class="svg-icon action-svg-small">
-                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <polyline points="3,6 5,6 21,6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                      </svg>
-                    </view>
-                    <text>删除</text>
-                  </view>
-                  
-                  <view class="comment-like">
-                    <view class="svg-icon action-svg-small">
-                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                      </svg>
-                    </view>
-                    <text>{{item.like}}</text>
-                  </view>
-                </view>
-              </view>
-            </view>
-            
-            <!-- Replies -->
-            <view wx:if="{{item.replies && item.replies.length > 0}}" class="comment-replies">
-              <view wx:for="{{item.replies}}" wx:for-item="reply" wx:key="id" class="reply-item">
-                <image src="{{reply.sender.avatar || '/images/default-avatar.png'}}" 
-                       class="reply-avatar"/>
-                <view class="reply-content">
-                  <view class="reply-header">
-                    <text class="reply-username">{{reply.sender.username}}</text>
-                    <text class="reply-time">{{formatTime(reply.created_at)}}</text>
-                  </view>
-                  <text class="reply-text">{{reply.comment_text}}</text>
-                </view>
-              </view>
-            </view>
-          </view>
-        </scroll-view>
-        
-        <!-- Comment input -->
-        <view class="comment-input-container">
-          <view wx:if="{{commentId}}" class="reply-indicator">
-            <text>{{replyIndicatorText}}</text>
-            <view class="cancel-reply" bindtap="onCancelReply">
-              <view class="svg-icon cancel-svg">
-                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </view>
-            </view>
-          </view>
-          
-          <view class="input-wrapper">
-            <textarea class="comment-input" 
-                      placeholder="{{commentId ? '写下你的回复...' : '写下你的评论...'}}"
-                      value="{{personalComment}}"
-                      bindinput="onCommentInput"
-                      auto-height="{{true}}"
-                      maxlength="500"/>
-            <view class="input-actions">
-              <view class="send-button {{personalComment ? 'active' : ''}}" 
-                    bindtap="onCommentSubmit">
-                <view class="svg-icon send-svg">
-                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                </view>
-              </view>
-            </view>
-          </view>
-        </view>
-      </view>
-      
-      <!-- Details tab -->
-      <view wx:if="{{tabIndex === 2}}" class="details-tab">
-        <view class="detail-section">
-          <view class="detail-header">
-            <text class="detail-title">标题</text>
-          </view>
-          <view class="detail-content">
-            <text wx:if="{{selectedDot}}">{{selectedDot.title}}</text>
-            <text wx:else class="no-selection">未选择任何点。请点击图片上的标记查看详情。</text>
-          </view>
-        </view>
-        
-        <view class="detail-section">
-          <view class="detail-header">
-            <text class="detail-title">说明</text>
-          </view>
-          <view class="detail-content">
-            <text wx:if="{{selectedDot}}">{{selectedDot.description}}</text>
-            <text wx:else class="no-selection">未选择任何点。请点击图片上的标记查看详情。</text>
-          </view>
-        </view>
-        
-        <view wx:if="{{selectedDot}}" class="detail-footer">
-          <text class="detail-meta">点 ID: {{selectedDot.id}}</text>
-        </view>
-      </view>
-      
-    </view>
-  </view>
-  
-  <!-- Report modal -->
-  <view wx:if="{{showReportModal}}" class="modal-overlay" bindtap="onCloseReportModal">
-    <view class="modal-content" catchtap="">
-      <view class="modal-header">
-        <text class="modal-title">举报内容</text>
-        <view class="modal-close" bindtap="onCloseReportModal">
-          <view class="svg-icon close-modal-svg">
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </view>
-        </view>
-      </view>
-      <view class="modal-body">
-        <view class="report-options">
-          <view class="report-option">色情内容</view>
-          <view class="report-option">暴力内容</view>
-          <view class="report-option">垃圾信息</view>
-          <view class="report-option">侵犯版权</view>
-          <view class="report-option">其他</view>
-        </view>
-      </view>
-      <view class="modal-footer">
-        <button class="cancel-btn" bindtap="onCloseReportModal">取消</button>
-        <button class="confirm-btn">提交</button>
-      </view>
-    </view>
-  </view>
-  
+
+  <!-- Media Display Component -->
+  <media-display
+    current-post="{{ currentPost }}"
+    current-media="{{ currentMedia }}"
+    current-slide-index="{{ currentSlideIndex }}"
+    media-length="{{ mediaLength }}"
+    is-playing="{{ isPlaying }}"
+    show-play-indicator="{{ showPlayIndicator }}"
+    selected-dot="{{ selectedDot }}"
+    bind:screentap="onScreenTap"
+    bind:slidechange="onSlideChange"
+    bind:dottap="onDotTap"
+    bind:previousslide="moveToPreviousSlide"
+    bind:nextslide="moveToNextSlide"
+  />
+
+  <!-- Media Controls Component -->
+  <media-controls
+    current-post="{{ currentPost }}"
+    current-media="{{ currentMedia }}"
+    current-slide-index="{{ currentSlideIndex }}"
+    is-playing="{{ isPlaying }}"
+    is-continue="{{ isContinue }}"
+    bind:playpause="onPlayPause"
+    bind:continuetoggle="onContinueToggle"
+    bind:progresstap="onProgressTap"
+  />
+
+  <!-- Post Info Overlay Component -->
+  <post-info-overlay
+    display-title="{{ displayTitle }}"
+    display-content="{{ displayContent }}"
+  />
+
+  <!-- Action Buttons Component -->
+  <action-buttons
+    current-post="{{ currentPost }}"
+    current-post-user="{{ currentPostUser }}"
+    auth-user="{{ authUser }}"
+    display-likes="{{ displayLikes }}"
+    display-comments="{{ displayComments }}"
+    display-favorites="{{ displayFavorites }}"
+    display-shares="{{ displayShares }}"
+    bind:userprofile="onUserProfile"
+    bind:like="handleLike"
+    bind:favorite="handleFavorite"
+    bind:share="handleShare"
+    bind:follow="handleFollow"
+    bind:toggleDetail="onToggleDetail"
+    bind:reportmodal="onShowReportModal"
+  />
+
+  <!-- Detail Panel Component -->
+  <detail-panel
+    show-detail="{{ showDetail }}"
+    tab-index="{{ tabIndex }}"
+    current-post="{{ currentPost }}"
+    current-post-user="{{ currentPostUser }}"
+    auth-user="{{ authUser }}"
+    user-comments="{{ userComments }}"
+    selected-dot="{{ selectedDot }}"
+    display-follower-count="{{ displayFollowerCount }}"
+    display-like-count="{{ displayLikeCount }}"
+    bind:tabchange="onTabChange"
+    bind:closedetail="onCloseDetail"
+    bind:follow="handleFollow"
+    bind:selectpost="onSelectUserPost"
+    bind:commentlike="onCommentLike"
+    bind:commentsent="onCommentSent"
+    bind:commentupdated="onCommentUpdated"
+    bind:commentdelete="onCommentDelete"
+    bind:imagepreview="onImagePreview"
+    bind:loginrequired="onLoginRequired"
+  />
+
+  <!-- Report Modal Component -->
+  <report-modal
+    show-report-modal="{{ showReportModal }}"
+    bind:close="onCloseReportModal"
+    bind:submit="onSubmitReport"
+  />
 </view>

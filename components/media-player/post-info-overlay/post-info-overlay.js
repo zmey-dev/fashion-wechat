@@ -1,0 +1,50 @@
+// components/post-info-overlay/post-info-overlay.js
+Component({
+  properties: {
+    displayTitle: { type: String, value: "" },
+    displayContent: { type: String, value: "" }
+  }
+});
+
+// components/action-buttons/action-buttons.js
+Component({
+  properties: {
+    currentPost: { type: Object, value: {} },
+    currentPostUser: { type: Object, value: {} },
+    authUser: { type: Object, value: null },
+    displayLikes: { type: String, value: "0" },
+    displayComments: { type: String, value: "0" },
+    displayFavorites: { type: String, value: "0" },
+    displayShares: { type: String, value: "0" }
+  },
+
+  methods: {
+    onUserProfile() {
+      this.triggerEvent('userprofile');
+    },
+
+    handleLike() {
+      this.triggerEvent('like');
+    },
+
+    handleFavorite() {
+      this.triggerEvent('favorite');
+    },
+
+    handleShare() {
+      this.triggerEvent('share');
+    },
+
+    handleFollow() {
+      this.triggerEvent('follow');
+    },
+
+    onToggleDetail() {
+      this.triggerEvent('toggledetail');
+    },
+
+    onShowReportModal() {
+      this.triggerEvent('reportmodal');
+    }
+  }
+});

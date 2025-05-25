@@ -1,0 +1,8 @@
+{
+  "component": true,
+  "usingComponents": {
+    "user-posts-tab": "../user-posts-tab/user-posts-tab",
+    "details-tab": "../details-tab/details-tab",
+    "comment-tree": "../comment-tree/comment-tree"
+  }
+}

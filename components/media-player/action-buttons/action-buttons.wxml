@@ -1,0 +1,98 @@
+<!-- components/action-buttons/action-buttons.wxml -->
+<view class="action-buttons">
+  <!-- User Avatar with Follow Badge -->
+  <view class="action-item" bindtap="onUserProfile">
+    <view class="user-avatar">
+      <avatar
+        avatar="{{ currentPostUser.avatar }}"
+        name="{{ currentPostUser.username }}"
+        size="100"
+      ></avatar>
+      <view
+        wx:if="{{ !currentPostUser.is_followed && authUser }}"
+        class="follow-badge"
+        bindtap="handleFollow"
+      >
+        <view class="svg-icon plus-icon">
+          <image
+            src="/images/icons/plus.svg"
+            class="svg-icon"
+            mode="aspectFit"
+          ></image>
+        </view>
+      </view>
+    </view>
+  </view>
+  <text class="username">@{{ currentPostUser.username }}</text>
+
+  <!-- Like button -->
+  <view class="action-item" bindtap="handleLike">
+    <view class="action-icon {{ currentPost.is_liked ? 'liked' : '' }}">
+      <view class="svg-icon">
+        <image
+          src="/images/icons/heart.svg"
+          class="svg-icon"
+          mode="aspectFit"
+        ></image>
+      </view>
+    </view>
+    <text class="action-count">{{ displayLikes }}</text>
+  </view>
+
+  <!-- Comment button -->
+  <view class="action-item" bindtap="onToggleDetail">
+    <view class="action-icon">
+      <view class="svg-icon">
+        <image
+          src="/images/icons/message.svg"
+          class="svg-icon"
+          mode="aspectFit"
+        ></image>
+      </view>
+    </view>
+    <text class="action-count">{{ displayComments }}</text>
+  </view>
+
+  <!-- Favorite button -->
+  <view class="action-item" bindtap="handleFavorite">
+    <view
+      class="action-icon {{ currentPost.is_favorited ? 'favorited' : '' }}"
+    >
+      <view class="svg-icon">
+        <image
+          src="/images/icons/star.svg"
+          class="svg-icon"
+          mode="aspectFit"
+        ></image>
+      </view>
+    </view>
+    <text class="action-count">{{ displayFavorites }}</text>
+  </view>
+
+  <!-- Share button -->
+  <view class="action-item" bindtap="handleShare">
+    <view class="action-icon">
+      <view class="svg-icon">
+        <image
+          src="/images/icons/share.svg"
+          class="svg-icon"
+          mode="aspectFit"
+        ></image>
+      </view>
+    </view>
+    <text class="action-count">{{ displayShares }}</text>
+  </view>
+
+  <!-- Report button -->
+  <view class="action-item" bindtap="onShowReportModal">
+    <view class="action-icon">
+      <view class="svg-icon">
+        <image
+          src="/images/icons/warning.svg"
+          class="svg-icon"
+          mode="aspectFit"
+        ></image>
+      </view>
+    </view>
+  </view>
+</view>

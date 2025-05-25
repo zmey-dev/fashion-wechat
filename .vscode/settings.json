@@ -1,0 +1,7 @@
+{
+  "files.associations": {
+    "*.embeddedhtml": "html",
+    "*.wxml": "html",
+    "*.wxss": "css"
+  }
+}

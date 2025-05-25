@@ -1,0 +1,370 @@
+/* components/post-info-overlay/post-info-overlay.wxss */
+
+/* Post Info Container */
+.post-info {
+  position: absolute;
+  bottom: 200rpx;
+  left: 30rpx;
+  right: 120rpx;
+  z-index: 300;
+  animation: slideInFromLeft 0.6s ease-out;
+  max-width: calc(100vw - 180rpx);
+}
+
+/* Post Title */
+.post-title {
+  color: #fff;
+  font-size: 32rpx;
+  font-weight: bold;
+  margin-bottom: 10rpx;
+  text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.8);
+  line-height: 1.4;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.post-title::before {
+  content: '';
+  position: absolute;
+  left: -10rpx;
+  top: 0;
+  bottom: 0;
+  width: 4rpx;
+  background: linear-gradient(180deg, #ff6b6b, #ff8e53);
+  border-radius: 2rpx;
+  opacity: 0;
+  transform: scaleY(0);
+  transition: all 0.3s ease;
+}
+
+.post-title:not(:empty)::before {
+  opacity: 1;
+  transform: scaleY(1);
+}
+
+/* Post Content */
+.post-content {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 28rpx;
+  line-height: 1.5;
+  text-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.8);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  position: relative;
+  transition: all 0.3s ease;
+  margin-top: 8rpx;
+}
+
+/* Gradient Fade Effect for Long Text */
+.post-title::after,
+.post-content::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 30rpx;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.3));
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.post-title.truncated::after,
+.post-content.truncated::after {
+  opacity: 1;
+}
+
+/* Enhanced Text Styling */
+.post-title {
+  background: linear-gradient(135deg, #fff 0%, rgba(255, 255, 255, 0.9) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 2rpx 4rpx rgba(0, 0, 0, 0.3));
+}
+
+.post-content {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.8) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 1rpx 3rpx rgba(0, 0, 0, 0.3));
+}
+
+/* Interactive States */
+.post-info:active {
+  transform: scale(0.98);
+}
+
+.post-info:active .post-title {
+  transform: translateX(5rpx);
+}
+
+.post-info:active .post-content {
+  transform: translateX(3rpx);
+}
+
+/* Container Background Effect */
+.post-info {
+  position: relative;
+  padding: 20rpx;
+  margin: -20rpx;
+  border-radius: 16rpx;
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10rpx);
+  border: 1rpx solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.post-info:hover {
+  background: rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2rpx);
+  box-shadow: 0 8rpx 25rpx rgba(0, 0, 0, 0.3);
+}
+
+/* Typing Animation Effect */
+.post-title.typing {
+  overflow: visible;
+  white-space: nowrap;
+  border-right: 2rpx solid #fff;
+  animation: typing 2s steps(20, end), blink 1s infinite;
+}
+
+.post-content.typing {
+  overflow: visible;
+  white-space: nowrap;
+  animation: typing 3s steps(30, end) 0.5s both;
+}
+
+/* Loading Skeleton */
+.post-title.loading,
+.post-content.loading {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4rpx;
+  color: transparent;
+  min-height: 40rpx;
+}
+
+.post-content.loading {
+  min-height: 80rpx;
+}
+
+/* Empty State */
+.post-info:empty::before {
+  content: 'No content available';
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 28rpx;
+  font-style: italic;
+  text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.8);
+}
+
+/* Animations */
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-50rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes typing {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes blink {
+  50% {
+    border-color: transparent;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Staggered Animation */
+.post-title {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.post-content {
+  animation: fadeInUp 0.6s ease-out 0.2s both;
+}
+
+/* Text Selection */
+.post-title,
+.post-content {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.post-title::selection,
+.post-content::selection {
+  background: rgba(255, 107, 107, 0.3);
+  color: #fff;
+}
+
+/* Focus States for Accessibility */
+.post-info:focus {
+  outline: 3rpx solid rgba(255, 255, 255, 0.5);
+  outline-offset: 5rpx;
+}
+
+/* Responsive Design */
+@media (max-width: 750rpx) {
+  .post-info {
+    left: 20rpx;
+    right: 100rpx;
+    bottom: 180rpx;
+    max-width: calc(100vw - 140rpx);
+  }
+
+  .post-title {
+    font-size: 30rpx;
+    -webkit-line-clamp: 2;
+  }
+
+  .post-content {
+    font-size: 26rpx;
+    -webkit-line-clamp: 3;
+  }
+}
+
+@media (max-width: 600rpx) {
+  .post-info {
+    left: 15rpx;
+    right: 80rpx;
+    bottom: 160rpx;
+  }
+
+  .post-title {
+    font-size: 28rpx;
+  }
+
+  .post-content {
+    font-size: 24rpx;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .post-title,
+  .post-content {
+    background: none;
+    -webkit-text-fill-color: #fff;
+    text-shadow: 2rpx 2rpx 4rpx rgba(0, 0, 0, 1);
+  }
+
+  .post-info {
+    background: rgba(0, 0, 0, 0.8);
+    border-color: rgba(255, 255, 255, 0.5);
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .post-info,
+  .post-title,
+  .post-content {
+    animation: none;
+    transition: none;
+  }
+
+  .post-title.typing,
+  .post-content.typing {
+    animation: none;
+    white-space: normal;
+    border-right: none;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .post-info {
+    position: static;
+    background: white;
+    color: black;
+    text-shadow: none;
+    border: 1rpx solid #ccc;
+  }
+
+  .post-title,
+  .post-content {
+    color: black;
+    background: none;
+    -webkit-text-fill-color: black;
+  }
+}
+
+/* RTL Support */
+[dir="rtl"] .post-info {
+  left: 120rpx;
+  right: 30rpx;
+}
+
+[dir="rtl"] .post-title::before {
+  left: auto;
+  right: -10rpx;
+}
+
+[dir="rtl"] .post-info:active .post-title,
+[dir="rtl"] .post-info:active .post-content {
+  transform: translateX(-5rpx);
+}
+
+/* Dark Mode Enhancements */
+@media (prefers-color-scheme: dark) {
+  .post-info {
+    background: rgba(0, 0, 0, 0.4);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+}
+
+/* Performance Optimizations */
+.post-info {
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+.post-title,
+.post-content {
+  will-change: transform;
+  contain: layout style paint;
+}

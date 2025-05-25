@@ -1,0 +1,36 @@
+<!-- components/details-tab/details-tab.wxml -->
+<view class="details-tab">
+  <!-- Title Section -->
+  <view class="detail-section">
+    <view class="detail-header">
+      <text class="detail-title">Title</text>
+    </view>
+    <view class="detail-content" data-type="title">
+      <text wx:if="{{ selectedDot }}" class="content-text">{{ selectedDot.title }}</text>
+      <view wx:else class="no-selection">
+        <icon class="selection-icon" type="info" size="24" color="rgba(255,255,255,0.5)"></icon>
+        <text>Select a dot to view details</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- Description Section -->
+  <view class="detail-section">
+    <view class="detail-header">
+      <text class="detail-title">Description</text>
+    </view>
+    <view class="detail-content" data-type="description">
+      <text wx:if="{{ selectedDot }}" class="content-text">{{ selectedDot.description }}</text>
+      <view wx:else class="no-selection">
+        <icon class="selection-icon" type="info" size="24" color="rgba(255,255,255,0.5)"></icon>
+        <text>Select a dot to view details</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- Footer with Metadata -->
+  <view wx:if="{{ selectedDot }}" class="detail-footer">
+    <text class="detail-meta">Dot ID: {{ selectedDot.id }}</text>
+    <text wx:if="{{ selectedDot.timestamp }}" class="detail-timestamp">Added: {{ selectedDot.timestamp }}</text>
+  </view>
+</view>

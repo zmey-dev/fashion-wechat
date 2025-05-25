@@ -1,0 +1,78 @@
+<!-- components/detail-panel/detail-panel.wxml -->
+<view class="detail-panel {{ showDetail ? 'show' : '' }}" wx:if="{{ currentPost && users }}">
+  <!-- Panel header -->
+  <view class="panel-header">
+    <view class="tab-bar">
+      <view
+        wx:if="{{ currentPost && !currentPost.event_id }}"
+        class="tab-item {{ tabIndex === 0 ? 'active' : '' }}"
+        data-index="0"
+        bindtap="onTabChange"
+      >
+        <text>{{ users.username || 'User' }}'s posts</text>
+      </view>
+      <view
+        class="tab-item {{ tabIndex === 1 ? 'active' : '' }}"
+        data-index="1"
+        bindtap="onTabChange"
+      >
+        <text>Comments</text>
+      </view>
+      <view
+        class="tab-item {{ tabIndex === 2 ? 'active' : '' }}"
+        data-index="2"
+        bindtap="onTabChange"
+      >
+        <text>Details</text>
+      </view>
+    </view>
+
+    <view class="close-button" bindtap="onCloseDetail">
+      <image
+        class="close-icon"
+        src="/images/icons/X.svg"
+        mode="aspectFit"
+      ></image>
+    </view>
+  </view>
+
+  <!-- Panel content -->
+  <view class="panel-content">
+    <!-- User posts tab -->
+    <user-posts-tab
+      wx:if="{{ tabIndex === 0 && users }}"
+      current-post-user="{{ users }}"
+      auth-user="{{ authUser }}"
+      display-follower-count="{{ displayFollowerCount }}"
+      display-like-count="{{ displayLikeCount }}"
+      bind:follow="onFollowUser"
+      bind:selectpost="onSelectUserPost"
+    />
+
+    <!-- Comments tab -->
+    <view wx:if="{{ tabIndex === 1 && currentPost }}" class="comments-tab">
+      <comment-tree 
+        wx:if="{{ userComments }}"
+        comments="{{userComments}}"
+        logged-user="{{authUser}}"
+        auth-user="{{authUser}}"
+        selected-post="{{currentPost}}"
+        bind:like="onCommentLike"
+        bind:commentsent="onCommentSent"
+        bind:commentupdated="onCommentUpdated"
+        bind:delete="onCommentDelete"
+        bind:imagepreview="onImagePreview"
+        bind:loginrequired="onLoginRequired"
+      />
+      <view wx:else class="no-comments-placeholder">
+        <text>Loading comments...</text>
+      </view>
+    </view>
+
+    <!-- Details tab -->
+    <details-tab
+      wx:if="{{ tabIndex === 2 }}"
+      selected-dot="{{ selectedDot }}"
+    />
+  </view>
+</view>
