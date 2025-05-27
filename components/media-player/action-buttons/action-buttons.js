@@ -4,6 +4,7 @@ Component({
     currentPost: { type: Object, value: {} },
     currentPostUser: { type: Object, value: {} },
     authUser: { type: Object, value: null },
+    followedUsers: { type: Array, value: [] },
     displayLikes: { type: String, value: "0" },
     displayComments: { type: String, value: "0" },
     displayFavorites: { type: String, value: "0" },
@@ -32,9 +33,6 @@ Component({
     },
 
     onToggleDetail() {
-      const app = getApp();
-      app.setState("showLoginModal", true);
-
       this.triggerEvent("toggleDetail");
     },
 

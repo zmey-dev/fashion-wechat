@@ -6,79 +6,119 @@ Component({
     },
     currentPath: {
       type: String,
-      value: 'discover'
+      value: "discover",
     },
     userInfo: {
       type: Object,
-      value: {}
-    }
+      value: {},
+    },
+    pageTitle: {
+      type: String,
+      value: "首页",
+    },
   },
-  
+
   data: {
-    touchStartX: 0,
-    touchStartY: 0
+    searchValue: '',
+    isSearchMode: false,
   },
-  
+
   methods: {
+    // Show sidebar
+    showSidebar() {
+      const app = getApp();
+      app.setSidebar(true);
+    },
+
+    // Hide sidebar
     hideSidebar() {
       const app = getApp();
       app.setSidebar(false);
     },
-    
+
+    // Toggle search mode
+    toggleSearch() {
+      this.setData({
+        isSearchMode: !this.data.isSearchMode,
+        searchValue: ''
+      });
+    },
+
+    // Handle search input
+    onSearchInput(e) {
+      this.setData({
+        searchValue: e.detail.value
+      });
+    },
+
+    // Handle search confirm
+    onSearchConfirm(e) {
+      const searchValue = e.detail.value;
+      if (searchValue.trim()) {
+        // Trigger search event to parent component
+        this.triggerEvent('search', { value: searchValue });
+      }
+    },
+
+    // Cancel search
+    cancelSearch() {
+      this.setData({
+        isSearchMode: false,
+        searchValue: ''
+      });
+    },
+
+    // Prevent scrolling when sidebar is open
     preventMove() {
       return false;
     },
-    
-    onTouchStart(e) {
-      this.setData({
-        touchStartX: e.touches[0].clientX,
-        touchStartY: e.touches[0].clientY
-      });
-    },
-    
-    onTouchMove(e) {
-    },
-    
-    onTouchEnd(e) {
-      const app = getApp();
-      app.handleSwipe(
-        this.data.touchStartX, 
-        this.data.touchStartY,
-        e.changedTouches[0].clientX,
-        e.changedTouches[0].clientY
-      );
-    },
-    
+
+    // Navigation methods
     navigateToDiscover() {
-      getApp().navigateTo('discover');
+      getApp().navigateTo("discover");
+      this.hideSidebar();
     },
-    
+
     navigateToRecommend() {
-      getApp().navigateTo('recommend');
+      getApp().navigateTo("recommend");
+      this.hideSidebar();
     },
-    
+
     navigateToFollow() {
-      getApp().navigateTo('follow');
+      getApp().navigateTo("follow");
+      this.hideSidebar();
     },
-    
+
     navigateToChat() {
-      getApp().navigateTo('chat');
+      getApp().navigateTo("chat");
+      this.hideSidebar();
     },
-    
+
     navigateToFriend() {
-      getApp().navigateTo('friend');
+      getApp().navigateTo("friend");
+      this.hideSidebar();
     },
-    
+
     navigateToMe() {
-      getApp().navigateTo('me');
+      getApp().navigateTo("me");
+      this.hideSidebar();
     },
-    
+
     navigateToEvent() {
-      getApp().navigateTo('event');
+      getApp().navigateTo("event");
+      this.hideSidebar();
     },
-    
+
     navigateToContact() {
-      getApp().navigateTo('contact');
-    }
-  }
-})
+      getApp().navigateTo("contact");
+      this.hideSidebar();
+    },
+
+    onNavItemTap(e) {
+      const destination = e.currentTarget.dataset.destination;
+      if (this[destination]) {
+        this[destination]();
+      }
+    },
+  },
+});

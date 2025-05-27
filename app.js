@@ -1,8 +1,13 @@
+const { default: config } = require("./config");
+
 App({
   globalData: {
     showSidebar: false,
     showLoginModal: false,
     userInfo: null,
+    friends: [],
+    followUsers: [],
+    followedUsers: [],
     currentPath: "discover",
     observers: {},
   },
@@ -29,7 +34,7 @@ App({
   setState(key, value) {
     this.globalData[key] = value;
     if (this.globalData.observers[key]) {
-      this.globalData.observers[key].forEach(callback => {
+      this.globalData.observers[key].forEach((callback) => {
         callback(value);
       });
     }
@@ -124,12 +129,81 @@ App({
     this.setSidebar(false);
   },
 
+  logout() {
+    // Clear user info and sidebar state
+    this.globalData.userInfo = null;
+    this.globalData.showSidebar = false;
+    wx.setStorageSync("userInfo", null);
+    wx.setStorageSync("showSidebar", false);
+
+    // Notify all pages about the logout
+    this.notifyPagesUpdate();
+
+    // Optionally redirect to login page
+    wx.redirectTo({ url: "/pages/login/login" });
+  },
+
   // Get user info
   getUserInfo() {
     try {
       const userInfo = wx.getStorageSync("userInfo");
       if (userInfo) {
         this.globalData.userInfo = userInfo;
+        wx.request({
+          url: `${config.BACKEND_URL}/user/get_my_follow_users`,
+          method: "GET",
+          header: {
+            Authorization: userInfo.token ? `Bearer ${userInfo.token}` : "",
+          },
+          success: (res) => {
+            if (res.statusCode === 200 && res.data) {
+              this.globalData.followUsers = res.data.users || [];
+            } else {
+              this.logout();
+            }
+          },
+          fail: (err) => {
+            console.error("Error fetching user info:", err);
+            this.logout();
+          },
+        });
+        wx.request({
+          url: `${config.BACKEND_URL}/user/get_my_followed_users`,
+          method: "GET",
+          header: {
+            Authorization: userInfo.token ? `Bearer ${userInfo.token}` : "",
+          },
+          success: (res) => {
+            if (res.statusCode === 200 && res.data) {
+              this.globalData.followedUsers = res.data.users || [];
+            } else {
+              this.logout();
+            }
+          },
+          fail: (err) => {
+            console.error("Error fetching followed users:", err);
+            this.logout();
+          },
+        });
+        wx.request({
+          url: `${config.BACKEND_URL}/friend/get_friends`,
+          method: "GET",
+          header: {
+            Authorization: userInfo.token ? `Bearer ${userInfo.token}` : "",
+          },
+          success: (res) => {
+            if (res.statusCode === 200 && res.data) {
+              this.globalData.friends = res.data.users || [];
+            } else {
+              this.logout();
+            }
+          },
+          fail: (err) => {
+            console.error("Error fetching friends:", err);
+            this.logout();
+          },
+        });
+        return userInfo;
       }
     } catch (e) {
       console.log("Failed to get user info from storage");
@@ -162,8 +236,8 @@ App({
     const deltaX = endX - startX;
     const deltaY = Math.abs(endY - startY);
 
-    // Right swipe (open sidebar)
-    if ((startX < 50 && deltaX > 100) || (deltaX > 150 && deltaY < 100)) {
+    // Right swipe (open sidebar) - only from left edge
+    if (startX < 50 && deltaX > 100 && deltaY < 100) {
       if (!this.globalData.showSidebar) {
         this.setSidebar(true);
         return "right";

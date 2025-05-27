@@ -1,63 +1,76 @@
 <!-- components/media-player/media-player.wxml -->
-<view class="media-player" style="height: {{ windowHeight }}px;">
+<view 
+  class="media-player" 
+  style="height: {{ windowHeight }}px;"
+  bindtouchstart="onTouchStart"
+  bindtouchmove="onTouchMove"
+  bindtouchend="onTouchEnd"
+  catchtouchmove="onTouchMove"
+>
   <!-- Loading indicator -->
   <view wx:if="{{ isLoading }}" class="loading-container">
     <view class="loading-spinner"></view>
   </view>
 
-  <!-- Media Display Component -->
-  <media-display
-    current-post="{{ currentPost }}"
-    current-media="{{ currentMedia }}"
-    current-slide-index="{{ currentSlideIndex }}"
-    media-length="{{ mediaLength }}"
-    is-playing="{{ isPlaying }}"
-    show-play-indicator="{{ showPlayIndicator }}"
-    selected-dot="{{ selectedDot }}"
-    bind:screentap="onScreenTap"
-    bind:slidechange="onSlideChange"
-    bind:dottap="onDotTap"
-    bind:previousslide="moveToPreviousSlide"
-    bind:nextslide="moveToNextSlide"
-  />
+  <view 
+    class="media-content {{ isVerticalSwiping ? 'swiping' : '' }}"
+    style="transform: translateY({{ verticalTransform }}px);"
+  >
+    <!-- Media Display Component -->
+    <media-display
+      current-post="{{ currentPost }}"
+      current-media="{{ currentMedia }}"
+      current-slide-index="{{ currentSlideIndex }}"
+      media-length="{{ mediaLength }}"
+      is-playing="{{ isPlaying }}"
+      show-play-indicator="{{ showPlayIndicator }}"
+      selected-dot="{{ selectedDot }}"
+      bind:screentap="onScreenTap"
+      bind:slidechange="onSlideChange"
+      bind:dottap="onDotTap"
+      bind:previousslide="moveToPreviousSlide"
+      bind:nextslide="moveToNextSlide"
+    />
 
-  <!-- Media Controls Component -->
-  <media-controls
-    current-post="{{ currentPost }}"
-    current-media="{{ currentMedia }}"
-    current-slide-index="{{ currentSlideIndex }}"
-    is-playing="{{ isPlaying }}"
-    is-continue="{{ isContinue }}"
-    bind:playpause="onPlayPause"
-    bind:continuetoggle="onContinueToggle"
-    bind:progresstap="onProgressTap"
-  />
+    <!-- Media Controls Component -->
+    <media-controls
+      current-post="{{ currentPost }}"
+      current-media="{{ currentMedia }}"
+      current-slide-index="{{ currentSlideIndex }}"
+      is-playing="{{ isPlaying }}"
+      is-continue="{{ isContinue }}"
+      bind:playpause="onPlayPause"
+      bind:continuetoggle="onContinueToggle"
+      bind:progresstap="onProgressTap"
+    />
 
-  <!-- Post Info Overlay Component -->
-  <post-info-overlay
-    display-title="{{ displayTitle }}"
-    display-content="{{ displayContent }}"
-  />
+    <!-- Post Info Overlay Component -->
+    <post-info-overlay
+      display-title="{{ displayTitle }}"
+      display-content="{{ displayContent }}"
+      class="post-info"
+    />
 
-  <!-- Action Buttons Component -->
-  <action-buttons
-    current-post="{{ currentPost }}"
-    current-post-user="{{ currentPostUser }}"
-    auth-user="{{ authUser }}"
-    display-likes="{{ displayLikes }}"
-    display-comments="{{ displayComments }}"
-    display-favorites="{{ displayFavorites }}"
-    display-shares="{{ displayShares }}"
-    bind:userprofile="onUserProfile"
-    bind:like="handleLike"
-    bind:favorite="handleFavorite"
-    bind:share="handleShare"
-    bind:follow="handleFollow"
-    bind:toggleDetail="onToggleDetail"
-    bind:reportmodal="onShowReportModal"
-  />
+    <!-- Action Buttons Component -->
+    <action-buttons
+      class="action-buttons"
+      current-post="{{ currentPost }}"
+      current-post-user="{{ currentPostUser }}"
+      auth-user="{{ authUser }}"
+      display-likes="{{ displayLikes }}"
+      display-comments="{{ displayComments }}"
+      display-favorites="{{ displayFavorites }}"
+      display-shares="{{ displayShares }}"
+      bind:userprofile="onUserProfile"
+      bind:like="handleLike"
+      bind:favorite="handleFavorite"
+      bind:share="handleShare"
+      bind:follow="handleFollow"
+      bind:toggleDetail="onToggleDetail"
+      bind:reportmodal="onShowReportModal"
+    />
+  </view>
 
-  <!-- Detail Panel Component -->
   <detail-panel
     show-detail="{{ showDetail }}"
     tab-index="{{ tabIndex }}"
@@ -80,10 +93,22 @@
     bind:loginrequired="onLoginRequired"
   />
 
-  <!-- Report Modal Component -->
   <report-modal
     show-report-modal="{{ showReportModal }}"
     bind:close="onCloseReportModal"
     bind:submit="onSubmitReport"
   />
+
+  <!-- Swipe direction indicator -->
+  <view 
+    wx:if="{{ isVerticalSwiping && Math.abs(verticalTransform) > 30 }}" 
+    class="swipe-direction-indicator"
+  >
+    <view class="direction-arrow {{ verticalTransform < 0 ? 'arrow-up' : 'arrow-down' }}">
+      {{ verticalTransform < 0 ? '↑' : '↓' }}
+    </view>
+    <view class="direction-text">
+      {{ verticalTransform < 0 ? 'Next' : 'Previous' }}
+    </view>
+  </view>
 </view>

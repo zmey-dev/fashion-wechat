@@ -5,18 +5,22 @@
   bindtouchend="onTouchEnd"
 >
   <!-- Login Modal -->
+  <slide-sidebar 
+    current-path="{{ currentPath }}" 
+    is-visible="{{ showSidebar }}" 
+    bind:hideSidebar="closeSideBar"
+    style="position:relative; width: 100%; background: #d3d3d3; height: 100px"
+    >
+    <view style="position:relative; width: 100%; background: #d3d3d3; height: 100px"></view>
+    <textarea placeholder="请输入" placeholder-style="color:blue;" />
+  </slide-sidebar>
   <login-modal wx:if="{{ showLoginModal }}" class="login-modal" />
-  <!-- Main Header -->
-  <main-header
-    showSidebar="{{ showSidebar }}"
-    bind:toggleSidebar="toggleSideBar"
-  />
-
   <view class="post-viewer-container">
     <media-player
       wx:if="{{ currentPost }}"
       selectedPost="{{ currentPost }}"
       selectedPostUser="{{ currentPostUser }}"
+      followedUsers="{{ followedUsers }}"
       authUser="{{ userInfo }}"
       index="{{ currentIndex }}"
       totalCount="{{ totalPosts }}"
@@ -27,6 +31,8 @@
       bind:followUpdated="handleFollowUpdated"
       bind:showLogin="showLoginModal"
       bind:navigateToProfile="navigateToUserProfile"
+      bind:previousPost="handlePreviousPost"
+      bind:nextPost="handleNextPost"
     >
     </media-player>
 
@@ -37,10 +43,5 @@
     </view>
   </view>
 
-  <!-- Slide Sidebar Component -->
-  <slide-sidebar
-    current-path="{{ currentPath }}"
-    is-visible="{{ showSidebar }}"
-    bind:hideSidebar="closeSideBar"
-  />
+  
 </view>

@@ -6,11 +6,6 @@ Component({
     displayFollowerCount: { type: String, value: "0" },
     displayLikeCount: { type: String, value: "0" }
   },
-  observers: {
-    currentPostUser: function(user) {
-      console.log('User data updated:', user);      
-    }
-  },
   methods: {
     handleFollow() {
       this.triggerEvent('follow');

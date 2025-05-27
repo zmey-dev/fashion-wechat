@@ -66,9 +66,8 @@ Component({
     onLikeHandle(e) {
       const { item, type } = e.currentTarget.dataset;
       this.triggerEvent('like', {
-        item: this.properties.item,
-        type: parseInt(type),
-        index: this.properties.index
+        commentId: this.properties.item.id,
+        state_flag: type
       });
     },
 

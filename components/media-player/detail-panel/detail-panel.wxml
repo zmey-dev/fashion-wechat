@@ -1,5 +1,5 @@
 <!-- components/detail-panel/detail-panel.wxml -->
-<view class="detail-panel {{ showDetail ? 'show' : '' }}" wx:if="{{ currentPost && users }}">
+<view class="detail-panel {{ showDetail ? 'show' : '' }}" wx:if="{{ currentPost && currentPostUser }}">
   <!-- Panel header -->
   <view class="panel-header">
     <view class="tab-bar">
@@ -9,7 +9,7 @@
         data-index="0"
         bindtap="onTabChange"
       >
-        <text>{{ users.username || 'User' }}'s posts</text>
+        <text>{{ currentPostUser.username || 'User' }}'s posts</text>
       </view>
       <view
         class="tab-item {{ tabIndex === 1 ? 'active' : '' }}"
@@ -40,8 +40,8 @@
   <view class="panel-content">
     <!-- User posts tab -->
     <user-posts-tab
-      wx:if="{{ tabIndex === 0 && users }}"
-      current-post-user="{{ users }}"
+      wx:if="{{ tabIndex === 0 && currentPostUser }}"
+      current-post-user="{{ currentPostUser }}"
       auth-user="{{ authUser }}"
       display-follower-count="{{ displayFollowerCount }}"
       display-like-count="{{ displayLikeCount }}"
@@ -63,6 +63,7 @@
         bind:delete="onCommentDelete"
         bind:imagepreview="onImagePreview"
         bind:loginrequired="onLoginRequired"
+        style="width: 100%;height: 100%;"
       />
       <view wx:else class="no-comments-placeholder">
         <text>Loading comments...</text>

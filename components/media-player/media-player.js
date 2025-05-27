@@ -1,3 +1,6 @@
+const { default: config } = require("../../config");
+const { isEmpty } = require("../../utils/isEmpty");
+
 // components/media-player/media-player.js
 Component({
   properties: {
@@ -22,7 +25,7 @@ Component({
   data: {
     // Media state
     currentSlideIndex: 0,
-    isPlaying: true,
+    isPlaying: false,
     isContinue: true,
     isLoading: false,
     showPlayIndicator: false,
@@ -56,6 +59,17 @@ Component({
     // System info
     windowWidth: 0,
     windowHeight: 0,
+
+    touchStartY: 0,
+    touchStartX: 0,
+    touchEndY: 0,
+    touchEndX: 0,
+    currentTouchY: 0,
+    isVerticalSwiping: false,
+    verticalTransform: 0, // Current vertical transform value
+    minSwipeDistance: 50, // Minimum distance for a valid swipe
+    maxHorizontalThreshold: 100, // Maximum horizontal movement to still consider vertical swipe
+    maxTransformDistance: 150, // Maximum transform distance for visual feedback
   },
 
   /**
@@ -122,10 +136,10 @@ Component({
         selectedDot: null,
         showDetail: false,
         currentPost: {
-          id: selectedPost.id || '',
-          title: selectedPost.title || '',
-          content: selectedPost.content || '',
-          type: selectedPost.type || 'image',
+          id: selectedPost.id || "",
+          title: selectedPost.title || "",
+          content: selectedPost.content || "",
+          type: selectedPost.type || "image",
           likes: selectedPost.likes || 0,
           favorites: selectedPost.favorites || 0,
           shares: selectedPost.shares || 0,
@@ -134,15 +148,15 @@ Component({
           is_favorited: selectedPost.is_favorited || false,
           event_id: selectedPost.event_id || null,
           media: selectedPost.media || [],
-          ...selectedPost
+          ...selectedPost,
         },
         currentPostUser: {
-          id: postUser.id || '',
-          username: postUser.username || 'Unknown User',
-          avatar: postUser.avatar || '',
+          id: postUser.id || "",
+          username: postUser.username || "Unknown User",
+          avatar: postUser.avatar || "",
           is_followed: postUser.is_followed || false,
           posts: postUser.posts || [],
-          ...postUser
+          ...postUser,
         },
         currentMedia: selectedPost.media || [],
         mediaLength: selectedPost.media ? selectedPost.media.length : 0,
@@ -170,8 +184,8 @@ Component({
         displayComments: this.formatNumber(currentPost.comments?.length || 0),
         displayFavorites: this.formatNumber(currentPost.favorites),
         displayShares: this.formatNumber(currentPost.shares),
-        displayFollowerCount: currentPostUser.posts
-          ? this.formatNumber(currentPostUser.posts.length)
+        displayFollowerCount: currentPostUser.followers
+          ? this.formatNumber(currentPostUser.followers.length)
           : "0",
         displayLikeCount: this.formatNumber(currentPost.likes),
       });
@@ -181,7 +195,11 @@ Component({
      * Auto play management
      */
     startAutoPlay() {
-      if (this.data.isPlaying && !this.data.showDetail && this.data.currentPost?.type === 'image') {
+      if (
+        this.data.isPlaying &&
+        !this.data.showDetail &&
+        this.data.currentPost?.type === "image"
+      ) {
         this.clearAutoPlayTimer();
         const timer = setInterval(() => {
           this.moveToNextSlide();
@@ -239,12 +257,12 @@ Component({
     /**
      * Event handlers from child components
      */
-    
+
     // Media Display Events
     onScreenTap() {
       const { currentPost } = this.data;
       if (currentPost.type !== "image") return;
-      
+
       this.togglePlayPause();
       this.showPlayIndicatorBriefly();
     },
@@ -291,11 +309,11 @@ Component({
     },
 
     moveToPreviousPost() {
-      this.triggerEvent('previousPost');
+      this.triggerEvent("previousPost");
     },
 
     moveToNextPost() {
-      this.triggerEvent('nextPost');
+      this.triggerEvent("nextPost");
     },
 
     // Media Controls Events
@@ -326,118 +344,205 @@ Component({
     },
 
     handleLike() {
-      if (!this.properties.authUser) {
-        this.showLoginToast();
+      if (isEmpty(this.properties.authUser)) {
+        const app = getApp();
+        app.setState("showLoginModal", true);
         return;
       }
 
-      const { currentPost } = this.data;
-      const newLikeStatus = !currentPost.is_liked;
-      const newLikeCount = newLikeStatus
-        ? currentPost.likes + 1
-        : currentPost.likes - 1;
-
-      this.setData({
-        "currentPost.is_liked": newLikeStatus,
-        "currentPost.likes": newLikeCount,
-        displayLikes: this.formatNumber(newLikeCount),
-      });
-
-      wx.vibrateShort();
-      wx.showToast({
-        title: newLikeStatus ? "Liked" : "Like removed",
-        icon: "success",
-        duration: 1000,
-      });
-
-      this.triggerEvent('like', {
-        postId: currentPost.id,
-        isLiked: newLikeStatus
-      });
-    },
-
-    handleFavorite() {
-      if (!this.properties.authUser) {
-        this.showLoginToast();
-        return;
-      }
-
-      const { currentPost } = this.data;
-      const newFavoriteStatus = !currentPost.is_favorited;
-      const newFavoriteCount = newFavoriteStatus
-        ? currentPost.favorites + 1
-        : currentPost.favorites - 1;
-
-      this.setData({
-        "currentPost.is_favorited": newFavoriteStatus,
-        "currentPost.favorites": newFavoriteCount,
-        displayFavorites: this.formatNumber(newFavoriteCount),
-      });
-
-      wx.vibrateShort();
-      wx.showToast({
-        title: newFavoriteStatus
-          ? "Added to favorites"
-          : "Removed from favorites",
-        icon: "success",
-        duration: 1000,
-      });
-
-      this.triggerEvent('favorite', {
-        postId: currentPost.id,
-        isFavorited: newFavoriteStatus
-      });
-    },
-
-    handleShare() {
-      wx.showActionSheet({
-        itemList: ["Share with friends", "Share to feed", "Copy link"],
+      wx.request({
+        url: `${config.BACKEND_URL}/post/add_like`,
+        method: "POST",
+        data: { post_id: this.data.currentPost.id },
+        header: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${this.properties.authUser.token}`,
+        },
         success: (res) => {
-          const actions = ["Share with friends", "Share to feed", "Copy link"];
+          if (res.statusCode === 200 && res.data.status === "success") {
+            const { currentPost } = this.data;
+            const newLikeStatus = !currentPost.likes_exists;
+            const newLikeCount = newLikeStatus
+              ? currentPost.likes + 1
+              : currentPost.likes - 1;
+
+            this.setData({
+              "currentPost.likes_exists": newLikeStatus,
+              "currentPost.likes": newLikeCount,
+              displayLikes: this.formatNumber(newLikeCount),
+            });
+
+            wx.vibrateShort();
+            wx.showToast({
+              title: newLikeStatus ? "Liked" : "Like removed",
+              icon: "success",
+              duration: 1000,
+            });
+
+            this.triggerEvent("like", {
+              postId: currentPost.id,
+              isLiked: newLikeStatus,
+            });
+          }
+        },
+        fail: (err) => {
+          console.error("Like request failed:", err);
           wx.showToast({
-            title: actions[res.tapIndex],
-            icon: "success",
-            duration: 1000,
-          });
-
-          const { currentPost } = this.data;
-          const newShareCount = currentPost.shares + 1;
-          this.setData({
-            "currentPost.shares": newShareCount,
-            displayShares: this.formatNumber(newShareCount),
-          });
-
-          this.triggerEvent('share', {
-            postId: currentPost.id,
-            shareType: res.tapIndex
+            title: "Failed to update like",
+            icon: "none",
+            duration: 1500,
           });
         },
       });
     },
 
-    handleFollow() {
-      if (!this.properties.authUser) {
-        this.showLoginToast();
+    handleFavorite() {
+      if (isEmpty(this.properties.authUser)) {
+        const app = getApp();
+        app.setState("showLoginModal", true);
         return;
       }
 
-      const { currentPostUser } = this.data;
-      const newFollowStatus = !currentPostUser.is_followed;
+      wx.request({
+        url: `${config.BACKEND_URL}/post/save_favorite`,
+        method: "POST",
+        data: { post_id: this.data.currentPost.id },
+        header: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${this.properties.authUser.token}`,
+        },
+        success: (res) => {
+          if (res.statusCode === 200 && res.data.status === "success") {
+            const { currentPost } = this.data;
+            const newFavoriteStatus = !currentPost.favorites_exists;
+            const newFavoriteCount = newFavoriteStatus
+              ? currentPost.favorites + 1
+              : currentPost.favorites - 1;
 
-      this.setData({
-        "currentPostUser.is_followed": newFollowStatus,
+            this.setData({
+              "currentPost.favorites_exists": newFavoriteStatus,
+              "currentPost.favorites": newFavoriteCount,
+              displayFavorites: this.formatNumber(newFavoriteCount),
+            });
+
+            wx.vibrateShort();
+            wx.showToast({
+              title: newFavoriteStatus
+                ? "Added to favorites"
+                : "Removed from favorites",
+              icon: "success",
+              duration: 1000,
+            });
+
+            this.triggerEvent("favorite", {
+              postId: currentPost.id,
+              isFavorited: newFavoriteStatus,
+            });
+          }
+        },
+        fail: (err) => {
+          console.error("Favorite request failed:", err);
+          wx.showToast({
+            title: "Failed to update favorite",
+            icon: "none",
+            duration: 1500,
+          });
+        },
       });
+    },
 
-      wx.vibrateShort();
-      wx.showToast({
-        title: newFollowStatus ? "Following" : "Unfollowed",
-        icon: "success",
-        duration: 1000,
+    handleShare() {
+      wx.setClipboardData({
+        data: `Check out this post: ${
+          this.data.currentPost.media[this.data.currentSlideIndex].url
+        }`,
+        success: () => {
+          const { currentPost } = this.data;
+          this.setData({
+            "currentPost.shares": currentPost.shares + 1,
+            displayShares: this.formatNumber(currentPost.shares + 1),
+          });
+          wx.showToast({
+            title: "Link copied to clipboard",
+            icon: "success",
+            duration: 1000,
+          });
+        },
+        fail: (err) => {
+          console.error("Copy to clipboard failed:", err);
+          wx.showToast({
+            title: "Failed to copy link",
+            icon: "none",
+            duration: 1500,
+          });
+        },
       });
+      wx.request({
+        url: `${config.BACKEND_URL}/post/save_share`,
+        method: "POST",
+        data: { post_id: this.data.currentPost.id },
+        header: {
+          "Content-Type": "application/json",
+        },
+        success: (res) => {
+          if (res.statusCode === 200 && res.data.status === "success") {
+          }
+        },
+        fail: (err) => {
+          console.error("Share request failed:", err);
+        },
+      });
+    },
 
-      this.triggerEvent('follow', {
-        userId: currentPostUser.id,
-        isFollowed: newFollowStatus
+    handleFollow() {
+      if (isEmpty(this.properties.authUser)) {
+        const app = getApp();
+        app.setState("showLoginModal", true);
+        return;
+      }
+
+      wx.request({
+        url: `${config.BACKEND_URL}/post/save_follow`,
+        method: "POST",
+        data: { follower_id: this.data.currentPostUser.id },
+        header: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${this.properties.authUser.token}`,
+        },
+        success: (res) => {
+          if (res.statusCode === 200 && res.data.status === "success") {
+            const { currentPostUser } = this.data;
+            const newFollowStatus = !currentPostUser.is_followed;
+            const newFollowerCount = newFollowStatus
+              ? Number(this.data.displayFollowerCount) + 1
+              : Number(this.data.displayFollowerCount) - 1;
+
+            this.setData({
+              "currentPostUser.is_followed": newFollowStatus,
+              displayFollowerCount: this.formatNumber(newFollowerCount),
+            });
+
+            wx.vibrateShort();
+            wx.showToast({
+              title: newFollowStatus ? "Following" : "Unfollowed",
+              icon: "success",
+              duration: 1000,
+            });
+
+            this.triggerEvent("follow", {
+              userId: currentPostUser.id,
+              isFollowed: newFollowStatus,
+            });
+          }
+        },
+        fail: (err) => {
+          console.error("Follow request failed:", err);
+          wx.showToast({
+            title: "Failed to update follow status",
+            icon: "none",
+            duration: 1500,
+          });
+        },
       });
     },
 
@@ -468,64 +573,131 @@ Component({
 
     onSelectUserPost(e) {
       const { post } = e.detail;
-      wx.showToast({
-        title: `Selected post: ${post.title}`,
-        icon: "none",
-        duration: 1000,
+      this.onCloseDetail();
+      wx.navigateTo({
+        url: `/pages/index/index?postId=${post.id}`,
       });
-      this.triggerEvent('selectUserPost', { post });
+      this.triggerEvent("selectUserPost", { post });
     },
 
     // Comment Events from comment-tree component
     onCommentLike(e) {
-      this.triggerEvent('commentLike', e.detail);
+      if (isEmpty(this.properties.authUser)) {
+        const app = getApp();
+        app.setState("showLoginModal", true);
+        return;
+      }
+      const { commentId,state_flag } = e.detail;
+      wx.request({
+        url: `${config.BACKEND_URL}/comment/like`,
+        method: "POST",
+        data: { comment_id: commentId, state_flag: state_flag },
+        header: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${this.properties.authUser.token}`,
+        },
+        success: (res) => {
+          if (res.statusCode === 200 && res.data.status === "success") {
+            const { userComments } = this.data;
+            const updatedComments = userComments.map((comment) => {
+              if (comment.id === commentId) {
+                return {
+                  ...comment,
+                  like: res.data.like_count,
+                  unlike: res.data.unlike_count,
+                };
+              }
+              return comment;
+            });
+
+            this.setData({
+              userComments: updatedComments,
+              displayComments: this.formatNumber(updatedComments.length),
+            });
+
+            wx.vibrateShort();
+            wx.showToast({
+              title: res.data.msg,
+              icon: "success",
+              duration: 1000,
+            });
+
+            this.triggerEvent("commentLike", {
+              commentId,
+              isLiked: state_flag,
+            });
+          } else {
+            wx.showToast({
+              title: "Failed to like comment",
+              icon: "none",
+              duration: 1500,
+            });
+          }
+        },
+        fail: (err) => {
+          console.error("Like request failed:", err);
+          wx.showToast({
+            title: "Failed to like comment",
+            icon: "none",
+            duration: 1500,
+          });
+        },
+      });
+    },
+
+    onCommentUnLike(e) {
+      if (isEmpty(this.properties.authUser)) {
+        const app = getApp();
+        app.setState("showLoginModal", true);
+        return;
+      }
     },
 
     onCommentSent(e) {
       const { comment } = e.detail;
       const { userComments } = this.data;
-      
+
       const updatedComments = [...userComments, comment];
       this.setData({
         userComments: updatedComments,
-        displayComments: this.formatNumber(updatedComments.length)
+        displayComments: this.formatNumber(updatedComments.length),
       });
 
-      this.triggerEvent('commentSent', e.detail);
+      this.triggerEvent("commentSent", e.detail);
     },
 
     onCommentUpdated(e) {
       const { comment } = e.detail;
       const { userComments } = this.data;
-      
-      const updatedComments = userComments.map(c => 
+
+      const updatedComments = userComments.map((c) =>
         c.id === comment.id ? comment : c
       );
       this.setData({
-        userComments: updatedComments
+        userComments: updatedComments,
       });
 
-      this.triggerEvent('commentUpdated', e.detail);
+      this.triggerEvent("commentUpdated", e.detail);
     },
 
     onCommentDelete(e) {
       const { commentId } = e.detail;
       const { userComments } = this.data;
-      
-      const updatedComments = userComments.filter(c => c.id !== commentId);
+
+      const updatedComments = userComments.filter((c) => c.id !== commentId);
       this.setData({
         userComments: updatedComments,
-        displayComments: this.formatNumber(updatedComments.length)
+        displayComments: this.formatNumber(updatedComments.length),
       });
 
-      this.triggerEvent('commentDeleted', e.detail);
+      this.triggerEvent("commentDeleted", e.detail);
     },
 
     onImagePreview(e) {
       const { url } = e.detail;
       wx.previewImage({
         urls: [url],
-        current: url
+        current: url,
       });
     },
 
@@ -546,10 +718,10 @@ Component({
         duration: 1500,
       });
       this.setData({ showReportModal: false });
-      
-      this.triggerEvent('reportSubmitted', {
+
+      this.triggerEvent("reportSubmitted", {
         postId: this.data.currentPost.id,
-        reason: option
+        reason: option,
       });
     },
 
@@ -597,6 +769,155 @@ Component({
      */
     cleanup() {
       this.clearAutoPlayTimer();
+    },
+
+    /**
+     * Touch event handlers for vertical swipe navigation
+     */
+    onTouchStart(e) {
+      if (this.data.showDetail) return;
+      const touch = e.touches[0];
+      this.setData({
+        touchStartY: touch.pageY,
+        touchStartX: touch.pageX,
+        currentTouchY: touch.pageY,
+        isVerticalSwiping: false,
+        verticalTransform: 0,
+      });
+    },
+
+    onTouchMove(e) {
+      if (this.data.showDetail) return;
+      const touch = e.touches[0];
+      const { touchStartY, touchStartX, maxTransformDistance } = this.data;
+
+      const deltaY = touch.pageY - touchStartY;
+      const deltaX = Math.abs(touch.pageX - touchStartX);
+      const absDeltaY = Math.abs(deltaY);
+
+      // Update current touch position
+      this.setData({ currentTouchY: touch.pageY });
+
+      // Determine if this is a vertical swipe (reduced threshold for better detection)
+      if (absDeltaY > 10 && (absDeltaY > deltaX || deltaX < 30)) {
+        this.setData({ isVerticalSwiping: true });
+
+        // Calculate transform value with damping effect
+        let transformValue = deltaY;
+
+        // Apply damping when exceeding max distance
+        if (Math.abs(transformValue) > maxTransformDistance) {
+          const excess = Math.abs(transformValue) - maxTransformDistance;
+          const dampingFactor = 0.3; // Reduce movement when exceeding limit
+          transformValue =
+            transformValue > 0
+              ? maxTransformDistance + excess * dampingFactor
+              : -maxTransformDistance - excess * dampingFactor;
+        }
+
+        this.setData({ verticalTransform: transformValue });
+
+        // Return false to prevent default behavior
+        return false;
+      }
+    },
+
+    onTouchEnd(e) {
+      if (this.data.showDetail) return;
+      const touch = e.changedTouches[0];
+      const {
+        touchStartY,
+        touchStartX,
+        minSwipeDistance,
+        maxHorizontalThreshold,
+        isVerticalSwiping,
+        verticalTransform,
+      } = this.data;
+
+      if (!isVerticalSwiping) return;
+
+      this.setData({
+        touchEndY: touch.pageY,
+        touchEndX: touch.pageX,
+      });
+
+      const deltaY = touch.pageY - touchStartY;
+      const deltaX = Math.abs(touch.pageX - touchStartX);
+      const absDeltalY = Math.abs(deltaY);
+
+      // Check if it's a valid vertical swipe
+      if (absDeltalY >= minSwipeDistance && deltaX <= maxHorizontalThreshold) {
+        if (deltaY < 0) {
+          // Swipe up - go to next post
+          this.handleVerticalSwipeUp();
+        } else {
+          // Swipe down - go to previous post
+          this.handleVerticalSwipeDown();
+        }
+      } else {
+        // Invalid swipe - animate back to original position
+        this.animateBackToCenter();
+      }
+
+      // Reset touch data
+      this.setData({
+        touchStartY: 0,
+        touchStartX: 0,
+        touchEndY: 0,
+        touchEndX: 0,
+        currentTouchY: 0,
+        isVerticalSwiping: false,
+      });
+    },
+
+    /**
+     * Handle vertical swipe up (next post)
+     */
+    handleVerticalSwipeUp() {
+      // Add haptic feedback
+      // wx.vibrateShort();
+
+      // Animate out and trigger next post
+      this.animateSwipeOut("up", () => {
+        this.moveToNextPost();
+      });
+    },
+
+    /**
+     * Handle vertical swipe down (previous post)
+     */
+    handleVerticalSwipeDown() {
+      // Add haptic feedback
+      // wx.vibrateShort();
+
+      // Animate out and trigger previous post
+      this.animateSwipeOut("down", () => {
+        this.moveToPreviousPost();
+      });
+    },
+
+    /**
+     * Animate swipe out effect
+     */
+    animateSwipeOut(direction, callback) {
+      const { windowHeight } = this.data;
+      const targetTransform = direction === "up" ? -windowHeight : windowHeight;
+
+      this.setData({ verticalTransform: targetTransform });
+
+      // Execute callback after animation
+      setTimeout(() => {
+        if (callback) callback();
+        // Reset transform for next post
+        this.setData({ verticalTransform: 0 });
+      }, 300);
+    },
+
+    /**
+     * Animate back to center when swipe is not valid
+     */
+    animateBackToCenter() {
+      this.setData({ verticalTransform: 0 });
     },
   },
 });

@@ -69,6 +69,8 @@ Component({
 
     // Toggle password visibility
     togglePassword() {
+      console.log("==================");
+      
       this.setData({
         showPassword: !this.data.showPassword,
       });
@@ -277,12 +279,72 @@ Component({
 
     // Handle successful login
     handleLoginSuccess(result) {
+      const app = getApp();
+      wx.request({
+        url: `${config.BACKEND_URL}/user/get_my_follow_users`,
+        method: "GET",
+        header: {
+          Authorization: result?.user.token
+            ? `Bearer ${result?.user.token}`
+            : "",
+        },
+        success: (res) => {
+          if (res.statusCode === 200 && res.data) {
+            app.setState("followUsers", res.data.users || []);
+          } else {
+            app.logout();
+          }
+        },
+        fail: (err) => {
+          console.error("Error fetching user info:", err);
+          app.logout();
+        },
+      });
+      wx.request({
+        url: `${config.BACKEND_URL}/user/get_my_followed_users`,
+        method: "GET",
+        header: {
+          Authorization: result?.user.token
+            ? `Bearer ${result?.user.token}`
+            : "",
+        },
+        success: (res) => {
+          if (res.statusCode === 200 && res.data) {
+            app.setState("followedUsers", res.data.users || []);
+          } else {
+            app.logout();
+          }
+        },
+        fail: (err) => {
+          console.error("Error fetching followed users:", err);
+          app.logout();
+        },
+      });
+      wx.request({
+        url: `${config.BACKEND_URL}/friend/get_friends`,
+        method: "GET",
+        header: {
+          Authorization: result?.user.token
+            ? `Bearer ${result?.user.token}`
+            : "",
+        },
+        success: (res) => {
+          if (res.statusCode === 200 && res.data) {
+            app.setState("friends", res.data.users || []);
+          } else {
+            app.logout();
+          }
+        },
+        fail: (err) => {
+          console.error("Error fetching friends:", err);
+          app.logout();
+        },
+      });
       // Store user data
-      wx.setStorageSync("userToken", result.token);
-      wx.setStorageSync("userInfo", result.userInfo);
-
+      wx.setStorageSync("userInfo", result.user);
       // Trigger success event
       this.triggerEvent("loginSuccess", result);
+      app.setState("userInfo", result.user);
 
       // Close modal
       this.closeModal();

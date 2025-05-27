@@ -1,4 +1,5 @@
 import config from "../../config";
+import { isEmpty } from "../../utils/isEmpty";
 const app = getApp();
 
 Page({
@@ -7,6 +8,7 @@ Page({
     currentPath: "discover",
     showLoginModal: app.globalData.showLoginModal || false,
     userInfo: app.globalData.userInfo || {},
+    followedUsers: app.globalData.followedUsers || [],
 
     currentPost: null,
     currentPostUser: null,
@@ -20,26 +22,34 @@ Page({
     touchStartX: 0,
     touchStartY: 0,
   },
-  onLoad: function () {
+  onLoad: function (options) {
+    console.time('onLoad');
+    const postId = options.postId || null;
     const app = getApp();
 
     // Subscribe to state changes
     this.userInfoHandler = (userInfo) => {
       this.setData({ userInfo });
     };
-    app.subscribe("userInfo", this.userInfoHandler);
-    app.subscribe("showLoginModal", (showLoginModal) => {
+    this.showLoginModalHandler = (showLoginModal) => {
       this.setData({ showLoginModal });
-    });
+    };
+    this.followedUserHandler = (followedUsers) => {
+      this.setData({ followedUsers });
+    };
+    app.subscribe("userInfo", this.userInfoHandler);
+    app.subscribe("followedUser", this.followedUserHandler);
+    app.subscribe("showLoginModal", this.showLoginModalHandler);
     this.setData({
       showSidebar: app.globalData.showSidebar,
       showLoginModal: app.globalData.showLoginModal || false,
       userInfo: app.globalData.userInfo || {},
+      followedUsers: app.globalData.followedUsers || [],
       // currentPath: currentPath,
       // userInfo: userInfo,
     });
-
-    this.loadPostData(0);
+    if (postId) this.loadPostData(null, postId);
+    else this.loadPostData(0);
   },
 
   onUnload: function () {
@@ -47,6 +57,7 @@ Page({
     // Unsubscribe from state changes
     app.unsubscribe("userInfo", this.userInfoHandler);
     app.unsubscribe("showLoginModal", this.showLoginModalHandler);
+    app.unsubscribe("followedUser", this.followedUserHandler);
   },
 
   setShowLoginModal: function (show) {
@@ -85,22 +96,26 @@ Page({
     app.toggleSidebar();
   },
 
-  loadPostData: function (index) {
+  loadPostData: function (index, postId) {
     this.setData({
       isLoading: true,
       loadError: false,
     });
-
+    const data = {};
+    if(index !== null && index !== undefined) {
+      data.index = index;
+    }
+    if (postId) {
+      data.id = postId;
+    }
     // Fetch post data from API
     wx.request({
       url: `${config.BACKEND_URL}/post/get_post_in_discover`,
       method: "GET",
-      data: {
-        index: index,
-      },
+      data: data,
       header: {
-        Authorization: app.globalData.token
-          ? `Bearer ${app.globalData.token}`
+        Authorization: app.globalData?.userInfo?.token
+          ? `Bearer ${app.globalData?.userInfo?.token}`
           : "",
       },
       success: (res) => {
@@ -247,5 +262,27 @@ Page({
         username
       )}`,
     });
+  },
+
+  handlePreviousPost: function () {
+    if (this.data.currentIndex > 0) {
+      this.loadPostData(this.data.currentIndex - 1);
+    } else {
+      wx.showToast({
+        title: "已经是第一篇文章了",
+        icon: "none",
+      });
+    }
+  },
+
+  handleNextPost: function () {
+    if (this.data.currentIndex < this.data.totalPosts - 1) {
+      this.loadPostData(this.data.currentIndex + 1);
+    } else {
+      wx.showToast({
+        title: "已经是最后一篇文章了",
+        icon: "none",
+      });
+    }
   },
 });

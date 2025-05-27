@@ -4,23 +4,12 @@ Component({
     showDetail: { type: Boolean, value: false },
     tabIndex: { type: Number, value: 1 },
     currentPost: { type: Object, value: {} },
+    currentPostUser: { type: Object, value: {} },
     authUser: { type: Object, value: null },
     userComments: { type: Array, value: [] },
     selectedDot: { type: Object, value: null },
     displayFollowerCount: { type: String, value: "0" },
     displayLikeCount: { type: String, value: "0" },
-  },
-  data: {
-    users: null,
-  },
-  observers: {
-    currentPost: function (post) {
-      if (post && post.id) {
-        this.setData({
-          users: post?.user || {},
-        });
-      }
-    },
   },
   methods: {
     onTabChange(e) {

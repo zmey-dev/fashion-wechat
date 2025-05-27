@@ -9,13 +9,20 @@
         size="100"
       ></avatar>
       <view
-        wx:if="{{ !currentPostUser.is_followed && authUser }}"
+        wx:if="{{ currentPostUser.id !== authUser.id }}"
         class="follow-badge"
         bindtap="handleFollow"
       >
         <view class="svg-icon plus-icon">
           <image
+            wx:if="{{ !currentPostUser.is_followed }}"
             src="/images/icons/plus.svg"
+            class="svg-icon"
+            mode="aspectFit"
+          ></image>
+          <image
+            wx:else
+            src="/images/icons/check.svg"
             class="svg-icon"
             mode="aspectFit"
           ></image>
@@ -27,9 +34,16 @@
 
   <!-- Like button -->
   <view class="action-item" bindtap="handleLike">
-    <view class="action-icon {{ currentPost.is_liked ? 'liked' : '' }}">
+    <view class="action-icon {{ currentPost.likes_exists ? 'liked' : '' }}">
       <view class="svg-icon">
         <image
+          wx:if="{{ currentPost.likes_exists }}"
+          src="/images/icons/red-heart.svg"
+          class="svg-icon"
+          mode="aspectFit"
+        ></image>
+        <image
+          wx:else
           src="/images/icons/heart.svg"
           class="svg-icon"
           mode="aspectFit"
@@ -56,10 +70,17 @@
   <!-- Favorite button -->
   <view class="action-item" bindtap="handleFavorite">
     <view
-      class="action-icon {{ currentPost.is_favorited ? 'favorited' : '' }}"
+      class="action-icon {{ currentPost.favorites_exists ? 'favorited' : '' }}"
     >
       <view class="svg-icon">
         <image
+          wx:if="{{ currentPost.favorites_exists }}"
+          src="/images/icons/red-star.svg"
+          class="svg-icon"
+          mode="aspectFit"
+        ></image>
+        <image
+          wx:else
           src="/images/icons/star.svg"
           class="svg-icon"
           mode="aspectFit"

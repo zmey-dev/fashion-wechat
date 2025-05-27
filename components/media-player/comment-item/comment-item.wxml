@@ -42,28 +42,6 @@
     <!-- Action Buttons -->
     <view class="action-buttons">
       <view class="button-group">
-        <!-- Like Button -->
-        <view 
-          class="action-btn like-btn {{item.like > 0 ? 'active' : ''}}" 
-          bindtap="onLikeHandle"
-          data-item="{{item}}"
-          data-type="1"
-        >
-          <image class="action-icon" src="/images/icons/thumbs-up.svg" />
-          <text class="action-text">{{item.like}}</text>
-        </view>
-
-        <!-- Unlike Button -->
-        <view 
-          class="action-btn unlike-btn {{item.unlike > 0 ? 'active' : ''}}" 
-          bindtap="onLikeHandle"
-          data-item="{{item}}"
-          data-type="0"
-        >
-          <image class="action-icon" src="/images/icons/thumbs-down.svg" />
-          <text class="action-text">{{item.unlike}}</text>
-        </view>
-
         <!-- Owner Actions -->
         <block wx:if="{{loggedUser.id === item.sender_id}}">
           <!-- Edit Button -->
@@ -90,6 +68,27 @@
 
         <!-- Non-owner Actions -->
         <block wx:else>
+          <!-- Like Button -->
+          <view 
+            class="action-btn like-btn {{item.like > 0 ? 'active' : ''}}" 
+            bindtap="onLikeHandle"
+            data-item="{{item}}"
+            data-type="1"
+          >
+            <image class="action-icon" src="/images/icons/thumbs-up.svg" />
+            <text class="action-text">{{item.like}}</text>
+          </view>
+
+          <!-- Unlike Button -->
+          <view 
+            class="action-btn unlike-btn {{item.unlike > 0 ? 'active' : ''}}" 
+            bindtap="onLikeHandle"
+            data-item="{{item}}"
+            data-type="0"
+          >
+            <image class="action-icon" src="/images/icons/thumbs-down.svg" />
+            <text class="action-text">{{item.unlike}}</text>
+          </view>
           <!-- Reply Button -->
           <view 
             class="action-btn reply-btn" 
@@ -99,16 +98,6 @@
           >
             <image class="action-icon" src="/images/icons/reply.svg" />
             <text class="action-text">Reply</text>
-          </view>
-
-          <!-- Delete Button (if user has permission) -->
-          <view 
-            class="action-btn delete-btn" 
-            bindtap="onCommentDelete"
-            data-id="{{item.id}}"
-          >
-            <image class="action-icon" src="/images/icons/trash.svg" />
-            <text class="action-text">Delete</text>
           </view>
         </block>
       </view>
