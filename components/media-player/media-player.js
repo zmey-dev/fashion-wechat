@@ -268,7 +268,7 @@ Component({
     },
 
     onSlideChange(e) {
-      const newIndex = e.detail.current || e.detail.index;
+      const newIndex = e.detail.current;
       this.setData({ currentSlideIndex: newIndex });
     },
 
@@ -547,12 +547,17 @@ Component({
     },
 
     onToggleDetail() {
+      if (isEmpty(this.properties.authUser)) {
+        const app = getApp();
+        app.setState("showLoginModal", true);
+      }
       this.setData({ showDetail: !this.data.showDetail });
     },
 
     onShowReportModal() {
-      if (!this.properties.authUser) {
-        this.showLoginToast();
+      if (isEmpty(this.properties.authUser)) {
+        const app = getApp();
+        app.setState("showLoginModal", true);
         return;
       }
       this.setData({ showReportModal: true });
@@ -587,7 +592,7 @@ Component({
         app.setState("showLoginModal", true);
         return;
       }
-      const { commentId,state_flag } = e.detail;
+      const { commentId, state_flag } = e.detail;
       wx.request({
         url: `${config.BACKEND_URL}/comment/like`,
         method: "POST",
@@ -654,13 +659,10 @@ Component({
     },
 
     onCommentSent(e) {
-      const { comment } = e.detail;
-      const { userComments } = this.data;
-
-      const updatedComments = [...userComments, comment];
+      const { comments } = e.detail;
       this.setData({
-        userComments: updatedComments,
-        displayComments: this.formatNumber(updatedComments.length),
+        userComments: comments,
+        displayComments: this.formatNumber(comments.length),
       });
 
       this.triggerEvent("commentSent", e.detail);
@@ -668,13 +670,11 @@ Component({
 
     onCommentUpdated(e) {
       const { comment } = e.detail;
-      const { userComments } = this.data;
-
-      const updatedComments = userComments.map((c) =>
-        c.id === comment.id ? comment : c
-      );
       this.setData({
-        userComments: updatedComments,
+        userComments: this.data.userComments.map((c) =>
+          c.id === comment.id ? { ...c, ...comment } : c
+        ),
+        displayComments: this.formatNumber(this.data.userComments.length),
       });
 
       this.triggerEvent("commentUpdated", e.detail);
@@ -683,14 +683,43 @@ Component({
     onCommentDelete(e) {
       const { commentId } = e.detail;
       const { userComments } = this.data;
+      wx.request({
+        url: `${config.BACKEND_URL}/post/delete_comment`,
+        method: "DELETE",
+        loading: true,
+        showLoading: true,
+        data: { id: commentId },
+        header: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${this.properties.authUser.token}`,
+        },
+        success: (res) => {
+          if (res.statusCode === 200 && res.data.status === "success") {
+            const updatedComments = userComments.filter(
+              (c) => c.id !== commentId
+            );
+            this.setData({
+              userComments: updatedComments,
+              displayComments: this.formatNumber(updatedComments.length),
+            });
 
-      const updatedComments = userComments.filter((c) => c.id !== commentId);
-      this.setData({
-        userComments: updatedComments,
-        displayComments: this.formatNumber(updatedComments.length),
+            this.triggerEvent("commentDeleted", e.detail);
+            wx.showToast({
+              title: "Comment deleted",
+              icon: "success",
+              duration: 1000,
+            });
+          }
+        },
+        fail: (err) => {
+          console.error("Delete request failed:", err);
+          wx.showToast({
+            title: "Failed to delete comment",
+            icon: "none",
+            duration: 1500,
+          });
+        },
       });
-
-      this.triggerEvent("commentDeleted", e.detail);
     },
 
     onImagePreview(e) {
@@ -775,7 +804,7 @@ Component({
      * Touch event handlers for vertical swipe navigation
      */
     onTouchStart(e) {
-      if (this.data.showDetail) return;
+      if (this.data.showDetail || this.data.showReportModal) return;
       const touch = e.touches[0];
       this.setData({
         touchStartY: touch.pageY,
@@ -787,7 +816,7 @@ Component({
     },
 
     onTouchMove(e) {
-      if (this.data.showDetail) return;
+      if (this.data.showDetail || this.data.showReportModal) return;
       const touch = e.touches[0];
       const { touchStartY, touchStartX, maxTransformDistance } = this.data;
 
@@ -823,7 +852,7 @@ Component({
     },
 
     onTouchEnd(e) {
-      if (this.data.showDetail) return;
+      if (this.data.showDetail || this.data.showReportModal) return;
       const touch = e.changedTouches[0];
       const {
         touchStartY,

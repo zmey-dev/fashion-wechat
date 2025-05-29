@@ -42,6 +42,7 @@
     <user-posts-tab
       wx:if="{{ tabIndex === 0 && currentPostUser }}"
       current-post-user="{{ currentPostUser }}"
+      selected-post="{{ currentPost }}"
       auth-user="{{ authUser }}"
       display-follower-count="{{ displayFollowerCount }}"
       display-like-count="{{ displayLikeCount }}"

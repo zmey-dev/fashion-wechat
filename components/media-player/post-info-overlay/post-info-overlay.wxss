@@ -3,7 +3,7 @@
 /* Post Info Container */
 .post-info {
   position: absolute;
-  bottom: 200rpx;
+  bottom: 0rpx;
   left: 30rpx;
   right: 120rpx;
   z-index: 300;

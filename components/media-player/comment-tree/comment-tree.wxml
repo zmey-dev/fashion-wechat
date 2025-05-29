@@ -13,6 +13,7 @@
         comment="{{item}}"
         all-comments="{{comments}}"
         logged-user="{{loggedUser}}"
+        selected-post="{{selectedPost}}"
         depth="{{0}}"
         bind:like="onCommentLike"
         bind:edit="onCommentEdit"
@@ -28,9 +29,9 @@
   <view class="comment-input-section">
     <!-- Reply Header (when replying to someone) -->
     <view wx:if="{{commentId}}" class="reply-header">
-      <button class="reply-close-btn" bindtap="onCancelReply">
+      <div class="reply-close-btn" bindtap="onCancelReply">
         <image class="close-icon" src="/images/icons/X.svg" />
-      </button>
+      </div>
       
       <view class="reply-info">
         <view class="reply-avatar-container">

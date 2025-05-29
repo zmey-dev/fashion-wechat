@@ -12,6 +12,13 @@
     <view class="loading-spinner"></view>
   </view>
 
+ <report-modal
+    visible="{{ showReportModal }}"
+    postId="{{ currentPost.id }}"
+    bind:close="onCloseReportModal"
+    bind:submit="onSubmitReport"
+  />
+  
   <view 
     class="media-content {{ isVerticalSwiping ? 'swiping' : '' }}"
     style="transform: translateY({{ verticalTransform }}px);"
@@ -34,6 +41,7 @@
 
     <!-- Media Controls Component -->
     <media-controls
+      wx:if="{{ currentPost.type === 'image' }}"
       current-post="{{ currentPost }}"
       current-media="{{ currentMedia }}"
       current-slide-index="{{ currentSlideIndex }}"
@@ -91,12 +99,6 @@
     bind:commentdelete="onCommentDelete"
     bind:imagepreview="onImagePreview"
     bind:loginrequired="onLoginRequired"
-  />
-
-  <report-modal
-    show-report-modal="{{ showReportModal }}"
-    bind:close="onCloseReportModal"
-    bind:submit="onSubmitReport"
   />
 
   <!-- Swipe direction indicator -->

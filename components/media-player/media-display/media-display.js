@@ -30,6 +30,20 @@ Component({
 
     moveToNextSlide() {
       this.triggerEvent('nextslide');
+    },
+
+    onVideoTap(e){
+    },
+    onVideoPlay() {
+      console.log('Video started playing');
+    },
+
+    onVideoPause() {
+      console.log('Video paused');
+    },
+
+    onVideoError(e) {
+      console.error('Video error:', e.detail);
     }
   }
 });

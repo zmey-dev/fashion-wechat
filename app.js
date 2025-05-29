@@ -8,6 +8,7 @@ App({
     friends: [],
     followUsers: [],
     followedUsers: [],
+    swear:  [],
     currentPath: "discover",
     observers: {},
   },
@@ -217,6 +218,28 @@ App({
     wx.setStorageSync("userInfo", userInfo);
   },
 
+  //get swear words
+  getSwearWords() {
+    return new Promise((resolve, reject) => {
+      wx.request({
+        url: `${config.BACKEND_URL}/swear`,
+        method: "GET",
+        success: (res) => {
+          if (res.statusCode === 200 && res.data) {
+            this.globalData.swear = res.data.swear_words || [];
+            resolve(res.data);
+          } else {
+            reject(new Error("Failed to fetch swear words"));
+          }
+        },
+        fail: (err) => {
+          console.error("Error fetching swear words:", err);
+          reject(err);
+        },
+      });
+    });
+  },
+
   // Notify all pages about sidebar state change
   notifyPagesUpdate() {
     const pages = getCurrentPages();
@@ -265,6 +288,7 @@ App({
 
       // Load user info
       this.getUserInfo();
+      this.getSwearWords();
     } catch (e) {
       console.log("Failed to load app state", e);
     }

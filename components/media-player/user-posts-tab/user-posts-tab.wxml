@@ -1,6 +1,11 @@
 <!-- components/user-posts-tab/user-posts-tab.wxml -->
 <view class="user-posts-tab" wx:if="{{ currentPostUser }}">
   <view class="user-info">
+
+    <view class="user-stats">
+      <span>标题 :</span>{{ selectedPost.title || 'No Title' }} ,
+      <span>内容 :</span>{{ selectedPost.content || 'No Content' }}
+    </view>  
     <view class="user-stats">
       <text class="stat-item">Followers: {{ displayFollowerCount }}</text>
       <text class="stat-item">Likes: {{ displayLikeCount }}</text>

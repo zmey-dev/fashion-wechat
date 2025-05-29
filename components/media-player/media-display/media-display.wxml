@@ -3,6 +3,7 @@
   <!-- Media content -->
   <swiper
     class="media-swiper"
+    wx:if="{{ currentPost.type === 'image' }}"
     current="{{ currentSlideIndex }}"
     bindchange="onSlideChange"
     circular="{{ false }}"
@@ -14,7 +15,6 @@
       <view class="media-wrapper">
         <!-- Image display -->
         <image
-          wx:if="{{ currentPost.type === 'image' }}"
           width="100%"
           height="100%"
           mode="aspectFill"
@@ -23,17 +23,6 @@
           src="{{ item.url }}"
           mode="aspectFit"
           lazy-load="{{ true }}"
-        />
-
-        <!-- Video display -->
-        <video
-          wx:elif="{{ currentPost.type === 'video' }}"
-          class="media-video"
-          src="{{ item.url }}"
-          poster="{{ item.preview_url }}"
-          controls="{{ true }}"
-          autoplay="{{ isPlaying }}"
-          loop="{{ true }}"
         />
       </view>
 
@@ -58,6 +47,25 @@
       </view>
     </swiper-item>
   </swiper>
+  <!-- Video display -->
+  <video
+    wx:else
+    class="media-video"
+    src="{{ currentMedia[0].url }}"
+    poster="{{ currentMedia[0].preview_url }}"
+    controls="{{ true }}"
+    show-controls="{{ true }}"
+    always-show-controls="{{ true }}"
+    enable-progress-gesture="{{ true }}"
+    show-play-btn="{{ true }}"
+    autoplay="{{ isPlaying }}"
+    loop="{{ true }}"
+    catch:tap="onVideoTap"
+    bindplay="onVideoPlay"
+    bindpause="onVideoPause"
+    binderror="onVideoError"
+  >
+  </video>
 
   <!-- Play/Pause overlay indicator -->
   <view
@@ -75,36 +83,6 @@
       <view wx:else class="svg-icon play-icon">
         <image
           src="/images/icons/play.svg"
-          class="svg-icon"
-          mode="aspectFit"
-        ></image>
-      </view>
-    </view>
-  </view>
-
-  <!-- Navigation arrows -->
-  <view class="nav-arrows" wx:if="{{ mediaLength > 1 }}">
-    <view
-      class="nav-arrow nav-left"
-      wx:if="{{ currentSlideIndex > 0 }}"
-      bindtap="moveToPreviousSlide"
-    >
-      <view class="svg-icon arrow-svg">
-        <image
-          src="/images/icons/arrow-left.svg"
-          class="svg-icon"
-          mode="aspectFit"
-        ></image>
-      </view>
-    </view>
-    <view
-      class="nav-arrow nav-right"
-      wx:if="{{ currentSlideIndex < mediaLength - 1 }}"
-      bindtap="moveToNextSlide"
-    >
-      <view class="svg-icon arrow-svg">
-        <image
-          src="/images/icons/arrow-right.svg"
           class="svg-icon"
           mode="aspectFit"
         ></image>

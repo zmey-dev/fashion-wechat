@@ -16,6 +16,10 @@ Component({
     depth: {
       type: Number,
       value: 0
+    },
+    selectedPost: {
+      type: Object,
+      value: {}
     }
   },
 

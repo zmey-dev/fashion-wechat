@@ -3,6 +3,7 @@
 /* Detail Panel Container */
 .detail-panel {
   position: absolute;
+  box-sizing: border-box;
   top: 0;
   right: -100%;
   width: 100%;
@@ -227,6 +228,7 @@
 
 /* Scrollable Content Areas */
 .panel-content scroll-view {
+  overflow: hidden;
   height: 100%;
 }
 

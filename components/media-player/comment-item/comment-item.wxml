@@ -54,16 +54,6 @@
             <image class="action-icon" src="/images/icons/edit.svg" />
             <text class="action-text">Edit</text>
           </view>
-
-          <!-- Delete Button -->
-          <view 
-            class="action-btn delete-btn" 
-            bindtap="onCommentDelete"
-            data-id="{{item.id}}"
-          >
-            <image class="action-icon" src="/images/icons/trash.svg" />
-            <text class="action-text">Delete</text>
-          </view>
         </block>
 
         <!-- Non-owner Actions -->
@@ -98,6 +88,17 @@
           >
             <image class="action-icon" src="/images/icons/reply.svg" />
             <text class="action-text">Reply</text>
+          </view>
+        </block>
+        <block wx:if="{{loggedUser.id === selectedPost.user_id}}">  
+          <!-- Delete Button -->
+          <view 
+            class="action-btn delete-btn" 
+            bindtap="onCommentDelete"
+            data-id="{{item.id}}"
+          >
+            <image class="action-icon" src="/images/icons/trash.svg" />
+            <text class="action-text">Delete</text>
           </view>
         </block>
       </view>

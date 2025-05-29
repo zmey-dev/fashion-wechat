@@ -1,6 +1,7 @@
 // components/user-posts-tab/user-posts-tab.js
 Component({
   properties: {
+    selectedPost: { type: Object, value: {} },
     currentPostUser: { type: Object, value: {} },
     authUser: { type: Object, value: null },
     displayFollowerCount: { type: String, value: "0" },

@@ -1,85 +1,108 @@
+const { default: config } = require("../../../config");
+const { isContainSword } = require("../../../utils/isContainSword");
+const { isEmpty } = require("../../../utils/isEmpty");
+
 // comment-tree.js
 Component({
   properties: {
     comments: {
       type: Array,
-      value: []
+      value: [],
     },
     loggedUser: {
       type: Object,
-      value: {}
+      value: {},
     },
     authUser: {
       type: Object,
-      value: {}
+      value: {},
     },
     selectedPost: {
       type: Object,
-      value: {}
-    }
+      value: {},
+    },
   },
 
   data: {
-    personalComment: '',
+    personalComment: "",
     commentId: null,
     isUpdate: false,
     showEmojiPicker: false,
     replyToComment: null,
     rootComments: [],
-    emojiList: ['😀', '😂', '😍', '🥰', '😊', '😎', '🤔', '😮', '😢', '😡', '👍', '👎', '❤️', '🔥', '💯', '🎉', '😱', '🤣', '😭', '🥺']
+    emojiList: [
+      "😀",
+      "😂",
+      "😍",
+      "🥰",
+      "😊",
+      "😎",
+      "🤔",
+      "😮",
+      "😢",
+      "😡",
+      "👍",
+      "👎",
+      "❤️",
+      "🔥",
+      "💯",
+      "🎉",
+      "😱",
+      "🤣",
+      "😭",
+      "🥺",
+    ],
   },
 
   observers: {
-    'comments': function(comments) {
+    comments: function (comments) {
       this.buildCommentTree();
     },
-    'commentId': function(commentId) {
+    commentId: function (commentId) {
       if (commentId) {
-        const replyComment = this.properties.comments.find(c => c.id === commentId);
+        const replyComment = this.properties.comments.find(
+          (c) => c.id === commentId
+        );
         this.setData({
-          replyToComment: replyComment
+          replyToComment: replyComment,
         });
       } else {
         this.setData({
-          replyToComment: null
+          replyToComment: null,
         });
       }
-    }
+    },
   },
 
   lifetimes: {
     attached() {
       this.buildCommentTree();
-    }
+    },
   },
 
   methods: {
     // Build comment tree structure
     buildCommentTree() {
       const { comments } = this.properties;
-      const rootComments = comments.filter(comment => comment.parent_id === null);
+      const rootComments = comments.filter(
+        (comment) => comment.parent_id === null
+      );
       this.setData({
-        rootComments: rootComments
+        rootComments: rootComments,
       });
-    },
-
-    // Check if text contains inappropriate words (simplified version)
-    isContainSword(text) {
-      const bannedWords = ['spam', 'inappropriate']; // Add your banned words
-      return bannedWords.some(word => text.toLowerCase().includes(word));
     },
 
     // Handle comment input
     onCommentInput(e) {
       this.setData({
-        personalComment: e.detail.value
+        personalComment: e.detail.value,
       });
     },
 
     // Handle emoji toggle
     onToggleEmoji() {
       this.setData({
-        showEmojiPicker: !this.data.showEmojiPicker
+        showEmojiPicker: !this.data.showEmojiPicker,
       });
     },
 
@@ -88,7 +111,7 @@ Component({
       const emoji = e.currentTarget.dataset.emoji;
       this.setData({
         personalComment: this.data.personalComment + emoji,
-        showEmojiPicker: false
+        showEmojiPicker: false,
       });
     },
 
@@ -97,66 +120,73 @@ Component({
       const that = this;
       wx.chooseImage({
         count: 1,
-        sizeType: ['compressed'],
-        sourceType: ['album', 'camera'],
+        sizeType: ["compressed"],
+        sourceType: ["album", "camera"],
         success(res) {
           const tempFilePath = res.tempFilePaths[0];
           that.uploadCommentImage(tempFilePath);
         },
         fail(err) {
-          console.error('Choose image failed:', err);
+          console.error("Choose image failed:", err);
           wx.showToast({
-            title: 'Failed to select image',
-            icon: 'error'
+            title: "Failed to select image",
+            icon: "error",
           });
-        }
+        },
       });
     },
 
     // Upload comment image
     uploadCommentImage(filePath) {
       wx.showLoading({
-        title: 'Uploading...'
+        title: "Uploading...",
       });
 
       const formData = {
-        parent_id: this.data.commentId,
+        parent_id: this.data.commentId || null,
         post_id: this.properties.selectedPost.id,
-        sender_id: this.properties.loggedUser.id
+        sender_id: this.properties.loggedUser.id,
       };
 
       wx.uploadFile({
-        url: 'YOUR_API_ENDPOINT/send-comment', // Replace with your API endpoint
+        url: `${config.BACKEND_URL}/post/send_comment`,
+        method: "POST",
+        header: {
+          "Content-Type": "multipart/form-data",
+          Authorization: this.properties.loggedUser.token
+            ? `Bearer ${this.properties.loggedUser.token}`
+            : "",
+        },
         filePath: filePath,
-        name: 'file',
+        name: "file",
         formData: formData,
         success: (res) => {
           wx.hideLoading();
           const data = JSON.parse(res.data);
           if (data.success) {
             wx.showToast({
-              title: 'Comment posted successfully',
-              icon: 'success'
+              title: "Comment posted successfully",
+              icon: "success",
             });
-            this.triggerEvent('commentsent', {
-              comment: data.comment
+            this.triggerEvent("commentsent", {
+              comment: data.comment,
             });
             this.resetCommentInput();
           } else {
             wx.showToast({
-              title: 'Failed to post comment',
-              icon: 'error'
+              title: "Failed to post comment",
+              icon: "error",
             });
           }
         },
         fail: (err) => {
           wx.hideLoading();
-          console.error('Upload failed:', err);
+          console.error("Upload failed:", err);
           wx.showToast({
-            title: 'Upload failed',
-            icon: 'error'
+            title: "Upload failed",
+            icon: "error",
           });
-        }
+        },
       });
     },
 
@@ -165,94 +195,101 @@ Component({
       const { personalComment, commentId, isUpdate } = this.data;
       const { authUser, loggedUser, selectedPost } = this.properties;
 
-      if (!authUser) {
-        this.triggerEvent('loginrequired');
+      const app = getApp();
+      if (isEmpty(authUser)) {
+        app.setState("showLoginModal", true);
         return;
       }
 
       if (!personalComment.trim()) {
         wx.showToast({
-          title: 'Please enter a comment',
-          icon: 'error'
+          title: "Please enter a comment",
+          icon: "error",
         });
         return;
       }
 
-      if (this.isContainSword(personalComment)) {
+      if (isContainSword(personalComment)) {
         wx.showToast({
-          title: 'Cannot use inappropriate language',
-          icon: 'error'
+          title: "Cannot use inappropriate language",
+          icon: "error",
         });
         return;
       }
 
       wx.showLoading({
-        title: isUpdate ? 'Updating...' : 'Posting...'
+        title: isUpdate ? "Updating..." : "Posting...",
       });
 
-      const apiUrl = isUpdate ? 
-        'YOUR_API_ENDPOINT/update-comment' : 
-        'YOUR_API_ENDPOINT/send-comment';
+      const apiUrl = isUpdate
+        ? `${config.BACKEND_URL}/comment/update_my_comment`
+        : `${config.BACKEND_URL}/post/send_comment`;
 
-      const requestData = isUpdate ? {
-        comment_id: commentId,
-        new_comment: personalComment
-      } : {
-        parent_id: commentId,
-        post_id: selectedPost.id,
-        sender_id: loggedUser.id,
-        content: personalComment
-      };
+      const requestData = isUpdate
+        ? {
+            comment_id: commentId,
+            new_comment: personalComment,
+          }
+        : {
+            parent_id: commentId,
+            post_id: selectedPost.id,
+            sender_id: loggedUser.id,
+            content: personalComment,
+          };
 
       wx.request({
         url: apiUrl,
-        method: 'POST',
+        method: "POST",
+        header: {
+          "Content-Type": "application/json",
+          Authorization: loggedUser.token ? `Bearer ${loggedUser.token}` : "",
+        },
         data: requestData,
         success: (res) => {
           wx.hideLoading();
-          if (res.data.success) {
+          if (res.data.status == "success") {
             wx.showToast({
-              title: isUpdate ? 'Comment updated' : 'Comment posted',
-              icon: 'success'
+              title: res.data.msg,
+              icon: "success",
             });
-            
+
             if (isUpdate) {
-              this.triggerEvent('commentupdated', {
-                comment: res.data.comment
+              this.triggerEvent("commentupdated", {
+                comment: res.data.comment,
               });
             } else {
-              this.triggerEvent('commentsent', {
-                comment: res.data.comment
+              this.triggerEvent("commentsent", {
+                comments: res.data.comment,
               });
             }
-            
+
             this.resetCommentInput();
           } else {
             wx.showToast({
-              title: 'Failed to post comment',
-              icon: 'error'
+              title: res.data.msg ? res.data.msg : "Failed to post comment",
+              icon: "error",
             });
           }
         },
         fail: (err) => {
           wx.hideLoading();
-          console.error('Request failed:', err);
+          console.error("Request failed:", err);
           wx.showToast({
-            title: 'Network error',
-            icon: 'error'
+            title: "Network error",
+            icon: "error",
           });
-        }
+        },
       });
     },
 
     // Reset comment input
     resetCommentInput() {
       this.setData({
-        personalComment: '',
+        personalComment: "",
         commentId: null,
         isUpdate: false,
         showEmojiPicker: false,
-        replyToComment: null
+        replyToComment: null,
       });
     },
 
@@ -263,7 +300,7 @@ Component({
 
     // Handle like from child components
     onCommentLike(e) {
-      this.triggerEvent('like', e.detail);
+      this.triggerEvent("like", e.detail);
     },
 
     // Handle edit from child components
@@ -272,7 +309,7 @@ Component({
       this.setData({
         isUpdate: true,
         commentId: item.id,
-        personalComment: item.comment_text || ''
+        personalComment: item.comment_text || "",
       });
     },
 
@@ -280,41 +317,41 @@ Component({
     onCommentReply(e) {
       const { item } = e.detail;
       const { loggedUser } = this.properties;
-      
+
       if (!loggedUser) {
-        this.triggerEvent('loginrequired');
+        this.triggerEvent("loginrequired");
         return;
       }
 
       if (loggedUser.id === item.sender_id) {
         wx.showToast({
-          title: 'Cannot reply to your own comment',
-          icon: 'error'
+          title: "Cannot reply to your own comment",
+          icon: "error",
         });
         return;
       }
 
       this.setData({
         commentId: item.id,
-        personalComment: '',
+        personalComment: "",
         isUpdate: false,
-        showEmojiPicker: false
+        showEmojiPicker: false,
       });
     },
 
     // Handle delete from child components
     onCommentDelete(e) {
-      this.triggerEvent('delete', e.detail);
+      this.triggerEvent("delete", e.detail);
     },
 
     // Handle image preview from child components
     onImagePreview(e) {
-      this.triggerEvent('imagepreview', e.detail);
+      this.triggerEvent("imagepreview", e.detail);
     },
 
     // Handle image upload from child components
     onImageUpload(e) {
-      this.triggerEvent('imageupload', e.detail);
-    }
-  }
+      this.triggerEvent("commentupdated", e.detail);
+    },
+  },
 });

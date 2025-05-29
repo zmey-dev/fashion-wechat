@@ -256,7 +256,7 @@
 }
 
 /* Additional visual enhancements */
-.media-wrapper::before {
+.media-wrapper {
   content: '';
   position: absolute;
   top: 0;
@@ -265,7 +265,7 @@
   bottom: 0;
   background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.02) 50%, transparent 70%);
   pointer-events: none;
-  opacity: 0;
+  opacity: 1;
   transition: opacity 0.3s ease;
 }
 
@@ -332,4 +332,9 @@
   display: block;
   font-size: 48rpx;
   margin-bottom: 20rpx;
+}
+
+video::-webkit-media-controls-panel {
+  display: flex !important;
+  opacity: 1 !important;
 }

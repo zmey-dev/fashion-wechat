@@ -69,8 +69,6 @@ Component({
 
     // Toggle password visibility
     togglePassword() {
-      console.log("==================");
-      
       this.setData({
         showPassword: !this.data.showPassword,
       });
