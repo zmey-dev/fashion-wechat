@@ -76,7 +76,7 @@ Page({
     }
     // Fetch post data from API
     wx.request({
-      url: `${config.BACKEND_URL}/post/get_post_in_discover`,
+      url: `${config.BACKEND_URL}/post/get_post_recommend`,
       method: "GET",
       data: data,
       header: {
