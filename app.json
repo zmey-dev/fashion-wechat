@@ -1,5 +1,11 @@
 {
-  "pages": ["pages/index/index", "pages/recommend/recommend","pages/follow/follow"],
+  "pages": [
+    "pages/index/index",
+    "pages/recommend/recommend",
+    "pages/follow/follow",
+    "pages/friend/friend",
+    "pages/contact/contact"
+  ],
   "window": {
     "backgroundTextStyle": "light",
     "navigationBarBackgroundColor": "#111111",

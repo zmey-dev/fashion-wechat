@@ -4,9 +4,11 @@ const app = getApp();
 
 Page({
   data: {
+    userInfo: app.globalData.userInfo || {},
     userList: [],
     filteredUserList: [],
     currentUser: null,
+    currentPath: "follow",
     userMediaList: [],
     showUserMedia: false,
     loading: false,
@@ -24,9 +26,14 @@ Page({
     this.sidebarHandler = (showSidebar) => {
       this.setData({ showSidebar });
     };
+    this.userInfoHandler = (userInfo) => {
+      this.setData({ userInfo });
+    }
     app.subscribe("showSidebar", this.sidebarHandler);
+    app.subscribe("userInfo", this.userInfoHandler);
     this.setData({
       showSidebar: app.globalData.showSidebar || false,
+      userInfo: app.globalData.userInfo || {},
     });
     this.loadUserList();
   },
@@ -34,6 +41,7 @@ Page({
   onUnload: function () {
     const app = getApp();
     app.unsubscribe("showSidebar", this.sidebarHandler);
+    app.unsubscribe("userInfo", this.userInfoHandler);
   },
 
   loadUserList: function () {
