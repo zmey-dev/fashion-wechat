@@ -1,2 +1,132 @@
 <!--pages/follow/follow.wxml-->
-<text>pages/follow/follow.wxml</text>
+<view class="container">
+  <slide-sidebar 
+    current-path="{{ currentPath }}" 
+    is-visible="{{ showSidebar }}" 
+    userInfo="{{ userInfo }}"
+    bind:hideSidebar="closeSideBar"
+    style="position:relative; width: 100%; background: black; height: 100rpx"
+    >
+    <view style="position:relative; width: 100%; background: #d3d3d3; height: 100px"></view>
+    <textarea placeholder="请输入" placeholder-style="color:blue;" />
+  </slide-sidebar>
+  <!-- User List View -->
+  <view class="user-list" wx:if="{{!showUserMedia}}">
+    <view class="page-header">
+      <text class="page-title">关注</text>
+    </view>
+    
+    <!-- Search Bar -->
+    <view class="search-container">
+      <view class="search-box">
+        <view class="search-icon">🔍</view>
+        <input 
+          class="search-input" 
+          type="text" 
+          placeholder="搜索用户" 
+          value="{{searchValue}}"
+          bindinput="searchUsers"
+          confirm-type="search"
+        />
+        <view class="clear-icon" bindtap="clearSearch" wx:if="{{searchValue}}">✕</view>
+      </view>
+    </view>
+    
+    <view class="no-results" wx:if="{{filteredUserList.length === 0}}">
+      <text>未找到匹配的用户</text>
+    </view>
+    
+    <view class="user-item" wx:for="{{filteredUserList}}" wx:key="id" bindtap="selectUser" data-id="{{item.id}}">
+      <avatar class="user-avatar" avatar="{{item.avatar}}" name="{{item.username}}" size="{{70}}" mode="aspectFill"></avatar>
+      <view class="user-info">
+        <text class="user-nickname">{{item.username}}</text>
+        <text class="user-followers">粉丝 {{item.followers}}人</text>
+      </view>
+      <view class="user-arrow">
+        <text class="arrow-icon">></text>
+      </view>
+    </view>
+  </view>
+
+  <!-- User Media View -->
+  <view class="user-media-container" wx:if="{{showUserMedia}}">
+    <view class="media-header">
+      <view class="back-button" bindtap="backToUserList">
+        <text class="back-icon">←</text>
+      </view>
+      <view class="user-profile">
+      <avatar class="user-avatar" avatar="{{currentUser.avatar}}" name="{{currentUser.username}}" size="{{70}}" mode="aspectFill"></avatar>
+        <text class="profile-nickname">{{currentUser.username}}</text>
+      </view>
+    </view>
+    <view class="media-stats">
+      <!-- Follow/Unfollow Button -->
+      <button 
+        class="action-button {{currentUser.isFollowed ? 'bg-green-800' : 'bg-dark'}}" 
+        bindtap="handleFollowToggle">
+        <block wx:if="{{currentUser.isFollowed}}">
+          <view class="button-content">
+            <text class="icon">-</text>
+            <text class="label">取消关注</text>
+          </view>
+        </block>
+        <block wx:else>
+          <view class="button-content">
+            <text class="icon">✓</text>
+            <text class="label">关 注</text>
+          </view>
+        </block>
+      </button>
+
+      <!-- Friend Button -->
+      <button 
+        class="action-button {{currentUser.isFriend ? (currentUser.isAllow ? 'bg-green-800' : 'bg-yellow-800') : 'bg-dark'}}" 
+        bindtap="handleFriendToggle">
+        <block wx:if="{{currentUser.isFriend}}">
+          <view class="button-content">
+            <text class="icon">-</text>
+            <text class="label">取消好友</text>
+          </view>
+        </block>
+        <block wx:else>
+          <view class="button-content">
+            <text class="icon">+</text>
+            <text class="label">申请好友</text>
+          </view>
+        </block>
+      </button>
+
+      <!-- Message Button (only shown if they are friends) -->
+      <button 
+        class="action-button bg-dark" 
+        bindtap="handleSendMessage"
+        wx:if="{{currentUser.isFriend}}">
+        <view class="button-content">
+          <text class="icon">💬</text>
+          <text class="label">留言</text>
+        </view>
+      </button>
+    </view>
+
+    <view class="media-grid">
+      <view class="media-item" wx:for="{{userMediaList}}" wx:key="id" bindtap="previewImage" data-id="{{item.id}}">
+        <image wx:if="{{item.type=='image'}}" class="media-image" src="{{item.media[0].url}}" mode="aspectFill"></image>
+        <image wx:else class="media-image" src="{{item.media[0].preview_url}}" mode="aspectFill"></image>
+        <view class="media-info">
+          <view class="media-stats">
+            <text class="media-likes">♥ {{item.likes}}</text>
+            <text class="media-comments">💬 {{item.comments}}</text>
+          </view>
+          <text class="media-description">{{item.description}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="loading-indicator" wx:if="{{loading}}">
+      <text>加载中...</text>
+    </view>
+    <view class="no-more" wx:if="{{!hasMore && userMediaList.length > 0}}">
+      <text>没有更多内容</text>
+    </view>
+  </view>
+</view>

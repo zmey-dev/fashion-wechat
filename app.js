@@ -1,4 +1,5 @@
 const { default: config } = require("./config");
+const { isEmpty } = require("./utils/isEmpty");
 
 App({
   globalData: {
@@ -8,7 +9,7 @@ App({
     friends: [],
     followUsers: [],
     followedUsers: [],
-    swear:  [],
+    swear: [],
     currentPath: "discover",
     observers: {},
   },
@@ -45,7 +46,6 @@ App({
   getState(key) {
     return this.globalData[key];
   },
-
 
   // Set current path
   setCurrentPath(path) {
@@ -89,30 +89,64 @@ App({
         this.globalData.currentPath = "discover";
         break;
       case "recommend":
+        if (isEmpty(this.globalData.userInfo)) {
+          getApp().setState("showLoginModal", true);
+          return;
+        }
         wx.redirectTo({ url: "/pages/recommend/recommend" });
         this.globalData.currentPath = "recommend";
         break;
       case "follow":
+        if (isEmpty(this.globalData.userInfo)) {
+          getApp().setState("showLoginModal", true);
+          return;
+        }
+
         wx.redirectTo({ url: "/pages/follow/follow" });
         this.globalData.currentPath = "follow";
         break;
       case "chat":
+        if (isEmpty(this.globalData.userInfo)) {
+          getApp().setState("showLoginModal", true);
+          return;
+        }
+
         wx.redirectTo({ url: "/pages/chat/chat" });
         this.globalData.currentPath = "chat";
         break;
       case "friend":
+        if (isEmpty(this.globalData.userInfo)) {
+          getApp().setState("showLoginModal", true);
+          return;
+        }
+
         wx.redirectTo({ url: "/pages/friend/friend" });
         this.globalData.currentPath = "friend";
         break;
       case "me":
+        if (isEmpty(this.globalData.userInfo)) {
+          getApp().setState("showLoginModal", true);
+          return;
+        }
+
         wx.redirectTo({ url: "/pages/me/me" });
         this.globalData.currentPath = "me";
         break;
       case "event":
+        if (isEmpty(this.globalData.userInfo)) {
+          getApp().setState("showLoginModal", true);
+          return;
+        }
+
         wx.redirectTo({ url: "/pages/event/event" });
         this.globalData.currentPath = "event";
         break;
       case "contact":
+        if (isEmpty(this.globalData.userInfo)) {
+          getApp().setState("showLoginModal", true);
+          return;
+        }
+
         wx.redirectTo({ url: "/pages/contact/contact" });
         this.globalData.currentPath = "contact";
         break;
