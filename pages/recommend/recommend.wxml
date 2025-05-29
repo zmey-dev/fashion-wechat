@@ -1,2 +1,43 @@
-<!--pages/recommend/recommend.wxml-->
-<text>pages/recommend/recommend.wxml</text>
+<!-- pages/index/index.wxml -->
+<view
+  class="page-container {{ showSidebar ? 'sidebar-open' : '' }}"
+>
+  <slide-sidebar 
+    current-path="{{ currentPath }}" 
+    is-visible="{{ showSidebar }}" 
+    userInfo="{{ userInfo }}"
+    bind:hideSidebar="closeSideBar"
+    style="position:relative; width: 100%; background: #d3d3d3; height: 100px"
+    >
+    <view style="position:relative; width: 100%; background: #d3d3d3; height: 100px"></view>
+    <textarea placeholder="请输入" placeholder-style="color:blue;" />
+  </slide-sidebar>
+  <login-modal wx:if="{{ showLoginModal }}" class="login-modal" />
+  <view class="post-viewer-container">
+    <media-player
+      wx:if="{{ currentPost }}"
+      selectedPost="{{ currentPost }}"
+      selectedPostUser="{{ currentPostUser }}"
+      followedUsers="{{ followedUsers }}"
+      authUser="{{ userInfo }}"
+      index="{{ currentIndex }}"
+      totalCount="{{ totalPosts }}"
+      bind:postNavigation="handlePostNavigation"
+      bind:likeUpdated="handleLikeUpdated"
+      bind:favoriteUpdated="handleFavoriteUpdated"
+      bind:shareUpdated="handleShareUpdated"
+      bind:followUpdated="handleFollowUpdated"
+      bind:showLogin="showLoginModal"
+      bind:navigateToProfile="navigateToUserProfile"
+      bind:previousPost="handlePreviousPost"
+      bind:nextPost="handleNextPost"
+    >
+    </media-player>
+
+    <!-- Loading indicator -->
+    <view wx:if="{{ isLoading }}" class="loading-container">
+      <view class="loading-spinner"></view>
+      <text class="loading-text">加载中...</text>
+    </view>
+  </view>
+</view>

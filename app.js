@@ -46,25 +46,10 @@ App({
     return this.globalData[key];
   },
 
-  // Toggle sidebar state
-  toggleSidebar() {
-    this.globalData.showSidebar = !this.globalData.showSidebar;
-    this.notifyPagesUpdate();
-  },
-
-  // Set sidebar state
-  setSidebar(isOpen) {
-    this.globalData.showSidebar = isOpen;
-    this.notifyPagesUpdate();
-
-    // Optional: Save to storage for persistence
-    wx.setStorageSync("showSidebar", isOpen);
-  },
 
   // Set current path
   setCurrentPath(path) {
     this.globalData.currentPath = path;
-    this.notifyPagesUpdate();
   },
 
   // Determine current path based on route
@@ -100,34 +85,33 @@ App({
   navigateTo(path) {
     switch (path) {
       case "discover":
-        wx.switchTab({ url: "/pages/index/index" });
+        wx.redirectTo({ url: "/pages/index/index" });
         break;
       case "recommend":
-        wx.navigateTo({ url: "/pages/recommend/recommend" });
+        wx.redirectTo({ url: "/pages/recommend/recommend" });
         break;
       case "follow":
-        wx.navigateTo({ url: "/pages/follow/follow" });
+        wx.redirectTo({ url: "/pages/follow/follow" });
         break;
       case "chat":
-        wx.navigateTo({ url: "/pages/chat/chat" });
+        wx.redirectTo({ url: "/pages/chat/chat" });
         break;
       case "friend":
-        wx.navigateTo({ url: "/pages/friend/friend" });
+        wx.redirectTo({ url: "/pages/friend/friend" });
         break;
       case "me":
-        wx.switchTab({ url: "/pages/me/me" });
+        wx.redirectTo({ url: "/pages/me/me" });
         break;
       case "event":
-        wx.navigateTo({ url: "/pages/event/event" });
+        wx.redirectTo({ url: "/pages/event/event" });
         break;
       case "contact":
-        wx.navigateTo({ url: "/pages/contact/contact" });
+        wx.redirectTo({ url: "/pages/contact/contact" });
         break;
       default:
         console.log("Unknown path:", path);
     }
-    // Close sidebar after navigation
-    this.setSidebar(false);
+    this.globalData.showSidebar = false;
   },
 
   logout() {

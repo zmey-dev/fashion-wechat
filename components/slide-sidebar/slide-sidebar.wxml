@@ -48,18 +48,17 @@
     <!-- Header -->
     <view class="sidebar-header">
       <view class="user-avatar">
-        <image wx:if="{{userInfo.avatar}}" src="{{userInfo.avatar}}" class="avatar-img" />
+        <avatar wx:if="{{userInfo.avatar}}" avatar="{{userInfo.avatar}}" name="{{userInfo.username}}" class="avatar-img" />
         <view wx:else class="avatar-placeholder">
           <view class="svg-icon">
             <view class="svg-content">
-              <view class="svg-circle"></view>
-              <view class="svg-body"></view>
+              <image class="svg-image" style="width: 70rpx;height: 70rpx;" src="/images/icons/user.svg" alt="默认头像" />
             </view>
           </view>
         </view>
       </view>
       <view class="user-info">
-        <text class="username">{{userInfo.nickname || '用户'}}</text>
+        <text class="username">{{userInfo.username || '用户'}}</text>
         <text class="user-role">学生</text>
       </view>
       <view class="close-btn" bindtap="hideSidebar">
@@ -77,10 +76,7 @@
             bindtap="onNavItemTap" 
             data-destination="navigateToDiscover">
         <view class="nav-icon">
-          <view class="thumbs-up-svg">
-            <view class="thumb-main"></view>
-            <view class="thumb-finger"></view>
-          </view>
+          <image src="/images/icons/discover.svg" class="button-svg" alt="发现图标"></image>
         </view>
         <text class="nav-label">精选</text>
         <view class="arrow-svg">
@@ -93,12 +89,7 @@
             bindtap="onNavItemTap"
             data-destination="navigateToRecommend">
         <view class="nav-icon">
-          <view class="sparkles-svg">
-            <view class="spark spark-1"></view>
-            <view class="spark spark-2"></view>
-            <view class="spark spark-3"></view>
-            <view class="spark spark-4"></view>
-          </view>
+          <image src="/images/icons/recommend.svg" class="button-svg" alt="发现图标"></image>
         </view>
         <text class="nav-label">推荐</text>
         <view class="arrow-svg">
@@ -111,11 +102,7 @@
             bindtap="onNavItemTap"
             data-destination="navigateToFollow">
         <view class="nav-icon">
-          <view class="user-check-svg">
-            <view class="user-circle"></view>
-            <view class="user-body"></view>
-            <view class="check-mark"></view>
-          </view>
+          <image src="/images/icons/follow.svg" class="button-svg" alt="发现图标"></image>
         </view>
         <text class="nav-label">关注</text>
         <view class="arrow-svg">
@@ -128,10 +115,7 @@
             bindtap="onNavItemTap"
             data-destination="navigateToChat">
         <view class="nav-icon">
-          <view class="message-svg">
-            <view class="message-bubble"></view>
-            <view class="message-tail"></view>
-          </view>
+          <image src="/images/icons/message.svg" class="button-svg" alt="发现图标"></image>
         </view>
         <text class="nav-label">对话</text>
         <view class="arrow-svg">
@@ -144,16 +128,7 @@
             bindtap="onNavItemTap"
             data-destination="navigateToFriend">
         <view class="nav-icon">
-          <view class="users-svg">
-            <view class="user-1">
-              <view class="user-circle"></view>
-              <view class="user-body"></view>
-            </view>
-            <view class="user-2">
-              <view class="user-circle"></view>
-              <view class="user-body"></view>
-            </view>
-          </view>
+          <image src="/images/icons/friend.svg" class="button-svg" alt="发现图标"></image>
         </view>
         <text class="nav-label">朋友</text>
         <view class="arrow-svg">
@@ -166,10 +141,7 @@
             bindtap="onNavItemTap"
             data-destination="navigateToMe">
         <view class="nav-icon">
-          <view class="user-svg">
-            <view class="user-circle"></view>
-            <view class="user-body"></view>
-          </view>
+          <image src="/images/icons/me.svg" class="button-svg" alt="发现图标"></image>
         </view>
         <text class="nav-label">我的</text>
         <view class="arrow-svg">
@@ -182,10 +154,7 @@
             bindtap="onNavItemTap"
             data-destination="navigateToEvent">
         <view class="nav-icon">
-          <view class="flag-svg">
-            <view class="flag-pole"></view>
-            <view class="flag-cloth"></view>
-          </view>
+          <image src="/images/icons/event.svg" class="button-svg" alt="发现图标"></image>
         </view>
         <text class="nav-label">比赛</text>
         <view class="arrow-svg">
@@ -198,11 +167,7 @@
             bindtap="onNavItemTap"
             data-destination="navigateToContact">
         <view class="nav-icon">
-          <view class="handshake-svg">
-            <view class="hand-1"></view>
-            <view class="hand-2"></view>
-            <view class="heart"></view>
-          </view>
+          <image src="/images/icons/support.svg" class="button-svg" alt="发现图标"></image>
         </view>
         <text class="nav-label">联系我们</text>
         <view class="arrow-svg">

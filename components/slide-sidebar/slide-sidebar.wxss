@@ -700,7 +700,7 @@
 
 /* Enhanced SVG Icons with animations */
 /* Thumbs Up */
-.thumbs-up-svg {
+.buttom-svg {
   width: 28rpx;
   height: 28rpx;
   position: relative;

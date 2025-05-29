@@ -1,5 +1,5 @@
 {
-  "pages": ["pages/index/index"],
+  "pages": ["pages/index/index", "pages/recommend/recommend"],
   "window": {
     "backgroundTextStyle": "light",
     "navigationBarBackgroundColor": "#111111",

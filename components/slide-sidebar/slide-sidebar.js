@@ -19,7 +19,7 @@ Component({
   },
 
   data: {
-    searchValue: '',
+    searchValue: "",
     isSearchMode: false,
   },
 
@@ -27,27 +27,27 @@ Component({
     // Show sidebar
     showSidebar() {
       const app = getApp();
-      app.setSidebar(true);
+      app.setState("showSidebar", true);
     },
 
     // Hide sidebar
     hideSidebar() {
       const app = getApp();
-      app.setSidebar(false);
+      app.setState("showSidebar", false);
     },
 
     // Toggle search mode
     toggleSearch() {
       this.setData({
         isSearchMode: !this.data.isSearchMode,
-        searchValue: ''
+        searchValue: "",
       });
     },
 
     // Handle search input
     onSearchInput(e) {
       this.setData({
-        searchValue: e.detail.value
+        searchValue: e.detail.value,
       });
     },
 
@@ -56,7 +56,7 @@ Component({
       const searchValue = e.detail.value;
       if (searchValue.trim()) {
         // Trigger search event to parent component
-        this.triggerEvent('search', { value: searchValue });
+        this.triggerEvent("search", { value: searchValue });
       }
     },
 
@@ -64,7 +64,7 @@ Component({
     cancelSearch() {
       this.setData({
         isSearchMode: false,
-        searchValue: ''
+        searchValue: "",
       });
     },
 

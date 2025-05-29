@@ -1,13 +1,11 @@
 <!-- pages/index/index.wxml -->
 <view
   class="page-container {{ showSidebar ? 'sidebar-open' : '' }}"
-  bindtouchstart="onTouchStart"
-  bindtouchend="onTouchEnd"
 >
-  <!-- Login Modal -->
   <slide-sidebar 
     current-path="{{ currentPath }}" 
     is-visible="{{ showSidebar }}" 
+    userInfo="{{ userInfo }}"
     bind:hideSidebar="closeSideBar"
     style="position:relative; width: 100%; background: #d3d3d3; height: 100px"
     >
