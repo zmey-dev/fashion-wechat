@@ -176,6 +176,23 @@
       </view>
     </view>
 
+    <!-- Authentication Buttons -->
+    <view class="auth-buttons">
+      <view wx:if="{{!isLoggedIn}}" class="auth-button login-button" bindtap="onLoginTap">
+        <view class="auth-icon">
+          <image src="/images/icons/login.svg" class="button-svg" alt="登录图标"></image>
+        </view>
+        <text class="auth-label">登录</text>
+      </view>
+      
+      <view wx:if="{{isLoggedIn}}" class="auth-button logout-button" bindtap="onLogoutTap">
+        <view class="auth-icon">
+          <image src="/images/icons/logout.svg" class="button-svg" alt="登出图标"></image>
+        </view>
+        <text class="auth-label">退出登录</text>
+      </view>
+    </view>
+
     <!-- Footer -->
     <view class="sidebar-footer">
       <view class="app-info">

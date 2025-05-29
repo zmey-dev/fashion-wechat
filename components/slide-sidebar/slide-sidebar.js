@@ -21,8 +21,15 @@ Component({
   data: {
     searchValue: "",
     isSearchMode: false,
+    isLoggedIn: false,
   },
-
+  observers: {
+    userInfo: function(newVal) {
+      this.setData({
+        isLoggedIn: !!newVal && !!newVal.username,
+      });
+    },
+  },
   methods: {
     // Show sidebar
     showSidebar() {
@@ -120,5 +127,43 @@ Component({
         this[destination]();
       }
     },
+
+    onLoginTap() {
+      getApp().setState("showLoginModal", true);      
+      this.hideSidebar();
+    },
+
+    onLogoutTap() {
+      wx.showModal({
+        title: '退出登录',
+        content: '确定要退出当前账号吗？',
+        success: (res) => {
+          if (res.confirm) {
+            // Implement logout logic here
+            // For example, clear user info in storage and update app state
+            wx.removeStorageSync('userInfo');
+            
+            // Update the component's data
+            this.setData({
+              userInfo: {
+                username: '',
+                avatar: '',
+                isLoggedIn: false
+              }
+            });
+
+            getApp().setState("userInfo", null);
+            
+            // Notify the parent component about the logout
+            this.triggerEvent('logout');
+            
+            wx.showToast({
+              title: '已退出登录',
+              icon: 'success'
+            });
+          }
+        }
+      });
+    }
   },
 });
