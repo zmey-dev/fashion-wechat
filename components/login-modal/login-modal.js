@@ -3,7 +3,7 @@ const { default: config } = require("../../config");
 // components/login-modal/login-modal.js
 Component({
   data: {
-    loginType: "wechat", // 'wechat', 'email', 'phone'
+    loginType: "email", // 'wechat', 'email', 'phone'
     email: "",
     phone: "",
     password: "",
@@ -81,7 +81,7 @@ Component({
     },
 
     validatePhone(phone) {
-      const phoneRegex = /^1[3-9]\d{9}$/;
+      const phoneRegex = /\d{11}$/;
       return phoneRegex.test(phone);
     },
 
@@ -191,13 +191,25 @@ Component({
       try {
         this.setData({ loading: true });
 
-        const authResult = await this.requestLogin({
-          type: "phone",
-          phone,
-          code: verificationCode,
+        wx.request({
+          url: `${config.BACKEND_URL}/verification/verify_and_login`,
+          method: "POST",
+          data: {
+            phone: "+86" + phone,
+            code: verificationCode,
+          },
+          header: {
+            "Content-Type": "application/json",
+          },
+          success: async (res) => {
+            if (res.statusCode === 200 && res.data.status === "success") {
+            this.handleLoginSuccess(res.data);
+            }
+            else {
+              throw new Error(res.data.message || "Phone verification failed");
+            }
+          }
         });
-
-        this.handleLoginSuccess(authResult);
       } catch (error) {
         this.handleLoginError(
           "Phone login failed, please check verification code"
@@ -226,7 +238,11 @@ Component({
       }
 
       try {
-        await this.requestVerificationCode(phone);
+        wx.showLoading({
+          title: "Sending code...",
+          mask: true,
+        });
+        await this.requestVerificationCode("+86" + phone);
 
         // Start countdown
         this.startCountdown();
@@ -240,6 +256,8 @@ Component({
           title: "Failed to send code",
           icon: "error",
         });
+      } finally {
+        wx.hideLoading();
       }
     },
 
@@ -388,14 +406,14 @@ Component({
     requestVerificationCode(phone) {
       return new Promise((resolve, reject) => {
         wx.request({
-          url: "https://your-api-domain.com/auth/send-code",
+          url: `${config.BACKEND_URL}/verification/send_phone_sms_code`,
           method: "POST",
-          data: { phone },
+          data: { phone, is_login: true },
           header: {
             "Content-Type": "application/json",
           },
           success: (res) => {
-            if (res.statusCode === 200 && res.data.success) {
+            if (res.statusCode === 200 && res.data.status === "success") {
               resolve(res.data);
             } else {
               reject(new Error(res.data.message || "Failed to send code"));

@@ -11,13 +11,6 @@
     <!-- Login Type Tabs -->
     <view class="login-tabs">
       <view 
-        class="tab-item {{loginType === 'wechat' ? 'active' : ''}}"
-        data-type="wechat"
-        bindtap="switchLoginType"
-      >
-        <span>WeChat</span>
-      </view>
-      <view 
         class="tab-item {{loginType === 'email' ? 'active' : ''}}"
         data-type="email"
         bindtap="switchLoginType"
@@ -79,13 +72,16 @@
       <!-- Phone Login -->
       <view class="form-container {{loginType === 'phone' ? 'active' : ''}}">
         <view class="input-group">
-          <input
-            class="form-input {{phoneError ? 'error' : ''}}"
-            type="number"
-            placeholder="Enter phone number"
-            value="{{phone}}"
-            bindinput="onPhoneInput"
-          />
+          <view class="phone-wrapper">
+            <view class="country-code">+86</view>
+            <input
+              class="form-input {{phoneError ? 'error' : ''}}"
+              type="number"
+              placeholder="Enter phone number"
+              value="{{phone}}"
+              bindinput="onPhoneInput"
+            />
+          </view>
           <span class="error-span" wx:if="{{phoneError}}">{{phoneError}}</span>
         </view>
         
