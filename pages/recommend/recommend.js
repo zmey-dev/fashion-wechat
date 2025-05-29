@@ -4,7 +4,7 @@ const app = getApp();
 Page({
   data: {
     showSidebar: false,
-    currentPath: "discover",
+    currentPath: "recommend",
     showLoginModal: app.globalData.showLoginModal || false,
     userInfo: app.globalData.userInfo || {},
     followedUsers: app.globalData.followedUsers || [],

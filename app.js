@@ -86,27 +86,35 @@ App({
     switch (path) {
       case "discover":
         wx.redirectTo({ url: "/pages/index/index" });
+        this.globalData.currentPath = "discover";
         break;
       case "recommend":
         wx.redirectTo({ url: "/pages/recommend/recommend" });
+        this.globalData.currentPath = "recommend";
         break;
       case "follow":
         wx.redirectTo({ url: "/pages/follow/follow" });
+        this.globalData.currentPath = "follow";
         break;
       case "chat":
         wx.redirectTo({ url: "/pages/chat/chat" });
+        this.globalData.currentPath = "chat";
         break;
       case "friend":
         wx.redirectTo({ url: "/pages/friend/friend" });
+        this.globalData.currentPath = "friend";
         break;
       case "me":
         wx.redirectTo({ url: "/pages/me/me" });
+        this.globalData.currentPath = "me";
         break;
       case "event":
         wx.redirectTo({ url: "/pages/event/event" });
+        this.globalData.currentPath = "event";
         break;
       case "contact":
         wx.redirectTo({ url: "/pages/contact/contact" });
+        this.globalData.currentPath = "contact";
         break;
       default:
         console.log("Unknown path:", path);
