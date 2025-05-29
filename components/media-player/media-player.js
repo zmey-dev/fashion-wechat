@@ -195,15 +195,15 @@ Component({
      * Auto play management
      */
     startAutoPlay() {
+      this.clearAutoPlayTimer();
       if (
         this.data.isPlaying &&
         !this.data.showDetail &&
         this.data.currentPost?.type === "image"
       ) {
-        this.clearAutoPlayTimer();
         const timer = setInterval(() => {
           this.moveToNextSlide();
-        }, 4000);
+        }, 5000);
         this.setData({ autoPlayTimer: timer });
       }
     },
