@@ -1,0 +1,345 @@
+<!--pages/create-media/create-media.wxml-->
+<view class="container">
+  <!-- Header -->
+  <view class="header">
+    <view class="header-content">
+      <text class="header-title">
+        {{isUpdateMode ? '更新作品' : (eventId ? eventTitle + ' - 创建作品' : '创建新作品')}}
+      </text>
+      <view class="close-btn" bindtap="onClose">
+        <text class="iconfont icon-close"></text>
+      </view>
+    </view>
+  </view>
+
+  <!-- Main Content -->
+  <view class="main-content">
+    <!-- Tab Navigation (only show when not in annotation mode) -->
+    <view class="tab-nav" wx:if="{{activeTab !== 'annotation'}}">
+      <view 
+        class="tab-item {{activeTab === 'media' ? 'active' : ''}}"
+        data-tab="media"
+        bindtap="switchTab"
+      >
+        <text class="tab-icon">📁</text>
+        <text class="tab-text">媒体文件</text>
+        <view class="tab-badge" wx:if="{{files.length > 0}}">{{files.length}}</view>
+      </view>
+      <view 
+        class="tab-item {{activeTab === 'form' ? 'active' : ''}}"
+        data-tab="form"
+        bindtap="switchTab"
+      >
+        <text class="tab-icon">📝</text>
+        <text class="tab-text">作品信息</text>
+      </view>
+    </view>
+
+    <!-- Media Tab -->
+    <scroll-view 
+      class="tab-content" 
+      scroll-y 
+      wx:if="{{activeTab === 'media'}}"
+    >
+      <!-- File Upload Section -->
+      <view class="section">
+        <view class="section-header">
+          <text class="section-title">📷 媒体文件 ({{files.length}}/{{maxFiles}})</text>
+          <view class="file-type-indicator" wx:if="{{files.length > 0}}">
+            <text class="type-badge {{isImage(files[0]) ? 'image' : 'video'}}">
+              {{isImage(files[0]) ? '图片模式' : '视频模式'}}
+            </text>
+          </view>
+        </view>
+
+        <!-- File Grid -->
+        <view class="file-grid">
+          <view 
+            class="file-item {{imageDots[index] && imageDots[index].length > 0 ? 'has-dots' : ''}}"
+            wx:for="{{files}}"
+            wx:key="index"
+            data-index="{{index}}"
+            bindtap="selectImage"
+          >
+            <!-- Remove Button -->
+            <view 
+              class="remove-btn" 
+              data-index="{{index}}"
+              bindtap="removeFile"
+              catchtap="removeFile"
+            >
+              <text class="iconfont icon-delete"></text>
+            </view>
+
+            <!-- Dot Indicator -->
+            <view class="dot-indicator" wx:if="{{imageDots[index] && imageDots[index].length > 0}}">
+              <text class="dot-count">{{imageDots[index].length}}</text>
+            </view>
+
+            <!-- File Preview -->
+            <image 
+              wx:if="{{isImage(item)}}" 
+              src="{{item.url}}" 
+              class="file-preview"
+              mode="aspectFill"
+            />
+            <video 
+              wx:else 
+              src="{{item.url}}" 
+              class="file-preview"
+              poster="{{item.poster || ''}}"
+              show-play-btn="{{false}}"
+            />
+
+            <!-- File Info -->
+            <view class="file-info">
+              <text class="file-type">{{isImage(item) ? '📷' : '🎬'}}</text>
+              <text class="file-name">{{item.name || 'Media File'}}</text>
+            </view>
+          </view>
+
+          <!-- Upload Button -->
+          <view 
+            class="upload-btn {{imageLoading ? 'loading' : ''}}"
+            bindtap="chooseMedia"
+            wx:if="{{files.length < maxFiles}}"
+          >
+            <view wx:if="{{imageLoading}}" class="loading-spinner"></view>
+            <view wx:else class="upload-content">
+              <text class="upload-icon">➕</text>
+              <text class="upload-text">添加文件</text>
+              <text class="upload-hint">
+                {{files.length === 0 ? '支持图片和视频' : '仅支持图片'}}
+              </text>
+            </view>
+          </view>
+        </view>
+
+        <!-- Empty State -->
+        <view class="empty-state" wx:if="{{files.length === 0}}">
+          <text class="empty-icon">📱</text>
+          <text class="empty-title">还没有上传文件</text>
+          <text class="empty-desc">点击上方按钮开始上传图片或视频</text>
+        </view>
+
+        <!-- Instructions -->
+        <view class="instructions-section">
+          <view class="instructions-header" bindtap="toggleInstructions">
+            <text class="instructions-title">💡 使用说明</text>
+            <text class="toggle-icon {{showInstructions ? 'expanded' : ''}}">▼</text>
+          </view>
+          <view class="instructions-content {{showInstructions ? 'show' : ''}}">
+            <view class="instruction-item">• 点击图片可以添加标记点进行标注</view>
+            <view class="instruction-item">• 标记点可以添加标题和描述信息</view>
+            <view class="instruction-item">• 视频模式只能上传一个文件</view>
+            <view class="instruction-item">• 图片模式最多可上传{{maxFiles}}个文件</view>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+
+    <!-- Form Tab -->
+    <scroll-view 
+      class="tab-content" 
+      scroll-y 
+      wx:if="{{activeTab === 'form'}}"
+    >
+      <view class="form-section">
+        <!-- Title Input -->
+        <view class="form-group">
+          <text class="form-label">📝 作品标题</text>
+          <input 
+            class="form-input"
+            placeholder="请输入作品标题"
+            value="{{title}}"
+            bindinput="onTitleInput"
+            maxlength="100"
+          />
+        </view>
+
+        <!-- Content Input -->
+        <view class="form-group">
+          <text class="form-label">📄 作品描述</text>
+          <textarea 
+            class="form-textarea"
+            placeholder="请描述您的作品内容..."
+            value="{{content}}"
+            bindinput="onContentInput"
+            maxlength="1000"
+            auto-height
+          />
+        </view>
+
+        <!-- Audio Section -->
+        <view class="form-group">
+          <text class="form-label">🎵 背景音乐 (可选)</text>
+          <view class="audio-section">
+            <view 
+              class="audio-btn {{audio ? 'selected' : ''}}"
+              bindtap="chooseAudio"
+              wx:if="{{!audio}}"
+            >
+              <text class="audio-icon">🎵</text>
+              <text class="audio-text">选择音乐</text>
+            </view>
+            <view class="audio-selected" wx:else>
+              <text class="audio-name">{{audioName}}</text>
+              <view class="audio-remove" bindtap="removeAudio">✕</view>
+            </view>
+          </view>
+        </view>
+
+        <!-- Settings -->
+        <view class="form-group">
+          <text class="form-label">⚙️ 其他设置</text>
+          <view class="settings-list">
+            <view class="setting-item" bindtap="onDownloadToggle">
+              <view class="setting-info">
+                <text class="setting-title">允许他人保存</text>
+                <text class="setting-desc">其他用户可以保存您的作品到本地</text>
+              </view>
+              <switch checked="{{allowDownload}}" bindchange="onDownloadToggle" />
+            </view>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+
+    <!-- Annotation Mode -->
+    <view class="annotation-mode" wx:if="{{activeTab === 'annotation'}}">
+      <!-- Annotation Header -->
+      <view class="annotation-header">
+        <view class="back-btn" bindtap="backFromAnnotation">
+          <text class="iconfont icon-back"></text>
+        </view>
+        <text class="annotation-title">图片标注</text>
+        <text class="annotation-subtitle">
+          {{files[selectedImageIndex] ? files[selectedImageIndex].name || '未命名图片' : ''}}
+        </text>
+      </view>
+
+      <!-- Image Annotation Area -->
+      <scroll-view class="annotation-content" scroll-y>
+        <view class="annotation-image-container">
+          <view class="annotation-help">
+            <text class="help-text">💡 点击图片任意位置添加标记点</text>
+          </view>
+          
+          <view class="image-wrapper" bindtap="onImageTap">
+            <image 
+              id="annotation-image"
+              src="{{files[selectedImageIndex].url}}"
+              class="annotation-image"
+              mode="widthFix"
+            />
+            
+            <!-- Dots Overlay -->
+            <view 
+              class="dot-overlay"
+              wx:for="{{imageDots[selectedImageIndex]}}"
+              wx:key="index"
+              style="left: {{item.x * 100}}%; top: {{item.y * 100}}%;"
+            >
+              <view 
+                class="dot"
+                data-image-index="{{selectedImageIndex}}"
+                data-dot-index="{{index}}"
+                bindtap="editDot"
+                catchtap="editDot"
+              ></view>
+              <view 
+                class="dot-remove"
+                data-image-index="{{selectedImageIndex}}"
+                data-dot-index="{{index}}"
+                bindtap="removeDot"
+                catchtap="removeDot"
+              >
+                <text>✕</text>
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <!-- Dots List -->
+        <view class="dots-list" wx:if="{{imageDots[selectedImageIndex] && imageDots[selectedImageIndex].length > 0}}">
+          <view class="dots-header">
+            <text class="dots-title">📍 标记点列表 ({{imageDots[selectedImageIndex].length}})</text>
+          </view>
+          <view 
+            class="dot-item"
+            wx:for="{{imageDots[selectedImageIndex]}}"
+            wx:key="index"
+            data-image-index="{{selectedImageIndex}}"
+            data-dot-index="{{index}}"
+            bindtap="editDot"
+          >
+            <view class="dot-preview"></view>
+            <view class="dot-content">
+              <text class="dot-title">{{item.title || '标记点 ' + (index + 1)}}</text>
+              <text class="dot-desc" wx:if="{{item.description}}">{{item.description}}</text>
+            </view>
+            <view class="dot-arrow">›</view>
+          </view>
+        </view>
+
+        <view class="annotation-empty" wx:else>
+          <text class="empty-icon">📍</text>
+          <text class="empty-text">还没有添加标记点</text>
+          <text class="empty-hint">点击图片添加第一个标记点</text>
+        </view>
+      </scroll-view>
+    </view>
+  </view>
+
+  <!-- Submit Button -->
+  <view class="submit-section" wx:if="{{activeTab !== 'annotation'}}">
+    <button 
+      class="submit-btn {{loading ? 'loading' : ''}}"
+      bindtap="submitForm"
+      disabled="{{loading}}"
+    >
+      <text wx:if="{{loading}}">{{isUpdateMode ? '更新中...' : '创建中...'}}</text>
+      <text wx:else>{{isUpdateMode ? '💾 更新作品' : '🚀 创建作品'}}</text>
+    </button>
+  </view>
+</view>
+
+<!-- Dot Editor Modal -->
+<view class="modal-overlay {{showDotEditor ? 'show' : ''}}" bindtap="cancelDotEdit">
+  <view class="dot-editor-modal" catchtap="">
+    <view class="modal-header">
+      <text class="modal-title">✏️ 编辑标记点</text>
+      <view class="modal-close" bindtap="cancelDotEdit">✕</view>
+    </view>
+    
+    <view class="modal-content">
+      <view class="form-group">
+        <text class="form-label">标题</text>
+        <input 
+          class="form-input"
+          placeholder="输入标记点标题"
+          value="{{editingDot.title}}"
+          bindinput="onDotTitleInput"
+          maxlength="50"
+        />
+      </view>
+      
+      <view class="form-group">
+        <text class="form-label">描述</text>
+        <textarea 
+          class="form-textarea"
+          placeholder="输入标记点描述..."
+          value="{{editingDot.description}}"
+          bindinput="onDotDescInput"
+          maxlength="200"
+          auto-height
+        />
+      </view>
+    </view>
+    
+    <view class="modal-actions">
+      <button class="modal-btn cancel" bindtap="cancelDotEdit">取消</button>
+      <button class="modal-btn confirm" bindtap="saveDot">保存</button>
+    </view>
+  </view>
+</view>

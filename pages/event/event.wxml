@@ -1,2 +1,165 @@
-<!--pages/event/event.wxml-->
-<text>pages/event/event.wxml</text>
+<!--event.wxml-->
+<view class="app-container">
+  <!-- Navigation Header -->
+  <view class="nav-header">
+    <view class="nav-content">
+      <view class="nav-brand">
+        <view class="brand-icon">
+          <view class="icon-dot"></view>
+        </view>
+        <text class="brand-text">Event Gallery</text>
+      </view>
+      <view class="nav-badge">
+        <text class="badge-text">{{events.length}} Active</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- Main Content -->
+  <view class="main-container">
+    <!-- Featured Event Section -->
+    <view class="featured-section">
+      <view class="section-header">
+        <text class="section-title">Featured Events</text>
+        <text class="section-subtitle">Discover amazing opportunities</text>
+      </view>
+
+      <view class="featured-showcase">
+        <!-- Main Event Display -->
+        <view class="showcase-main">
+          <swiper 
+            class="event-swiper" 
+            indicator-dots="false"
+            circular="true"
+            autoplay="false"
+            current="{{currentEventIndex}}"
+            bindchange="onSwiperChange">
+            <swiper-item wx:for="{{events}}" wx:key="id">
+              <view class="event-slide">
+                <view class="slide-image-container">
+                  <image class="slide-image" src="{{item.poster_image}}" mode="aspectFill"></image>
+                  <view class="image-overlay"></view>
+                </view>
+                
+                <view class="slide-content">
+                  <view class="event-meta">
+                    <view class="meta-item">
+                      <view class="meta-icon calendar-icon"></view>
+                      <text class="meta-text">{{item.start_date}} - {{item.end_date}}</text>
+                    </view>
+                    <view class="meta-item">
+                      <view class="meta-icon location-icon"></view>
+                      <text class="meta-text">{{item.user.university.name}}</text>
+                    </view>
+                  </view>
+                  
+                  <text class="event-title">{{item.title}}</text>
+                  
+                  <view class="event-stats">
+                    <view class="stat-item">
+                      <text class="stat-number" wx:if="{{item.allow_limit}}">{{item.students_count}}/{{item.limit}}</text>
+                      <text class="stat-number" wx:else>{{item.students_count}}</text>
+                      <text class="stat-label">Participants</text>
+                    </view>
+                    <view class="stat-divider"></view>
+                    <view class="stat-item">
+                      <text class="stat-number" wx:if="{{item.allow_limit}}">{{item.limit - item.students_count}}</text>
+                      <text class="stat-number" wx:else>∞</text>
+                      <text class="stat-label">Available</text>
+                    </view>
+                  </view>
+                  
+                  <button class="cta-button" bindtap="onParticipate">
+                    <text class="cta-text">View Details</text>
+                    <view class="cta-arrow"></view>
+                  </button>
+                </view>
+              </view>
+            </swiper-item>
+          </swiper>
+        </view>
+
+        <!-- Event Navigation -->
+        <view class="showcase-nav">
+          <view class="nav-list">
+            <view 
+              wx:for="{{events}}" 
+              wx:key="id" 
+              class="nav-item {{currentEventIndex === index ? 'active' : ''}}"
+              data-index="{{index}}"
+              bindtap="onEventSelect">
+              <view class="nav-item-image">
+                <image class="item-image" src="{{item.poster_image}}" mode="aspectFill"></image>
+              </view>
+              <view class="nav-item-content">
+                <text class="item-title">{{item.title}}</text>
+                <text class="item-subtitle">{{item.user.university.name}}</text>
+                <view class="item-indicator" wx:if="{{currentEventIndex === index}}"></view>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- Past Events Section -->
+    <view class="past-section">
+      <view class="section-header">
+        <text class="section-title">Past Events</text>
+        <text class="section-subtitle">{{pastEvents.length}} completed events</text>
+      </view>
+      
+      <view wx:if="{{pastEvents.length > 0}}" class="past-grid">
+        <view wx:for="{{pastEvents}}" wx:key="id" class="past-card">
+          <view class="past-image-wrapper">
+            <image class="past-image" src="{{item.poster_image}}" mode="aspectFill"></image>
+            <view class="past-status">Completed</view>
+          </view>
+          <view class="past-info">
+            <text class="past-title">{{item.title}}</text>
+            <text class="past-university">{{item.user.university.name}}</text>
+            <view class="past-stats">
+              <text class="past-participants" wx:if="{{item.allow_limit}}">{{item.students_count}}/{{item.limit}} participants</text>
+              <text class="past-participants" wx:else>{{item.students_count}} participants</text>
+            </view>
+          </view>
+        </view>
+      </view>
+      
+      <view wx:else class="empty-past">
+        <view class="empty-icon"></view>
+        <text class="empty-title">No Past Events</text>
+        <text class="empty-description">Previous events will appear here once completed</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- Event Rules Modal -->
+  <view wx:if="{{showRulesModal}}" class="modal-backdrop" bindtap="onCloseRulesModal">
+    <view class="modal-dialog" catchtap="">
+      <view class="modal-content">
+        <view class="modal-header">
+          <text class="modal-title">Event Guidelines</text>
+          <button class="modal-close" bindtap="onCloseRulesModal">
+            <view class="close-icon"></view>
+          </button>
+        </view>
+        
+        <view class="modal-body">
+          <view class="event-preview">
+            <image class="preview-image" src="{{selectedEvent.poster_image}}" mode="aspectFill"></image>
+            <text class="preview-title">{{selectedEvent.title}}</text>
+          </view>
+          <view class="description-content">
+            <text class="description-text">{{selectedEvent.description}}</text>
+          </view>
+        </view>
+        
+        <view class="modal-footer">
+          <button class="modal-btn secondary" bindtap="onCloseRulesModal">Cancel</button>
+          <button class="modal-btn primary" bindtap="onAgreeRules">Accept & Continue</button>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

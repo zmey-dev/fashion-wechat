@@ -1,2 +1,170 @@
-<!--pages/notification/notification.wxml-->
-<text>pages/notification/notification.wxml</text>
+<!-- pages/notification/notification.wxml -->
+<view class="notification-container">
+  <!-- Header -->
+  <view class="header">
+    <text class="header-title">Notifications</text>
+  </view>
+
+  <!-- Tab Navigation -->
+  <view class="tab-container">
+    <view 
+      class="tab-item {{activeTab === 0 ? 'active' : ''}}"
+      bindtap="switchTab"
+      data-index="0"
+    >
+      <view class="tab-icon">
+        <image src="/images/user-icon.png" class="icon" mode="aspectFit"></image>
+      </view>
+      <text class="tab-text">Friends</text>
+      <view class="tab-badge" wx:if="{{friendNotifications.length > 0}}">
+        {{friendNotifications.length}}
+      </view>
+    </view>
+    
+    <view 
+      class="tab-item {{activeTab === 1 ? 'active' : ''}}"
+      bindtap="switchTab"
+      data-index="1"
+    >
+      <view class="tab-icon">
+        <image src="/images/message-icon.png" class="icon" mode="aspectFit"></image>
+      </view>
+      <text class="tab-text">Posts</text>
+      <view class="tab-badge" wx:if="{{postNotifications.length > 0}}">
+        {{postNotifications.length}}
+      </view>
+    </view>
+  </view>
+
+  <!-- Friend Notifications -->
+  <scroll-view 
+    class="notification-list" 
+    scroll-y="true"
+    wx:if="{{activeTab === 0}}"
+  >
+    <view wx:if="{{friendNotifications.length === 0}}" class="empty-state">
+      <image src="/images/empty-friends.png" class="empty-icon" mode="aspectFit"></image>
+      <text class="empty-text">No friend notifications</text>
+    </view>
+    
+    <view 
+      wx:for="{{friendNotifications}}" 
+      wx:key="notify_id" 
+      class="notification-item"
+    >
+      <view 
+        class="notification-content {{expandedItems[item.notify_id] ? 'expanded' : ''}}"
+        bindtap="toggleItem"
+        data-id="{{item.notify_id}}"
+      >
+        <view class="notification-header">
+          <view class="avatar-container">
+            <image 
+              src="{{item.sender_avatar || '/images/default-avatar.png'}}" 
+              class="avatar"
+              mode="aspectFill"
+            ></image>
+          </view>
+          
+          <view class="notification-info">
+            <text class="sender-name">{{item.sender_name}}</text>
+            <text class="notification-type">Friend Request</text>
+            <text class="notification-time">{{formatDate(item.updated_at)}}</text>
+          </view>
+          
+          <view class="action-buttons" wx:if="{{item.type === 'add_friend'}}">
+            <view 
+              class="action-btn accept-btn"
+              bindtap="handleFriendRequest"
+              data-action="accept"
+              data-notify-id="{{item.notify_id}}"
+              catchtap="true"
+            >
+              <image src="/images/check-icon.png" class="action-icon" mode="aspectFit"></image>
+            </view>
+            <view 
+              class="action-btn decline-btn"
+              bindtap="handleFriendRequest"
+              data-action="declined"
+              data-notify-id="{{item.notify_id}}"
+              catchtap="true"
+            >
+              <image src="/images/close-icon.png" class="action-icon" mode="aspectFit"></image>
+            </view>
+          </view>
+          
+          <view class="action-buttons" wx:else>
+            <view 
+              class="action-btn remove-btn"
+              bindtap="handleFriendRequest"
+              data-action="removed"
+              data-notify-id="{{item.notify_id}}"
+              catchtap="true"
+            >
+              <image src="/images/check-icon.png" class="action-icon" mode="aspectFit"></image>
+            </view>
+          </view>
+        </view>
+        
+        <view class="notification-message" wx:if="{{expandedItems[item.notify_id] && item.message}}">
+          <text>{{item.message}}</text>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- Post Notifications -->
+  <scroll-view 
+    class="notification-list" 
+    scroll-y="true"
+    wx:if="{{activeTab === 1}}"
+  >
+    <view wx:if="{{postNotifications.length === 0}}" class="empty-state">
+      <image src="/images/empty-posts.png" class="empty-icon" mode="aspectFit"></image>
+      <text class="empty-text">No post notifications</text>
+    </view>
+    
+    <view 
+      wx:for="{{postNotifications}}" 
+      wx:key="notify_id" 
+      class="notification-item"
+    >
+      <view 
+        class="notification-content {{expandedItems[item.notify_id] ? 'expanded' : ''}}"
+        bindtap="toggleItem"
+        data-id="{{item.notify_id}}"
+      >
+        <view class="notification-header">
+          <view class="avatar-container">
+            <image 
+              src="{{item.sender_avatar || '/images/default-avatar.png'}}" 
+              class="avatar"
+              mode="aspectFill"
+            ></image>
+          </view>
+          
+          <view class="notification-info">
+            <text class="sender-name">{{item.sender_name}}</text>
+            <text class="notification-type">New Post</text>
+            <text class="notification-time">{{formatDate(item.updated_at)}}</text>
+          </view>
+          
+          <view class="action-buttons">
+            <view 
+              class="action-btn remove-btn"
+              bindtap="handlePostNotification"
+              data-notify-id="{{item.notify_id}}"
+              catchtap="true"
+            >
+              <image src="/images/check-icon.png" class="action-icon" mode="aspectFit"></image>
+            </view>
+          </view>
+        </view>
+        
+        <view class="notification-message" wx:if="{{expandedItems[item.notify_id] && item.message}}">
+          <text>{{item.message}}</text>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+</view>

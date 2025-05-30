@@ -132,6 +132,25 @@ App({
         wx.redirectTo({ url: "/pages/me/me" });
         this.globalData.currentPath = "me";
         break;
+
+      case "notification":
+        if (isEmpty(this.globalData.userInfo)) {
+          getApp().setState("showLoginModal", true);
+          return;
+        }
+
+        wx.redirectTo({ url: "/pages/notification/notification" });
+        this.globalData.currentPath = "notification";
+        break;
+      case "upload":
+        if (isEmpty(this.globalData.userInfo)) {
+          getApp().setState("showLoginModal", true);
+          return;
+        }
+
+        wx.redirectTo({ url: "/pages/upload/upload" });
+        this.globalData.currentPath = "upload";
+        break;
       case "event":
         if (isEmpty(this.globalData.userInfo)) {
           getApp().setState("showLoginModal", true);

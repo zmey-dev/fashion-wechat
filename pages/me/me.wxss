@@ -1,1 +1,306 @@
-/* pages/me/me.wxss */
+.container {
+  min-height: 100vh;
+  background: #000;
+  color: #fff;
+  padding: 20rpx;
+}
+
+/* Profile Header Styles */
+.profile-header {
+  margin-bottom: 40rpx;
+  padding: 30rpx 0;
+}
+
+.profile-info {
+  display: flex;
+  align-items: flex-start;
+}
+
+.avatar-container {
+  margin-right: 30rpx;
+}
+
+.avatar {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 60rpx;
+  border: 3rpx solid #333;
+}
+
+.user-details {
+  flex: 1;
+}
+
+.username-section {
+  margin-bottom: 20rpx;
+}
+
+.username {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #fff;
+}
+
+.user-meta {
+  display: flex;
+  align-items: center;
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  color: #999;
+}
+
+.phone {
+  margin-right: 10rpx;
+}
+
+.gender-age {
+  display: flex;
+  align-items: center;
+}
+
+.gender-icon {
+  color: #00d4ff;
+  margin-right: 5rpx;
+  font-size: 28rpx;
+}
+
+.age {
+  color: #999;
+}
+
+.stats-container {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 20rpx;
+  border-top: 1rpx solid #333;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.stat-number {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #fff;
+}
+
+.stat-label {
+  font-size: 24rpx;
+  color: #666;
+  margin-top: 8rpx;
+}
+
+/* Tabs Styles */
+.tabs-container {
+  margin-bottom: 30rpx;
+  border-bottom: 1rpx solid #333;
+}
+
+.tabs {
+  display: flex;
+}
+
+.tab-item {
+  flex: 1;
+  text-align: center;
+  padding: 25rpx 0;
+  font-size: 28rpx;
+  color: #666;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.tab-item.active {
+  color: #00d4ff;
+  font-weight: bold;
+}
+
+.tab-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60rpx;
+  height: 4rpx;
+  background: #00d4ff;
+  border-radius: 2rpx;
+}
+
+/* Posts Grid Styles */
+.posts-container {
+  min-height: 400rpx;
+}
+
+.empty-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 400rpx;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  color: #666;
+}
+
+.posts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20rpx;
+}
+
+.post-card {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 16rpx;
+  overflow: hidden;
+  background: #111;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.3);
+}
+
+.post-image {
+  width: 100%;
+  height: 100%;
+}
+
+.post-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+  padding: 20rpx;
+}
+
+.post-stats {
+  display: flex;
+  gap: 20rpx;
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.stat-icon {
+  font-size: 24rpx;
+}
+
+.stat-text {
+  font-size: 22rpx;
+  color: #fff;
+}
+
+.post-actions {
+  position: absolute;
+  top: 10rpx;
+  right: 10rpx;
+  display: flex;
+  gap: 10rpx;
+}
+
+.action-btn {
+  width: 50rpx;
+  height: 50rpx;
+  border-radius: 25rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10rpx);
+  font-size: 24rpx;
+}
+
+.edit-btn {
+  background: rgba(0, 212, 255, 0.8);
+}
+
+.delete-btn {
+  background: rgba(255, 59, 48, 0.8);
+}
+
+/* Loading Styles */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40rpx 0;
+}
+
+.loading-spinner {
+  width: 40rpx;
+  height: 40rpx;
+  border: 3rpx solid #333;
+  border-top: 3rpx solid #00d4ff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  margin-top: 20rpx;
+  font-size: 24rpx;
+  color: #666;
+}
+
+/* Floating Action Button */
+.fab {
+  position: fixed;
+  bottom: 100rpx;
+  right: 40rpx;
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50rpx;
+  background: #00d4ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8rpx 20rpx rgba(0, 212, 255, 0.3);
+  z-index: 1000;
+}
+
+.fab-icon {
+  font-size: 40rpx;
+  color: #000;
+  font-weight: bold;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 600rpx) {
+  .posts-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15rpx;
+  }
+  
+  .avatar {
+    width: 100rpx;
+    height: 100rpx;
+    border-radius: 50rpx;
+  }
+  
+  .username {
+    font-size: 32rpx;
+  }
+  
+  .user-meta {
+    font-size: 22rpx;
+  }
+  
+  .stat-number {
+    font-size: 28rpx;
+  }
+  
+  .stat-label {
+    font-size: 22rpx;
+  }
+}

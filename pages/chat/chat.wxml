@@ -1,2 +1,230 @@
-<!--pages/chat/chat.wxml-->
-<text>pages/chat/chat.wxml</text>
+<!-- pages/chat/chat.wxml -->
+<view class="app-container">
+  <!-- Chat List View -->
+  <view class="chat-list-view {{currentView === 'list' ? 'active' : 'hidden'}}" >
+    <!-- Header -->
+    <view class="list-header">
+      <view class="header-title">Chats</view>
+      <view class="header-actions">
+        <view class="action-icon">🔍</view>
+        <view class="action-icon">✏️</view>
+      </view>
+    </view>
+
+    <!-- Search Bar -->
+    <view class="search-container">
+      <view class="search-box">
+        <view class="search-icon">🔍</view>
+        <input 
+          class="search-input" 
+          placeholder="Search"
+          value="{{searchText}}"
+          bindinput="onSearchInput"
+        />
+      </view>
+    </view>
+
+    <!-- Friends List -->
+    <scroll-view class="friends-list" scroll-y enhanced="{{true}}" show-scrollbar="{{false}}">
+      <view 
+        wx:for="{{filteredFriends}}" 
+        wx:key="id"
+        class="chat-item"
+        data-userid="{{item.id}}"
+        bindtap="onSelectUser"
+        bindlongpress="onLongPress"
+        hover-class="chat-item-hover"
+        hover-stay-time="100"
+      >
+        <view class="friend-avatar-container">
+          <image 
+            class="friend-avatar" 
+            src="{{item.avatar}}"
+            mode="aspectFill"
+            lazy-load="{{true}}"
+          />
+          <view wx:if="{{item.isOnline}}" class="online-dot"></view>
+        </view>
+        
+        <view class="friend-content">
+          <view class="friend-main">
+            <view class="friend-name">{{item.username}}</view>
+            <view class="timestamp">{{item.timestamp}}</view>
+          </view>
+          
+          <view class="friend-bottom">
+            <view class="last-message">{{item.lastMessage}}</view>
+            <view wx:if="{{item.unreadCount > 0}}" class="unread-badge">
+              {{item.unreadCount}}
+            </view>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- Chat Detail View -->
+  <view class="chat-detail-view {{currentView === 'chat' ? 'active' : 'hidden'}}">
+    <!-- Chat Header -->
+    <view class="chat-header">
+      <view class="header-left">
+        <view class="back-btn" bindtap="onBackToList">
+          ← 
+        </view>
+        <image 
+          class="user-avatar" 
+          src="{{selectedUser.avatar}}"
+          mode="aspectFill"
+        />
+        <view class="user-info">
+          <view class="user-name">{{selectedUser.username}}</view>
+          <view class="user-status">{{selectedUser.isOnline ? 'online' : 'last seen recently'}}</view>
+        </view>
+      </view>
+      <view class="header-actions">
+        <view class="action-icon">📞</view>
+        <view class="action-icon">📹</view>
+        <view class="action-icon">⋯</view>
+      </view>
+    </view>
+
+    <!-- Messages Container -->
+    <scroll-view 
+      class="messages-container"
+      scroll-y
+      enhanced="{{true}}"
+      show-scrollbar="{{false}}"
+      scroll-into-view="{{scrollIntoView}}"
+      scroll-with-animation="{{true}}"
+      style="bottom: {{keyboardHeight + 100}}px;"
+    >
+      <view class="messages-list">
+        <view 
+          wx:for="{{messages}}" 
+          wx:key="id"
+          id="msg-{{index}}"
+          class="message-wrapper {{item.sender_id === 'me' ? 'sent' : 'received'}}"
+        >
+          <!-- Received Messages -->
+          <view wx:if="{{item.sender_id !== 'me'}}" class="message-group received">
+            <image 
+              class="message-avatar" 
+              src="{{selectedUser.avatar}}"
+              mode="aspectFill"
+            />
+            <view class="message-bubble received-bubble {{isEmojiOnly(item.message) ? 'emoji-only' : ''}}">
+              <view class="message-text">{{item.message}}</view>
+              <view class="message-time">{{formatTime(item.created_at)}}</view>
+            </view>
+          </view>
+
+          <!-- Sent Messages -->
+          <view wx:if="{{item.sender_id === 'me'}}" class="message-group sent">
+            <view class="message-bubble sent-bubble {{isEmojiOnly(item.message) ? 'emoji-only' : ''}}">
+              <view class="message-text">{{item.message}}</view>
+              <view class="message-time">{{formatTime(item.created_at)}}</view>
+            </view>
+            <image 
+              class="message-avatar" 
+              src="{{currentUser.avatar}}"
+              mode="aspectFill"
+            />
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+
+    <!-- Emoji Picker -->
+    <view wx:if="{{showEmojiPicker}}" class="emoji-picker" style="bottom: {{keyboardHeight + 60}}px;">
+      <scroll-view class="emoji-grid" scroll-y enhanced="{{true}}" show-scrollbar="{{false}}">
+        <view 
+          wx:for="{{emojis}}" 
+          wx:key="*this"
+          class="emoji-item"
+          data-emoji="{{item}}"
+          bindtap="onEmojiSelect"
+          hover-class="emoji-item-hover"
+          hover-stay-time="100"
+        >
+          {{item}}
+        </view>
+      </scroll-view>
+    </view>
+
+    <!-- Message Input -->
+    <view class="message-input-container" style="bottom: {{keyboardHeight}}px;">
+      <view class="input-box">
+        <view class="input-actions-left">
+          <view class="input-action-btn" bindtap="toggleEmojiPicker">
+            {{showEmojiPicker ? '⌨️' : '😊'}}
+          </view>
+        </view>
+        
+        <input 
+          class="message-input"
+          placeholder="Message"
+          value="{{inputMessage}}"
+          bindinput="onInputChange"
+          bindfocus="onInputFocus"
+          bindblur="onInputBlur"
+          bindkeyboardheightchange="onKeyboardHeightChange"
+          confirm-type="send"
+          bindconfirm="onSendMessage"
+          adjust-position="{{false}}"
+          hold-keyboard="{{true}}"
+        />
+        
+        <view class="input-actions-right">
+          <view wx:if="{{inputMessage.length > 0}}" class="send-btn" bindtap="onSendMessage">
+            ➤
+          </view>
+          <view wx:else class="input-action-btn">🎤</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Context Menu -->
+  <view 
+    wx:if="{{contextMenu.visible}}" 
+    class="context-overlay"
+    bindtap="hideContextMenu"
+  >
+    <view 
+      class="context-menu"
+      style="left: {{contextMenu.x}}px; top: {{contextMenu.y}}px;"
+      catchtap=""
+    >
+      <view 
+        class="context-item"
+        data-action="profile"
+        bindtap="onContextAction"
+      >
+        <view class="context-icon">👤</view>
+        <text class="context-text">Profile</text>
+      </view>
+      
+      <view class="context-divider"></view>
+      
+      <view 
+        class="context-item"
+        data-action="delete"
+        bindtap="onContextAction"
+      >
+        <view class="context-icon">🗑️</view>
+        <text class="context-text">Delete Messages</text>
+      </view>
+      
+      <view class="context-divider"></view>
+      
+      <view 
+        class="context-item danger"
+        data-action="block"
+        bindtap="onContextAction"
+      >
+        <view class="context-icon">🚫</view>
+        <text class="context-text">Block User</text>
+      </view>
+    </view>
+  </view>
+</view>

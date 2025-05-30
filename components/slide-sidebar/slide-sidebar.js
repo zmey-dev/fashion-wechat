@@ -111,6 +111,16 @@ Component({
       this.hideSidebar();
     },
 
+    navigateToNotification() {
+      getApp().navigateTo("notification");
+      this.hideSidebar();
+    },
+
+    navigateToUpload() {
+      getApp().navigateTo("upload");
+      this.hideSidebar();
+    },
+
     navigateToEvent() {
       getApp().navigateTo("event");
       this.hideSidebar();

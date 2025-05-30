@@ -4,7 +4,12 @@
     "pages/recommend/recommend",
     "pages/follow/follow",
     "pages/friend/friend",
-    "pages/contact/contact"
+    "pages/contact/contact",
+    "pages/upload/upload",
+    "pages/me/me",
+    "pages/chat/chat",
+    "pages/notification/notification",
+    "pages/event/event"
   ],
   "window": {
     "backgroundTextStyle": "light",

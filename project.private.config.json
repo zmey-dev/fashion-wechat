@@ -37,13 +37,6 @@
           "scene": null
         },
         {
-          "name": "我的帖子",
-          "pathName": "pages/me/posts/posts",
-          "query": "",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
           "name": "比赛页面",
           "pathName": "pages/event/event",
           "query": "",

@@ -110,6 +110,19 @@
         </view>
       </view>
       
+      <!-- Friend -->
+      <view class="nav-item {{currentPath === 'friend' ? 'active' : ''}}" 
+            bindtap="onNavItemTap"
+            data-destination="navigateToFriend">
+        <view class="nav-icon">
+          <image src="/images/icons/friend.svg" class="button-svg" alt="发现图标"></image>
+        </view>
+        <text class="nav-label">朋友</text>
+        <view class="arrow-svg">
+          <view class="arrow-line"></view>
+        </view>
+      </view>
+
       <!-- Chat -->
       <view class="nav-item {{currentPath === 'chat' ? 'active' : ''}}" 
             bindtap="onNavItemTap"
@@ -123,19 +136,6 @@
         </view>
       </view>
       
-      <!-- Friend -->
-      <view class="nav-item {{currentPath === 'friend' ? 'active' : ''}}" 
-            bindtap="onNavItemTap"
-            data-destination="navigateToFriend">
-        <view class="nav-icon">
-          <image src="/images/icons/friend.svg" class="button-svg" alt="发现图标"></image>
-        </view>
-        <text class="nav-label">朋友</text>
-        <view class="arrow-svg">
-          <view class="arrow-line"></view>
-        </view>
-      </view>
-      
       <!-- Me -->
       <view class="nav-item {{currentPath === 'me' ? 'active' : ''}}" 
             bindtap="onNavItemTap"
@@ -144,6 +144,32 @@
           <image src="/images/icons/me.svg" class="button-svg" alt="发现图标"></image>
         </view>
         <text class="nav-label">我的</text>
+        <view class="arrow-svg">
+          <view class="arrow-line"></view>
+        </view>
+      </view>
+
+      <!-- Notification -->
+      <view class="nav-item {{currentPath === 'notification' ? 'active' : ''}}" 
+            bindtap="onNavItemTap"
+            data-destination="navigateToNotification">
+        <view class="nav-icon">
+          <image src="/images/icons/notification.svg" class="button-svg" alt="发现图标"></image>
+        </view>
+        <text class="nav-label">通知</text>
+        <view class="arrow-svg">
+          <view class="arrow-line"></view>
+        </view>
+      </view>
+
+      <!-- upload -->
+      <view class="nav-item {{currentPath === 'upload' ? 'active' : ''}}" 
+            bindtap="onNavItemTap"
+            data-destination="navigateToUpload">
+        <view class="nav-icon">
+          <image src="/images/icons/upload.svg" class="button-svg" alt="上传图标"></image>
+        </view>
+        <text class="nav-label">上传</text>
         <view class="arrow-svg">
           <view class="arrow-line"></view>
         </view>
