@@ -1,16 +1,15 @@
 <!--pages/create-media/create-media.wxml-->
 <view class="container">
-  <!-- Header -->
-  <view class="header">
-    <view class="header-content">
-      <text class="header-title">
-        {{isUpdateMode ? '更新作品' : (eventId ? eventTitle + ' - 创建作品' : '创建新作品')}}
-      </text>
-      <view class="close-btn" bindtap="onClose">
-        <text class="iconfont icon-close"></text>
-      </view>
-    </view>
-  </view>
+  <slide-sidebar 
+    current-path="{{ currentPath }}" 
+    is-visible="{{ showSidebar }}" 
+    userInfo="{{ userInfo }}"
+    bind:hideSidebar="closeSideBar"
+    style="position:relative; width: 100%; background: black; height: 100rpx"
+    >
+    <view style="position:relative; width: 100%; background: #d3d3d3; height: 100px"></view>
+    <textarea placeholder="请输入" placeholder-style="color:blue;" />
+  </slide-sidebar>
 
   <!-- Main Content -->
   <view class="main-content">
@@ -76,9 +75,8 @@
               <text class="dot-count">{{imageDots[index].length}}</text>
             </view>
 
-            <!-- File Preview -->
             <image 
-              wx:if="{{isImage(item)}}" 
+              wx:if="{{item.type === 'image'}}" 
               src="{{item.url}}" 
               class="file-preview"
               mode="aspectFill"
@@ -210,7 +208,7 @@
       <!-- Annotation Header -->
       <view class="annotation-header">
         <view class="back-btn" bindtap="backFromAnnotation">
-          <text class="iconfont icon-back"></text>
+          <image class="icon-back" src="/images/icons/back.svg" mode="aspectFit"></image>
         </view>
         <text class="annotation-title">图片标注</text>
         <text class="annotation-subtitle">
@@ -239,19 +237,20 @@
               wx:for="{{imageDots[selectedImageIndex]}}"
               wx:key="index"
               style="left: {{item.x * 100}}%; top: {{item.y * 100}}%;"
+              data-class="dot-overlay"
             >
               <view 
                 class="dot"
                 data-image-index="{{selectedImageIndex}}"
                 data-dot-index="{{index}}"
-                bindtap="editDot"
+                data-class="dot"
                 catchtap="editDot"
               ></view>
               <view 
                 class="dot-remove"
                 data-image-index="{{selectedImageIndex}}"
                 data-dot-index="{{index}}"
-                bindtap="removeDot"
+                data-class="dot-remove"
                 catchtap="removeDot"
               >
                 <text>✕</text>
@@ -306,7 +305,7 @@
 
 <!-- Dot Editor Modal -->
 <view class="modal-overlay {{showDotEditor ? 'show' : ''}}" bindtap="cancelDotEdit">
-  <view class="dot-editor-modal" catchtap="">
+  <view class="dot-editor-modal" catchtap="handlePreventClose">
     <view class="modal-header">
       <text class="modal-title">✏️ 编辑标记点</text>
       <view class="modal-close" bindtap="cancelDotEdit">✕</view>
