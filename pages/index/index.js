@@ -20,6 +20,8 @@ Page({
 
     touchStartX: 0,
     touchStartY: 0,
+
+    error: "",
   },
   onLoad: function (options) {
     const postId = options.postId || null;
@@ -109,6 +111,49 @@ Page({
           isLoading: false,
           loadError: true,
           errorMessage: "网络错误，请稍后重试",
+          error: JSON.stringify(err),
+        });
+      },
+    });
+
+    wx.request({
+      url: `https://top6.ch/api/media`,
+      method: "GET",
+      data: {
+        limit: 10,
+        includeCursor: true,
+      },
+      header: {
+        Authorization: app.globalData?.userInfo?.token
+          ? `Bearer ${app.globalData?.userInfo?.token}`
+          : "",
+      },
+      success: (res) => {
+        if (res.statusCode === 200 && res.data) {
+          // Get post count for navigation
+          const totalPosts = res.data.count || 1;
+
+          this.setData({
+            currentPost: res.data.post,
+            currentIndex: index || 0,
+            totalPosts: totalPosts,
+            isLoading: false,
+          });
+        } else {
+          this.setData({
+            isLoading: false,
+            loadError: true,
+            errorMessage: "内容加载失败",
+          });
+        }
+      },
+      fail: (err) => {
+        console.error("Failed to load post:", err);
+        this.setData({
+          isLoading: false,
+          loadError: true,
+          errorMessage: "网络错误，请稍后重试",
+          error: this.error + JSON.stringify(err),
         });
       },
     });
