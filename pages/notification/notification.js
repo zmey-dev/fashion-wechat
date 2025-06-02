@@ -1,57 +1,83 @@
+const { default: config } = require("../../config");
+
 // pages/notification/notification.js
+const app = getApp();
+
 Page({
   data: {
+    userInfo: {},
     activeTab: 0, // 0: friend notifications, 1: post notifications
     notifications: [],
     friendNotifications: [],
     postNotifications: [],
-    expandedItems: {} // Track which items are expanded
+    expandedItems: {}, // Track which items are expanded
+    loading: false,
+    error: null
   },
 
   onLoad() {
-    this.loadNotifications();
+    this.setData({
+      userInfo: app.globalData.userInfo || {}
+    });
+    this.getNotifications();
   },
 
-  // Load notifications from your API or storage
-  loadNotifications() {
-    // Replace this with your actual API call
-    // For demo purposes, using mock data
-    const mockNotifications = [
-      {
-        notify_id: 1,
-        event_type: "add_friend",
-        type: "add_friend",
-        sender_id: 101,
-        receiver_id: 102,
-        sender_name: "John Doe",
-        sender_avatar: "/images/avatar1.png",
-        message: "Hello! I'd like to add you as a friend.",
-        updated_at: "2025-05-29T10:30:00Z"
+  onShow() {
+    this.getNotifications();
+  },
+
+  getNotifications() {
+    this.setData({ loading: true });
+
+    wx.request({
+      url: `${config.BACKEND_URL}/notify/get_notifications`,
+      method: 'GET',
+      header: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.data.userInfo.token}`
       },
-      {
-        notify_id: 2,
-        event_type: "new_post",
-        type: "new_post",
-        sender_id: 103,
-        receiver_id: 102,
-        sender_name: "Jane Smith",
-        sender_avatar: "/images/avatar2.png",
-        message: "Check out my new post about WeChat Mini Programs!",
-        updated_at: "2025-05-29T09:15:00Z"
+      success: (res) => {
+        if (res.data && res.data.status === 'success') {
+          const notifications = res.data.message || [];
+          
+          const friendNotifications = notifications.filter(item => item.event_type !== "new_post");
+          const postNotifications = notifications.filter(item => item.event_type === "new_post");
+
+          this.setData({
+            notifications,
+            friendNotifications,
+            postNotifications,
+            loading: false,
+            error: null
+          });
+        } else {
+          this.setData({
+            loading: false,
+            error: res.data?.message || '알림을 가져오는데 실패했습니다'
+          });
+          
+          wx.showToast({
+            title: '알림을 가져오는데 실패했습니다',
+            icon: 'none'
+          });
+        }
+      },
+      fail: (err) => {
+        console.error('Failed to fetch notifications:', err);
+        this.setData({
+          loading: false,
+          error: '네트워크 오류가 발생했습니다'
+        });
+        
+        wx.showToast({
+          title: '네트워크 오류가 발생했습니다',
+          icon: 'none'
+        });
       }
-    ];
-
-    const friendNotifications = mockNotifications.filter(item => item.event_type !== "new_post");
-    const postNotifications = mockNotifications.filter(item => item.event_type === "new_post");
-
-    this.setData({
-      notifications: mockNotifications,
-      friendNotifications,
-      postNotifications
     });
   },
 
-  // Switch between tabs
+  // 탭 전환
   switchTab(e) {
     const { index } = e.currentTarget.dataset;
     this.setData({
@@ -59,7 +85,7 @@ Page({
     });
   },
 
-  // Toggle item expansion
+  // 항목 확장/축소 토글
   toggleItem(e) {
     const { id } = e.currentTarget.dataset;
     const expandedItems = { ...this.data.expandedItems };
@@ -70,58 +96,43 @@ Page({
     });
   },
 
-  // Handle friend request actions
+  // 친구 요청 처리 (수락/거절)
   handleFriendRequest(e) {
     const { action, notifyId } = e.currentTarget.dataset;
     
     wx.showLoading({
-      title: 'Processing...'
+      title: '처리 중...'
     });
 
-    // Replace with your actual API call
+    // 실제 API 호출로 친구 요청 처리
     this.requestFriendAction({
       status: action,
       notify_id: notifyId
-    }).then(() => {
-      wx.hideLoading();
-      wx.showToast({
-        title: action === 'accept' ? 'Friend Added!' : 'Request Declined',
-        icon: 'success'
-      });
-      
-      // Remove notification from list
-      this.removeNotification(notifyId);
-    }).catch(() => {
-      wx.hideLoading();
-      wx.showToast({
-        title: 'Operation Failed',
-        icon: 'error'
-      });
     });
   },
 
-  // Handle post notification removal
+  // 게시물 알림 처리
   handlePostNotification(e) {
     const { notifyId } = e.currentTarget.dataset;
     
+    // 게시물 알림 제거 API 호출
     this.requestFriendAction({
       status: 'removed',
       notify_id: notifyId
-    }).then(() => {
-      wx.showToast({
-        title: 'Notification Removed',
-        icon: 'success'
-      });
-      
-      this.removeNotification(notifyId);
     });
   },
 
-  // Remove notification from local data
+  // 로컬 데이터에서 알림 제거
   removeNotification(notifyId) {
-    const notifications = this.data.notifications.filter(item => item.notify_id !== parseInt(notifyId));
-    const friendNotifications = notifications.filter(item => item.event_type !== "new_post");
-    const postNotifications = notifications.filter(item => item.event_type === "new_post");
+    const notifications = this.data.notifications.filter(
+      item => item.notify_id !== parseInt(notifyId)
+    );
+    const friendNotifications = notifications.filter(
+      item => item.event_type !== "new_post"
+    );
+    const postNotifications = notifications.filter(
+      item => item.event_type === "new_post"
+    );
 
     this.setData({
       notifications,
@@ -130,26 +141,48 @@ Page({
     });
   },
 
-  // API request function (replace with your actual implementation)
   requestFriendAction(data) {
-    return new Promise((resolve, reject) => {
-      wx.request({
-        url: 'YOUR_API_ENDPOINT/handle-friend',
-        method: 'POST',
-        data: data,
-        success: (res) => {
-          if (res.statusCode === 200) {
-            resolve(res.data);
-          } else {
-            reject(res);
-          }
-        },
-        fail: reject
-      });
+    wx.request({
+      url: `${config.BACKEND_URL}/handle-friend`,
+      method: 'POST',
+      data: data,
+      header: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.data.userInfo.token}`
+      },
+      success: (res) => {
+        wx.hideLoading();
+        
+        if (res.data && res.data.status === 'success') {
+          const actionText = 
+            data.status === 'accept' ? '친구 추가됨!' :
+            data.status === 'reject' ? '요청 거절됨' : '알림 제거됨';
+          
+          wx.showToast({
+            title: actionText,
+            icon: 'success'
+          });
+          
+          this.removeNotification(data.notify_id);
+        } else {
+          wx.showToast({
+            title: '작업 실패',
+            icon: 'none'
+          });
+        }
+      },
+      fail: (err) => {
+        wx.hideLoading();
+        console.error('Friend action request failed:', err);
+        
+        wx.showToast({
+          title: '네트워크 오류',
+          icon: 'none'
+        });
+      }
     });
   },
 
-  // Format date for display
   formatDate(dateString) {
     const date = new Date(dateString);
     const now = new Date();
@@ -163,7 +196,25 @@ Page({
     } else if (diffDays <= 7) {
       return `${diffDays - 1} days ago`;
     } else {
-      return date.toISOString().split('T')[0];
+      return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric"
+      });
     }
+  },
+  
+  navigateToUserProfile(e) {
+    const { userId } = e.currentTarget.dataset;
+    wx.navigateTo({
+      url: `/pages/profile/profile?userId=${userId}`
+    });
+  },
+  
+  navigateToPost(e) {
+    const { postId } = e.currentTarget.dataset;
+    wx.navigateTo({
+      url: `/pages/post/post-detail?postId=${postId}`
+    });
   }
 });
