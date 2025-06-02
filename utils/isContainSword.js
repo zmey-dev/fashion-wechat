@@ -14,7 +14,7 @@ export const isContainSword = (text) => {
     (swear) => swear.name
   );
 
-  let dealedText = removeDefinedSymbols(text, symbols).toLowerCase();
+  let dealedText = text?removeDefinedSymbols(text, symbols).toLowerCase():"";
 
   for (let word of swearWords) {
     const regex = new RegExp(word, "gi");

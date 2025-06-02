@@ -1,4 +1,5 @@
 const { default: config } = require("./config");
+const { socketManager } = require("./services/socket");
 const { isEmpty } = require("./utils/isEmpty");
 
 App({
@@ -12,6 +13,7 @@ App({
     swear: [],
     currentPath: "discover",
     observers: {},
+    socketManager: socketManager,
   },
 
   // Subscribe to state changes
@@ -175,18 +177,39 @@ App({
     this.globalData.showSidebar = false;
   },
 
-  logout() {
-    // Clear user info and sidebar state
-    this.globalData.userInfo = null;
-    this.globalData.showSidebar = false;
-    wx.setStorageSync("userInfo", null);
-    wx.setStorageSync("showSidebar", false);
+  // Set user info
+  setUserInfo(userInfo) {
+    this.globalData.userInfo = userInfo;
+    wx.setStorageSync("userInfo", userInfo);
+    // Initialize socket when user info changes
+    this.initializeSocket();
+  },
 
-    // Notify all pages about the logout
-    this.notifyPagesUpdate();
+  // Handle force disconnect event
+  handleForceDisconnect() {
+    console.log("Force disconnect received from server");
+    this.logout();
+  },
 
-    // Optionally redirect to login page
-    wx.redirectTo({ url: "/pages/login/login" });
+  // Handle swear words update event
+  handleSwearWordsUpdate() {
+    console.log("Updating swear words from server");
+    this.getSwearWords();
+  },
+
+  initializeSocket() {
+    // Check if userInfo exists in globalData
+    if (this.globalData.userInfo && this.globalData.userInfo.token) {
+      const userId =
+        this.globalData.userInfo.id || this.globalData.userInfo.userId;
+      const token = this.globalData.userInfo.token;
+
+      if (userId && token) {
+        socketManager.connect(userId, token);
+      }
+    } else {
+      socketManager.disconnect();
+    }
   },
 
   // Get user info
@@ -257,12 +280,6 @@ App({
     return this.globalData.userInfo;
   },
 
-  // Set user info
-  setUserInfo(userInfo) {
-    this.globalData.userInfo = userInfo;
-    wx.setStorageSync("userInfo", userInfo);
-  },
-
   //get swear words
   getSwearWords() {
     return new Promise((resolve, reject) => {
@@ -323,6 +340,20 @@ App({
     return null;
   },
 
+  async logout() {
+    console.log("Logging out user");
+
+    this.globalData.userInfo = null;
+    await wx.setStorageSync("userInfo", null);
+    await this.cleanupSocketListeners();
+
+    if (this.globalData.socketManager) {
+      this.globalData.socketManager.disconnect();
+    }
+
+    wx.redirectTo({ url: "/pages/login/login" });
+  },
+
   onLaunch() {
     // Load sidebar state from storage on app launch
     try {
@@ -334,6 +365,7 @@ App({
       // Load user info
       this.getUserInfo();
       this.getSwearWords();
+      this.initializeSocket();
     } catch (e) {
       console.log("Failed to load app state", e);
     }

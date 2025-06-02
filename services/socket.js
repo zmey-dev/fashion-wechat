@@ -1,169 +1,676 @@
-// services/socket.js
-/**
- * WebSocket service for real-time communication
- */
-import config from '../config';
+// WeChat Socket Manager - Updated with handlers property
 
-const SOCKET_URL = config.SOCKET_SERVER_URL;
-let socketTask = null;
-let reconnectTimer = null;
-let isConnected = false;
-let messageListeners = [];
-let token = '';
+const { isEmpty } = require("../utils/isEmpty");
 
-/**
- * Initialize WebSocket connection
- */
-const connectSocket = () => {
-  if (socketTask) {
-    return;
+class WeChatSocketManager {
+  constructor() {
+    this.socketTask = null;
+    this.isConnected = false;
+    this.reconnectAttempts = 0;
+    this.maxReconnectAttempts = 5;
+    this.reconnectInterval = 3000;
+    this.serverUrl = "wss://backend.xiaoshow.com/ws";
+    this.userId = null;
+    this.token = null;
+    this.heartbeatInterval = null;
+    this.keepAliveInterval = null;
+    this.connectionTimeout = null;
+    this.isReconnecting = false;
+    this.isConnecting = false;
+    this.pendingMessages = [];
+    this.typingTimeout = null;
+    
+    // ✅ UPDATED: Changed from messageHandlers to handlers
+    this.handlers = new Map();
   }
-  
-  token = wx.getStorageSync('token');
-  if (!token) {
-    console.log('Socket: No token available for socket connection');
-    return;
-  }
-  
-  socketTask = wx.connectSocket({
-    url: `${SOCKET_URL}?token=${token}`,
-    success: () => {
-      console.log('Socket: Connection established');
-    },
-    fail: (err) => {
-      console.error('Socket: Connection failed', err);
-      scheduleReconnect();
+
+  // ✅ UPDATED: Register event handlers using handlers property
+  on(eventType, handler) {
+    if (typeof handler !== 'function') {
+      console.error('Handler must be a function');
+      return;
     }
-  });
-  
-  socketTask.onOpen(() => {
-    console.log('Socket: Connection opened');
-    isConnected = true;
-    clearReconnectTimer();
-  });
-  
-  socketTask.onClose(() => {
-    console.log('Socket: Connection closed');
-    isConnected = false;
-    socketTask = null;
-    scheduleReconnect();
-  });
-  
-  socketTask.onError((err) => {
-    console.error('Socket: Error', err);
-    isConnected = false;
-    socketTask = null;
-    scheduleReconnect();
-  });
-  
-  socketTask.onMessage((res) => {
-    try {
-      const data = JSON.parse(res.data);
-      console.log('Socket: Message received', data);
-      
-      // Notify all listeners
-      messageListeners.forEach(listener => {
-        listener(data);
+    
+    if (!this.handlers.has(eventType)) {
+      this.handlers.set(eventType, []);
+    }
+    this.handlers.get(eventType).push(handler);
+  }
+
+  // ✅ UPDATED: Remove event handlers using handlers property
+  off(eventType, handler) {
+    if (this.handlers.has(eventType)) {
+      const handlers = this.handlers.get(eventType);
+      const index = handlers.indexOf(handler);
+      if (index > -1) {
+        handlers.splice(index, 1);
+      }
+    }
+  }
+
+  // ✅ UPDATED: Remove all handlers for an event type
+  removeAllHandlers(eventType) {
+    if (this.handlers.has(eventType)) {
+      this.handlers.delete(eventType);
+    }
+  }
+
+  // ✅ UPDATED: Trigger message handler using handlers property
+  triggerHandler(eventType, data) {
+    if (this.handlers.has(eventType)) {
+      this.handlers.get(eventType).forEach((handler) => {
+        try {
+          handler(data);
+        } catch (error) {
+          console.error(`Error in ${eventType} handler:`, error);
+        }
       });
-      
-    } catch (err) {
-      console.error('Socket: Failed to parse message', err);
     }
-  });
-};
-
-/**
- * Schedule reconnection
- */
-const scheduleReconnect = () => {
-  if (reconnectTimer) {
-    return;
   }
-  
-  console.log('Socket: Scheduling reconnect');
-  reconnectTimer = setTimeout(() => {
-    reconnectTimer = null;
-    connectSocket();
-  }, 5000);
-};
 
-/**
- * Clear reconnection timer
- */
-const clearReconnectTimer = () => {
-  if (reconnectTimer) {
-    clearTimeout(reconnectTimer);
-    reconnectTimer = null;
-  }
-};
+  // Initialize connection
+  connect(userId, token) {
+    // Validate input parameters
+    if (!userId || !token) {
+      console.error("UserId and token are required for connection");
+      wx.showToast({
+        title: "Connection parameters missing",
+        icon: "error",
+      });
+      return;
+    }
 
-/**
- * Add message listener
- * @param {Function} listener - Message listener function
- * @returns {Function} - Function to remove listener
- */
-const addMessageListener = (listener) => {
-  messageListeners.push(listener);
-  
-  return () => {
-    messageListeners = messageListeners.filter(l => l !== listener);
-  };
-};
+    // Prevent multiple connection attempts
+    if (this.isConnecting || this.isConnected) {
+      console.log("Already connected or connecting");
+      return;
+    }
 
-/**
- * Send message via WebSocket
- * @param {Object} data - Message data
- * @returns {Boolean} - Whether the message was sent
- */
-const sendMessage = (data) => {
-  if (!socketTask || !isConnected) {
-    console.error('Socket: Cannot send message, socket not connected');
-    return false;
-  }
-  
-  try {
-    socketTask.send({
-      data: JSON.stringify(data),
+    this.userId = userId;
+    this.token = token;
+    this.isConnecting = true;
+
+    console.log("Connecting to WebSocket server...");
+
+    // Set connection timeout
+    this.connectionTimeout = setTimeout(() => {
+      console.error("Connection timeout");
+      this.isConnecting = false;
+      this.handleReconnect();
+    }, 10000);
+
+    this.socketTask = wx.connectSocket({
+      url: this.serverUrl,
+      header: {
+        "content-type": "application/json",
+      },
       success: () => {
-        console.log('Socket: Message sent', data);
+        console.log("WebSocket connection initiated");
       },
       fail: (err) => {
-        console.error('Socket: Failed to send message', err);
+        console.error("WebSocket connection failed:", err);
+        this.isConnecting = false;
+        this.clearConnectionTimeout();
+        this.handleReconnect();
+      },
+    });
+
+    this.setupEventListeners();
+  }
+
+  // Clear connection timeout
+  clearConnectionTimeout() {
+    if (this.connectionTimeout) {
+      clearTimeout(this.connectionTimeout);
+      this.connectionTimeout = null;
+    }
+  }
+
+  // Setup all event listeners
+  setupEventListeners() {
+    if (!this.socketTask) return;
+
+    // Connection opened
+    this.socketTask.onOpen(() => {
+      this.clearConnectionTimeout();
+      this.isConnected = true;
+      this.isConnecting = false;
+      this.isReconnecting = false;
+      this.reconnectAttempts = 0;
+      console.log("WebSocket connected successfully");
+
+      // Join the chat room
+      this.joinChat();
+
+      // Start heartbeat and keepAlive
+      this.startHeartbeat();
+      this.startKeepAlive();
+
+      // Send any pending messages
+      this.processPendingMessages();
+
+      // Trigger connected event
+      this.triggerHandler("connected", { userId: this.userId });
+    });
+
+    // Message received
+    this.socketTask.onMessage((res) => {
+      try {
+        const message = JSON.parse(res.data);
+        console.log("Message received:", message);
+        this.handleMessage(message);
+      } catch (error) {
+        console.error("Error parsing message:", error);
       }
     });
+
+    // Connection error
+    this.socketTask.onError((err) => {
+      console.error("WebSocket error:", err);
+      this.isConnected = false;
+      this.isConnecting = false;
+      this.clearConnectionTimeout();
+      this.stopHeartbeat();
+      this.stopKeepAlive();
+      
+      // Trigger error handler
+      this.triggerHandler("error", { error: err, type: "connection_error" });
+    });
+
+    // Connection closed
+    this.socketTask.onClose((res) => {
+      console.log("WebSocket connection closed:", res);
+      this.isConnected = false;
+      this.isConnecting = false;
+      this.clearConnectionTimeout();
+      this.stopHeartbeat();
+      this.stopKeepAlive();
+
+      // Trigger disconnected event
+      this.triggerHandler("disconnected", { code: res.code, reason: res.reason });
+
+      // Attempt to reconnect if not intentionally closed
+      if (res.code !== 1000 && !this.isReconnecting) {
+        this.handleReconnect();
+      }
+    });
+  }
+
+  // Join chat room
+  joinChat() {
+    console.log("Joining chat room...");
+
+    this.sendMessage("join", {
+      userId: this.userId,
+      token: this.token,
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  // Send message to server with retry mechanism
+  sendMessage(eventType, data, retryOnFail = true) {
+    if (!this.isConnected || !this.socketTask) {
+      console.log("WebSocket is not connected, queuing message");
+      
+      if (retryOnFail) {
+        // Queue message for later sending
+        this.pendingMessages.push({ eventType, data, timestamp: Date.now() });
+        
+        // Limit pending messages to prevent memory issues
+        if (this.pendingMessages.length > 100) {
+          this.pendingMessages.shift(); // Remove oldest message
+        }
+      }
+      
+      return false;
+    }
+
+    const message = {
+      event: eventType,
+      data: data,
+    };
+
+    this.socketTask.send({
+      data: JSON.stringify(message),
+      success: () => {
+        console.log(`Message sent successfully: ${eventType}`, data);
+      },
+      fail: (err) => {
+        console.error(`Failed to send message: ${eventType}`, err);
+        
+        if (retryOnFail) {
+          // Queue message for retry
+          this.pendingMessages.push({ eventType, data, timestamp: Date.now() });
+        }
+      },
+    });
+
     return true;
-  } catch (err) {
-    console.error('Socket: Error sending message', err);
-    return false;
   }
-};
 
-/**
- * Disconnect WebSocket
- */
-const disconnectSocket = () => {
-  if (socketTask && isConnected) {
-    console.log('Socket: Disconnecting');
-    socketTask.close({
-      success: () => {
-        console.log('Socket: Disconnected successfully');
-      },
-      fail: (err) => {
-        console.error('Socket: Failed to disconnect', err);
+  // Process pending messages when connection is restored
+  processPendingMessages() {
+    if (this.pendingMessages.length === 0) return;
+
+    console.log(`Processing ${this.pendingMessages.length} pending messages`);
+    
+    // Filter out old messages (older than 5 minutes)
+    const fiveMinutesAgo = Date.now() - (5 * 60 * 1000);
+    const validMessages = this.pendingMessages.filter(msg => msg.timestamp > fiveMinutesAgo);
+    
+    // Send valid pending messages
+    validMessages.forEach(({ eventType, data }) => {
+      this.sendMessage(eventType, data, false); // Don't retry these again
+    });
+    
+    // Clear pending messages
+    this.pendingMessages = [];
+  }
+
+  // Handle incoming messages
+  handleMessage(message) {
+    const eventType = message.event || message.type;
+    const data = message.data;
+
+    if (!eventType) {
+      console.error("Message missing event/type property:", message);
+      return;
+    }
+
+    switch (eventType) {
+      case "connected":
+        console.log("Connected to server:", data);
+        this.triggerHandler("connected", data);
+        break;
+
+      case "join_ack":
+        console.log("Successfully joined chat room");
+        this.triggerHandler("join_ack", data);
+        break;
+
+      case "pong":
+        console.log("Heartbeat pong received");
+        this.triggerHandler("pong", data);
+        break;
+
+      case "keepAliveAck":
+        console.log("Keep alive acknowledged");
+        this.triggerHandler("keepAliveAck", data);
+        break;
+
+      case "user_online":
+        console.log(`User ${data} came online`);
+        this.triggerHandler("user_online", data);
+        break;
+
+      case "user_offline":
+        console.log(`User ${data} went offline`);
+        this.triggerHandler("user_offline", data);
+        break;
+
+      case "new_message":
+        console.log("New message received:", data);
+        this.triggerHandler("new_message", data);
+        break;
+
+      case "read_message":
+        console.log("Message read notification:", data);
+        this.triggerHandler("read_message", data);
+        break;
+
+      case "typing_message":
+        console.log("User typing:", data);
+        this.triggerHandler("typing_message", data);
+        break;
+
+      case "add_friend":
+        console.log("Friend request received:", data);
+        this.triggerHandler("add_friend", data);
+        break;
+
+      case "accept_friend":
+        console.log("Friend request accepted:", data);
+        this.triggerHandler("accept_friend", data);
+        break;
+
+      case "decline_friend":
+        console.log("Friend request declined:", data);
+        this.triggerHandler("decline_friend", data);
+        break;
+
+      case "del_friend":
+        console.log("Friend deleted:", data);
+        this.triggerHandler("del_friend", data);
+        break;
+
+      case "new_comment":
+        console.log("New comment received:", data);
+        this.triggerHandler("new_comment", data);
+        break;
+
+      case "update_swear_words":
+        console.log("Swear words updated:", data);
+        this.triggerHandler("update_swear_words", data);
+        break;
+
+      case "force_disconnect":
+        console.log("Force disconnect received");
+        const app = getApp();
+        app.logout();
+        this.triggerHandler("force_disconnect", data);
+        this.disconnect();
+        wx.showModal({
+          title: "Connection Notice",
+          content: "Your account has been logged in from another device. This connection will be terminated.",
+          showCancel: false,
+          confirmText: "OK",
+        });
+        break;
+
+      case "error":
+        console.error("Server error:", data);
+        this.triggerHandler("error", data);
+        break;
+
+      default:
+        console.log(`Unknown message type: ${eventType}`, data);
+        this.triggerHandler("unknown_message", { eventType, data });
+    }
+  }
+
+  // Start heartbeat mechanism
+  startHeartbeat() {
+    this.stopHeartbeat();
+
+    this.heartbeatInterval = setInterval(() => {
+      if (this.isConnected) {
+        this.sendMessage("ping", {
+          timestamp: new Date().toISOString(),
+          userId: this.userId
+        }, false); // Don't queue heartbeat messages
       }
+    }, 30000);
+  }
+
+  // Start keepAlive mechanism
+  startKeepAlive() {
+    this.stopKeepAlive();
+
+    setTimeout(() => {
+      this.sendKeepAlive();
+      this.keepAliveInterval = setInterval(() => {
+        if (this.isConnected) {
+          this.sendKeepAlive();
+        }
+      }, 10000);
+    }, 10000);
+  }
+
+  // Send keepAlive message
+  sendKeepAlive() {
+    if (this.isConnected) {
+      this.sendMessage("keepAlive", {
+        userId: this.userId,
+        timestamp: Date.now(),
+      }, false); // Don't queue keepAlive messages
+    }
+  }
+
+  // Stop heartbeat
+  stopHeartbeat() {
+    if (this.heartbeatInterval) {
+      clearInterval(this.heartbeatInterval);
+      this.heartbeatInterval = null;
+    }
+  }
+
+  // Stop keepAlive
+  stopKeepAlive() {
+    if (this.keepAliveInterval) {
+      clearInterval(this.keepAliveInterval);
+      this.keepAliveInterval = null;
+    }
+  }
+
+  // Handle reconnection with exponential backoff
+  handleReconnect() {
+    if (this.isReconnecting || this.reconnectAttempts >= this.maxReconnectAttempts) {
+      if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+        console.log("Max reconnection attempts reached");
+        this.triggerHandler("max_reconnect_attempts", { attempts: this.reconnectAttempts });
+        
+        wx.showModal({
+          title: "Connection Failed",
+          content: "Unable to connect to the server. Please check your network connection and try again.",
+          showCancel: true,
+          confirmText: "Retry",
+          cancelText: "Cancel",
+          success: (res) => {
+            if (res.confirm) {
+              this.reconnectAttempts = 0;
+              this.connect(this.userId, this.token);
+            }
+          },
+        });
+      }
+      return;
+    }
+
+    this.isReconnecting = true;
+    this.reconnectAttempts++;
+    
+    console.log(`Attempting to reconnect... (${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
+    
+    this.triggerHandler("reconnecting", { 
+      attempt: this.reconnectAttempts, 
+      maxAttempts: this.maxReconnectAttempts 
+    });
+
+    // Exponential backoff
+    const delay = Math.min(
+      this.reconnectInterval * Math.pow(2, this.reconnectAttempts - 1),
+      30000
+    );
+
+    setTimeout(() => {
+      if (!this.isConnected && !isEmpty(getApp().getState("userInfo"))) {
+        this.connect(getApp().getState("userInfo").id, getApp().getState("userInfo").token);
+      } else {
+        this.isReconnecting = false;
+      }
+    }, delay);
+  }
+
+  // Enhanced chat message sending with validation
+  sendChatMessage(receiverId, message, messageType = "text") {
+    if (!receiverId) {
+      console.error("Receiver ID is required");
+      return false;
+    }
+
+    if (!message || (typeof message === 'string' && !message.trim())) {
+      console.error("Message content is required");
+      return false;
+    }
+
+    const messageData = {
+      receiver_id: receiverId,
+      message: typeof message === 'string' ? message.trim() : message,
+      type: messageType,
+      timestamp: new Date().toISOString(),
+      sender_id: this.userId,
+    };
+
+    return this.sendMessage("new_message", messageData);
+  }
+
+  // Send typing indicator with debouncing
+  sendTyping(receiverId, isTyping = true) {
+    if (!receiverId) {
+      console.error("Receiver ID is required");
+      return false;
+    }
+
+    // Clear previous typing timeout
+    if (this.typingTimeout) {
+      clearTimeout(this.typingTimeout);
+    }
+
+    const result = this.sendMessage("typing_message", {
+      receiver_id: receiverId,
+      is_typing: isTyping,
+      sender_id: this.userId,
+    });
+
+    // Auto-stop typing after 3 seconds
+    if (isTyping && result) {
+      this.typingTimeout = setTimeout(() => {
+        this.sendTyping(receiverId, false);
+      }, 3000);
+    }
+
+    return result;
+  }
+
+  // Mark message as read
+  markMessageAsRead(receiverId, messageId) {
+    if (!receiverId || !messageId) {
+      console.error("Receiver ID and message ID are required");
+      return false;
+    }
+
+    return this.sendMessage("read_message", {
+      receiver_id: receiverId,
+      message_id: messageId,
+      sender_id: this.userId,
     });
   }
-  
-  isConnected = false;
-  socketTask = null;
-  clearReconnectTimer();
-  messageListeners = [];
-};
 
+  // Send friend request
+  sendFriendRequest(receiverId, message = "") {
+    if (!receiverId) {
+      console.error("Receiver ID is required");
+      return false;
+    }
+
+    return this.sendMessage("add_friend", {
+      receiver_id: receiverId,
+      message: message,
+      sender_id: this.userId,
+    });
+  }
+
+  // Accept friend request
+  acceptFriendRequest(receiverId) {
+    if (!receiverId) {
+      console.error("Receiver ID is required");
+      return false;
+    }
+
+    return this.sendMessage("accept_friend", {
+      receiver_id: receiverId,
+      sender_id: this.userId,
+    });
+  }
+
+  // Decline friend request
+  declineFriendRequest(receiverId) {
+    if (!receiverId) {
+      console.error("Receiver ID is required");
+      return false;
+    }
+
+    return this.sendMessage("decline_friend", {
+      receiver_id: receiverId,
+      sender_id: this.userId,
+    });
+  }
+
+  // Delete friend
+  deleteFriend(receiverId) {
+    if (!receiverId) {
+      console.error("Receiver ID is required");
+      return false;
+    }
+
+    return this.sendMessage("del_friend", {
+      receiver_id: receiverId,
+      sender_id: this.userId,
+    });
+  }
+
+  // Send comment
+  sendComment(receiverId, comment, isReply = false) {
+    if (!receiverId || !comment) {
+      console.error("Receiver ID and comment are required");
+      return false;
+    }
+
+    return this.sendMessage("new_comment", {
+      receiver_id: receiverId,
+      comments: comment,
+      isReply: isReply,
+      sender_id: this.userId,
+    });
+  }
+
+  // Get connection status
+  getConnectionStatus() {
+    return {
+      isConnected: this.isConnected,
+      userId: this.userId,
+      reconnectAttempts: this.reconnectAttempts,
+      serverUrl: this.serverUrl,
+    };
+  }
+
+  // Get socket task
+  getSocketTask() {
+    return this.socketTask;
+  }
+
+  // Disconnect
+  disconnect() {
+    console.log("Disconnecting from WebSocket server...");
+
+    this.stopHeartbeat();
+    this.stopKeepAlive();
+    this.clearConnectionTimeout();
+
+    // Clear typing timeout
+    if (this.typingTimeout) {
+      clearTimeout(this.typingTimeout);
+      this.typingTimeout = null;
+    }
+
+    if (this.socketTask) {
+      this.socketTask.close({
+        code: 1000,
+        reason: "User initiated disconnect",
+      });
+    }
+
+    this.isConnected = false;
+    this.isConnecting = false;
+    this.isReconnecting = false;
+    this.socketTask = null;
+    this.reconnectAttempts = 0;
+    this.pendingMessages = [];
+  }
+
+  // Force reconnect
+  forceReconnect() {
+    console.log("Force reconnecting...");
+    this.disconnect();
+    setTimeout(() => {
+      if (this.userId && this.token) {
+        this.connect(this.userId, this.token);
+      }
+    }, 1000);
+  }
+}
+
+// Export for use in other pages
 module.exports = {
-  connectSocket,
-  disconnectSocket,
-  addMessageListener,
-  sendMessage,
-  isConnected: () => isConnected
+  socketManager: new WeChatSocketManager(),
 };

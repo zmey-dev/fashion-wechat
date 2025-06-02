@@ -356,11 +356,9 @@ Component({
           app.logout();
         },
       });
-      // Store user data
-      wx.setStorageSync("userInfo", result.user);
       // Trigger success event
       this.triggerEvent("loginSuccess", result);
-      app.setState("userInfo", result.user);
+      app.setUserInfo(result.user);
 
       // Close modal
       this.closeModal();

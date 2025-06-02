@@ -5,10 +5,6 @@
     <!-- Header -->
     <view class="list-header">
       <view class="header-title">Chats</view>
-      <view class="header-actions">
-        <view class="action-icon">🔍</view>
-        <view class="action-icon">✏️</view>
-      </view>
     </view>
 
     <!-- Search Bar -->
@@ -29,35 +25,44 @@
       <view 
         wx:for="{{filteredFriends}}" 
         wx:key="id"
-        class="chat-item"
+        class="chat-item relative"
         data-userid="{{item.id}}"
         bindtap="onSelectUser"
         bindlongpress="onLongPress"
         hover-class="chat-item-hover"
         hover-stay-time="100"
       >
-        <view class="friend-avatar-container">
-          <image 
+        <view class="friend-avatar-container relative">
+          <avatar 
             class="friend-avatar" 
-            src="{{item.avatar}}"
+            avatar="{{item.avatar}}"
+            name="{{item.username}}"
+            size="{{80}}"
             mode="aspectFill"
             lazy-load="{{true}}"
           />
-          <view wx:if="{{item.isOnline}}" class="online-dot"></view>
+          <!-- Unread message badge -->
+          <view wx:if="{{item.unreadCount > 0}}" class="unread-badge absolute top-0 right-0">
+            {{item.unreadCount}}
+          </view>
+          <!-- Online status indicator -->
+          <view wx:if="{{item.status === 'online'}}" class="online-indicator absolute bottom-0 right-0.5 h-2 w-2 rounded-full bg-green-500 border-2 border-white"></view>
         </view>
         
         <view class="friend-content">
           <view class="friend-main">
             <view class="friend-name">{{item.username}}</view>
-            <view class="timestamp">{{item.timestamp}}</view>
+            <view class="timestamp">{{item.timestamp || ''}}</view>
           </view>
           
           <view class="friend-bottom">
-            <view class="last-message">{{item.lastMessage}}</view>
-            <view wx:if="{{item.unreadCount > 0}}" class="unread-badge">
-              {{item.unreadCount}}
-            </view>
+            <view class="last-message">{{item.lastMessage || ''}}</view>
           </view>
+        </view>
+        
+        <!-- Typing indicator - similar to React version -->
+        <view wx:if="{{friendsTyping[item.id]}}" class="typing-text">
+          ...typing
         </view>
       </view>
     </scroll-view>
@@ -71,14 +76,30 @@
         <view class="back-btn" bindtap="onBackToList">
           ← 
         </view>
-        <image 
-          class="user-avatar" 
-          src="{{selectedUser.avatar}}"
-          mode="aspectFill"
-        />
+        <view class="relative" style="height: 80rpx; margin-right: 20rpx;">
+          <avatar 
+            class="user-avatar" 
+            avatar="{{selectedUser.avatar}}"
+            name="{{selectedUser.username}}"
+            size="{{80}}"
+            mode="aspectFill"
+          />
+          <!-- Online status indicator in chat header -->
+          <view wx:if="{{selectedUser.status === 'online'}}" class="online-indicator absolute bottom-0 right-0.5 h-2 w-2 rounded-full bg-green-500 border-2 border-white"></view>
+        </view>
         <view class="user-info">
           <view class="user-name">{{selectedUser.username}}</view>
-          <view class="user-status">{{selectedUser.isOnline ? 'online' : 'last seen recently'}}</view>
+          <!-- Show typing indicator in header when user is typing -->
+          <view wx:if="{{friendsTyping[selectedUser.id]}}" class="header-typing-indicator">
+            <text class="header-typing-text">typing...</text>
+            <view class="header-typing-dots">
+              <view class="header-typing-dot"></view>
+              <view class="header-typing-dot"></view>
+              <view class="header-typing-dot"></view>
+            </view>
+          </view>
+          <!-- Show status when not typing -->
+          <view wx:else class="user-status">{{selectedUser.status === 'online' ? 'online' : 'offline'}}</view>
         </view>
       </view>
       <view class="header-actions">
@@ -103,32 +124,87 @@
           wx:for="{{messages}}" 
           wx:key="id"
           id="msg-{{index}}"
-          class="message-wrapper {{item.sender_id === 'me' ? 'sent' : 'received'}}"
+          class="message-wrapper"
         >
-          <!-- Received Messages -->
+          <view wx:if="{{index === 0 || shouldShowDateSeparator(item, messages[index-1])}}" class="date-separator">
+            <view class="date-text">{{formatDate(item.updated_at)}}</view>
+          </view>
+          
           <view wx:if="{{item.sender_id !== 'me'}}" class="message-group received">
-            <image 
+            <avatar 
               class="message-avatar" 
-              src="{{selectedUser.avatar}}"
+              avatar="{{selectedUser.avatar}}"
+              name="{{selectedUser.username}}"
+              size="{{80}}"
               mode="aspectFill"
             />
             <view class="message-bubble received-bubble {{isEmojiOnly(item.message) ? 'emoji-only' : ''}}">
               <view class="message-text">{{item.message}}</view>
-              <view class="message-time">{{formatTime(item.created_at)}}</view>
+              <view class="message-time">{{item.formatted_time}}</view>
             </view>
           </view>
 
-          <!-- Sent Messages -->
           <view wx:if="{{item.sender_id === 'me'}}" class="message-group sent">
-            <view class="message-bubble sent-bubble {{isEmojiOnly(item.message) ? 'emoji-only' : ''}}">
-              <view class="message-text">{{item.message}}</view>
-              <view class="message-time">{{formatTime(item.created_at)}}</view>
-            </view>
-            <image 
+            <avatar 
               class="message-avatar" 
-              src="{{currentUser.avatar}}"
+              avatar="{{userInfo.avatar}}"
+              name="{{userInfo.username}}"
+              size="{{80}}"
               mode="aspectFill"
             />
+            
+            <view class="message-bubble sent-bubble {{isEmojiOnly(item.message) ? 'emoji-only' : ''}}">
+              <view class="message-text">{{item.message}}</view>
+              <view class="message-info">
+                <view class="message-time">{{item.formatted_time}}</view>
+              </view>
+            </view>
+            
+            <!-- Add seen indicator on the left side of the message bubble -->
+            <view wx:if="{{item.id === lastViewedMessageId}}" class="message-seen-indicator-left">
+              <view class="seen-icon">
+                <!-- SVG Eye Icon -->
+                <image src="/images/icons/eye.svg" class="seen-icon" mode="aspectFit" />
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- Typing indicator - Mobile optimized version -->
+      <view wx:if="{{friendIsTyping}}" class="typing-indicator-container">
+        <view class="typing-avatar">
+          <avatar 
+            avatar="{{selectedUser.avatar}}"
+            name="{{selectedUser.username}}"
+            size="{{60}}"
+            mode="aspectFill"
+          />
+        </view>
+        <view class="typing-bubble">
+          <view class="typing-dots">
+            <view class="typing-dot"></view>
+            <view class="typing-dot"></view>
+            <view class="typing-dot"></view>
+          </view>
+        </view>
+      </view>
+
+      <!-- Only show typing indicator if selected user is typing -->
+      <view wx:if="{{selectedUser && friendsTyping[selectedUser.id]}}" class="typing-indicator-container">
+        <view class="typing-avatar">
+          <avatar 
+            avatar="{{selectedUser.avatar}}"
+            name="{{selectedUser.username}}"
+            size="{{60}}"
+            mode="aspectFill"
+          />
+        </view>
+        <view class="typing-bubble">
+          <view class="typing-dots">
+            <view class="typing-dot"></view>
+            <view class="typing-dot"></view>
+            <view class="typing-dot"></view>
           </view>
         </view>
       </view>
@@ -178,7 +254,7 @@
           <view wx:if="{{inputMessage.length > 0}}" class="send-btn" bindtap="onSendMessage">
             ➤
           </view>
-          <view wx:else class="input-action-btn">🎤</view>
+          <view wx:else class="input-action-btn"></view>
         </view>
       </view>
     </view>

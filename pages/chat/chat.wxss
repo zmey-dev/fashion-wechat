@@ -53,7 +53,7 @@ page {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 44px 20px 12px 20px;
+  padding: 12px 20px 12px 20px;
   background: #0f0f0f;
   border-bottom: 1px solid #1c1c1e;
 }
@@ -134,6 +134,8 @@ page {
 
 .friend-avatar-container {
   position: relative;
+  width: 45px;
+  height: 45px;
   margin-right: 12px;
   flex-shrink: 0;
 }
@@ -228,7 +230,7 @@ page {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 44px 16px 12px 16px;
+  padding: 12px 16px 12px 16px;
   background: #182533;
   border-bottom: 1px solid #2b3943;
   position: fixed;
@@ -314,51 +316,51 @@ page {
 
 .message-group {
   display: flex;
-  align-items: flex-end;
+  margin-bottom: 16px;
   max-width: 80%;
+  position: relative;
 }
 
 .message-group.sent {
   flex-direction: row-reverse;
+  margin-left: auto;
 }
 
 .message-group.received {
   flex-direction: row;
+  margin-right: auto;
 }
 
 .message-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 16px;
-  margin: 0 8px 0 0;
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 40rpx;
+  margin: 0 8rpx;
   background: #3a4b5c;
   flex-shrink: 0;
 }
 
-.message-group.sent .message-avatar {
-  margin: 0 0 0 8px;
-}
-
 .message-bubble {
-  padding: 8px 12px;
-  border-radius: 18px;
+  padding: 16rpx 24rpx;
+  border-radius: 24rpx;
   position: relative;
   word-wrap: break-word;
   max-width: 100%;
 }
 
 .received-bubble {
-  background: #1e2b3a;
-  color: white;
-  border-bottom-left-radius: 4px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  background-color: #f3f4f6; /* gray-100 */
+  color: #1f2937; /* gray-800 */
+  border-top-left-radius: 4rpx;
+  margin-left: 12rpx;
 }
 
 .sent-bubble {
-  background: #006bb3;
-  color: white;
-  border-bottom-right-radius: 4px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  background-color: #86efac; /* green-300 from React */
+  color: #1f2937; /* gray-800 */
+  border-radius: 20rpx;
+  margin-right: 12rpx;
+  position: relative;
 }
 
 .message-bubble.emoji-only {
@@ -373,22 +375,63 @@ page {
 }
 
 .message-text {
-  font-size: 16px;
+  font-size: 28rpx;
   line-height: 1.4;
-  margin-bottom: 4px;
   word-break: break-word;
   white-space: pre-wrap;
 }
 
-.message-time {
-  font-size: 11px;
-  opacity: 0.6;
-  text-align: right;
-  margin-top: 2px;
+.message-info {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: 4rpx;
 }
 
-.received-bubble .message-time {
-  text-align: left;
+.message-time {
+  font-size: 20rpx;
+  color: #8e8e93;
+  margin-top: 4rpx;
+}
+
+/* Seen indicator */
+.message-seen-indicator {
+  display: flex;
+  align-items: center;
+  margin-left: 4rpx;
+}
+
+.message-seen-indicator-left {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  margin: 0 20rpx;
+}
+
+.seen-icon {
+  width: 32rpx;
+  height: 32rpx;
+}
+
+/* Fix message wrapper */
+.message-wrapper {
+  width: 100%;
+  padding: 0 24rpx;
+  margin-bottom: 16rpx;
+  box-sizing: border-box;
+}
+
+/* Emoji-only messages */
+.emoji-only {
+  background: transparent !important;
+  padding: 4rpx 8rpx;
+  box-shadow: none;
+}
+
+.emoji-only .message-text {
+  font-size: 96rpx;
+  line-height: 1;
 }
 
 /* Emoji Picker */
@@ -567,6 +610,139 @@ page {
   }
 }
 
+/* Typing indicator styles */
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  margin: 8px 16px;
+  padding-left: 40px; /* Space for avatar alignment */
+}
+
+.typing-bubble {
+  display: flex;
+  align-items: center;
+  background-color: #f1f1f1;
+  border-radius: 18px;
+  padding: 8px 12px;
+  margin-right: 8px;
+}
+
+.typing-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #aaa;
+  margin: 0 2px;
+  animation: typingAnimation 1.4s infinite ease-in-out;
+}
+
+.typing-dot:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.typing-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+.typing-text {
+  font-size: 12px;
+  color: #999;
+}
+
+@keyframes typingAnimation {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.6;
+  }
+  30% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+
+/* Typing indicator styles - Mobile optimized */
+.typing-indicator-container {
+  display: flex;
+  align-items: flex-end;
+  margin: 12rpx 24rpx;
+  max-width: 70%;
+}
+
+.typing-avatar {
+  width: 60rpx;
+  height: 60rpx;
+  margin-right: 12rpx;
+  flex-shrink: 0;
+}
+
+.typing-bubble {
+  background-color: #f1f1f1;
+  border-radius: 36rpx;
+  padding: 16rpx 24rpx;
+  box-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.typing-bubble::before {
+  content: "";
+  position: absolute;
+  bottom: 8rpx;
+  left: -8rpx;
+  width: 16rpx;
+  height: 16rpx;
+  background-color: #f1f1f1;
+  transform: rotate(45deg);
+}
+
+.typing-dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 30rpx;
+  width: 60rpx;
+}
+
+.typing-dot {
+  width: 8rpx;
+  height: 8rpx;
+  border-radius: 50%;
+  background-color: #999;
+  margin: 0 4rpx;
+  opacity: 0.6;
+  animation: typingBounce 1.4s infinite ease-in-out;
+}
+
+.typing-dot:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.typing-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes typingBounce {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.6;
+  }
+  30% {
+    transform: translateY(-6rpx);
+    opacity: 1;
+  }
+}
+
 /* Scrollbar hidden */
 ::-webkit-scrollbar {
   display: none;
@@ -574,11 +750,6 @@ page {
 
 /* Safe area handling */
 @supports (padding: max(0px)) {
-  .list-header,
-  .chat-header {
-    padding-top: max(44px, env(safe-area-inset-top));
-  }
-  
   .message-input-container {
     padding-bottom: max(8px, env(safe-area-inset-bottom));
   }
@@ -589,12 +760,290 @@ page {
   .message-bubble {
     max-width: 85%;
   }
-  
+
   .friend-name {
     font-size: 16px;
   }
-  
+
   .last-message {
     font-size: 14px;
   }
+}
+
+.relative {
+  position: relative;
+}
+
+.absolute {
+  position: absolute;
+}
+
+.top-0 {
+  top: 0;
+}
+
+.right-0 {
+  right: 0;
+}
+
+.bottom-0 {
+  bottom: 0;
+}
+
+.h-2 {
+  height: 8px;
+}
+
+.w-2 {
+  width: 8px;
+}
+
+.rounded-full {
+  border-radius: 9999px;
+}
+
+.bg-green-500 {
+  background-color: #10b981;
+}
+
+.border-2 {
+  border-width: 2px;
+}
+
+.border-white {
+  border-color: white;
+}
+
+.unread-badge {
+  background-color: #ef4444;
+  color: white;
+  font-size: 10px;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 9999px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+}
+
+.online-indicator {
+  position: absolute;
+  bottom: 0;
+  right: 2px;
+  height: 8px;
+  width: 8px;
+  border-radius: 50%;
+  background-color: #10b981; /* green-500 */
+  border: 2px solid white;
+}
+
+/* Add these styles to match the React implementation */
+
+/* Online status indicator */
+.online-indicator {
+  position: absolute;
+  bottom: 0;
+  right: 2px;
+  height: 8px;
+  width: 8px;
+  border-radius: 50%;
+  background-color: #10b981; /* green-500 */
+  border: 2px solid white;
+}
+
+/* Typing indicator in chat list */
+.typing-text {
+  position: absolute;
+  left: 85px;
+  bottom: 3px;
+  font-size: 10px;
+  color: #93c5fd; /* blue-300 */
+}
+
+/* Typing indicator in chat detail */
+.typing-indicator-container {
+  display: flex;
+  align-items: flex-end;
+  margin: 12rpx 24rpx;
+  max-width: 70%;
+}
+
+.typing-avatar {
+  width: 60rpx;
+  height: 60rpx;
+  margin-right: 12rpx;
+  flex-shrink: 0;
+}
+
+.typing-bubble {
+  background-color: #f1f1f1;
+  border-radius: 36rpx;
+  padding: 16rpx 24rpx;
+  box-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.typing-bubble::before {
+  content: "";
+  position: absolute;
+  bottom: 8rpx;
+  left: -8rpx;
+  width: 16rpx;
+  height: 16rpx;
+  background-color: #f1f1f1;
+  transform: rotate(45deg);
+}
+
+.typing-dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 30rpx;
+  width: 60rpx;
+}
+
+.typing-dot {
+  width: 8rpx;
+  height: 8rpx;
+  border-radius: 50%;
+  background-color: #999;
+  margin: 0 4rpx;
+  opacity: 0.6;
+  animation: typingBounce 1.4s infinite ease-in-out;
+}
+
+.typing-dot:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.typing-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes typingBounce {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.6;
+  }
+  30% {
+    transform: translateY(-6rpx);
+    opacity: 1;
+  }
+}
+
+/* Add these styles for the header typing indicator */
+
+/* Header typing indicator container */
+.header-typing-indicator {
+  display: flex;
+  align-items: center;
+  font-size: 24rpx;
+  color: #10b981; /* Green color to match online status */
+}
+
+/* Header typing text */
+.header-typing-text {
+  margin-right: 6rpx;
+}
+
+/* Header typing dots container */
+.header-typing-dots {
+  display: flex;
+  align-items: center;
+}
+
+/* Header typing dot */
+.header-typing-dot {
+  width: 6rpx;
+  height: 6rpx;
+  border-radius: 50%;
+  background-color: #10b981;
+  margin: 0 2rpx;
+  animation: headerTypingBounce 1.4s infinite ease-in-out;
+}
+
+.header-typing-dot:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.header-typing-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.header-typing-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+/* User status text */
+.user-status {
+  font-size: 24rpx;
+  color: #9ca3af; /* Gray-400 */
+}
+
+.user-status.online {
+  color: #10b981; /* Green-500 */
+}
+
+/* Animation for header typing dots */
+@keyframes headerTypingBounce {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.6;
+  }
+  30% {
+    transform: translateY(-3rpx);
+    opacity: 1;
+  }
+}
+
+/* User info section */
+.user-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.user-name {
+  font-size: 30rpx;
+  font-weight: 500;
+  margin-bottom: 4rpx;
+}
+
+/* 날짜 구분선 스타일 */
+.date-separator {
+  display: flex;
+  justify-content: center;
+  margin: 20rpx 0;
+  padding: 10rpx 0;
+}
+
+.date-text {
+  font-size: 24rpx;
+  color: #8e8e93;
+  background-color: #f2f2f7;
+  padding: 8rpx 16rpx;
+  border-radius: 10rpx;
+  text-align: center;
+}
+
+/* 메시지 시간 표시 스타일 개선 */
+.message-time {
+  font-size: 20rpx;
+  color: #8e8e93;
+  margin-top: 4rpx;
+}
+
+/* 메시지 버블 간격 조정 */
+.message-wrapper {
+  margin-bottom: 8rpx;
 }

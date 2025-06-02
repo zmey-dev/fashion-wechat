@@ -1,31 +1,35 @@
+const { default: config } = require("../../config");
+
 Page({
   data: {
-    user: {
-      username: 'John Doe',
-      avatar: '/images/default-avatar.png',
-      phone: '12345678',
-      gender: 'male',
-      birthday: '1995-06-15'
-    },
-    likes: 128,
-    friends: [],
-    followUsers: [],
-    followedUsers: [],
+    userInfo: getApp().globalData.userInfo || {},
     posts: [],
     loading: false,
     hasMore: true,
     currentTab: 0,
-    tabs: ['작품', '좋아요', '즐겨찾기', '기록'],
-    age: 0
+    tabs: ["Works", "Likes", "Favorites", "History"],
+    age: 0,
   },
 
-  onLoad() {
+  onLoad: function (options) {
+    const app = getApp();
+    this.userInfoHandler = (userInfo) => {
+      this.setData({ userInfo });
+    };
+    app.subscribe("userInfo", this.userInfoHandler);
+    this.setData({
+      userInfo: app.globalData.userInfo || {},
+    });
     this.calculateAge();
     this.loadPosts();
   },
 
+  onUnload: function () {
+    const app = getApp();
+    app.unsubscribe("userInfo", this.userInfoHandler);
+  },
+
   onShow() {
-    // Refresh data when page shows
     this.loadPosts();
   },
 
@@ -40,61 +44,111 @@ Page({
   },
 
   calculateAge() {
-    const birthday = new Date(this.data.user.birthday);
+    const birthday = new Date(this.data.userInfo.birthday);
     const today = new Date();
     let age = today.getFullYear() - birthday.getFullYear();
-    const hasHadBirthdayThisYear = 
+    const hasHadBirthdayThisYear =
       today.getMonth() > birthday.getMonth() ||
-      (today.getMonth() === birthday.getMonth() && today.getDate() >= birthday.getDate());
-    
+      (today.getMonth() === birthday.getMonth() &&
+        today.getDate() >= birthday.getDate());
+
     if (!hasHadBirthdayThisYear) {
       age -= 1;
     }
-    
+
     this.setData({ age });
   },
 
   onTabChange(e) {
     const index = e.currentTarget.dataset.index;
-    this.setData({ 
+    this.setData({
       currentTab: parseInt(index),
-      posts: []
+      posts: [],
     });
     this.loadPosts();
   },
 
   async loadPosts() {
     this.setData({ loading: true });
-    
+
     try {
-      // Simulate API call
-      await this.mockApiCall();
-      const mockPosts = this.generateMockPosts();
-      
-      this.setData({ 
-        posts: mockPosts,
-        loading: false
+      wx.request({
+        url: `${config.BACKEND_URL}/post/get_posts?scope=15&${
+          this.data.currentTab == 0 && "user_id="
+        }${this.data.currentTab == 0 ? this.data.userInfo?.id : ""}&isLike=${
+          this.data.currentTab == 1
+        }&isFavorite=${this.data.currentTab == 2}&isHistory=${
+          this.data.currentTab == 3
+        }`,
+        header: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getApp().globalData.userInfo.token}`,
+        },
+        method: "GET",
+        success: (res) => {
+          if (res.data && res.data.status === "success") {
+            this.setData({
+              posts: this.data.posts.concat(res.data.posts),
+              loading: false,
+              hasMore: res.data.has_more || false,
+            });
+          } else {
+            this.setData({ hasMore: false, loading: false });
+          }
+        },
+        fail: () => {
+          this.setData({ loading: false });
+          wx.showToast({
+            title: "Failed to load posts",
+            icon: "none",
+          });
+        },
       });
     } catch (error) {
-      console.error('Failed to load posts:', error);
+      console.error("Failed to load posts:", error);
       this.setData({ loading: false });
       wx.showToast({
-        title: 'Loading failed',
-        icon: 'none'
+        title: "Loading failed",
+        icon: "none",
       });
     }
   },
 
   async loadMorePosts() {
     this.setData({ loading: true });
-    
+
     try {
-      await this.mockApiCall();
-      const morePosts = this.generateMockPosts();
-      
-      this.setData({ 
-        posts: [...this.data.posts, ...morePosts],
-        loading: false
+      wx.request({
+        url: `${config.BACKEND_URL}/post/get_posts?scope=15&${
+          this.data.currentTab == 0 && "user_id="
+        }${this.data.currentTab == 0 ? this.data.userInfo?.id : ""}&isLike=${
+          this.data.currentTab == 1
+        }&isFavorite=${this.data.currentTab == 2}&isHistory=${
+          this.data.currentTab == 3
+        }`,
+        header: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getApp().globalData.userInfo.token}`,
+        },
+        method: "GET",
+        success: (res) => {
+          if (res.data && res.data.status === "success") {
+            this.setData({
+              posts: this.data.posts.concat(res.data.posts || []),
+              loading: false,
+              hasMore: res.data.has_more || false,
+            });
+          } else {
+            this.setData({ hasMore: false, loading: false });
+          }
+        },
+        fail: () => {
+          this.setData({ loading: false });
+          wx.showToast({
+            title: "Failed to load posts",
+            icon: "none",
+          });
+        },
       });
     } catch (error) {
       this.setData({ loading: false });
@@ -107,69 +161,66 @@ Page({
     wx.stopPullDownRefresh();
   },
 
-  mockApiCall() {
-    return new Promise(resolve => {
-      setTimeout(resolve, 1000);
-    });
-  },
-
-  generateMockPosts() {
-    const posts = [];
-    for (let i = 0; i < 10; i++) {
-      posts.push({
-        id: Date.now() + i,
-        title: `Post ${i + 1}`,
-        image: '/images/placeholder.jpg',
-        likes: Math.floor(Math.random() * 100),
-        comments: Math.floor(Math.random() * 50),
-        createTime: new Date().toISOString()
-      });
-    }
-    return posts;
-  },
-
-  onPostTap(e) {
-    const postId = e.currentTarget.dataset.id;
-    wx.navigateTo({
-      url: `/pages/postDetail/postDetail?id=${postId}`
-    });
-  },
-
-  onEditPost(e) {
-    const postId = e.currentTarget.dataset.id;
-    wx.navigateTo({
-      url: `/pages/editPost/editPost?id=${postId}`
-    });
-  },
-
   onDeletePost(e) {
     const postId = e.currentTarget.dataset.id;
-    
+
     wx.showModal({
-      title: 'Delete Confirmation',
-      content: 'Are you sure you want to delete this post?',
+      title: "Delete Confirmation",
+      content: "Are you sure you want to delete this post?",
       success: (res) => {
         if (res.confirm) {
           this.deletePost(postId);
         }
-      }
+      },
     });
   },
 
   deletePost(postId) {
-    const posts = this.data.posts.filter(post => post.id !== postId);
-    this.setData({ posts });
-    
-    wx.showToast({
-      title: 'Deleted successfully',
-      icon: 'success'
-    });
+    try {
+      wx.request({
+        url: `${config.BACKEND_URL}/post/delete_my_post?id=${postId}`,
+        header: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getApp().globalData.userInfo.token}`,
+        },
+        method: "DELETE",
+        success: (res) => {
+          if (res.data && res.data.status === "success") {
+            const posts = this.data.posts.filter((post) => post.id !== postId);
+            this.setData({ posts });
+
+            wx.showToast({
+              title: "Deleted successfully",
+              icon: "success",
+            });
+          } else {
+            wx.showToast({
+              title: "Failed to delete post",
+              icon: "none",
+            });
+          }
+        },
+        fail: () => {
+          wx.showToast({
+            title: "Failed to delete post",
+            icon: "none",
+          });
+        },
+      });
+    } catch (error) {
+      console.error("Error deleting post:", error);
+      wx.showToast({
+        title: "Failed to delete post",
+        icon: "none",
+      });
+      return;
+    }
   },
 
   scrollToTop() {
     wx.pageScrollTo({
       scrollTop: 0,
-      duration: 300
+      duration: 300,
     });
-  }
+  },
 });

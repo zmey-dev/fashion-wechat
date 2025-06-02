@@ -3,37 +3,37 @@
   <view class="profile-header">
     <view class="profile-info">
       <view class="avatar-container">
-        <image class="avatar" src="{{user.avatar}}" mode="aspectFill" />
+        <avatar class="avatar" src="{{userInfo.avatar}}" name="{{userInfo.username}}" size="{{100}}" mode="aspectFill" />
       </view>
       
       <view class="user-details">
         <view class="username-section">
-          <text class="username">{{user.username}}</text>
+          <text class="username">{{userInfo.username}}</text>
           <view class="user-meta">
-            <text class="phone">(ID: {{user.phone}},</text>
+            <text class="phone">(phone: {{userInfo.phone}},</text>
             <view class="gender-age">
               <text class="gender-icon">{{user.gender === 'male' ? '♂' : '♀'}}</text>
-              <text class="age">{{age}}세)</text>
+              <text class="age">{{age}} years)</text>
             </view>
           </view>
         </view>
         
         <view class="stats-container">
           <view class="stat-item">
-            <text class="stat-number">{{likes}}</text>
-            <text class="stat-label">좋아요</text>
+            <text class="stat-number">{{userInfo.likes_count}}</text>
+            <text class="stat-label">Likes</text>
           </view>
           <view class="stat-item">
-            <text class="stat-number">{{friends.length}}</text>
-            <text class="stat-label">친구</text>
+            <text class="stat-number">{{userInfo.friends_count}}</text>
+            <text class="stat-label">Friends</text>
           </view>
           <view class="stat-item">
-            <text class="stat-number">{{followUsers.length}}</text>
-            <text class="stat-label">팔로잉</text>
+            <text class="stat-number">{{userInfo.follows_count}}</text>
+            <text class="stat-label">Following</text>
           </view>
           <view class="stat-item">
-            <text class="stat-number">{{followedUsers.length}}</text>
-            <text class="stat-label">팔로워</text>
+            <text class="stat-number">{{userInfo.followers_count}}</text>
+            <text class="stat-label">Followers</text>
           </view>
         </view>
       </view>
@@ -58,7 +58,7 @@
   <!-- Posts Grid -->
   <view class="posts-container">
     <view wx:if="{{!loading && posts.length === 0}}" class="empty-state">
-      <text class="empty-text">표시할 작품이 없습니다.</text>
+      <text class="empty-text">No works to display.</text>
     </view>
     
     <view wx:else class="posts-grid">
@@ -69,7 +69,7 @@
         data-id="{{item.id}}"
         bindtap="onPostTap"
       >
-        <image class="post-image" src="{{item.image}}" mode="aspectFill" />
+        <image class="post-image" src="{{item.type=='video'?item.media[0].preview_url:item.media[0].url}}" mode="aspectFill" />
         
         <view class="post-overlay">
           <view class="post-stats">
@@ -86,13 +86,6 @@
         
         <view wx:if="{{currentTab === 0}}" class="post-actions">
           <view 
-            class="action-btn edit-btn"
-            data-id="{{item.id}}"
-            catchtap="onEditPost"
-          >
-            <text>✏️</text>
-          </view>
-          <view 
             class="action-btn delete-btn"
             data-id="{{item.id}}"
             catchtap="onDeletePost"
@@ -106,7 +99,7 @@
     <!-- Loading Indicator -->
     <view wx:if="{{loading}}" class="loading-container">
       <view class="loading-spinner"></view>
-      <text class="loading-text">로딩중...</text>
+      <text class="loading-text">Loading...</text>
     </view>
   </view>
 

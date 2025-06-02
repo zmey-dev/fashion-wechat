@@ -13,11 +13,6 @@
     <textarea placeholder="请输入" placeholder-style="color:blue;" />
   </slide-sidebar>
   <login-modal wx:if="{{ showLoginModal }}" class="login-modal" />
-  <view style="z-index: 900; height: 100vh; width: 100vw; display: flex;justify-content: center;align-items: center;">
-    <div>
-      {{error}}
-    </div>
-  </view>
   <view class="post-viewer-container">
     <media-player
       wx:if="{{ currentPost }}"
