@@ -45,23 +45,30 @@ Page({
     // Subscribe to state changes
     this.userInfoHandler = (userInfo) => {
       this.setData({ userInfo });
+      // If login was successful and user was trying to access filtered content
+      if (userInfo && this.data.currentFilter !== 'discover') {
+        this.loadPosts(true);
+      }
     };
-    this.showLoginModal = (showLoginModal) => {
+    this.showLoginModalHandler = (showLoginModal) => {
       this.setData({ showLoginModal });
-    }
-    app.subscribe("showLoginModal", this.showLoginModal);
+    };
+
+    app.subscribe("showLoginModal", this.showLoginModalHandler);
     app.subscribe("userInfo", this.userInfoHandler);
+    
     this.setData({
       showLoginModal: app.globalData.showLoginModal || false,
       userInfo: app.globalData.userInfo || {},
     });
+    
     this.initializePage();
     this.loadPosts(true);
   },
 
   onUnload: function () {
     const app = getApp();
-    app.unsubscribe("showLoginModal", this.showLoginModal);
+    app.unsubscribe("showLoginModal", this.showLoginModalHandler);
     app.unsubscribe("userInfo", this.userInfoHandler);
   },
 
@@ -182,10 +189,45 @@ Page({
   },
 
   /**
+   * Handle filter change
+   */
+  onFilterTap: function (e) {
+    const { filter } = e.currentTarget.dataset;
+    
+    if (filter === this.data.currentFilter) return;
+
+    // Check login requirement for non-discover filters
+    if (filter !== 'discover' && !app.globalData.userInfo) {
+      console.log('User not logged in, showing login modal for filter:', filter);
+      this.setData({ showLoginModal: true });
+      return;
+    }
+
+    this.setData({
+      currentFilter: filter,
+      currentPage: 1,
+      searchFilter: "", // Clear search when changing category filter
+    });
+
+    this.loadPosts(true);
+  },
+
+  /**
    * Handle search input
    */
   onSearchInput: function (e) {
     const searchTerm = e.detail.value;
+    
+    // Check if user is logged in for search functionality
+    if (searchTerm && searchTerm.trim() && !app.globalData.userInfo) {
+      console.log('User not logged in, showing login modal for search');
+      this.setData({ 
+        showLoginModal: true,
+        searchFilter: "" // Clear search input
+      });
+      return;
+    }
+
     this.setData({
       searchFilter: searchTerm,
     });
@@ -199,54 +241,43 @@ Page({
   },
 
   /**
-   * Clear search filter
-   */
-  onClearSearch: function () {
-    this.setData({
-      searchFilter: "",
-      currentPage: 1,
-    });
-    this.loadPosts(true);
-  },
-
-  /**
-   * Handle filter change
-   */
-  onFilterTap: function (e) {
-    const { filter } = e.currentTarget.dataset;
-
-    if (filter === this.data.currentFilter) return;
-
-    this.setData({
-      currentFilter: filter,
-      currentPage: 1,
-      searchFilter: "", // Clear search when changing category filter
-    });
-
-    this.loadPosts(true);
-  },
-
-  /**
    * Handle search tap
    */
   onSearchTap: function () {
+    // Check login requirement for search page
+    if (!app.globalData.userInfo) {
+      console.log('User not logged in, showing login modal for search page');
+      this.setData({ showLoginModal: true });
+      return;
+    }
+
     wx.navigateTo({
       url: "/pages/search/search",
     });
   },
 
   /**
-   * Handle upload tap
+   * Close login modal
    */
-  onUploadTap: function () {
-    if (!app.globalData.userInfo) {
-      this.setData({ showLoginModal: true });
-      return;
-    }
+  onLoginClose: function () {
+    this.setData({ showLoginModal: false });
+    app.setState("showLoginModal", false);
+  },
 
-    wx.navigateTo({
-      url: "/pages/upload/upload",
+  /**
+   * Handle login success - refresh current filter if needed
+   */
+  onLoginSuccess: function() {
+    console.log('Login successful, refreshing page data');
+    this.setData({
+      userInfo: app.globalData.userInfo,
+      showLoginModal: false
     });
+    
+    // If user was trying to access a non-discover filter, reload with that filter
+    if (this.data.currentFilter !== 'discover') {
+      this.loadPosts(true);
+    }
   },
 
   /**
@@ -324,12 +355,5 @@ Page({
       icon: "none",
       duration: 2000,
     });
-  },
-
-  /**
-   * Close login modal
-   */
-  onLoginClose: function () {
-    this.setData({ showLoginModal: false });
   },
 });

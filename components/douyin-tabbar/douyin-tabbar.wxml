@@ -16,4 +16,5 @@
     </view>
     <text class="tab-text" wx:if="{{item.text}}">{{item.text}}</text>
   </view>
+  <login-modal wx:if="{{showLoginModal}}" class="login-modal" />
 </view>

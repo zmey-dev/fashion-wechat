@@ -83,91 +83,98 @@ App({
     return currentPath;
   },
 
+  // Method to handle tab bar navigation with login check
+  handleTabNavigation(pagePath) {
+    const loginRequiredPages = [
+      "pages/recommend/recommend",
+      "pages/follow/follow", 
+      "pages/chat/chat",
+      "pages/upload/upload", 
+      "pages/notification/notification",
+      "pages/friend/friend",
+      "pages/me/me",
+      "pages/event/event",
+      "pages/contact/contact"
+    ];
+
+    // Check if the page requires login
+    if (loginRequiredPages.includes(pagePath) && isEmpty(this.globalData.userInfo)) {
+      this.setState("showLoginModal", true);
+      return false;
+    }
+
+    // Allow navigation
+    return true;
+  },
+
+  // Enhanced method for checking if current navigation requires login
+  checkLoginRequired(targetPath) {
+    const loginRequiredPaths = [
+      "recommend", "follow", "chat", "friend", "me", 
+      "notification", "upload", "event", "contact"
+    ];
+    
+    if (loginRequiredPaths.includes(targetPath) && isEmpty(this.globalData.userInfo)) {
+      this.setState("showLoginModal", true);
+      return false;
+    }
+    return true;
+  },
+
   // Sidebar navigation methods
   navigateTo(path) {
+    // Check login requirement first
+    if (!this.checkLoginRequired(path)) {
+      return;
+    }
+
+    // Check if user is trying to navigate from home page and needs login
+    // (except for post-detail which should be accessible without login)
+    const needsLogin = ["recommend", "follow", "chat", "friend", "me", "notification", "upload", "event", "contact"];
+    
+    if (needsLogin.includes(path) && isEmpty(this.globalData.userInfo)) {
+      this.setState("showLoginModal", true);
+      return;
+    }
+
     switch (path) {
       case "discover":
         wx.redirectTo({ url: "/pages/index/index" });
         this.globalData.currentPath = "discover";
         break;
       case "recommend":
-        if (isEmpty(this.globalData.userInfo)) {
-          getApp().setState("showLoginModal", true);
-          return;
-        }
         wx.redirectTo({ url: "/pages/recommend/recommend" });
         this.globalData.currentPath = "recommend";
         break;
       case "follow":
-        if (isEmpty(this.globalData.userInfo)) {
-          getApp().setState("showLoginModal", true);
-          return;
-        }
-
         wx.redirectTo({ url: "/pages/follow/follow" });
         this.globalData.currentPath = "follow";
         break;
       case "chat":
-        if (isEmpty(this.globalData.userInfo)) {
-          getApp().setState("showLoginModal", true);
-          return;
-        }
-
         wx.redirectTo({ url: "/pages/chat/chat" });
         this.globalData.currentPath = "chat";
         break;
       case "friend":
-        if (isEmpty(this.globalData.userInfo)) {
-          getApp().setState("showLoginModal", true);
-          return;
-        }
-
         wx.redirectTo({ url: "/pages/friend/friend" });
         this.globalData.currentPath = "friend";
         break;
       case "me":
-        if (isEmpty(this.globalData.userInfo)) {
-          getApp().setState("showLoginModal", true);
-          return;
-        }
-
         wx.redirectTo({ url: "/pages/me/me" });
         this.globalData.currentPath = "me";
         break;
-
       case "notification":
-        if (isEmpty(this.globalData.userInfo)) {
-          getApp().setState("showLoginModal", true);
-          return;
-        }
-
         wx.redirectTo({ url: "/pages/notification/notification" });
         this.globalData.currentPath = "notification";
         break;
       case "upload":
-        if (isEmpty(this.globalData.userInfo)) {
-          getApp().setState("showLoginModal", true);
-          return;
-        }
-
         wx.redirectTo({ url: "/pages/upload/upload" });
         this.globalData.currentPath = "upload";
         break;
       case "event":
-        if (isEmpty(this.globalData.userInfo)) {
-          getApp().setState("showLoginModal", true);
-          return;
-        }
-
         wx.redirectTo({ url: "/pages/event/event" });
         this.globalData.currentPath = "event";
         break;
       case "contact":
-        if (isEmpty(this.globalData.userInfo)) {
-          getApp().setState("showLoginModal", true);
-          return;
-        }
-
         wx.redirectTo({ url: "/pages/contact/contact" });
         this.globalData.currentPath = "contact";
         break;
@@ -175,6 +182,16 @@ App({
         console.log("Unknown path:", path);
     }
     this.globalData.showSidebar = false;
+  },
+
+  // New method for checking login requirement before navigation
+  requireLogin(callback) {
+    if (isEmpty(this.globalData.userInfo)) {
+      this.setState("showLoginModal", true);
+      return false;
+    }
+    if (callback) callback();
+    return true;
   },
 
   // Set user info
@@ -370,4 +387,18 @@ App({
       console.log("Failed to load app state", e);
     }
   },
+
+  // 각 페이지에서 탭 클릭 시 사용할 예시 코드
+  onTabItemTap(item) {
+    const app = getApp();
+    const pagePath = item.pagePath;
+    
+    // 로그인 체크
+    if (!app.handleTabNavigation(pagePath)) {
+      return false; // 로그인 모달이 표시되고 탭 전환 중단
+    }
+    
+    // 로그인이 되어있거나 로그인이 필요없는 페이지면 계속 진행
+    return true;
+  }
 });

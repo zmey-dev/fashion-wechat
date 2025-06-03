@@ -1,19 +1,6 @@
 <view class="page-container">
   <!-- Header Section -->
   <view class="header-section">
-    <view class="header-top">
-      <view class="brand-area">
-        <text class="brand-title">Fashion</text>
-        <text class="brand-subtitle">时装秀平台</text>
-      </view>
-      
-      <view class="header-actions">
-        <view class="action-btn" bindtap="onSearchTap">
-          <text class="icon-search">🔍</text>
-        </view>
-      </view>
-    </view>
-    
     <!-- Filter Navigation -->
     <view class="filter-nav">
       <view class="filter-list">
@@ -108,6 +95,6 @@
     <text class="scroll-up-icon">⬆️</text>
   </view>
 
-  <!-- Login Modal -->
+  <douyin-tabbar current="index"></douyin-tabbar>
   <login-modal wx:if="{{showLoginModal}}" bind:close="onLoginClose" />
 </view>

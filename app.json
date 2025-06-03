@@ -25,7 +25,8 @@
     "media-card": "/components/media-card/media-card",
     "slide-sidebar": "/components/slide-sidebar/slide-sidebar",
     "media-player": "/components/media-player/media-player",
-    "login-modal": "/components/login-modal/login-modal"
+    "login-modal": "/components/login-modal/login-modal",
+    "douyin-tabbar": "/components/douyin-tabbar/douyin-tabbar"
   },
   "darkmode": true,
   "themeLocation": "theme.json",
