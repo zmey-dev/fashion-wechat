@@ -1,0 +1,19 @@
+<view class="douyin-tabbar">
+  <view 
+    class="tab-item {{current === item.name ? 'active' : ''}} {{item.isSpecial ? 'special' : ''}}" 
+    wx:for="{{tabs}}" 
+    wx:key="name"
+    bindtap="navigateTo"
+    data-path="{{item.path}}"
+    data-name="{{item.name}}"
+  >
+    <view class="{{item.isSpecial ? 'upload-btn' : ''}}">
+      <image 
+        class="tab-icon" 
+        src="{{current === item.name ? item.activeIcon : item.icon}}" 
+        mode="aspectFit"
+      ></image>
+    </view>
+    <text class="tab-text" wx:if="{{item.text}}">{{item.text}}</text>
+  </view>
+</view>

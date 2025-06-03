@@ -2,135 +2,75 @@
 Component({
   data: {
     selected: 0,
-    color: "#FFFFFF",
-    selectedColor: "#F3CC14",
-    backgroundColor: "#111111",
     list: [
       {
         pagePath: "/pages/index/index",
-        text: "精选",
-        iconPath: "/images/icons/discover.png",
-        selectedIconPath: "/images/icons/discover-active.png"
+        text: "首页",
+        iconPath: "/images/icons/home.png",
+        selectedIconPath: "/images/icons/home-active.png",
+        requireLogin: false
       },
       {
-        pagePath: "/pages/recommend/recommend",
-        text: "推荐",
-        iconPath: "/images/icons/recommend.png",
-        selectedIconPath: "/images/icons/recommend-active.png"
+        pagePath: "/pages/notification/notification",
+        text: "消息",
+        iconPath: "/images/icons/notification.png",
+        selectedIconPath: "/images/icons/notification-active.png",
+        requireLogin: true
       },
       {
-        pagePath: "/pages/follow/follow",
-        text: "关注",
-        iconPath: "/images/icons/follow.png",
-        selectedIconPath: "/images/icons/follow-active.png"
+        pagePath: "/pages/upload/upload",
+        text: "",
+        iconPath: "/images/icons/upload.png",
+        selectedIconPath: "/images/icons/upload-active.png",
+        isSpecial: true,
+        requireLogin: true
       },
       {
         pagePath: "/pages/chat/chat",
-        text: "对话",
-        iconPath: "/images/icons/chat.png",
-        selectedIconPath: "/images/icons/chat-active.png"
-      },
-      {
-        pagePath: "/pages/friend/friend",
-        text: "朋友",
-        iconPath: "/images/icons/friend.png",
-        selectedIconPath: "/images/icons/friend-active.png"
+        text: "聊天",
+        iconPath: "/images/icons/message.png",
+        selectedIconPath: "/images/icons/message-active.png",
+        requireLogin: true
       },
       {
         pagePath: "/pages/me/me",
-        text: "我的",
+        text: "我",
         iconPath: "/images/icons/me.png",
-        selectedIconPath: "/images/icons/me-active.png"
-      },
-      {
-        pagePath: "/pages/event/event",
-        text: "比赛",
-        iconPath: "/images/icons/event.png",
-        selectedIconPath: "/images/icons/event-active.png"
-      },
-      {
-        pagePath: "/pages/contact/contact",
-        text: "联系我们",
-        iconPath: "/images/icons/contact.png",
-        selectedIconPath: "/images/icons/contact-active.png"
+        selectedIconPath: "/images/icons/me-active.png",
+        requireLogin: true
       }
-    ],
-    tabList: [],
-    isStudent: true
+    ]
   },
-  
-  lifetimes: {
-    attached: function() {
-      this.updateIsStudent();
-      this.updateTabList();
-    }
-  },
-  
-  pageLifetimes: {
-    show: function() {
-      this.setData({
-        selected: this.getTabBarIndex()
-      });
-      this.updateIsStudent();
-      this.updateTabList();
-    }
-  },
-  
   methods: {
-    updateIsStudent: function() {
-      const app = getApp();
-      // Check if user is logged in and role is 'user' or not set
-      const userInfo = app.globalData.userInfo;
-      const isStudent = !userInfo || userInfo.role === 'user';
-      
-      this.setData({
-        isStudent: isStudent
-      });
-    },
-    
-    updateTabList: function() {
-      const { isStudent, list } = this.data;
-      let tabList;
-      
-      if (isStudent) {
-        tabList = list;
-      } else {
-        // For teachers, filter out student-specific tabs
-        tabList = list.filter(tab => 
-          tab.text !== '关注' && tab.text !== '对话' && tab.text !== '朋友'
-        );
-      }
-      
-      this.setData({
-        tabList: tabList
-      });
-    },
-    
-    switchTab: function(e) {
+    switchTab(e) {
       const data = e.currentTarget.dataset;
       const url = data.path;
+      const requireLogin = data.requireLogin;
       const app = getApp();
       
-      // Check if user is logged in for certain tabs
-      if (data.index > 0 && !app.globalData.hasLogin) {
-        // Show login modal
-        wx.showModal({
-          title: '登录提示',
-          content: '您需要登录才能访问此功能',
-          confirmText: '去登录',
-          success (res) {
-            if (res.confirm) {
-              // Show login page or modal
-              wx.navigateTo({
-                url: '/pages/login/login'
-              });
-            }
-          }
+      // 로그인이 필요한 페이지이고 로그인 상태가 아닌 경우
+      if (requireLogin && !app.globalData.userInfo) {
+        // 로그인 모달 표시 - 안전하게 체크
+        if (typeof app.setState === 'function') {
+          app.setState("showLoginModal", true);
+        } else {
+          // fallback - 직접 토스트 표시
+          wx.showToast({
+            title: '请先登录',
+            icon: 'none'
+          });
+        }
+        return;
+      }
+      
+      // 특별한 탭(업로드) 처리
+      if (data.special) {
+        wx.navigateTo({
+          url
         });
         return;
       }
       
-      // Navigate to the selected tab
       wx.switchTab({
         url
       });
@@ -138,19 +78,6 @@ Component({
       this.setData({
         selected: data.index
       });
-    },
-    
-    getTabBarIndex: function() {
-      const pages = getCurrentPages();
-      const currentPage = pages[pages.length - 1];
-      const route = '/' + currentPage.route;
-      
-      for (let i = 0; i < this.data.list.length; i++) {
-        if (this.data.list[i].pagePath === route) {
-          return i;
-        }
-      }
-      return 0;
     }
   }
 });

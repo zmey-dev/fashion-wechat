@@ -9,7 +9,8 @@
     "pages/me/me",
     "pages/chat/chat",
     "pages/notification/notification",
-    "pages/event/event"
+    "pages/event/event",
+    "pages/post-detail/post-detail"
   ],
   "window": {
     "backgroundTextStyle": "light",

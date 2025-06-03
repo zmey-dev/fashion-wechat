@@ -1,43 +1,117 @@
-<!-- pages/index/index.wxml -->
-<view
-  class="page-container {{ showSidebar ? 'sidebar-open' : '' }}"
->
-  <slide-sidebar 
-    current-path="{{ currentPath }}" 
-    is-visible="{{ showSidebar }}" 
-    userInfo="{{ userInfo }}"
-    bind:hideSidebar="closeSideBar"
-    style="position:relative; width: 100%; background: #d3d3d3; height: 100px"
-    >
-    <view style="position:relative; width: 100%; background: #d3d3d3; height: 100px"></view>
-    <textarea placeholder="请输入" placeholder-style="color:blue;" />
-  </slide-sidebar>
-  <login-modal wx:if="{{ showLoginModal }}" class="login-modal" />
-  <view class="post-viewer-container">
-    <media-player
-      wx:if="{{ currentPost }}"
-      selectedPost="{{ currentPost }}"
-      selectedPostUser="{{ currentPostUser }}"
-      followedUsers="{{ followedUsers }}"
-      authUser="{{ userInfo }}"
-      index="{{ currentIndex }}"
-      totalCount="{{ totalPosts }}"
-      bind:postNavigation="handlePostNavigation"
-      bind:likeUpdated="handleLikeUpdated"
-      bind:favoriteUpdated="handleFavoriteUpdated"
-      bind:shareUpdated="handleShareUpdated"
-      bind:followUpdated="handleFollowUpdated"
-      bind:showLogin="showLoginModal"
-      bind:navigateToProfile="navigateToUserProfile"
-      bind:previousPost="handlePreviousPost"
-      bind:nextPost="handleNextPost"
-    >
-    </media-player>
-
-    <!-- Loading indicator -->
-    <view wx:if="{{ isLoading }}" class="loading-container">
-      <view class="loading-spinner"></view>
-      <text class="loading-text">加载中...</text>
+<view class="page-container">
+  <!-- Header Section -->
+  <view class="header-section">
+    <view class="header-top">
+      <view class="brand-area">
+        <text class="brand-title">Fashion</text>
+        <text class="brand-subtitle">时装秀平台</text>
+      </view>
+      
+      <view class="header-actions">
+        <view class="action-btn" bindtap="onSearchTap">
+          <text class="icon-search">🔍</text>
+        </view>
+      </view>
+    </view>
+    
+    <!-- Filter Navigation -->
+    <view class="filter-nav">
+      <view class="filter-list">
+        <view 
+          wx:for="{{filterOptions}}" 
+          wx:key="key"
+          class="filter-tab {{currentFilter === item.key ? 'active' : ''}}"
+          data-filter="{{item.key}}"
+          bindtap="onFilterTap"
+        >
+          <text class="filter-name">{{item.name}}</text>
+          <view wx:if="{{currentFilter === item.key}}" class="filter-indicator"></view>
+        </view>
+      </view>
     </view>
   </view>
+
+  <!-- Main Content Area -->
+  <view class="content-area">
+    
+    <!-- Posts Grid -->
+    <view class="posts-grid">
+      <view 
+        wx:for="{{posts}}" 
+        wx:key="id"
+        class="post-card"
+        data-post-id="{{item.id}}"
+        data-index="{{index}}"
+        bindtap="onPostTap"
+      >
+        <!-- Media Container -->
+        <view class="media-container">
+          <image 
+            src="{{item.type === 'video' ? item.media[0].preview_url : item.media[0].url}}"
+            class="post-image"
+            mode="aspectFill"
+            lazy-load="{{true}}"
+          />
+          
+          <!-- Like Stats Overlay -->
+          <view class="like-overlay">
+            <view 
+              class="like-action {{item.likes_exists ? 'liked' : ''}}"
+              data-post-id="{{item.id}}"
+              data-index="{{index}}"
+              bindtap="onLikeTap"
+            >
+              <text class="heart-icon">{{item.likes_exists ? '❤️' : '🤍'}}</text>
+              <text class="like-count">{{item.likes || 0}}</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- User Info Only -->
+        <view class="user-section">
+          <view class="user-row" data-username="{{item.user.username}}" bindtap="onUserTap">
+            <avatar 
+              avatar="{{item.user.avatar}}" 
+              name="{{item.user.username}}" 
+              size="{{40}}"
+            />
+            <text class="user-name">{{item.user.username}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- Loading State -->
+    <view wx:if="{{loading && posts.length === 0}}" class="loading-state">
+      <view class="loading-spinner"></view>
+      <text class="loading-text">正在加载精彩内容...</text>
+    </view>
+
+    <!-- Empty State -->
+    <view wx:if="{{!loading && posts.length === 0}}" class="empty-state">
+      <text class="empty-icon">📸</text>
+      <text class="empty-title">暂无内容</text>
+      <text class="empty-desc">快来发布你的时尚作品吧</text>
+      <button class="upload-btn" bindtap="onUploadTap">立即发布</button>
+    </view>
+
+    <!-- Load More -->
+    <view wx:if="{{loading && posts.length > 0}}" class="load-more">
+      <view class="loading-spinner small"></view>
+      <text class="load-text">加载更多...</text>
+    </view>
+
+    <!-- End Message -->
+    <view wx:if="{{!hasMore && posts.length > 0}}" class="end-message">
+      <text class="end-text">~ 已经到底了 ~</text>
+    </view>
+  </view>
+
+  <!-- Floating Upload Button -->
+  <view class="fab-button" bindtap="onUploadTap">
+    <text class="plus-icon">➕</text>
+  </view>
+
+  <!-- Login Modal -->
+  <login-modal wx:if="{{showLoginModal}}" bind:close="onLoginClose" />
 </view>
