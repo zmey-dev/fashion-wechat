@@ -93,15 +93,16 @@ Component({
         return;
       }
 
-      if (name === "upload") {
-        wx.navigateTo({
-          url: path,
-        });
-      } else {
-        wx.switchTab({
-          url: path,
-        });
-      }
+      wx.redirectTo({
+        url: path,
+        fail: (err) => {
+          console.error(`Failed to navigate to ${name}:`, err);
+          wx.showToast({
+            title: "页面跳转失败",
+            icon: "none",
+          });
+        },
+      });
     },
   },
 });
