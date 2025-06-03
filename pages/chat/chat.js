@@ -47,6 +47,27 @@ Page({
 
     // Add this to track the last viewed message
     lastViewedMessageId: null,
+    
+    // Chinese messages for UI text
+    messages: {
+      loading: "加载中...",
+      loadingMessages: "加载消息中...",
+      failedToLoad: "加载失败",
+      failedToLoadFriends: "加载好友失败",
+      networkError: "网络错误",
+      deleteConfirm: "删除消息",
+      deletePrompt: "确定要删除所有消息吗？",
+      messagesDeleted: "消息已删除",
+      blockConfirm: "屏蔽用户",
+      blockPrompt: "确定要屏蔽此用户吗？",
+      userBlocked: "用户已屏蔽",
+      sendFailed: "发送失败",
+      inappropriateLanguage: "请避免使用不当语言",
+      today: "今天",
+      yesterday: "昨天",
+      goToProfile: "查看资料",
+      noMessages: "没有消息"
+    }
   },
   
   // Class properties (not in data)
@@ -122,7 +143,7 @@ Page({
   handleNewMessage(data) {
     console.log("New message received:", data);
     
-    // 현재 채팅 화면이면서 해당 사용자와의 채팅인 경우에만 읽음 표시
+    // Only show messages in current chat and mark as read if in chat view with that user
     if (this.data.currentView === 'chat' && 
         this.data.selectedUser && 
         data.sender_id === this.data.selectedUser.id) {
@@ -131,7 +152,7 @@ Page({
         sender_id: data.sender_id,
         message: data.message,
         created_at: data.created_at || new Date().toISOString(),
-        formatted_time: this.formatTime(data.created_at || new Date().toISOString()), // 형식이 지정된 시간 추가
+        formatted_time: this.formatTime(data.created_at || new Date().toISOString()),
       };
       
       const messages = [...this.data.messages, newMessage];
@@ -144,12 +165,12 @@ Page({
         }
       });
       
-      // 현재 채팅 화면인 경우에만 읽음 표시 처리
+      // Mark as read only if currently in chat view
       this.markMessagesAsRead(data.sender_id);
       
       this.scrollToBottom();
     } else {
-      // 채팅 화면이 아니거나 다른 사용자와 채팅 중인 경우 읽지 않음 표시
+      // Update friends list with unread count for messages not in current chat
       const { friends, filteredFriends } = this.data;
       
       const updatedFriends = friends.map(friend => {
@@ -186,7 +207,7 @@ Page({
     console.log("Typing message received:", data);
     
     const senderId = data.sender_id;
-    // 초기화가 필요한 경우를 대비해 객체 복사 방식 변경
+    // Initialize object copy for safety
     const friendsTyping = this.data.friendsTyping || {};
     
     // Set this friend as typing
@@ -200,7 +221,7 @@ Page({
     
     // Set a timer to reset typing state after 1.5 seconds
     this.typingTimers[senderId] = setTimeout(() => {
-      // 객체가 존재하는지 확인 후 업데이트
+      // Check if object exists before updating
       const updatedFriendsTyping = { ...this.data.friendsTyping };
       if (updatedFriendsTyping) {
         updatedFriendsTyping[senderId] = false;
@@ -330,9 +351,9 @@ Page({
       // Fetch messages from the database
       this.getMessagesByUserId(userId);
       
-      // 메시지를 가져온 후에 읽음 표시 처리
+      // Mark messages as read after fetching
       setTimeout(() => {
-        // 채팅 화면이 활성화된 경우에만 읽음 표시 처리
+        // Only mark as read if still in chat view with this user
         if (this.data.currentView === 'chat' && this.data.selectedUser?.id === userId) {
           this.markMessagesAsRead(userId);
         }
@@ -345,7 +366,7 @@ Page({
     if (!userId || !this.data.userInfo.token) return;
 
     wx.showLoading({
-      title: "Loading messages...",
+      title: this.data.messages.loadingMessages,
     });
 
     wx.request({
@@ -365,7 +386,7 @@ Page({
             sender_id: msg.sender_id === this.data.userInfo.id ? "me" : msg.sender_id,
             message: msg.message,
             created_at: msg.created_at,
-            formatted_time: this.formatTime(msg.created_at), // 미리 형식이 지정된 시간
+            formatted_time: this.formatTime(msg.created_at),
             is_read: msg.seen_at ? true : false,
             seen_at: msg.seen_at
           }));
@@ -392,7 +413,7 @@ Page({
           }, 300);
         } else {
           wx.showToast({
-            title: "Failed to load messages",
+            title: this.data.messages.failedToLoad,
             icon: "none",
           });
         }
@@ -401,7 +422,7 @@ Page({
         wx.hideLoading();
         console.error("Failed to fetch messages:", err);
         wx.showToast({
-          title: "Network error",
+          title: this.data.messages.networkError,
           icon: "none",
         });
       },
@@ -440,7 +461,7 @@ Page({
 
     switch (action) {
       case "profile":
-        wx.showToast({ title: "Go to Profile", icon: "none" });
+        wx.showToast({ title: this.data.messages.goToProfile, icon: "none" });
         break;
       case "delete":
         this.deleteMessages(friendId);
@@ -485,14 +506,14 @@ Page({
             this.checkFriendsStatus();
           } else {
             wx.showToast({
-              title: "Failed to load friends",
+              title: this.data.messages.failedToLoadFriends,
               icon: "none",
             });
           }
         },
         fail: () => {
           wx.showToast({
-            title: "Network error",
+            title: this.data.messages.networkError,
             icon: "none",
           });
         },
@@ -504,8 +525,8 @@ Page({
 
   deleteMessages(friendId) {
     wx.showModal({
-      title: "Delete Messages",
-      content: "Are you sure you want to delete all messages?",
+      title: this.data.messages.deleteConfirm,
+      content: this.data.messages.deletePrompt,
       success: (res) => {
         if (res.confirm) {
           this.messageData[friendId] = [];
@@ -515,7 +536,7 @@ Page({
           ) {
             this.setData({ messages: [] });
           }
-          wx.showToast({ title: "Messages deleted", icon: "success" });
+          wx.showToast({ title: this.data.messages.messagesDeleted, icon: "success" });
         }
       },
     });
@@ -523,8 +544,8 @@ Page({
 
   blockUser(friendId) {
     wx.showModal({
-      title: "Block User",
-      content: "Are you sure you want to block this user?",
+      title: this.data.messages.blockConfirm,
+      content: this.data.messages.blockPrompt,
       success: (res) => {
         if (res.confirm) {
           const friends = this.data.friends.filter((f) => f.id !== friendId);
@@ -540,7 +561,7 @@ Page({
             this.onBackToList();
           }
 
-          wx.showToast({ title: "User blocked", icon: "success" });
+          wx.showToast({ title: this.data.messages.userBlocked, icon: "success" });
         }
       },
     });
@@ -579,7 +600,7 @@ Page({
     
     if (containsSwearWord) {
       wx.showToast({
-        title: "Please avoid using inappropriate language",
+        title: this.data.messages.inappropriateLanguage,
         icon: "none"
       });
       return;
@@ -663,7 +684,7 @@ Page({
       fail: (err) => {
         console.error("Failed to send message:", err);
         wx.showToast({
-          title: "Failed to send message",
+          title: this.data.messages.sendFailed,
           icon: "none"
         });
       }
@@ -689,7 +710,7 @@ Page({
     const diff = now - date;
     
     if (diff < 86400000) { // Less than a day
-      return date.toLocaleTimeString("en-US", {
+      return date.toLocaleTimeString("zh-CN", {
         hour: "2-digit",
         minute: "2-digit",
         hour12: false,
@@ -697,58 +718,58 @@ Page({
     }
     
     if (diff < 172800000) { // Less than 2 days
-      return "Yesterday " + date.toLocaleTimeString("en-US", {
+      return this.data.messages.yesterday + " " + date.toLocaleTimeString("zh-CN", {
         hour: "2-digit",
         minute: "2-digit",
         hour12: false,
       });
     }
     
-    return date.toLocaleDateString("en-US", {
+    return date.toLocaleDateString("zh-CN", {
       month: "short",
       day: "numeric",
-    }) + " " + date.toLocaleTimeString("en-US", {
+    }) + " " + date.toLocaleTimeString("zh-CN", {
       hour: "2-digit",
       minute: "2-digit",
       hour12: false,
     });
   },
 
-  // 새로 추가: 날짜만 포맷하는 함수
+  // Format date only
   formatDate(timestamp) {
     if (!timestamp) return "";
     
     const date = new Date(timestamp);
     const now = new Date();
     
-    // 오늘인지 확인
+    // Check if today
     if (date.toDateString() === now.toDateString()) {
-      return "Today";
+      return this.data.messages.today;
     }
     
-    // 어제인지 확인
+    // Check if yesterday
     const yesterday = new Date(now);
     yesterday.setDate(now.getDate() - 1);
     if (date.toDateString() === yesterday.toDateString()) {
-      return "Yesterday";
+      return this.data.messages.yesterday;
     }
     
-    // 일반 날짜 형식
-    return date.toLocaleDateString("en-US", {
+    // General date format
+    return date.toLocaleDateString("zh-CN", {
       year: "numeric",
       month: "short",
       day: "numeric"
     });
   },
 
-  // 새로 추가: 메시지 그룹에 날짜 구분선을 표시할지 결정하는 함수
+  // Check if date separator should be shown in message groups
   shouldShowDateSeparator(currentMsg, prevMsg) {
-    if (!prevMsg) return true; // 첫 메시지는 항상 날짜 표시
+    if (!prevMsg) return true; // Always show date for first message
     
     const currentDate = new Date(currentMsg.created_at).toDateString();
     const prevDate = new Date(prevMsg.created_at).toDateString();
     
-    return currentDate !== prevDate; // 날짜가 다르면 구분선 표시
+    return currentDate !== prevDate; // Show separator if dates are different
   },
 
   // Handle read message event from socket
@@ -793,7 +814,7 @@ Page({
   markMessagesAsRead(userId) {
     if (!userId || !this.data.userInfo.token) return;
     
-    // 현재 채팅 화면인 경우에만 읽음 표시 처리
+    // Only mark as read if currently in chat view with this user
     if (this.data.currentView !== 'chat' || this.data.selectedUser?.id !== userId) {
       console.log('Not marking messages as read - not in chat view with this user');
       return;

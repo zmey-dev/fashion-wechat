@@ -1,19 +1,13 @@
 <!-- pages/index/index.wxml -->
-<view
-  class="page-container {{ showSidebar ? 'sidebar-open' : '' }}"
->
-  <slide-sidebar 
-    current-path="{{ currentPath }}" 
-    is-visible="{{ showSidebar }}" 
-    userInfo="{{ userInfo }}"
-    bind:hideSidebar="closeSideBar"
-    style="position:relative; width: 100%; background: #d3d3d3; height: 100px"
-    >
-    <view style="position:relative; width: 100%; background: #d3d3d3; height: 100px"></view>
-    <textarea placeholder="请输入" placeholder-style="color:blue;" />
-  </slide-sidebar>
+<view class="page-container">
+
+  
+  <!-- Login Modal -->
   <login-modal wx:if="{{ showLoginModal }}" class="login-modal" />
+  
+  <!-- Post Viewer Container -->
   <view class="post-viewer-container">
+    <!-- Media Player Component -->
     <media-player
       wx:if="{{ currentPost }}"
       selectedPost="{{ currentPost }}"
@@ -34,10 +28,25 @@
     >
     </media-player>
 
-    <!-- Loading indicator -->
+    <!-- Loading State -->
     <view wx:if="{{ isLoading }}" class="loading-container">
       <view class="loading-spinner"></view>
-      <text class="loading-text">加载中...</text>
+      <text class="loading-text">{{messages.loading}}</text>
+    </view>
+    
+    <!-- Error State -->
+    <view wx:elif="{{ loadError }}" class="error-container">
+      <view class="error-icon">⚠️</view>
+      <text class="error-text">{{errorMessage}}</text>
+      <button class="retry-btn" bindtap="retryLoad">重试</button>
+    </view>
+    
+    <!-- Empty State -->
+    <view wx:elif="{{ !currentPost }}" class="empty-container">
+      <view class="empty-icon">📭</view>
+      <text class="empty-text">内容不存在</text>
+      <button class="back-btn" bindtap="goBack">返回</button>
     </view>
   </view>
+  <douyin-tabbar current="me"></douyin-tabbar>
 </view>

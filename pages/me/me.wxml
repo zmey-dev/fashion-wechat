@@ -10,10 +10,10 @@
         <view class="username-section">
           <text class="username">{{userInfo.username}}</text>
           <view class="user-meta">
-            <text class="phone">(phone: {{userInfo.phone}},</text>
+            <text class="phone">(手机: {{userInfo.phone}},</text>
             <view class="gender-age">
               <text class="gender-icon">{{user.gender === 'male' ? '♂' : '♀'}}</text>
-              <text class="age">{{age}} years)</text>
+              <text class="age">{{age}} 岁)</text>
             </view>
           </view>
         </view>
@@ -21,19 +21,19 @@
         <view class="stats-container">
           <view class="stat-item">
             <text class="stat-number">{{userInfo.likes_count}}</text>
-            <text class="stat-label">Likes</text>
+            <text class="stat-label">获赞</text>
           </view>
           <view class="stat-item">
             <text class="stat-number">{{userInfo.friends_count}}</text>
-            <text class="stat-label">Friends</text>
+            <text class="stat-label">好友</text>
           </view>
           <view class="stat-item">
             <text class="stat-number">{{userInfo.follows_count}}</text>
-            <text class="stat-label">Following</text>
+            <text class="stat-label">关注</text>
           </view>
           <view class="stat-item">
             <text class="stat-number">{{userInfo.followers_count}}</text>
-            <text class="stat-label">Followers</text>
+            <text class="stat-label">粉丝</text>
           </view>
         </view>
       </view>
@@ -58,7 +58,7 @@
   <!-- Posts Grid -->
   <view class="posts-container">
     <view wx:if="{{!loading && posts.length === 0}}" class="empty-state">
-      <text class="empty-text">No works to display.</text>
+      <text class="empty-text">暂无内容</text>
     </view>
     
     <view wx:else class="posts-grid">
@@ -99,7 +99,7 @@
     <!-- Loading Indicator -->
     <view wx:if="{{loading}}" class="loading-container">
       <view class="loading-spinner"></view>
-      <text class="loading-text">Loading...</text>
+      <text class="loading-text">{{messages.loading}}</text>
     </view>
   </view>
 
@@ -107,4 +107,5 @@
   <view class="fab" bindtap="scrollToTop">
     <text class="fab-icon">↑</text>
   </view>
+  <douyin-tabbar current="me"></douyin-tabbar>
 </view>

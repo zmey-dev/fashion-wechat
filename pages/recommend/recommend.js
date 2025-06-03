@@ -3,7 +3,6 @@ const app = getApp();
 
 Page({
   data: {
-    showSidebar: false,
     currentPath: "recommend",
     showLoginModal: app.globalData.showLoginModal || false,
     userInfo: app.globalData.userInfo || {},
@@ -11,7 +10,6 @@ Page({
 
     currentPost: null,
     currentPostUser: null,
-    userInfo: null,
     currentIndex: 0,
     totalPosts: 0,
     isLoading: true,
@@ -20,7 +18,21 @@ Page({
 
     touchStartX: 0,
     touchStartY: 0,
+
+    // Chinese messages for UI text
+    messages: {
+      loading: "加载中...",
+      errors: {
+        loadFailed: "内容加载失败",
+        networkError: "网络错误，请稍后重试",
+      },
+      navigation: {
+        firstPost: "已经是第一篇文章了",
+        lastPost: "已经是最后一篇文章了",
+      },
+    },
   },
+
   onLoad: function (options) {
     const postId = options.postId || null;
     const app = getApp();
@@ -35,20 +47,18 @@ Page({
     this.followedUserHandler = (followedUsers) => {
       this.setData({ followedUsers });
     };
-    this.sidebarHandler = (showSidebar) => {
-      this.setData({ showSidebar });
-    };
+
     app.subscribe("userInfo", this.userInfoHandler);
     app.subscribe("followedUser", this.followedUserHandler);
     app.subscribe("showLoginModal", this.showLoginModalHandler);
-    app.subscribe("showSidebar", this.sidebarHandler);
+
     this.setData({
-      showSidebar: app.globalData.showSidebar,
       showLoginModal: app.globalData.showLoginModal || false,
       userInfo: app.globalData.userInfo || {},
       followedUsers: app.globalData.followedUsers || [],
       showSidebar: app.globalData.showSidebar || false,
     });
+
     if (postId) this.loadPostData(null, postId);
     else this.loadPostData(0);
   },
@@ -59,7 +69,6 @@ Page({
     app.unsubscribe("userInfo", this.userInfoHandler);
     app.unsubscribe("showLoginModal", this.showLoginModalHandler);
     app.unsubscribe("followedUser", this.followedUserHandler);
-    app.unsubscribe("showSidebar", this.sidebarHandler);
   },
 
   loadPostData: function (index, postId) {
@@ -67,6 +76,7 @@ Page({
       isLoading: true,
       loadError: false,
     });
+
     const data = {};
     if (index !== null && index !== undefined) {
       data.index = index;
@@ -74,6 +84,7 @@ Page({
     if (postId) {
       data.id = postId;
     }
+
     // Fetch post data from API
     wx.request({
       url: `${config.BACKEND_URL}/post/get_post_recommend`,
@@ -99,7 +110,7 @@ Page({
           this.setData({
             isLoading: false,
             loadError: true,
-            errorMessage: "内容加载失败",
+            errorMessage: this.data.messages.errors.loadFailed,
           });
         }
       },
@@ -108,7 +119,7 @@ Page({
         this.setData({
           isLoading: false,
           loadError: true,
-          errorMessage: "网络错误，请稍后重试",
+          errorMessage: this.data.messages.errors.networkError,
         });
       },
     });
@@ -119,7 +130,7 @@ Page({
       this.loadPostData(this.data.currentIndex - 1);
     } else {
       wx.showToast({
-        title: "已经是第一篇文章了",
+        title: this.data.messages.navigation.firstPost,
         icon: "none",
       });
     }
@@ -130,7 +141,7 @@ Page({
       this.loadPostData(this.data.currentIndex + 1);
     } else {
       wx.showToast({
-        title: "已经是最后一篇文章了",
+        title: this.data.messages.navigation.lastPost,
         icon: "none",
       });
     }

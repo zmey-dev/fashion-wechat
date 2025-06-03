@@ -1047,3 +1047,13 @@ page {
 .message-wrapper {
   margin-bottom: 8rpx;
 }
+
+/* 메인 컨테이너에 탭 바 높이만큼 하단 패딩 추가 */
+.container {
+  padding-bottom: 110rpx;
+}
+
+/* 채팅 입력 영역의 위치 조정 */
+.input-container {
+  bottom: 110rpx;
+}

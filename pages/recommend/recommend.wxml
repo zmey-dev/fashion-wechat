@@ -1,18 +1,9 @@
 <!-- pages/index/index.wxml -->
 <view
-  class="page-container {{ showSidebar ? 'sidebar-open' : '' }}"
+  class="page-container"
 >
-  <slide-sidebar 
-    current-path="{{ currentPath }}" 
-    is-visible="{{ showSidebar }}" 
-    userInfo="{{ userInfo }}"
-    bind:hideSidebar="closeSideBar"
-    style="position:relative; width: 100%; background: #d3d3d3; height: 100px"
-    >
-    <view style="position:relative; width: 100%; background: #d3d3d3; height: 100px"></view>
-    <textarea placeholder="请输入" placeholder-style="color:blue;" />
-  </slide-sidebar>
   <login-modal wx:if="{{ showLoginModal }}" class="login-modal" />
+  <filter-bar currentFilter="recommend"></filter-bar>
   <view class="post-viewer-container">
     <media-player
       wx:if="{{ currentPost }}"
@@ -40,4 +31,5 @@
       <text class="loading-text">加载中...</text>
     </view>
   </view>
+  <douyin-tabbar current="me"></douyin-tabbar>
 </view>

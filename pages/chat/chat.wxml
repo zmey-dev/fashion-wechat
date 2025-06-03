@@ -4,7 +4,7 @@
   <view class="chat-list-view {{currentView === 'list' ? 'active' : 'hidden'}}" >
     <!-- Header -->
     <view class="list-header">
-      <view class="header-title">Chats</view>
+      <view class="header-title">聊天</view>
     </view>
 
     <!-- Search Bar -->
@@ -13,7 +13,7 @@
         <view class="search-icon">🔍</view>
         <input 
           class="search-input" 
-          placeholder="Search"
+          placeholder="搜索"
           value="{{searchText}}"
           bindinput="onSearchInput"
         />
@@ -62,7 +62,7 @@
         
         <!-- Typing indicator - similar to React version -->
         <view wx:if="{{friendsTyping[item.id]}}" class="typing-text">
-          ...typing
+          正在输入...
         </view>
       </view>
     </scroll-view>
@@ -91,7 +91,7 @@
           <view class="user-name">{{selectedUser.username}}</view>
           <!-- Show typing indicator in header when user is typing -->
           <view wx:if="{{friendsTyping[selectedUser.id]}}" class="header-typing-indicator">
-            <text class="header-typing-text">typing...</text>
+            <text class="header-typing-text">正在输入...</text>
             <view class="header-typing-dots">
               <view class="header-typing-dot"></view>
               <view class="header-typing-dot"></view>
@@ -99,7 +99,7 @@
             </view>
           </view>
           <!-- Show status when not typing -->
-          <view wx:else class="user-status">{{selectedUser.status === 'online' ? 'online' : 'offline'}}</view>
+          <view wx:else class="user-status">{{selectedUser.status === 'online' ? '在线' : '离线'}}</view>
         </view>
       </view>
       <view class="header-actions">
@@ -238,7 +238,7 @@
         
         <input 
           class="message-input"
-          placeholder="Message"
+          placeholder="消息"
           value="{{inputMessage}}"
           bindinput="onInputChange"
           bindfocus="onInputFocus"
@@ -277,7 +277,7 @@
         bindtap="onContextAction"
       >
         <view class="context-icon">👤</view>
-        <text class="context-text">Profile</text>
+        <text class="context-text">查看资料</text>
       </view>
       
       <view class="context-divider"></view>
@@ -288,7 +288,7 @@
         bindtap="onContextAction"
       >
         <view class="context-icon">🗑️</view>
-        <text class="context-text">Delete Messages</text>
+        <text class="context-text">删除消息</text>
       </view>
       
       <view class="context-divider"></view>
@@ -299,8 +299,11 @@
         bindtap="onContextAction"
       >
         <view class="context-icon">🚫</view>
-        <text class="context-text">Block User</text>
+        <text class="context-text">屏蔽用户</text>
       </view>
     </view>
   </view>
+
+  <!-- Tab Bar - Add this section for the tab bar -->
+  <douyin-tabbar current="chat"></douyin-tabbar>
 </view>

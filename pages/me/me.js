@@ -7,8 +7,23 @@ Page({
     loading: false,
     hasMore: true,
     currentTab: 0,
-    tabs: ["Works", "Likes", "Favorites", "History"],
+    tabs: ["作品", "喜欢", "收藏", "历史"],
     age: 0,
+    // Chinese messages for UI text
+    messages: {
+      loading: "加载中...",
+      errors: {
+        loadFailed: "加载失败",
+        networkError: "网络错误",
+      },
+      confirmations: {
+        deleteTitle: "删除确认",
+        deleteContent: "您确定要删除这个帖子吗？",
+      },
+      success: {
+        deleteSuccess: "删除成功",
+      },
+    },
   },
 
   onLoad: function (options) {
@@ -43,6 +58,7 @@ Page({
     this.refreshPosts();
   },
 
+  // Calculate user age based on birthday
   calculateAge() {
     const birthday = new Date(this.data.userInfo.birthday);
     const today = new Date();
@@ -59,6 +75,7 @@ Page({
     this.setData({ age });
   },
 
+  // Handle tab change
   onTabChange(e) {
     const index = e.currentTarget.dataset.index;
     this.setData({
@@ -68,6 +85,7 @@ Page({
     this.loadPosts();
   },
 
+  // Load posts based on current tab
   async loadPosts() {
     this.setData({ loading: true });
 
@@ -99,7 +117,7 @@ Page({
         fail: () => {
           this.setData({ loading: false });
           wx.showToast({
-            title: "Failed to load posts",
+            title: this.data.messages.errors.loadFailed,
             icon: "none",
           });
         },
@@ -108,12 +126,13 @@ Page({
       console.error("Failed to load posts:", error);
       this.setData({ loading: false });
       wx.showToast({
-        title: "Loading failed",
+        title: this.data.messages.errors.loadFailed,
         icon: "none",
       });
     }
   },
 
+  // Load more posts for pagination
   async loadMorePosts() {
     this.setData({ loading: true });
 
@@ -145,7 +164,7 @@ Page({
         fail: () => {
           this.setData({ loading: false });
           wx.showToast({
-            title: "Failed to load posts",
+            title: this.data.messages.errors.loadFailed,
             icon: "none",
           });
         },
@@ -155,18 +174,20 @@ Page({
     }
   },
 
+  // Refresh posts
   async refreshPosts() {
     this.setData({ posts: [] });
     await this.loadPosts();
     wx.stopPullDownRefresh();
   },
 
+  // Handle delete post confirmation
   onDeletePost(e) {
     const postId = e.currentTarget.dataset.id;
 
     wx.showModal({
-      title: "Delete Confirmation",
-      content: "Are you sure you want to delete this post?",
+      title: this.data.messages.confirmations.deleteTitle,
+      content: this.data.messages.confirmations.deleteContent,
       success: (res) => {
         if (res.confirm) {
           this.deletePost(postId);
@@ -175,6 +196,7 @@ Page({
     });
   },
 
+  // Delete post
   deletePost(postId) {
     try {
       wx.request({
@@ -190,19 +212,19 @@ Page({
             this.setData({ posts });
 
             wx.showToast({
-              title: "Deleted successfully",
+              title: this.data.messages.success.deleteSuccess,
               icon: "success",
             });
           } else {
             wx.showToast({
-              title: "Failed to delete post",
+              title: this.data.messages.errors.loadFailed,
               icon: "none",
             });
           }
         },
         fail: () => {
           wx.showToast({
-            title: "Failed to delete post",
+            title: this.data.messages.errors.loadFailed,
             icon: "none",
           });
         },
@@ -210,13 +232,14 @@ Page({
     } catch (error) {
       console.error("Error deleting post:", error);
       wx.showToast({
-        title: "Failed to delete post",
+        title: this.data.messages.errors.loadFailed,
         icon: "none",
       });
       return;
     }
   },
 
+  // Scroll to top
   scrollToTop() {
     wx.pageScrollTo({
       scrollTop: 0,

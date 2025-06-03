@@ -2,7 +2,7 @@
   <view class="modal-content" catch:tap="preventClose">
     <!-- Header -->
     <view class="modal-header">
-      <span class="modal-title">Login</span>
+      <span class="modal-title">登录</span>
       <view class="close-btn" bindtap="closeModal">
         <span class="iconfont icon-close">×</span>
       </view>
@@ -15,14 +15,14 @@
         data-type="email"
         bindtap="switchLoginType"
       >
-        <span>Email</span>
+        <span>{{messages.loginTypes.email}}</span>
       </view>
       <view 
         class="tab-item {{loginType === 'phone' ? 'active' : ''}}"
         data-type="phone"
         bindtap="switchLoginType"
       >
-        <span>Phone</span>
+        <span>{{messages.loginTypes.phone}}</span>
       </view>
     </view>
 
@@ -34,8 +34,8 @@
           <view class="wechat-icon">
             <span class="icon">🔴</span>
           </view>
-          <span class="wechat-span">One-click login with WeChat</span>
-          <span class="wechat-desc">Secure and convenient</span>
+          <span class="wechat-span">微信一键登录</span>
+          <span class="wechat-desc">安全便捷</span>
         </view>
       </view>
 
@@ -45,7 +45,7 @@
           <input
             class="form-input {{emailError ? 'error' : ''}}"
             type="span"
-            placeholder="Enter email address"
+            placeholder="{{messages.formLabels.email}}"
             value="{{email}}"
             bindinput="onEmailInput"
           />
@@ -57,7 +57,7 @@
             <input
               class="form-input {{passwordError ? 'error' : ''}}"
               type="{{showPassword ? 'span' : 'password'}}"
-              placeholder="Enter password"
+              placeholder="{{messages.formLabels.password}}"
               value="{{password}}"
               bindinput="onPasswordInput"
             />
@@ -77,7 +77,7 @@
             <input
               class="form-input {{phoneError ? 'error' : ''}}"
               type="number"
-              placeholder="Enter phone number"
+              placeholder="{{messages.formLabels.phone}}"
               value="{{phone}}"
               bindinput="onPhoneInput"
             />
@@ -90,7 +90,7 @@
             <input
               class="form-input code-input {{codeError ? 'error' : ''}}"
               type="number"
-              placeholder="Enter verification code"
+              placeholder="{{messages.formLabels.verificationCode}}"
               value="{{verificationCode}}"
               bindinput="onCodeInput"
               maxlength="6"
@@ -100,7 +100,7 @@
               bindtap="sendVerificationCode"
               disabled="{{countdown > 0}}"
             >
-              {{countdown > 0 ? countdown + 's' : 'Send Code'}}
+              {{countdown > 0 ? countdown + ' ' + messages.buttons.seconds : messages.buttons.sendCode}}
             </button>
           </view>
           <span class="error-span" wx:if="{{codeError}}">{{codeError}}</span>
@@ -116,18 +116,18 @@
         disabled="{{loading}}"
       >
         <span wx:if="{{!loading}}">
-          {{loginType === 'wechat' ? 'Login with WeChat' : 'Login'}}
+          {{loginType === 'wechat' ? '微信登录' : messages.buttons.login}}
         </span>
-        <span wx:if="{{loading}}">Logging in...</span>
+        <span wx:if="{{loading}}">登录中...</span>
       </button>
     </view>
 
     <!-- Footer -->
     <view class="modal-footer">
       <span class="terms-span">
-        By logging in, you agree to our 
-        <span class="link">Terms of Service</span> and 
-        <span class="link">Privacy Policy</span>
+        登录即表示您同意我们的
+        <span class="link">服务条款</span> 和
+        <span class="link">隐私政策</span>
       </span>
     </view>
   </view>

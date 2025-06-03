@@ -16,37 +16,61 @@ Page({
     page: 1,
     pageSize: 10,
     searchValue: "",
+    // Chinese messages for UI text
+    messages: {
+      loading: "加载中...",
+      errors: {
+        loadFailed: "加载失败",
+        networkError: "网络错误",
+        operationFailed: "操作失败",
+        addFriendFailed: "添加好友失败",
+        removeFriendFailed: "取消好友失败",
+      },
+      actions: {
+        following: "关注中...",
+        unfollowing: "取消关注中...",
+        addingFriend: "添加好友中...",
+        removingFriend: "取消好友中...",
+        followed: "已关注",
+        unfollowed: "已取消关注",
+        friendAdded: "已添加好友",
+        friendRemoved: "已取消好友",
+      },
+      confirmations: {
+        removeFriendTitle: "提示",
+        removeFriendContent: "您确定要删除您的好友请求吗？",
+      },
+    },
   },
 
   onLoad: function (options) {
     const postId = options.postId || null;
     const app = getApp();
 
-    // Subscribe to state changes
-    this.sidebarHandler = (showSidebar) => {
-      this.setData({ showSidebar });
-    };
+    // Remove sidebar related code
     this.userInfoHandler = (userInfo) => {
       this.setData({ userInfo });
     };
-    app.subscribe("showSidebar", this.sidebarHandler);
+    // Subscribe to user info changes
     app.subscribe("userInfo", this.userInfoHandler);
+
     this.setData({
-      showSidebar: app.globalData.showSidebar || false,
       userInfo: app.globalData.userInfo || {},
     });
+
     this.loadUserList();
   },
 
   onUnload: function () {
     const app = getApp();
-    app.unsubscribe("showSidebar", this.sidebarHandler);
+    // Unsubscribe from user info changes
     app.unsubscribe("userInfo", this.userInfoHandler);
   },
 
+  // Load user list from API
   loadUserList: function () {
     wx.showLoading({
-      title: "加载中...",
+      title: this.data.messages.loading,
     });
     wx.request({
       url: `${config.BACKEND_URL}/friend/get_friends`,
@@ -63,14 +87,14 @@ Page({
           });
         } else {
           wx.showToast({
-            title: "加载失败",
+            title: this.data.messages.errors.loadFailed,
             icon: "none",
           });
         }
       },
       fail: () => {
         wx.showToast({
-          title: "网络错误",
+          title: this.data.messages.errors.networkError,
           icon: "none",
         });
       },
@@ -80,6 +104,7 @@ Page({
     });
   },
 
+  // Search users functionality
   searchUsers: function (e) {
     const searchValue = e.detail.value.toLowerCase();
     this.setData({
@@ -102,6 +127,7 @@ Page({
     });
   },
 
+  // Clear search input
   clearSearch: function () {
     this.setData({
       searchValue: "",
@@ -109,6 +135,7 @@ Page({
     });
   },
 
+  // Select user and show their media
   selectUser: function (e) {
     const userId = e.currentTarget.dataset.id;
     const selectedUser = this.data.userList.find((user) => user.id === userId);
@@ -133,6 +160,7 @@ Page({
     this.loadUserMedia(userId);
   },
 
+  // Load user's media posts
   loadUserMedia: function (userId) {
     if (!this.data.hasMore || this.data.loading) return;
 
@@ -160,14 +188,14 @@ Page({
           });
         } else {
           wx.showToast({
-            title: "加载失败",
+            title: this.data.messages.errors.loadFailed,
             icon: "none",
           });
         }
       },
       fail: () => {
         wx.showToast({
-          title: "网络错误",
+          title: this.data.messages.errors.networkError,
           icon: "none",
         });
       },
@@ -177,12 +205,14 @@ Page({
     });
   },
 
+  // Handle reaching bottom of page for infinite scroll
   onReachBottom: function () {
     if (this.data.showUserMedia && this.data.currentUser) {
       this.loadUserMedia(this.data.currentUser.id);
     }
   },
 
+  // Go back to user list
   backToUserList: function () {
     this.setData({
       showUserMedia: false,
@@ -190,6 +220,7 @@ Page({
     });
   },
 
+  // Preview image by navigating to post detail
   previewImage: function (e) {
     const current = e.currentTarget.dataset.id;
     wx.navigateTo({
@@ -197,6 +228,7 @@ Page({
     });
   },
 
+  // Handle pull down refresh
   onPullDownRefresh: function () {
     if (this.data.showUserMedia && this.data.currentUser) {
       this.setData({
@@ -219,7 +251,9 @@ Page({
     const newFollowStatus = !currentUser.isFollowed;
 
     wx.showLoading({
-      title: newFollowStatus ? "关注中..." : "取消关注中...",
+      title: newFollowStatus
+        ? this.data.messages.actions.following
+        : this.data.messages.actions.unfollowing,
     });
 
     wx.request({
@@ -251,14 +285,16 @@ Page({
           });
 
           wx.showToast({
-            title: newFollowStatus ? "已关注" : "已取消关注",
+            title: newFollowStatus
+              ? this.data.messages.actions.followed
+              : this.data.messages.actions.unfollowed,
             icon: "success",
           });
         }
       },
       fail: () => {
         wx.showToast({
-          title: "操作失败",
+          title: this.data.messages.errors.operationFailed,
           icon: "error",
         });
       },
@@ -287,8 +323,8 @@ Page({
     if (currentUser.isFriend) {
       // Confirm before removing friend
       wx.showModal({
-        title: "提示",
-        content: "您确定要删除您的好友请求吗？",
+        title: this.data.messages.confirmations.removeFriendTitle,
+        content: this.data.messages.confirmations.removeFriendContent,
         success: (res) => {
           if (res.confirm) {
             this.updateFriendStatus(false);
@@ -308,7 +344,9 @@ Page({
     const currentUser = this.data.currentUser;
 
     wx.showLoading({
-      title: addFriend ? "添加好友中..." : "取消好友中...",
+      title: addFriend
+        ? this.data.messages.actions.addingFriend
+        : this.data.messages.actions.removingFriend,
     });
 
     if (addFriend)
@@ -329,15 +367,24 @@ Page({
               currentUser: updatedUser,
             });
             wx.showToast({
-              title: "已添加好友",
+              title: this.data.messages.actions.friendAdded,
               icon: "success",
             });
           } else {
             wx.showToast({
-              title: "添加好友失败",
+              title: this.data.messages.errors.addFriendFailed,
               icon: "error",
             });
           }
+        },
+        fail: () => {
+          wx.showToast({
+            title: this.data.messages.errors.addFriendFailed,
+            icon: "error",
+          });
+        },
+        complete: () => {
+          wx.hideLoading();
         },
       });
     else
@@ -358,15 +405,24 @@ Page({
               currentUser: updatedUser,
             });
             wx.showToast({
-              title: "已取消好友",
+              title: this.data.messages.actions.friendRemoved,
               icon: "success",
             });
           } else {
             wx.showToast({
-              title: "取消好友失败",
+              title: this.data.messages.errors.removeFriendFailed,
               icon: "error",
             });
           }
+        },
+        fail: () => {
+          wx.showToast({
+            title: this.data.messages.errors.removeFriendFailed,
+            icon: "error",
+          });
+        },
+        complete: () => {
+          wx.hideLoading();
         },
       });
   },

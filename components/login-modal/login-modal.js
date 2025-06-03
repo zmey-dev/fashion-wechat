@@ -15,6 +15,51 @@ Component({
     phoneError: "",
     passwordError: "",
     codeError: "",
+    // Add Chinese messages
+    messages: {
+      // Login type labels
+      loginTypes: {
+        wechat: "微信登录",
+        email: "邮箱登录",
+        phone: "手机登录",
+      },
+      // Form labels
+      formLabels: {
+        email: "邮箱地址",
+        phone: "手机号码",
+        password: "密码",
+        verificationCode: "验证码",
+      },
+      // Button texts
+      buttons: {
+        login: "登录",
+        sendCode: "发送验证码",
+        resend: "重新发送",
+        seconds: "秒",
+      },
+      // Error messages
+      errors: {
+        emailRequired: "请输入邮箱地址",
+        emailInvalid: "请输入有效的邮箱地址",
+        phoneRequired: "请输入手机号码",
+        phoneInvalid: "请输入有效的手机号码",
+        passwordRequired: "请输入密码",
+        passwordTooShort: "密码至少需要6个字符",
+        codeRequired: "请输入验证码",
+        codeInvalid: "验证码必须为6位数字",
+        wechatLoginFailed: "微信登录失败，请重试",
+        emailLoginFailed: "邮箱登录失败，请检查凭据",
+        phoneLoginFailed: "手机登录失败，请检查验证码",
+        verificationFailed: "验证失败",
+      },
+      // Status messages
+      status: {
+        sendingCode: "发送验证码中...",
+        codeSent: "验证码已发送",
+        sendFailed: "发送失败",
+        loginSuccess: "登录成功",
+      },
+    },
   },
   methods: {
     // Close modal
@@ -99,7 +144,7 @@ Component({
 
         // Get user info (requires user authorization)
         const userInfoResult = await this.promiseWrapper(wx.getUserProfile, {
-          desc: "Login to access personalized features",
+          desc: "登录以访问个性化功能", // Chinese: "Login to access personalized features"
         });
 
         // Send to backend for authentication
@@ -113,7 +158,7 @@ Component({
 
         this.handleLoginSuccess(authResult);
       } catch (error) {
-        this.handleLoginError("WeChat login failed, please try again");
+        this.handleLoginError(this.data.messages.errors.wechatLoginFailed);
       } finally {
         this.setData({ loading: false });
       }
@@ -125,23 +170,23 @@ Component({
 
       // Validation
       if (!email) {
-        this.setData({ emailError: "Please enter email address" });
+        this.setData({ emailError: this.data.messages.errors.emailRequired });
         return;
       }
 
       if (!this.validateEmail(email)) {
-        this.setData({ emailError: "Please enter valid email address" });
+        this.setData({ emailError: this.data.messages.errors.emailInvalid });
         return;
       }
 
       if (!password) {
-        this.setData({ passwordError: "Please enter password" });
+        this.setData({ passwordError: this.data.messages.errors.passwordRequired });
         return;
       }
 
       if (password.length < 6) {
         this.setData({
-          passwordError: "Password must be at least 6 characters",
+          passwordError: this.data.messages.errors.passwordTooShort,
         });
         return;
       }
@@ -157,7 +202,7 @@ Component({
 
         this.handleLoginSuccess(authResult);
       } catch (error) {
-        this.handleLoginError("Email login failed, please check credentials");
+        this.handleLoginError(this.data.messages.errors.emailLoginFailed);
       } finally {
         this.setData({ loading: false });
       }
@@ -169,22 +214,22 @@ Component({
 
       // Validation
       if (!phone) {
-        this.setData({ phoneError: "Please enter phone number" });
+        this.setData({ phoneError: this.data.messages.errors.phoneRequired });
         return;
       }
 
       if (!this.validatePhone(phone)) {
-        this.setData({ phoneError: "Please enter valid phone number" });
+        this.setData({ phoneError: this.data.messages.errors.phoneInvalid });
         return;
       }
 
       if (!verificationCode) {
-        this.setData({ codeError: "Please enter verification code" });
+        this.setData({ codeError: this.data.messages.errors.codeRequired });
         return;
       }
 
       if (verificationCode.length !== 6) {
-        this.setData({ codeError: "Verification code must be 6 digits" });
+        this.setData({ codeError: this.data.messages.errors.codeInvalid });
         return;
       }
 
@@ -203,17 +248,14 @@ Component({
           },
           success: async (res) => {
             if (res.statusCode === 200 && res.data.status === "success") {
-            this.handleLoginSuccess(res.data);
+              this.handleLoginSuccess(res.data);
+            } else {
+              throw new Error(res.data.message || this.data.messages.errors.verificationFailed);
             }
-            else {
-              throw new Error(res.data.message || "Phone verification failed");
-            }
-          }
+          },
         });
       } catch (error) {
-        this.handleLoginError(
-          "Phone login failed, please check verification code"
-        );
+        this.handleLoginError(this.data.messages.errors.phoneLoginFailed);
       } finally {
         this.setData({ loading: false });
       }
@@ -224,12 +266,12 @@ Component({
       const { phone, countdown } = this.data;
 
       if (!phone) {
-        this.setData({ phoneError: "Please enter phone number first" });
+        this.setData({ phoneError: this.data.messages.errors.phoneRequired });
         return;
       }
 
       if (!this.validatePhone(phone)) {
-        this.setData({ phoneError: "Please enter valid phone number" });
+        this.setData({ phoneError: this.data.messages.errors.phoneInvalid });
         return;
       }
 
@@ -239,7 +281,7 @@ Component({
 
       try {
         wx.showLoading({
-          title: "Sending code...",
+          title: this.data.messages.status.sendingCode,
           mask: true,
         });
         await this.requestVerificationCode("+86" + phone);
@@ -248,12 +290,12 @@ Component({
         this.startCountdown();
 
         wx.showToast({
-          title: "Verification code sent",
+          title: this.data.messages.status.codeSent,
           icon: "success",
         });
       } catch (error) {
         wx.showToast({
-          title: "Failed to send code",
+          title: this.data.messages.status.sendFailed,
           icon: "error",
         });
       } finally {
@@ -364,7 +406,7 @@ Component({
       this.closeModal();
 
       wx.showToast({
-        title: "Login successful",
+        title: this.data.messages.status.loginSuccess,
         icon: "success",
       });
     },

@@ -1,10 +1,8 @@
 const { default: config } = require("../../config");
 
-// pages/create-media/create-media.js
 Page({
   data: {
     currentPath: "upload",
-    showSidebar: false,
     userInfo: getApp().globalData.userInfo || {},
 
     // Form data
@@ -39,22 +37,62 @@ Page({
     eventId: null,
     eventTitle: "",
     mediaCreateType: "",
+
+    // Chinese messages for UI text
+    messages: {
+      loading: "上传中...",
+      updating: "更新中...",
+      errors: {
+        titleRequired: "请输入标题",
+        contentRequired: "请输入描述",
+        filesRequired: "请上传媒体文件",
+        videoLimit: "视频模式只能上传一个文件",
+        maxFilesLimit: "最多只能上传",
+        videoImageConflict: "视频模式不能添加图片",
+        videoAudioConflict: "视频模式不支持背景音乐",
+        audioOnly: "只能选择音频文件",
+        audioSizeLimit: "音频文件不能超过10MB",
+        chooseAudioFailed: "选择音频失败",
+        operationFailed: "操作失败，请重试",
+        uploadFailed: "上传失败",
+        createFailed: "创建失败",
+        updateFailed: "更新失败",
+        requestFailed: "请求失败",
+        parseFailed: "响应解析失败",
+      },
+      success: {
+        filesAdded: "已添加",
+        videoAdded: "视频已添加",
+        audioSelected: "音频已选择",
+        fileDeleted: "文件已删除",
+        dotAdded: "标记点已添加",
+        dotDeleted: "标记点已删除",
+        dotUpdated: "标记点已更新",
+        createSuccess: "创建成功",
+        updateSuccess: "更新成功",
+      },
+      confirmations: {
+        deleteFileTitle: "确认删除",
+        deleteFileContent: "确定要删除这个文件吗？",
+        deleteDotTitle: "确认删除",
+        deleteDotContent: "确定要删除这个标记点吗？",
+      },
+      actions: {
+        takePhoto: "拍摄照片",
+        selectFromAlbum: "从相册选择",
+        takeVideo: "拍摄视频",
+      },
+    },
   },
+
   onLoad: function (options) {
-    const postId = options.postId || null;
     const app = getApp();
 
-    // Subscribe to state changes
-    this.sidebarHandler = (showSidebar) => {
-      this.setData({ showSidebar });
-    };
     this.userInfoHandler = (userInfo) => {
       this.setData({ userInfo });
     };
-    app.subscribe("showSidebar", this.sidebarHandler);
     app.subscribe("userInfo", this.userInfoHandler);
     this.setData({
-      showSidebar: app.globalData.showSidebar || false,
       userInfo: app.globalData.userInfo || {},
     });
     const { eventId, mediaId, mediaCreateType } = options;
@@ -77,7 +115,6 @@ Page({
 
   onUnload: function () {
     const app = getApp();
-    app.unsubscribe("showSidebar", this.sidebarHandler);
     app.unsubscribe("userInfo", this.userInfoHandler);
   },
 
@@ -99,7 +136,7 @@ Page({
 
   // Load existing post for update
   loadExistingPost(mediaId) {
-    wx.showLoading({ title: "Loading..." });
+    wx.showLoading({ title: this.data.messages.loading });
 
     wx.request({
       url: `${getApp().globalData.apiBase}/posts/${mediaId}`,
@@ -134,7 +171,7 @@ Page({
 
     if (files.length > 0 && files[0].type === "video") {
       wx.showToast({
-        title: "视频模式只能上传一个文件",
+        title: this.data.messages.errors.videoLimit,
         icon: "none",
       });
       return;
@@ -143,15 +180,18 @@ Page({
     const remainingSlots = this.data.maxFiles - files.length;
     if (remainingSlots <= 0) {
       wx.showToast({
-        title: `最多只能上传 ${this.data.maxFiles} 个文件`,
+        title: `${this.data.messages.errors.maxFilesLimit} ${this.data.maxFiles} 个文件`,
         icon: "none",
       });
       return;
     }
 
-    const itemList = ["拍摄照片", "从相册选择"];
+    const itemList = [
+      this.data.messages.actions.takePhoto,
+      this.data.messages.actions.selectFromAlbum,
+    ];
     if (files.length === 0) {
-      itemList.push("拍摄视频");
+      itemList.push(this.data.messages.actions.takeVideo);
     }
 
     wx.showActionSheet({
@@ -180,7 +220,7 @@ Page({
 
     if (files.length > 0 && files[0].type === "video") {
       wx.showToast({
-        title: "视频模式不能添加图片",
+        title: this.data.messages.errors.videoImageConflict,
         icon: "none",
       });
       return;
@@ -208,7 +248,7 @@ Page({
         });
 
         wx.showToast({
-          title: `已添加 ${newFiles.length} 个文件`,
+          title: `${this.data.messages.success.filesAdded} ${newFiles.length} 个文件`,
           icon: "success",
         });
       },
@@ -224,7 +264,7 @@ Page({
 
     if (files.length > 0) {
       wx.showToast({
-        title: "视频模式只能上传一个文件",
+        title: this.data.messages.errors.videoLimit,
         icon: "none",
       });
       return;
@@ -248,7 +288,7 @@ Page({
         });
 
         wx.showToast({
-          title: "视频已添加",
+          title: this.data.messages.success.videoAdded,
           icon: "success",
         });
       },
@@ -261,8 +301,8 @@ Page({
     const { files, imageDots, selectedImageIndex } = this.data;
 
     wx.showModal({
-      title: "确认删除",
-      content: "确定要删除这个文件吗？",
+      title: this.data.messages.confirmations.deleteFileTitle,
+      content: this.data.messages.confirmations.deleteFileContent,
       success: (res) => {
         if (res.confirm) {
           const newFiles = [...files];
@@ -305,7 +345,7 @@ Page({
           });
 
           wx.showToast({
-            title: "文件已删除",
+            title: this.data.messages.success.fileDeleted,
             icon: "success",
           });
         }
@@ -388,7 +428,7 @@ Page({
     });
 
     wx.showToast({
-      title: "标记点已添加",
+      title: this.data.messages.success.dotAdded,
       icon: "success",
     });
   },
@@ -413,8 +453,8 @@ Page({
     const { imageIndex, dotIndex } = e.currentTarget.dataset;
 
     wx.showModal({
-      title: "确认删除",
-      content: "确定要删除这个标记点吗？",
+      title: this.data.messages.confirmations.deleteDotTitle,
+      content: this.data.messages.confirmations.deleteDotContent,
       success: (res) => {
         if (res.confirm) {
           const { imageDots } = this.data;
@@ -435,7 +475,7 @@ Page({
           });
 
           wx.showToast({
-            title: "标记点已删除",
+            title: this.data.messages.success.dotDeleted,
             icon: "success",
           });
         }
@@ -475,7 +515,7 @@ Page({
     });
 
     wx.showToast({
-      title: "标记点已更新",
+      title: this.data.messages.success.dotUpdated,
       icon: "success",
     });
   },
@@ -494,7 +534,7 @@ Page({
 
     if (files.length > 0 && !this.isImage(files[0])) {
       wx.showToast({
-        title: "视频模式不支持背景音乐",
+        title: this.data.messages.errors.videoAudioConflict,
         icon: "none",
       });
       return;
@@ -513,7 +553,7 @@ Page({
 
         if (!validAudioExts.includes(fileExt)) {
           wx.showToast({
-            title: "只能选择音频文件",
+            title: this.data.messages.errors.audioOnly,
             icon: "none",
           });
           return;
@@ -522,7 +562,7 @@ Page({
         const maxSize = 10 * 1024 * 1024; // 10MB
         if (audioFile.size > maxSize) {
           wx.showToast({
-            title: "音频文件不能超过10MB",
+            title: this.data.messages.errors.audioSizeLimit,
             icon: "none",
           });
           return;
@@ -534,14 +574,14 @@ Page({
         });
 
         wx.showToast({
-          title: "音频已选择",
+          title: this.data.messages.success.audioSelected,
           icon: "success",
         });
       },
       fail: (err) => {
         console.error("Failed to choose audio file:", err);
         wx.showToast({
-          title: "选择音频失败",
+          title: this.data.messages.errors.chooseAudioFailed,
           icon: "none",
         });
       },
@@ -604,7 +644,7 @@ Page({
 
     if (!title.trim()) {
       wx.showToast({
-        title: "请输入标题",
+        title: this.data.messages.errors.titleRequired,
         icon: "none",
       });
       return false;
@@ -612,7 +652,7 @@ Page({
 
     if (!content.trim()) {
       wx.showToast({
-        title: "请输入描述",
+        title: this.data.messages.errors.contentRequired,
         icon: "none",
       });
       return false;
@@ -620,7 +660,7 @@ Page({
 
     if (files.length === 0) {
       wx.showToast({
-        title: "请上传媒体文件",
+        title: this.data.messages.errors.filesRequired,
         icon: "none",
       });
       return false;
@@ -645,7 +685,9 @@ Page({
       }
 
       wx.showToast({
-        title: this.data.isUpdateMode ? "更新成功" : "创建成功",
+        title: this.data.isUpdateMode
+          ? this.data.messages.success.updateSuccess
+          : this.data.messages.success.createSuccess,
         icon: "success",
       });
 
@@ -655,7 +697,7 @@ Page({
     } catch (error) {
       console.error("Form submission error:", error);
       wx.showToast({
-        title: "操作失败，请重试",
+        title: this.data.messages.errors.operationFailed,
         icon: "none",
       });
     } finally {
@@ -704,7 +746,7 @@ Page({
   createPost(formData) {
     return new Promise(async (resolve, reject) => {
       try {
-        wx.showLoading({ title: "上传中...", mask: true });
+        wx.showLoading({ title: this.data.messages.loading, mask: true });
 
         let audioUrl = null;
         if (formData.audio) {
@@ -743,13 +785,13 @@ Page({
               resolve(res.data); // Add this to properly resolve the promise
             } else {
               wx.hideLoading(); // Add this to hide loading when request fails
-              reject(new Error(res.data.msg || "创建失败"));
+              reject(new Error(res.data.msg || this.data.messages.errors.createFailed));
             }
           },
           fail: (err) => {
             wx.hideLoading();
             console.error("Request failed:", err);
-            reject(new Error(`请求失败: ${err.errMsg}`));
+            reject(new Error(`${this.data.messages.errors.requestFailed}: ${err.errMsg}`));
           },
         });
       } catch (error) {
@@ -775,13 +817,11 @@ Page({
 
   uploadSingleFile(file) {
     return new Promise((resolve, reject) => {
-      // Create form data with proper JSON handling for dots
       const formData = {
         type: file.type || "image",
         post_id: file.post_id || null,
       };
 
-      // Always ensure dots is valid JSON, even when empty
       if (file.dots && file.dots.length > 0) {
         formData.dots = JSON.stringify(file.dots);
       } else {
@@ -804,17 +844,17 @@ Page({
               resolve(data.media_id);
             } else {
               console.error("Media upload failed:", data.msg);
-              reject(new Error(data.msg || "媒体上传失败"));
+              reject(new Error(data.msg || this.data.messages.errors.uploadFailed));
             }
           } catch (error) {
             console.error("Failed to parse upload response:", error);
-            reject(new Error("上传响应解析失败"));
+            reject(new Error(this.data.messages.errors.parseFailed));
           }
         },
         fail: (err) => {
           console.error("Upload request failed:", err);
           wx.hideLoading();
-          reject(new Error(`上传请求失败: ${err.errMsg}`));
+          reject(new Error(`${this.data.messages.errors.requestFailed}: ${err.errMsg}`));
         },
       });
     });
@@ -835,14 +875,14 @@ Page({
             if (data.status === "success") {
               resolve(data.audio_url);
             } else {
-              reject(new Error(data.msg || "音频上传失败"));
+              reject(new Error(data.msg || this.data.messages.errors.uploadFailed));
             }
           } catch (error) {
-            reject(new Error("音频上传响应解析失败"));
+            reject(new Error(this.data.messages.errors.parseFailed));
           }
         },
         fail: (err) => {
-          reject(new Error(`音频上传请求失败: ${err.errMsg}`));
+          reject(new Error(`${this.data.messages.errors.requestFailed}: ${err.errMsg}`));
         },
       });
     });
@@ -852,7 +892,7 @@ Page({
   updatePost(formData) {
     return new Promise(async (resolve, reject) => {
       try {
-        wx.showLoading({ title: "更新中...", mask: true });
+        wx.showLoading({ title: this.data.messages.updating, mask: true });
 
         const newFiles = formData.files.filter((file) => !file.isExisting);
         const uploadedNewFiles = await this.uploadAllFiles(newFiles);
@@ -894,12 +934,12 @@ Page({
             if (res.statusCode === 200 && res.data.status === "success") {
               resolve(res.data);
             } else {
-              reject(new Error(res.data.message || "更新失败"));
+              reject(new Error(res.data.message || this.data.messages.errors.updateFailed));
             }
           },
           fail: (err) => {
             wx.hideLoading();
-            reject(new Error(`请求失败: ${err.errMsg}`));
+            reject(new Error(`${this.data.messages.errors.requestFailed}: ${err.errMsg}`));
           },
         });
       } catch (error) {

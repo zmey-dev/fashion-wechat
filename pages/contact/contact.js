@@ -12,27 +12,51 @@ Page({
     images: [],
     maxImages: 4,
     isSubmitting: false,
-    showSidebar: false,
+    // Chinese messages for UI text
+    messages: {
+      form: {
+        titlePlaceholder: "请输入标题",
+        descriptionPlaceholder: "请详细描述您的建议或问题",
+        submitButton: "提交建议",
+        submitting: "提交中...",
+      },
+      validation: {
+        required: "请填写标题和您的建议",
+        maxImages: "最多只能上传{max}张图片",
+      },
+      success: {
+        submitted: "您的建议已成功提交！感谢您的反馈",
+      },
+      errors: {
+        submitFailed: "提交失败，请稍后重试",
+        uploadFailed: "图片上传失败",
+        networkError: "网络错误，请检查网络连接",
+        parseFailed: "数据解析失败",
+        requestFailed: "请求失败",
+      },
+      actions: {
+        addImage: "添加图片",
+        preview: "预览",
+        remove: "删除",
+        removeAll: "删除所有",
+      },
+    },
   },
 
   onLoad: function (options) {
-    // Subscribe to sidebar state changes
-    this.sidebarHandler = (showSidebar) => {
-      this.setData({ showSidebar });
-    };
+    // Subscribe to user info changes
     this.userInfoHandler = (userInfo) => {
       this.setData({ userInfo });
     };
     app.subscribe("userInfo", this.userInfoHandler);
-    app.subscribe("showSidebar", this.sidebarHandler);
+
     this.setData({
-      showSidebar: app.globalData.showSidebar || false,
       userInfo: app.globalData.userInfo || {},
     });
   },
 
   onUnload: function () {
-    app.unsubscribe("showSidebar", this.sidebarHandler);
+    // Unsubscribe from user info changes
     app.unsubscribe("userInfo", this.userInfoHandler);
   },
 
@@ -56,7 +80,7 @@ Page({
 
     if (images.length >= maxImages) {
       wx.showToast({
-        title: `最多只能上传${maxImages}张图片`,
+        title: this.data.messages.validation.maxImages.replace("{max}", maxImages),
         icon: "none",
       });
       return;
@@ -123,7 +147,7 @@ Page({
     // Validate input
     if (!title.trim() || !description.trim()) {
       wx.showToast({
-        title: "请填写标题和您的建议",
+        title: this.data.messages.validation.required,
         icon: "none",
         duration: 2000,
       });
@@ -139,7 +163,7 @@ Page({
 
     // Show loading indicator
     wx.showLoading({
-      title: "提交中...",
+      title: this.data.messages.form.submitting,
       mask: true,
     });
 
@@ -167,7 +191,7 @@ Page({
 
         // Show success message
         wx.showToast({
-          title: "您的建议已成功提交！感谢您的反馈",
+          title: this.data.messages.success.submitted,
           icon: "success",
           duration: 3000,
         });
@@ -177,7 +201,9 @@ Page({
           wx.vibrateShort({ type: "medium" });
         }
       } else {
-        throw new Error(result.message || "提交失败");
+        throw new Error(
+          result.message || this.data.messages.errors.submitFailed
+        );
       }
     } catch (error) {
       // Hide loading indicator
@@ -187,7 +213,8 @@ Page({
       this.setData({ isSubmitting: false });
 
       // Show error message
-      const errorMessage = error.message || "提交失败，请稍后重试";
+      const errorMessage =
+        error.message || this.data.messages.errors.submitFailed;
       wx.showToast({
         title: errorMessage,
         icon: "none",
@@ -225,15 +252,21 @@ Page({
                     innerResolve(data.url);
                   } else {
                     innerReject(
-                      new Error(data.message || "Image upload failed")
+                      new Error(
+                        data.message || this.data.messages.errors.uploadFailed
+                      )
                     );
                   }
                 } catch (error) {
-                  innerReject(new Error("Failed to parse upload response"));
+                  innerReject(new Error(this.data.messages.errors.parseFailed));
                 }
               },
               fail: (err) => {
-                innerReject(new Error(`Upload request failed: ${err.errMsg}`));
+                innerReject(
+                  new Error(
+                    `${this.data.messages.errors.requestFailed}: ${err.errMsg}`
+                  )
+                );
               },
             });
           });
@@ -267,11 +300,15 @@ Page({
           if (res.statusCode === 200 && res.data.status === "success") {
             resolve(res.data);
           } else {
-            reject(new Error(res.data.message || "Form submission failed"));
+            reject(
+              new Error(res.data.message || this.data.messages.errors.submitFailed)
+            );
           }
         },
         fail: (err) => {
-          reject(new Error(`Request failed: ${err.errMsg}`));
+          reject(
+            new Error(`${this.data.messages.errors.requestFailed}: ${err.errMsg}`)
+          );
         },
       });
     });

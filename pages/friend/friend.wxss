@@ -9,6 +9,21 @@
   color: #f0f0f0;
 }
 
+/* 페이지 컨테이너 스타일 추가 */
+.page-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding-top: 88rpx; /* 필터 바 높이만큼 상단 패딩 추가 */
+  padding-bottom: 110rpx; /* 탭 바 높이만큼 하단 패딩 추가 */
+}
+
+/* 콘텐츠 컨테이너 스타일 추가 */
+.content-container {
+  flex: 1;
+  width: 100%;
+}
+
 /* User List Styles */
 .user-list {
   width: 100%;

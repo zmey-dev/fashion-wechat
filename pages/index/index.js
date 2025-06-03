@@ -1,359 +1,201 @@
+const app = getApp();
 const { default: config } = require("../../config");
 
-const app = getApp();
-
 Page({
-  /**
-   * Page initial data
-   */
   data: {
-    // Posts data
     posts: [],
-    // Loading state
     loading: false,
-    // Current page
     currentPage: 1,
-    // Has more data
     hasMore: true,
-    // Page size
     pageSize: 8,
-    // User info
     userInfo: null,
-    // Show login modal
     showLoginModal: false,
-    // Current filter
-    currentFilter: "discover",
-    // Search filter (search term)
-    searchFilter: "",
-    // Show scroll to top button
     showScrollTop: false,
-    // Filter options
-    filterOptions: [
-      { key: "discover", name: "发现" },
-      { key: "recommend", name: "推荐" },
-      { key: "following", name: "关注" },
-      { key: "latest", name: "最新" },
-    ],
+    // Chinese messages for UI text
+    messages: {
+      loading: "加载中...",
+      errors: {
+        loadFailed: "加载失败，请稍后重试",
+        networkError: "网络错误，请检查网络连接"
+      },
+      time: {
+        justNow: "刚刚",
+        minutesAgo: "分钟前",
+        hoursAgo: "小时前",
+        daysAgo: "天前"
+      }
+    }
+    // currentFilter and filterOptions removed - moved to filter-bar component
   },
 
-  /**
-   * Lifecycle function--Called when page load
-   */
   onLoad: function (options) {
-    const app = getApp();
+    // Set user info
+    this.setData({
+      userInfo: app.globalData.userInfo
+    });
 
-    // Subscribe to state changes
+    // Setup subscriptions
     this.userInfoHandler = (userInfo) => {
       this.setData({ userInfo });
-      // If login was successful and user was trying to access filtered content
-      if (userInfo && this.data.currentFilter !== 'discover') {
-        this.loadPosts(true);
-      }
     };
-    this.showLoginModalHandler = (showLoginModal) => {
+    app.subscribe("userInfo", this.userInfoHandler);
+
+    this.loginModalHandler = (showLoginModal) => {
       this.setData({ showLoginModal });
     };
+    app.subscribe("showLoginModal", this.loginModalHandler);
 
-    app.subscribe("showLoginModal", this.showLoginModalHandler);
-    app.subscribe("userInfo", this.userInfoHandler);
-    
-    this.setData({
-      showLoginModal: app.globalData.showLoginModal || false,
-      userInfo: app.globalData.userInfo || {},
-    });
-    
+    // Initial post loading
     this.initializePage();
-    this.loadPosts(true);
   },
 
   onUnload: function () {
-    const app = getApp();
-    app.unsubscribe("showLoginModal", this.showLoginModalHandler);
+    // Unsubscribe from events
     app.unsubscribe("userInfo", this.userInfoHandler);
+    app.unsubscribe("showLoginModal", this.loginModalHandler);
   },
 
-  /**
-   * Lifecycle function--Called when page show
-   */
   onShow: function () {
-    this.setData({
-      userInfo: app.globalData.userInfo,
-    });
+    // Refresh posts if needed
+    if (app.globalData.refreshPosts) {
+      this.refreshPosts();
+      app.globalData.refreshPosts = false;
+    }
   },
 
-  /**
-   * Initialize page settings
-   */
   initializePage: function () {
-    wx.setNavigationBarTitle({
-      title: "时装秀平台",
-    });
+    this.loadPosts(true);
   },
 
-  /**
-   * Load posts from server
-   */
   loadPosts: function (refresh = false) {
     if (this.data.loading) return;
 
+    if (refresh) {
+      this.setData({
+        posts: [],
+        currentPage: 1,
+        hasMore: true
+      });
+    }
+
+    if (!this.data.hasMore) return;
+
     this.setData({ loading: true });
 
-    const page = refresh ? 1 : this.data.currentPage;
-    const existIds = refresh ? [] : this.data.posts.map((p) => p.id);
-
-    // Build request data object
-    const requestData = {
-      page: page,
-      limit: this.data.pageSize,
-      scope: 15,
-      isDiscover: true,
-    };
-
-    // Only add exist_post_ids if there are existing posts
-    if (existIds && existIds.length > 0) {
-      requestData.exist_post_ids = JSON.stringify(existIds);
-    }
-
-    // Only add filter if there's a search term
-    if (this.data.searchFilter && this.data.searchFilter.trim()) {
-      requestData.filter = this.data.searchFilter.trim();
-    }
-
     wx.request({
-      url: `${config.BACKEND_URL}/post/get_posts_discover`,
-      method: "GET",
-      data: requestData,
-      header: {
-        Authorization: app.globalData.userInfo?.token
-          ? `Bearer ${app.globalData.userInfo.token}`
-          : "",
-        "Content-Type": "application/json",
+      url: `${config.BACKEND_URL}/post/get_posts`,
+      method: 'GET',
+      data: {
+        page: this.data.currentPage,
+        limit: this.data.pageSize
       },
       success: (res) => {
-        console.log("Posts loaded:", res.data);
-        if (res.data.status === "success") {
+        if (res.statusCode === 200 && res.data.status === 'success') {
           const newPosts = res.data.posts || [];
-          const allPosts = refresh
-            ? newPosts
-            : [...this.data.posts, ...newPosts];
+          
+          // Format timestamps
+          newPosts.forEach(post => {
+            post.timeAgo = this.formatTimeAgo(post.created_at);
+          });
 
           this.setData({
-            posts: allPosts,
-            hasMore: res.data.has_more || false,
-            currentPage: page + 1,
-            loading: false,
+            posts: [...this.data.posts, ...newPosts],
+            currentPage: this.data.currentPage + 1,
+            hasMore: newPosts.length >= this.data.pageSize
           });
         } else {
-          this.showToast("加载失败，请重试");
-          this.setData({ loading: false });
+          this.showToast(this.data.messages.errors.loadFailed);
         }
       },
-      fail: (err) => {
-        console.error("Load posts failed:", err);
-        this.showToast("网络错误，请检查连接");
-        this.setData({ loading: false });
-      },
-    });
-  },
-
-  /**
-   * Handle post item tap - navigate to detail
-   */
-  onPostTap: function (e) {
-    const { postId, index } = e.currentTarget.dataset;
-
-    if (!postId) {
-      this.showToast("帖子信息错误");
-      return;
-    }
-
-    wx.navigateTo({
-      url: `/pages/post-detail/post-detail?postId=${postId}&index=${index}`,
       fail: () => {
-        this.showToast("页面跳转失败");
+        this.showToast(this.data.messages.errors.networkError);
       },
+      complete: () => {
+        this.setData({ loading: false });
+        wx.stopPullDownRefresh();
+      }
     });
   },
 
-  /**
-   * Handle user avatar tap
-   */
+  onPostTap: function (e) {
+    const postId = e.currentTarget.dataset.postId;
+    wx.navigateTo({
+      url: `/pages/post-detail/post-detail?id=${postId}`
+    });
+  },
+
   onUserTap: function (e) {
-    e.stopPropagation();
-
-    const { username } = e.currentTarget.dataset;
-
+    const userId = e.currentTarget.dataset.userId;
     wx.navigateTo({
-      url: `/pages/profile/profile?username=${username}`,
+      url: `/pages/user-profile/user-profile?id=${userId}`
     });
   },
 
-  /**
-   * Handle filter change
-   */
-  onFilterTap: function (e) {
-    const { filter } = e.currentTarget.dataset;
-    
-    if (filter === this.data.currentFilter) return;
+  // onFilterTap method removed - moved to filter-bar component
 
-    // Check login requirement for non-discover filters
-    if (filter !== 'discover' && !app.globalData.userInfo) {
-      console.log('User not logged in, showing login modal for filter:', filter);
-      this.setData({ showLoginModal: true });
-      return;
-    }
-
-    this.setData({
-      currentFilter: filter,
-      currentPage: 1,
-      searchFilter: "", // Clear search when changing category filter
-    });
-
-    this.loadPosts(true);
-  },
-
-  /**
-   * Handle search input
-   */
-  onSearchInput: function (e) {
-    const searchTerm = e.detail.value;
-    
-    // Check if user is logged in for search functionality
-    if (searchTerm && searchTerm.trim() && !app.globalData.userInfo) {
-      console.log('User not logged in, showing login modal for search');
-      this.setData({ 
-        showLoginModal: true,
-        searchFilter: "" // Clear search input
-      });
-      return;
-    }
-
-    this.setData({
-      searchFilter: searchTerm,
-    });
-
-    // Debounce search - wait 500ms after user stops typing
-    clearTimeout(this.searchTimer);
-    this.searchTimer = setTimeout(() => {
-      this.setData({ currentPage: 1 });
-      this.loadPosts(true);
-    }, 500);
-  },
-
-  /**
-   * Handle search tap
-   */
   onSearchTap: function () {
-    // Check login requirement for search page
-    if (!app.globalData.userInfo) {
-      console.log('User not logged in, showing login modal for search page');
-      this.setData({ showLoginModal: true });
-      return;
-    }
-
     wx.navigateTo({
-      url: "/pages/search/search",
+      url: '/pages/search/search'
     });
   },
 
-  /**
-   * Close login modal
-   */
   onLoginClose: function () {
-    this.setData({ showLoginModal: false });
     app.setState("showLoginModal", false);
   },
 
-  /**
-   * Handle login success - refresh current filter if needed
-   */
   onLoginSuccess: function() {
-    console.log('Login successful, refreshing page data');
     this.setData({
-      userInfo: app.globalData.userInfo,
-      showLoginModal: false
+      userInfo: app.globalData.userInfo
     });
-    
-    // If user was trying to access a non-discover filter, reload with that filter
-    if (this.data.currentFilter !== 'discover') {
-      this.loadPosts(true);
-    }
+    this.refreshPosts();
   },
 
-  /**
-   * Pull down refresh
-   */
-  onPullDownRefresh: function () {
+  refreshPosts: function() {
     this.loadPosts(true);
-    setTimeout(() => {
-      wx.stopPullDownRefresh();
-    }, 1000);
   },
 
-  /**
-   * Reach bottom load more
-   */
+  onPullDownRefresh: function () {
+    this.refreshPosts();
+  },
+
   onReachBottom: function () {
-    if (this.data.hasMore && !this.data.loading) {
-      this.loadPosts(false);
-    }
+    this.loadPosts();
   },
 
-  /**
-   * Page scroll event - show/hide scroll to top button
-   */
   onPageScroll: function(e) {
-    const scrollTop = e.scrollTop;
-    const showScrollTop = scrollTop > 500; // 500px 이상 스크롤하면 버튼 표시
-    
+    // Show scroll to top button based on scroll position
+    const showScrollTop = e.scrollTop > 300;
     if (this.data.showScrollTop !== showScrollTop) {
       this.setData({ showScrollTop });
     }
   },
 
-  /**
-   * Scroll to top smoothly
-   */
   onScrollToTop: function() {
     wx.pageScrollTo({
       scrollTop: 0,
-      duration: 600
+      duration: 300
     });
-    
-    // 햅틱 피드백
-    wx.vibrateShort();
   },
 
-  /**
-   * Format relative time display
-   */
   formatTimeAgo: function (dateStr) {
-    if (!dateStr) return "";
-
     const now = new Date();
     const date = new Date(dateStr);
-    const diff = now.getTime() - date.getTime();
+    const diff = (now - date) / 1000; // Difference in seconds
 
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(minutes / 60);
-    const days = Math.floor(hours / 24);
-
-    if (minutes < 1) return "刚刚";
-    if (minutes < 60) return `${minutes}分钟前`;
-    if (hours < 24) return `${hours}小时前`;
-    if (days < 30) return `${days}天前`;
-
-    return date.toLocaleDateString("zh-CN");
+    if (diff < 60) return this.data.messages.time.justNow;
+    if (diff < 3600) return Math.floor(diff / 60) + this.data.messages.time.minutesAgo;
+    if (diff < 86400) return Math.floor(diff / 3600) + this.data.messages.time.hoursAgo;
+    if (diff < 604800) return Math.floor(diff / 86400) + this.data.messages.time.daysAgo;
+    
+    // For more than a week, show date format
+    return `${date.getMonth() + 1}月${date.getDate()}日`;
   },
 
-  /**
-   * Show toast message
-   */
   showToast: function (title) {
     wx.showToast({
       title: title,
-      icon: "none",
-      duration: 2000,
+      icon: 'none',
+      duration: 2000
     });
-  },
+  }
 });

@@ -47,6 +47,12 @@ Component({
     ],
     showLoginModal: false,
     userInfo: getApp().globalData.userInfo || {},
+    // Add Chinese messages for error states and UI text
+    messages: {
+      navigationError: "页面跳转失败",
+      loginRequired: "需要登录",
+      loading: "加载中...",
+    }
   },
 
   onload: function () {
@@ -81,7 +87,6 @@ Component({
       if (name === this.properties.current) return;
 
       const app = getApp();
-      console.log(`Navigating to ${name} with path: ${path}`);
 
       // Check login for certain tabs
       if (
@@ -98,7 +103,7 @@ Component({
         fail: (err) => {
           console.error(`Failed to navigate to ${name}:`, err);
           wx.showToast({
-            title: "页面跳转失败",
+            title: this.data.messages.navigationError,
             icon: "none",
           });
         },

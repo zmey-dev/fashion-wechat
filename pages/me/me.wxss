@@ -2,7 +2,7 @@
   min-height: 100vh;
   background: #0a0a0a;
   color: #fff;
-  padding: 20rpx;
+  padding: 20rpx 20rpx 130rpx 20rpx;
   font-family: 'Helvetica Neue', Arial, sans-serif;
 }
 

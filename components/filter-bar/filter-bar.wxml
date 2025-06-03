@@ -1,0 +1,23 @@
+<view class="filter-nav dark-mode">
+  <scroll-view 
+    scroll-x="true" 
+    class="filter-scroll" 
+    scroll-with-animation="true"
+    enhanced="true"
+    show-scrollbar="false"
+    scroll-left="{{scrollLeft}}"
+  >
+    <view class="filter-list">
+      <view 
+        wx:for="{{filterOptions}}" 
+        wx:key="key"
+        class="filter-tab {{currentFilter === item.key ? 'active' : ''}}"
+        data-filter="{{item.key}}"
+        bindtap="onFilterTap"
+      >
+        <text class="filter-name">{{item.name}}</text>
+        <view wx:if="{{currentFilter === item.key}}" class="filter-indicator"></view>
+      </view>
+    </view>
+  </scroll-view>
+</view>

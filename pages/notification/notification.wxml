@@ -2,7 +2,7 @@
 <view class="notification-container">
   <!-- Header -->
   <view class="header">
-    <text class="header-title">Notifications</text>
+    <text class="header-title">通知</text>
   </view>
 
   <!-- Tab Navigation -->
@@ -15,7 +15,7 @@
       <view class="tab-icon">
         <image src="/images/icons/user-icon.svg" class="icon" mode="aspectFit"></image>
       </view>
-      <text class="tab-text">Friends</text>
+      <text class="tab-text">好友</text>
       <view class="tab-badge" wx:if="{{friendNotifications.length > 0}}">
         {{friendNotifications.length}}
       </view>
@@ -29,7 +29,7 @@
       <view class="tab-icon">
         <image src="/images/icons/message.svg" class="icon" mode="aspectFit"></image>
       </view>
-      <text class="tab-text">Posts</text>
+      <text class="tab-text">动态</text>
       <view class="tab-badge" wx:if="{{postNotifications.length > 0}}">
         {{postNotifications.length}}
       </view>
@@ -44,7 +44,7 @@
   >
     <view wx:if="{{friendNotifications.length === 0}}" class="empty-state">
       <image src="/images/icons/empty.svg" class="empty-icon" mode="aspectFit"></image>
-      <text class="empty-text">No friend notifications</text>
+      <text class="empty-text">暂无好友通知</text>
     </view>
     
     <view 
@@ -68,7 +68,7 @@
           
           <view class="notification-info">
             <text class="sender-name">{{item.sender_name}}</text>
-            <text class="notification-type">Friend Request</text>
+            <text class="notification-type">好友请求</text>
             <text class="notification-time">{{formatDate(item.updated_at)}}</text>
           </view>
           
@@ -121,7 +121,7 @@
   >
     <view wx:if="{{postNotifications.length === 0}}" class="empty-state">
       <image src="/images/icons/empty.svg" class="empty-icon" mode="aspectFit"></image>
-      <text class="empty-text">No post notifications</text>
+      <text class="empty-text">暂无动态通知</text>
     </view>
     
     <view 
@@ -145,7 +145,7 @@
           
           <view class="notification-info">
             <text class="sender-name">{{item.sender_name}}</text>
-            <text class="notification-type">New Post</text>
+            <text class="notification-type">新动态</text>
             <text class="notification-time">{{formatDate(item.updated_at)}}</text>
           </view>
           
@@ -167,4 +167,5 @@
       </view>
     </view>
   </scroll-view>
+  <douyin-tabbar current="notification"></douyin-tabbar>
 </view>

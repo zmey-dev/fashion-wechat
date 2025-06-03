@@ -8,7 +8,29 @@ Page({
     events: [], // Active events
     pastEvents: [], // Past events
     loading: false,
-    error: null
+    error: null,
+    // Chinese messages for UI text
+    messages: {
+      loading: "加载中...",
+      errors: {
+        loadFailed: "加载活动失败",
+        networkError: "网络错误",
+        eventFull: "活动已满",
+        schoolRestriction: "此活动仅限同校学生参加",
+        notSet: "未设置"
+      },
+      actions: {
+        participate: "参加",
+        join: "加入活动",
+        agree: "同意",
+        close: "关闭"
+      },
+      status: {
+        active: "进行中",
+        past: "已结束",
+        upcoming: "即将开始"
+      }
+    }
   },
 
   onLoad(options) {
@@ -64,11 +86,11 @@ Page({
         } else {
           this.setData({
             loading: false,
-            error: res.data?.message || 'Failed to load events.'
+            error: res.data?.message || this.data.messages.errors.loadFailed
           });
           
           wx.showToast({
-            title: 'Failed to load events',
+            title: this.data.messages.errors.loadFailed,
             icon: 'none'
           });
         }
@@ -77,11 +99,11 @@ Page({
         console.error('Failed to fetch events:', err);
         this.setData({
           loading: false,
-          error: 'Network error occurred.'
+          error: this.data.messages.errors.networkError
         });
         
         wx.showToast({
-          title: 'Network error occurred',
+          title: this.data.messages.errors.networkError,
           icon: 'none'
         });
       }
@@ -117,7 +139,7 @@ Page({
     // Check participation limit
     if (event.allow_limit && event.students_count >= event.limit) {
       wx.showToast({
-        title: 'Event is full',
+        title: this.data.messages.errors.eventFull,
         icon: 'none',
         duration: 2000
       });
@@ -128,7 +150,7 @@ Page({
     if (!event.allow_other_school && 
         userInfo.university_id !== event.user.university_id) {
       wx.showToast({
-        title: 'This event is only for same school students',
+        title: this.data.messages.errors.schoolRestriction,
         icon: 'none',
         duration: 2000
       });
@@ -172,9 +194,44 @@ Page({
   
   // Format date for display
   formatDate(dateString) {
-    if (!dateString) return 'Not set';
+    if (!dateString) return this.data.messages.errors.notSet;
+    
     const date = new Date(dateString);
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+    const months = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+    return `${date.getFullYear()}年${months[date.getMonth()]}${date.getDate()}日`;
+  },
+
+  // Get event status text in Chinese
+  getEventStatus(event) {
+    if (!event) return '';
+    
+    const now = new Date();
+    const startDate = new Date(event.start_date);
+    const endDate = new Date(event.end_date);
+    
+    if (now < startDate) {
+      return this.data.messages.status.upcoming;
+    } else if (now >= startDate && now <= endDate) {
+      return this.data.messages.status.active;
+    } else {
+      return this.data.messages.status.past;
+    }
+  },
+
+  // Format event time for display
+  formatEventTime(startDate, endDate) {
+    if (!startDate || !endDate) return this.data.messages.errors.notSet;
+    
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    
+    // Format time in Chinese style
+    const formatTime = (date) => {
+      const hours = date.getHours().toString().padStart(2, '0');
+      const minutes = date.getMinutes().toString().padStart(2, '0');
+      return `${hours}:${minutes}`;
+    };
+    
+    return `${formatTime(start)} - ${formatTime(end)}`;
   }
 });

@@ -1,6 +1,5 @@
 const { default: config } = require("../../config");
 
-// pages/notification/notification.js
 const app = getApp();
 
 Page({
@@ -12,7 +11,27 @@ Page({
     postNotifications: [],
     expandedItems: {}, // Track which items are expanded
     loading: false,
-    error: null
+    error: null,
+    // Chinese messages for UI text
+    messages: {
+      loading: "加载中...",
+      errors: {
+        loadFailed: "获取通知失败",
+        networkError: "网络错误",
+        actionFailed: "操作失败"
+      },
+      actions: {
+        processing: "处理中...",
+        friendAdded: "已添加好友！",
+        requestRejected: "已拒绝请求",
+        notificationRemoved: "已移除通知"
+      },
+      time: {
+        today: "今天",
+        yesterday: "昨天",
+        daysAgo: "天前"
+      }
+    }
   },
 
   onLoad() {
@@ -53,11 +72,11 @@ Page({
         } else {
           this.setData({
             loading: false,
-            error: res.data?.message || '알림을 가져오는데 실패했습니다'
+            error: res.data?.message || this.data.messages.errors.loadFailed
           });
           
           wx.showToast({
-            title: '알림을 가져오는데 실패했습니다',
+            title: this.data.messages.errors.loadFailed,
             icon: 'none'
           });
         }
@@ -66,18 +85,18 @@ Page({
         console.error('Failed to fetch notifications:', err);
         this.setData({
           loading: false,
-          error: '네트워크 오류가 발생했습니다'
+          error: this.data.messages.errors.networkError
         });
         
         wx.showToast({
-          title: '네트워크 오류가 발생했습니다',
+          title: this.data.messages.errors.networkError,
           icon: 'none'
         });
       }
     });
   },
 
-  // 탭 전환
+  // Switch tabs
   switchTab(e) {
     const { index } = e.currentTarget.dataset;
     this.setData({
@@ -85,7 +104,7 @@ Page({
     });
   },
 
-  // 항목 확장/축소 토글
+  // Toggle item expansion
   toggleItem(e) {
     const { id } = e.currentTarget.dataset;
     const expandedItems = { ...this.data.expandedItems };
@@ -96,33 +115,31 @@ Page({
     });
   },
 
-  // 친구 요청 처리 (수락/거절)
+  // Handle friend request (accept/reject)
   handleFriendRequest(e) {
     const { action, notifyId } = e.currentTarget.dataset;
     
     wx.showLoading({
-      title: '처리 중...'
+      title: this.data.messages.actions.processing
     });
 
-    // 실제 API 호출로 친구 요청 처리
     this.requestFriendAction({
       status: action,
       notify_id: notifyId
     });
   },
 
-  // 게시물 알림 처리
+  // Handle post notification
   handlePostNotification(e) {
     const { notifyId } = e.currentTarget.dataset;
     
-    // 게시물 알림 제거 API 호출
     this.requestFriendAction({
       status: 'removed',
       notify_id: notifyId
     });
   },
 
-  // 로컬 데이터에서 알림 제거
+  // Remove notification from local data
   removeNotification(notifyId) {
     const notifications = this.data.notifications.filter(
       item => item.notify_id !== parseInt(notifyId)
@@ -155,8 +172,9 @@ Page({
         
         if (res.data && res.data.status === 'success') {
           const actionText = 
-            data.status === 'accept' ? '친구 추가됨!' :
-            data.status === 'reject' ? '요청 거절됨' : '알림 제거됨';
+            data.status === 'accept' ? this.data.messages.actions.friendAdded :
+            data.status === 'reject' ? this.data.messages.actions.requestRejected : 
+            this.data.messages.actions.notificationRemoved;
           
           wx.showToast({
             title: actionText,
@@ -166,7 +184,7 @@ Page({
           this.removeNotification(data.notify_id);
         } else {
           wx.showToast({
-            title: '작업 실패',
+            title: this.data.messages.errors.actionFailed,
             icon: 'none'
           });
         }
@@ -176,7 +194,7 @@ Page({
         console.error('Friend action request failed:', err);
         
         wx.showToast({
-          title: '네트워크 오류',
+          title: this.data.messages.errors.networkError,
           icon: 'none'
         });
       }
@@ -190,17 +208,13 @@ Page({
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     
     if (diffDays === 1) {
-      return 'Today';
+      return this.data.messages.time.today;
     } else if (diffDays === 2) {
-      return 'Yesterday';
+      return this.data.messages.time.yesterday;
     } else if (diffDays <= 7) {
-      return `${diffDays - 1} days ago`;
+      return `${diffDays - 1}${this.data.messages.time.daysAgo}`;
     } else {
-      return date.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric"
-      });
+      return `${date.getMonth() + 1}月${date.getDate()}日`;
     }
   },
   

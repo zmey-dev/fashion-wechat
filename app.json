@@ -26,7 +26,8 @@
     "slide-sidebar": "/components/slide-sidebar/slide-sidebar",
     "media-player": "/components/media-player/media-player",
     "login-modal": "/components/login-modal/login-modal",
-    "douyin-tabbar": "/components/douyin-tabbar/douyin-tabbar"
+    "douyin-tabbar": "/components/douyin-tabbar/douyin-tabbar",
+    "filter-bar": "/components/filter-bar/filter-bar"
   },
   "darkmode": true,
   "themeLocation": "theme.json",

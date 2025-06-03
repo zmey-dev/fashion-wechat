@@ -1,26 +1,11 @@
 <view class="page-container">
   <!-- Header Section -->
   <view class="header-section">
-    <!-- Filter Navigation -->
-    <view class="filter-nav">
-      <view class="filter-list">
-        <view 
-          wx:for="{{filterOptions}}" 
-          wx:key="key"
-          class="filter-tab {{currentFilter === item.key ? 'active' : ''}}"
-          data-filter="{{item.key}}"
-          bindtap="onFilterTap"
-        >
-          <text class="filter-name">{{item.name}}</text>
-          <view wx:if="{{currentFilter === item.key}}" class="filter-indicator"></view>
-        </view>
-      </view>
-    </view>
+    <filter-bar currentFilter="discover"></filter-bar>
   </view>
 
   <!-- Main Content Area -->
   <view class="content-area" id="contentArea">
-    
     <!-- Posts Grid -->
     <view class="posts-grid">
       <view 
@@ -34,59 +19,48 @@
         <!-- Media Container -->
         <view class="media-container">
           <image 
-            src="{{item.type === 'video' ? item.media[0].preview_url : item.media[0].url}}"
             class="post-image"
-            mode="aspectFill"
+            src="{{item.type === 'video' ? item.media[0].preview_url : item.media[0].url}}"
             lazy-load="{{true}}"
+            mode="aspectFill"
           />
-          
-          <!-- Like Stats Display Only -->
+          <!-- Like Display -->
           <view class="like-display">
-            <text class="heart-icon">{{item.likes_exists ? '❤️' : '🤍'}}</text>
-            <text class="like-count">{{item.likes || 0}}</text>
+            <text class="heart-icon">♥</text>
+            <text class="like-count">{{item.likes}}</text>
           </view>
         </view>
-
-        <!-- User Info Only -->
+        
+        <!-- User Section -->
         <view class="user-section">
-          <view class="user-row" data-username="{{item.user.username}}" bindtap="onUserTap">
-            <avatar 
-              avatar="{{item.user.avatar}}" 
-              name="{{item.user.username}}" 
-              size="{{40}}"
-            />
+          <view class="user-row" catchtap="onUserTap" data-user-id="{{item.user.id}}">
+            <avatar class="user-avatar" avatar="{{item.user.avatar}}" size="{{50}}"></avatar>
             <text class="user-name">{{item.user.username}}</text>
           </view>
         </view>
       </view>
     </view>
-
+    
     <!-- Loading State -->
-    <view wx:if="{{loading && posts.length === 0}}" class="loading-state">
+    <view class="loading-state" wx:if="{{loading}}">
       <view class="loading-spinner"></view>
-      <text class="loading-text">正在加载精彩内容...</text>
+      <text class="loading-text">{{messages.loading}}</text>
     </view>
-
+    
     <!-- Empty State -->
-    <view wx:if="{{!loading && posts.length === 0}}" class="empty-state">
-      <text class="empty-icon">📸</text>
-      <text class="empty-title">暂无内容</text>
-      <text class="empty-desc">快来发布你的时尚作品吧</text>
+    <view class="empty-state" wx:if="{{!loading && posts.length === 0}}">
+      <text class="empty-icon">🔍</text>
+      <text class="empty-title">还没有内容</text>
+      <text class="empty-desc">稍后再来查看，或者尝试其他分类</text>
     </view>
-
-    <!-- Load More -->
-    <view wx:if="{{loading && posts.length > 0}}" class="load-more">
-      <view class="loading-spinner small"></view>
-      <text class="load-text">加载更多...</text>
-    </view>
-
+    
     <!-- End Message -->
-    <view wx:if="{{!hasMore && posts.length > 0}}" class="end-message">
-      <text class="end-text">~ 已经到底了 ~</text>
+    <view class="end-message" wx:if="{{!hasMore && posts.length > 0}}">
+      <text class="end-text">已经到底了</text>
     </view>
   </view>
 
-  <!-- Scroll to Top Button (원래 + 버튼 위치에 배치) -->
+  <!-- Scroll To Top Button -->
   <view 
     wx:if="{{showScrollTop}}" 
     class="scroll-top-button" 
@@ -94,7 +68,10 @@
   >
     <text class="scroll-up-icon">⬆️</text>
   </view>
-
+  
+  <!-- Tab Bar Component -->
   <douyin-tabbar current="index"></douyin-tabbar>
-  <login-modal wx:if="{{showLoginModal}}" bind:close="onLoginClose" />
+  
+  <!-- Login Modal -->
+  <login-modal wx:if="{{showLoginModal}}" bind:close="onLoginClose" bind:success="onLoginSuccess" />
 </view>

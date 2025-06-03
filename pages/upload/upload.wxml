@@ -1,19 +1,8 @@
 <!--pages/create-media/create-media.wxml-->
 <view class="container">
-  <slide-sidebar 
-    current-path="{{ currentPath }}" 
-    is-visible="{{ showSidebar }}" 
-    userInfo="{{ userInfo }}"
-    bind:hideSidebar="closeSideBar"
-    style="position:relative; width: 100%; background: black; height: 100rpx"
-    >
-    <view style="position:relative; width: 100%; background: #d3d3d3; height: 100px"></view>
-    <textarea placeholder="请输入" placeholder-style="color:blue;" />
-  </slide-sidebar>
-
   <!-- Main Content -->
   <view class="main-content">
-    <!-- Tab Navigation (only show when not in annotation mode) -->
+    <!-- Tab Navigation -->
     <view class="tab-nav" wx:if="{{activeTab !== 'annotation'}}">
       <view 
         class="tab-item {{activeTab === 'media' ? 'active' : ''}}"
@@ -92,7 +81,7 @@
             <!-- File Info -->
             <view class="file-info">
               <text class="file-type">{{isImage(item) ? '📷' : '🎬'}}</text>
-              <text class="file-name">{{item.name || 'Media File'}}</text>
+              <text class="file-name">{{item.name || '媒体文件'}}</text>
             </view>
           </view>
 
@@ -297,7 +286,7 @@
       bindtap="submitForm"
       disabled="{{loading}}"
     >
-      <text wx:if="{{loading}}">{{isUpdateMode ? '更新中...' : '创建中...'}}</text>
+      <text wx:if="{{loading}}">{{isUpdateMode ? messages.updating : messages.loading}}</text>
       <text wx:else>{{isUpdateMode ? '💾 更新作品' : '🚀 创建作品'}}</text>
     </button>
   </view>
@@ -342,3 +331,5 @@
     </view>
   </view>
 </view>
+
+<douyin-tabbar current="upload"></douyin-tabbar>

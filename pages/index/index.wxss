@@ -6,6 +6,7 @@
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
+  padding-bottom: 110rpx; /* 탭 바 높이만큼 하단 패딩 추가 */
 }
 
 /* Header Section */
@@ -76,49 +77,6 @@
 
 .icon-search {
   font-size: 36rpx;
-}
-
-/* Filter Navigation */
-.filter-nav {
-  padding: 20rpx 0 25rpx;
-}
-
-.filter-list {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 0 40rpx;
-  gap: 50rpx;
-}
-
-.filter-tab {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12rpx;
-  padding: 12rpx 20rpx;
-  transition: all 0.3s ease;
-}
-
-.filter-name {
-  font-size: 30rpx;
-  color: rgba(255, 255, 255, 0.6);
-  font-weight: 500;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-}
-
-.filter-tab.active .filter-name {
-  color: #ff6b6b;
-  font-weight: 700;
-}
-
-.filter-indicator {
-  width: 40rpx;
-  height: 6rpx;
-  background: linear-gradient(90deg, #ff6b6b, #feca57);
-  border-radius: 3rpx;
 }
 
 /* Content Area */
@@ -286,7 +244,7 @@
   color: rgba(255, 255, 255, 0.4);
 }
 
-/* Scroll to Top Button - 원래 + 버튼 위치에 배치 */
+/* Scroll to Top Button */
 .scroll-top-button {
   position: fixed;
   bottom: 100rpx;

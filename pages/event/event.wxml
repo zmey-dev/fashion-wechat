@@ -7,10 +7,10 @@
         <view class="brand-icon">
           <view class="icon-dot"></view>
         </view>
-        <text class="brand-text">Event Gallery</text>
+        <text class="brand-text">活动展示</text>
       </view>
       <view class="nav-badge">
-        <text class="badge-text">{{events.length}} Active</text>
+        <text class="badge-text">{{events.length}} 进行中</text>
       </view>
     </view>
   </view>
@@ -20,8 +20,8 @@
     <!-- Featured Event Section -->
     <view class="featured-section">
       <view class="section-header">
-        <text class="section-title">Featured Events</text>
-        <text class="section-subtitle">Discover amazing opportunities</text>
+        <text class="section-title">推荐活动</text>
+        <text class="section-subtitle">发现精彩机会</text>
       </view>
 
       <view class="featured-showcase">
@@ -59,18 +59,18 @@
                     <view class="stat-item">
                       <text class="stat-number" wx:if="{{item.allow_limit}}">{{item.students_count}}/{{item.limit}}</text>
                       <text class="stat-number" wx:else>{{item.students_count}}</text>
-                      <text class="stat-label">Participants</text>
+                      <text class="stat-label">参与者</text>
                     </view>
                     <view class="stat-divider"></view>
                     <view class="stat-item">
                       <text class="stat-number" wx:if="{{item.allow_limit}}">{{item.limit - item.students_count}}</text>
                       <text class="stat-number" wx:else>∞</text>
-                      <text class="stat-label">Available</text>
+                      <text class="stat-label">剩余名额</text>
                     </view>
                   </view>
                   
                   <button class="cta-button" bindtap="onParticipate">
-                    <text class="cta-text">View Details</text>
+                    <text class="cta-text">查看详情</text>
                     <view class="cta-arrow"></view>
                   </button>
                 </view>
@@ -105,22 +105,22 @@
     <!-- Past Events Section -->
     <view class="past-section">
       <view class="section-header">
-        <text class="section-title">Past Events</text>
-        <text class="section-subtitle">{{pastEvents.length}} completed events</text>
+        <text class="section-title">往期活动</text>
+        <text class="section-subtitle">{{pastEvents.length}} 个已完成活动</text>
       </view>
       
       <view wx:if="{{pastEvents.length > 0}}" class="past-grid">
         <view wx:for="{{pastEvents}}" wx:key="id" class="past-card">
           <view class="past-image-wrapper">
             <image class="past-image" src="{{item.poster_image}}" mode="aspectFill"></image>
-            <view class="past-status">Completed</view>
+            <view class="past-status">已结束</view>
           </view>
           <view class="past-info">
             <text class="past-title">{{item.title}}</text>
             <text class="past-university">{{item.user.university.name}}</text>
             <view class="past-stats">
-              <text class="past-participants" wx:if="{{item.allow_limit}}">{{item.students_count}}/{{item.limit}} participants</text>
-              <text class="past-participants" wx:else>{{item.students_count}} participants</text>
+              <text class="past-participants" wx:if="{{item.allow_limit}}">{{item.students_count}}/{{item.limit}} 参与者</text>
+              <text class="past-participants" wx:else>{{item.students_count}} 参与者</text>
             </view>
           </view>
         </view>
@@ -128,8 +128,8 @@
       
       <view wx:else class="empty-past">
         <view class="empty-icon"></view>
-        <text class="empty-title">No Past Events</text>
-        <text class="empty-description">Previous events will appear here once completed</text>
+        <text class="empty-title">暂无往期活动</text>
+        <text class="empty-description">已完成的活动将在这里显示</text>
       </view>
     </view>
   </view>
@@ -137,20 +137,20 @@
   <!-- Loading state -->
   <view wx:if="{{loading && !events.length}}" class="loading-container">
     <view class="loading-spinner"></view>
-    <text class="loading-text">Loading events...</text>
+    <text class="loading-text">{{messages.loading}}</text>
   </view>
 
   <!-- Error state -->
   <view wx:elif="{{error}}" class="error-container">
     <icon type="warn" size="64" color="#E53E3E"></icon>
     <text class="error-text">{{error}}</text>
-    <button class="retry-button" bindtap="fetchEvents">Try Again</button>
+    <button class="retry-button" bindtap="fetchEvents">重试</button>
   </view>
 
   <!-- No events state -->
   <view wx:elif="{{events.length === 0}}" class="empty-container">
     <icon type="info" size="64" color="#4299E1"></icon>
-    <text class="empty-text">No active events available</text>
+    <text class="empty-text">暂无进行中的活动</text>
   </view>
 
   <!-- Event content -->
@@ -187,7 +187,7 @@
                   <view class="event-meta-item">
                     <image class="meta-icon" src="/images/icons/people.png" mode="aspectFit"></image>
                     <text>
-                      {{item.allow_limit ? (item.students_count + '/' + item.limit + ' participants') : (item.students_count + ' participants')}}
+                      {{item.allow_limit ? (item.students_count + '/' + item.limit + ' 参与者') : (item.students_count + ' 参与者')}}
                     </text>
                   </view>
                   <view class="event-meta-item">
@@ -195,7 +195,7 @@
                     <text>{{item.user.university.name}}</text>
                   </view>
                 </view>
-                <button class="participate-button" bindtap="onParticipate">Join Event</button>
+                <button class="participate-button" bindtap="onParticipate">{{messages.actions.join}}</button>
               </view>
             </view>
           </view>
@@ -205,7 +205,7 @@
 
     <!-- Event thumbnails -->
     <view class="event-thumbnails">
-      <text class="section-title">Active Events</text>
+      <text class="section-title">进行中的活动</text>
       <scroll-view class="thumbnails-scrollview" scroll-x="{{true}}">
         <view 
           wx:for="{{events}}" 
@@ -222,7 +222,7 @@
           <view class="thumbnail-info">
             <text class="thumbnail-title">{{item.title}}</text>
             <text class="thumbnail-participants">
-              {{item.students_count}} {{item.students_count === 1 ? 'participant' : 'participants'}}
+              {{item.students_count}} 参与者
             </text>
           </view>
         </view>
@@ -231,9 +231,9 @@
 
     <!-- Past events section -->
     <view class="past-events-section">
-      <text class="section-title">Past Events</text>
+      <text class="section-title">往期活动</text>
       <view wx:if="{{pastEvents.length === 0}}" class="past-events-empty">
-        <text>No past events to display</text>
+        <text>暂无往期活动</text>
       </view>
       <scroll-view wx:else class="past-events-scrollview" scroll-x="{{true}}">
         <view 
@@ -247,12 +247,12 @@
             lazy-load="{{true}}">
           </image>
           <view class="past-event-overlay">
-            <text class="past-event-tag">Ended</text>
+            <text class="past-event-tag">已结束</text>
           </view>
           <view class="past-event-info">
             <text class="past-event-title">{{item.title}}</text>
             <text class="past-event-date">{{formatDate(item.end_date)}}</text>
-            <text class="past-event-participants">{{item.students_count}} participants</text>
+            <text class="past-event-participants">{{item.students_count}} 参与者</text>
           </view>
         </view>
       </scroll-view>
@@ -264,7 +264,7 @@
     <view class="modal-dialog" catchtap="">
       <view class="modal-content">
         <view class="modal-header">
-          <text class="modal-title">Event Guidelines</text>
+          <text class="modal-title">活动指南</text>
           <button class="modal-close" bindtap="onCloseRulesModal">
             <view class="close-icon"></view>
           </button>
@@ -281,10 +281,46 @@
         </view>
         
         <view class="modal-footer">
-          <button class="modal-btn secondary" bindtap="onCloseRulesModal">Cancel</button>
-          <button class="modal-btn primary" bindtap="onAgreeRules">Accept & Continue</button>
+          <button class="modal-btn secondary" bindtap="onCloseRulesModal">{{messages.actions.close}}</button>
+          <button class="modal-btn primary" bindtap="onAgreeRules">{{messages.actions.agree}}并继续</button>
         </view>
       </view>
     </view>
   </view>
+
+  <!-- Filter Bar -->
+  <filter-bar currentFilter="event"></filter-bar>
+
+  <!-- Page content -->
+  <view class="container">
+    <!-- Show loading state -->
+    <block wx:if="{{loading}}">
+      <view class="loading-container">
+        <view class="loading-spinner"></view>
+        <text class="loading-text">{{messages.loading}}</text>
+      </view>
+    </block>
+    
+    <!-- Show error state -->
+    <block wx:elif="{{error}}">
+      <view class="error-container">
+        <text class="error-text">{{error}}</text>
+        <button class="retry-button" bindtap="fetchEvents">重试</button>
+      </view>
+    </block>
+    
+    <!-- Show empty state -->
+    <block wx:elif="{{events.length === 0 && pastEvents.length === 0}}">
+      <view class="empty-container">
+        <text class="empty-text">暂无活动</text>
+      </view>
+    </block>
+    
+    <block wx:else>
+      <!-- Event display content here -->
+    </block>
+  </view>
+
+  <!-- Bottom Tab Bar -->
+  <douyin-tabbar current="event"></douyin-tabbar>
 </view>

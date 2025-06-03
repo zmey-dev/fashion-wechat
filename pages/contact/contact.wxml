@@ -1,107 +1,82 @@
 <!--pages/contact/contact.wxml-->
-<view class="container">
-  <slide-sidebar 
-    current-path="{{ currentPath }}" 
-    is-visible="{{ showSidebar }}" 
-    userInfo="{{ userInfo }}"
-    bind:hideSidebar="closeSideBar"
-    style="position:relative; width: 100%; background: black; height: 100rpx"
-    >
-    <view style="position:relative; width: 100%; background: #d3d3d3; height: 100px"></view>
-    <textarea placeholder="请输入" placeholder-style="color:blue;" />
-  </slide-sidebar>
-  <!-- Header -->
-  <view class="header">
-    <view class="header-content">
-      <view class="header-title">
-        <text class="header-icon">ℹ️</text>
-        <text>提交您的建议</text>
-      </view>
-      <view class="header-badge">帮助我们变得更好</view>
-    </view>
-  </view>
+<view class="page-container">
+  <!-- 필터 바 추가 -->
+  <filter-bar currentFilter="contact"></filter-bar>
 
-  <!-- Content -->
-  <view class="content">
-    <!-- Form section -->
-    <view class="form-section">
-      <view class="form-item">
-        <text class="form-label">标题</text>
-        <input 
-          class="form-input" 
-          placeholder="请输入简短的标题描述您的建议" 
-          value="{{title}}" 
-          bindinput="onTitleChange"
-        />
-      </view>
-
-      <view class="form-item">
-        <text class="form-label">详细描述</text>
-        <textarea 
-          class="form-textarea" 
-          placeholder="请详细描述您的建议或问题，以便我们能更好地理解和改进" 
-          value="{{description}}" 
-          bindinput="onDescriptionChange"
-        />
+  <view class="container">
+    <!-- Header -->
+    <view class="header">
+      <view class="header-content">
+        <view class="header-title">
+          <text class="header-icon">ℹ️</text>
+          <text>提交您的建议</text>
+        </view>
+        <view class="header-badge">帮助我们变得更好</view>
       </view>
     </view>
 
-    <!-- Image upload section -->
-    <view class="image-section">
-      <view class="section-header">
-        <text class="section-title">📷 添加图片</text>
-        <text class="section-subtitle">（可选）</text>
-      </view>
-      <text class="section-description">上传最多 {{maxImages}} 张图片来更好地说明您的建议</text>
+    <!-- Content -->
+    <view class="content">
+      <!-- Form section -->
+      <view class="form-section">
+        <view class="form-item">
+          <text class="form-label">标题</text>
+          <input 
+            class="form-input" 
+            placeholder="请输入简短的标题描述您的建议" 
+            value="{{title}}" 
+            bindinput="onTitleChange"
+          />
+        </view>
 
-      <!-- Image grid -->
-      <view class="image-grid">
-        <block wx:for="{{images}}" wx:key="index">
-          <view class="image-item">
-            <image src="{{item.path}}" mode="aspectFill" bindtap="previewImage" data-index="{{index}}"></image>
-            <view class="image-overlay">
-              <view class="image-actions">
-                <view class="action-button" bindtap="removeImage" data-index="{{index}}">
-                  <text>✕</text>
-                </view>
-              </view>
-            </view>
-          </view>
-        </block>
-
-        <view class="image-upload" bindtap="chooseImage" wx:if="{{images.length < maxImages}}">
-          <view class="upload-content">
-            <text class="upload-icon">+</text>
-            <text class="upload-text">点击上传</text>
-          </view>
+        <view class="form-item">
+          <text class="form-label">详细描述</text>
+          <textarea 
+            class="form-textarea" 
+            placeholder="请详细描述您的建议或问题，以便我们能更好地理解和改进" 
+            value="{{description}}" 
+            bindinput="onDescriptionChange"
+          />
         </view>
       </view>
 
-      <view class="clear-button" bindtap="removeAllImages" wx:if="{{images.length > 0}}">
-        <text>清除所有图片</text>
+      <!-- Image upload section -->
+      <view class="image-section">
+        <view class="section-header">
+          <text class="section-title">📷 添加图片</text>
+          <text class="section-subtitle">（可选）</text>
+        </view>
+        <text class="section-description">上传最多 {{maxImages}} 张图片来更好地说明您的建议</text>
+
+        <!-- Image grid -->
+        <view class="image-grid">
+          <block wx:for="{{images}}" wx:key="index">
+            <view class="image-item">
+              <image src="{{item.path}}" mode="aspectFill" bindtap="previewImage" data-index="{{index}}"></image>
+              <view class="image-overlay">
+                <view class="image-actions">
+                  <view class="action-button" bindtap="removeImage" data-index="{{index}}">
+                    <text>✕</text>
+                  </view>
+                </view>
+              </view>
+            </view>
+          </block>
+
+          <view class="image-upload" bindtap="chooseImage" wx:if="{{images.length < maxImages}}">
+            <view class="upload-content">
+              <text class="upload-icon">+</text>
+              <text class="upload-text">点击上传</text>
+            </view>
+          </view>
+        </view>
+
+        <view class="clear-button" bindtap="removeAllImages" wx:if="{{images.length > 0}}">
+          <text>清除所有图片</text>
+        </view>
       </view>
     </view>
   </view>
 
-  <!-- Submit button -->
-  <view class="submit-container">
-    <button 
-      class="submit-button {{isSubmitting ? 'disabled' : ''}}" 
-      bindtap="submitFeedback" 
-      disabled="{{isSubmitting}}"
-    >
-      <block wx:if="{{isSubmitting}}">
-        <view class="loading-spinner"></view>
-        <text>提交中...</text>
-      </block>
-      <block wx:else>
-        <text>📤 提交建议</text>
-      </block>
-    </button>
-  </view>
-
-  <!-- Footer -->
-  <view class="footer">
-    <text>感谢您的宝贵建议，我们会认真考虑每一条反馈</text>
-  </view>
+  <douyin-tabbar current="home"></douyin-tabbar>
 </view>
