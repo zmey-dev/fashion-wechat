@@ -1,8 +1,5 @@
 <view class="page-container">
-  <!-- Header Section -->
-  <view class="header-section">
-    <filter-bar currentFilter="discover"></filter-bar>
-  </view>
+  <filter-bar currentFilter="discover"></filter-bar>
 
   <!-- Main Content Area -->
   <view class="content-area" id="contentArea">
@@ -24,18 +21,19 @@
             lazy-load="{{true}}"
             mode="aspectFill"
           />
-          <!-- Like Display -->
-          <view class="like-display">
-            <text class="heart-icon">♥</text>
-            <text class="like-count">{{item.likes}}</text>
-          </view>
         </view>
         
         <!-- User Section -->
         <view class="user-section">
-          <view class="user-row" catchtap="onUserTap" data-user-id="{{item.user.id}}">
-            <avatar class="user-avatar" avatar="{{item.user.avatar}}" size="{{50}}"></avatar>
-            <text class="user-name">{{item.user.username}}</text>
+          <view class="user-info">
+            <view class="user-row" catchtap="onUserTap" data-user-id="{{item.user.id}}">
+              <avatar avatar="{{item.user.avatar}}" name="{{item.user.username}}" size="45"></avatar>
+              <text class="user-name">{{item.user.username}}</text>
+            </view>
+          </view>
+          <view class="like-display">
+            <image class="heart-icon" src="/images/icons/heart.svg" mode="aspectFit"></image>
+            <text class="like-count">{{item.likes}}</text>
           </view>
         </view>
       </view>

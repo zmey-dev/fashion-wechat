@@ -6,7 +6,7 @@
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
-  padding-bottom: 110rpx; /* 탭 바 높이만큼 하단 패딩 추가 */
+  padding-bottom: 110rpx;
 }
 
 /* Header Section */
@@ -82,7 +82,7 @@
 /* Content Area */
 .content-area {
   flex: 1;
-  padding: 0 30rpx;
+  padding: 110rpx 0rpx;
   overflow-y: auto;
   overflow-x: hidden;
 }
@@ -91,15 +91,15 @@
 .posts-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 24rpx;
-  padding: 30rpx 0 120rpx;
+  gap: 12rpx;
+  padding: 16rpx 0 120rpx;
   width: 100%;
   box-sizing: border-box;
 }
 
 .post-card {
   background: rgba(255, 255, 255, 0.04);
-  border-radius: 24rpx;
+  border-radius: 20rpx;
   overflow: hidden;
   border: 1rpx solid rgba(255, 255, 255, 0.06);
   transition: all 0.3s ease;
@@ -128,51 +128,56 @@
   object-fit: cover;
 }
 
-/* Like Display Only (Non-interactive) */
-.like-display {
-  position: absolute;
-  bottom: 16rpx;
-  right: 16rpx;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4rpx;
-  background: rgba(0, 0, 0, 0.6);
-  padding: 12rpx 16rpx;
-  border-radius: 24rpx;
-  backdrop-filter: blur(10rpx);
-  pointer-events: none;
-}
-
-.heart-icon {
-  font-size: 28rpx;
-}
-
-.like-count {
-  font-size: 18rpx;
-  color: #ffffff;
-  font-weight: 600;
-}
-
 /* User Section */
 .user-section {
-  padding: 16rpx 20rpx;
+  padding: 12rpx 16rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.user-info {
+  flex: 1;
 }
 
 .user-row {
   display: flex;
   align-items: center;
-  gap: 12rpx;
+  gap: 8rpx;
 }
 
 .user-name {
-  font-size: 24rpx;
+  font-size: 22rpx;
   color: #ffffff;
-  font-weight: 600;
+  font-weight: 500;
   flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* Like Display */
+.like-display {
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+  padding: 4rpx 8rpx;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12rpx;
+  border: 1rpx solid rgba(255, 255, 255, 0.1);
+}
+
+.heart-icon {
+  width: 18rpx;
+  height: 18rpx;
+  filter: brightness(0) saturate(100%) invert(45%) sepia(92%) saturate(2844%) hue-rotate(334deg) brightness(103%) contrast(102%);
+}
+
+.like-count {
+  font-size: 20rpx;
+  color: #ffffff;
+  font-weight: 600;
+  line-height: 1;
 }
 
 /* Loading States */
@@ -277,7 +282,7 @@
 @media (max-width: 640rpx) {
   .posts-grid {
     grid-template-columns: 1fr;
-    gap: 30rpx;
+    gap: 24rpx;
   }
   
   .post-card {

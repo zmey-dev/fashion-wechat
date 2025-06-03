@@ -7,10 +7,11 @@ Page({
     loading: false,
     currentPage: 1,
     hasMore: true,
-    pageSize: 8,
+    pageSize: 15,
     userInfo: null,
     showLoginModal: false,
     showScrollTop: false,
+    existPostIds: [],
     // Chinese messages for UI text
     messages: {
       loading: "加载中...",
@@ -25,7 +26,6 @@ Page({
         daysAgo: "天前"
       }
     }
-    // currentFilter and filterOptions removed - moved to filter-bar component
   },
 
   onLoad: function (options) {
@@ -58,37 +58,34 @@ Page({
   onShow: function () {
     // Refresh posts if needed
     if (app.globalData.refreshPosts) {
-      this.refreshPosts();
+      this.handleRefresh();
       app.globalData.refreshPosts = false;
     }
   },
 
   initializePage: function () {
-    this.loadPosts(true);
+    this.handleRefresh();
   },
 
   loadPosts: function (refresh = false) {
     if (this.data.loading) return;
 
-    if (refresh) {
-      this.setData({
-        posts: [],
-        currentPage: 1,
-        hasMore: true
-      });
-    }
-
-    if (!this.data.hasMore) return;
-
     this.setData({ loading: true });
 
+    const requestData = {
+      scope: this.data.pageSize,
+      isDiscover: true
+    };
+
+    // Add exist_post_ids for pagination (not refresh)
+    if (!refresh && this.data.posts.length > 0) {
+      requestData.exist_post_ids = this.data.existPostIds;
+    }
+
     wx.request({
-      url: `${config.BACKEND_URL}/post/get_posts`,
+      url: `${config.BACKEND_URL}/post/get_posts_discover`,
       method: 'GET',
-      data: {
-        page: this.data.currentPage,
-        limit: this.data.pageSize
-      },
+      data: requestData,
       success: (res) => {
         if (res.statusCode === 200 && res.data.status === 'success') {
           const newPosts = res.data.posts || [];
@@ -98,11 +95,26 @@ Page({
             post.timeAgo = this.formatTimeAgo(post.created_at);
           });
 
-          this.setData({
-            posts: [...this.data.posts, ...newPosts],
-            currentPage: this.data.currentPage + 1,
-            hasMore: newPosts.length >= this.data.pageSize
-          });
+          if (refresh) {
+            // Reset data for refresh
+            this.setData({
+              posts: newPosts,
+              existPostIds: newPosts.map(post => post.id),
+              hasMore: res.data.has_more || false,
+              currentPage: 1
+            });
+          } else {
+            // Append new posts for pagination
+            const allPosts = [...this.data.posts, ...newPosts];
+            const allIds = [...this.data.existPostIds, ...newPosts.map(post => post.id)];
+            
+            this.setData({
+              posts: allPosts,
+              existPostIds: allIds,
+              hasMore: res.data.has_more || false,
+              currentPage: this.data.currentPage + 1
+            });
+          }
         } else {
           this.showToast(this.data.messages.errors.loadFailed);
         }
@@ -112,9 +124,20 @@ Page({
       },
       complete: () => {
         this.setData({ loading: false });
-        wx.stopPullDownRefresh();
       }
     });
+  },
+
+  handleRefresh: function() {
+    // Reset pagination state
+    this.setData({
+      posts: [],
+      existPostIds: [],
+      currentPage: 1,
+      hasMore: true
+    });
+    
+    this.loadPosts(true);
   },
 
   onPostTap: function (e) {
@@ -131,8 +154,6 @@ Page({
     });
   },
 
-  // onFilterTap method removed - moved to filter-bar component
-
   onSearchTap: function () {
     wx.navigateTo({
       url: '/pages/search/search'
@@ -147,19 +168,20 @@ Page({
     this.setData({
       userInfo: app.globalData.userInfo
     });
-    this.refreshPosts();
+    this.handleRefresh();
   },
 
-  refreshPosts: function() {
-    this.loadPosts(true);
-  },
-
-  onPullDownRefresh: function () {
-    this.refreshPosts();
+  onReloadTap: function() {
+    if (this.data.loading) return;
+    
+    wx.vibrateShort();
+    this.handleRefresh();
   },
 
   onReachBottom: function () {
-    this.loadPosts();
+    if (this.data.hasMore && !this.data.loading) {
+      this.loadPosts(false);
+    }
   },
 
   onPageScroll: function(e) {
