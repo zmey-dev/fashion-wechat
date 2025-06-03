@@ -134,6 +134,131 @@
     </view>
   </view>
 
+  <!-- Loading state -->
+  <view wx:if="{{loading && !events.length}}" class="loading-container">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">Loading events...</text>
+  </view>
+
+  <!-- Error state -->
+  <view wx:elif="{{error}}" class="error-container">
+    <icon type="warn" size="64" color="#E53E3E"></icon>
+    <text class="error-text">{{error}}</text>
+    <button class="retry-button" bindtap="fetchEvents">Try Again</button>
+  </view>
+
+  <!-- No events state -->
+  <view wx:elif="{{events.length === 0}}" class="empty-container">
+    <icon type="info" size="64" color="#4299E1"></icon>
+    <text class="empty-text">No active events available</text>
+  </view>
+
+  <!-- Event content -->
+  <view wx:else class="event-content">
+    <!-- Main event showcase -->
+    <view class="main-event-section">
+      <swiper 
+        class="event-swiper" 
+        current="{{currentEventIndex}}" 
+        bindchange="onSwiperChange"
+        indicator-dots="{{true}}"
+        indicator-color="#FFFFFF50"
+        indicator-active-color="#FFFFFF"
+        autoplay="{{true}}"
+        interval="{{5000}}"
+        duration="{{500}}"
+        circular="{{true}}">
+        <swiper-item wx:for="{{events}}" wx:key="id" class="event-swiper-item">
+          <view class="event-slide">
+            <image 
+              class="event-image" 
+              src="{{item.poster_image}}" 
+              mode="aspectFill"
+              lazy-load="{{true}}">
+            </image>
+            <view class="event-overlay">
+              <view class="event-info">
+                <text class="event-title">{{item.title}}</text>
+                <view class="event-meta">
+                  <view class="event-meta-item">
+                    <image class="meta-icon" src="/images/icons/calendar.png" mode="aspectFit"></image>
+                    <text>{{formatDate(item.start_date)}} - {{formatDate(item.end_date)}}</text>
+                  </view>
+                  <view class="event-meta-item">
+                    <image class="meta-icon" src="/images/icons/people.png" mode="aspectFit"></image>
+                    <text>
+                      {{item.allow_limit ? (item.students_count + '/' + item.limit + ' participants') : (item.students_count + ' participants')}}
+                    </text>
+                  </view>
+                  <view class="event-meta-item">
+                    <image class="meta-icon" src="/images/icons/university.png" mode="aspectFit"></image>
+                    <text>{{item.user.university.name}}</text>
+                  </view>
+                </view>
+                <button class="participate-button" bindtap="onParticipate">Join Event</button>
+              </view>
+            </view>
+          </view>
+        </swiper-item>
+      </swiper>
+    </view>
+
+    <!-- Event thumbnails -->
+    <view class="event-thumbnails">
+      <text class="section-title">Active Events</text>
+      <scroll-view class="thumbnails-scrollview" scroll-x="{{true}}">
+        <view 
+          wx:for="{{events}}" 
+          wx:key="id" 
+          class="event-thumbnail {{currentEventIndex === index ? 'active' : ''}}"
+          data-index="{{index}}"
+          bindtap="onEventSelect">
+          <image 
+            class="thumbnail-image" 
+            src="{{item.poster_image}}" 
+            mode="aspectFill"
+            lazy-load="{{true}}">
+          </image>
+          <view class="thumbnail-info">
+            <text class="thumbnail-title">{{item.title}}</text>
+            <text class="thumbnail-participants">
+              {{item.students_count}} {{item.students_count === 1 ? 'participant' : 'participants'}}
+            </text>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+
+    <!-- Past events section -->
+    <view class="past-events-section">
+      <text class="section-title">Past Events</text>
+      <view wx:if="{{pastEvents.length === 0}}" class="past-events-empty">
+        <text>No past events to display</text>
+      </view>
+      <scroll-view wx:else class="past-events-scrollview" scroll-x="{{true}}">
+        <view 
+          wx:for="{{pastEvents}}" 
+          wx:key="id" 
+          class="past-event-card">
+          <image 
+            class="past-event-image" 
+            src="{{item.poster_image}}" 
+            mode="aspectFill"
+            lazy-load="{{true}}">
+          </image>
+          <view class="past-event-overlay">
+            <text class="past-event-tag">Ended</text>
+          </view>
+          <view class="past-event-info">
+            <text class="past-event-title">{{item.title}}</text>
+            <text class="past-event-date">{{formatDate(item.end_date)}}</text>
+            <text class="past-event-participants">{{item.students_count}} participants</text>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+  </view>
+
   <!-- Event Rules Modal -->
   <view wx:if="{{showRulesModal}}" class="modal-backdrop" bindtap="onCloseRulesModal">
     <view class="modal-dialog" catchtap="">

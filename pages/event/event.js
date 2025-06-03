@@ -1,101 +1,91 @@
-// event.js
+const { default: config } = require("../../config");
+
 Page({
   data: {
     currentEventIndex: 0,
     showRulesModal: false,
     selectedEvent: null,
-    events: [
-      {
-        id: 1,
-        title: "Photography Contest 2025",
-        poster_image: "https://images.unsplash.com/photo-1606983340126-99ab4feaa64a?w=800&h=600&fit=crop",
-        start_date: "2025-06-01",
-        end_date: "2025-06-30",
-        students_count: 128,
-        limit: 200,
-        allow_limit: true,
-        allow_other_school: true,
-        description: "Join our annual photography contest and showcase your creative vision. This competition is open to all photography enthusiasts who want to display their artistic talent and compete for prestigious awards.",
-        user: {
-          university: {
-            name: "Beijing University"
-          }
-        }
-      },
-      {
-        id: 2,
-        title: "Digital Art Exhibition",
-        poster_image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop",
-        start_date: "2025-07-01",
-        end_date: "2025-07-15",
-        students_count: 85,
-        limit: 150,
-        allow_limit: true,
-        allow_other_school: false,
-        description: "Experience cutting-edge digital artworks from talented students. Witness the intersection of technology and creativity in this comprehensive exhibition featuring interactive installations and digital masterpieces.",
-        user: {
-          university: {
-            name: "Tsinghua University"
-          }
-        }
-      },
-      {
-        id: 3,
-        title: "International Music Festival",
-        poster_image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=600&fit=crop",
-        start_date: "2025-08-01",
-        end_date: "2025-08-03",
-        students_count: 256,
-        limit: 300,
-        allow_limit: true,
-        allow_other_school: true,
-        description: "Three days of exceptional musical performances featuring student orchestras, jazz ensembles, and contemporary bands. Experience diverse musical genres and cultural exchanges through this prestigious festival.",
-        user: {
-          university: {
-            name: "Shanghai University"
-          }
-        }
-      }
-    ],
-    pastEvents: [
-      {
-        id: 4,
-        title: "Spring Dance Competition",
-        poster_image: "https://images.unsplash.com/photo-1518834107812-67b0b7c58434?w=400&h=300&fit=crop",
-        students_count: 95,
-        limit: 120,
-        allow_limit: true,
-        end_date: "2025-04-15",
-        user: {
-          university: {
-            name: "Beijing University"
-          }
-        }
-      },
-      {
-        id: 5,
-        title: "Literature Reading Festival",
-        poster_image: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=300&fit=crop",
-        students_count: 67,
-        limit: 80,
-        allow_limit: true,
-        end_date: "2025-03-20",
-        user: {
-          university: {
-            name: "Tsinghua University"
-          }
-        }
-      }
-    ]
+    events: [], // Active events
+    pastEvents: [], // Past events
+    loading: false,
+    error: null
   },
 
   onLoad(options) {
-    // Initialize selected event
-    if (this.data.events.length > 0) {
-      this.setData({
-        selectedEvent: this.data.events[0]
-      });
-    }
+    // Load event data
+    this.fetchEvents();
+  },
+  
+  onShow() {
+    // Refresh events whenever page is shown
+    this.fetchEvents();
+  },
+
+  // Fetch event data from API
+  fetchEvents() {
+    this.setData({ loading: true });
+    
+    wx.request({
+      url: `${config.BACKEND_URL}/event`,
+      method: 'GET',
+      header: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getApp().globalData.userInfo?.token}`
+      },
+      success: (res) => {
+        if (res.data && res.data.status === 'success') {
+          const allEvents = res.data.events || [];
+          
+          // Current date
+          const now = new Date();
+          
+          // Separate active and past events
+          const activeEvents = allEvents.filter(
+            event => new Date(event.end_date) >= now
+          );
+          
+          const pastEvents = allEvents.filter(
+            event => new Date(event.end_date) < now
+          );
+          
+          this.setData({
+            events: activeEvents,
+            pastEvents: pastEvents,
+            loading: false,
+            error: null
+          });
+          
+          // Initialize selected event
+          if (activeEvents.length > 0) {
+            this.setData({
+              selectedEvent: activeEvents[0]
+            });
+          }
+        } else {
+          this.setData({
+            loading: false,
+            error: res.data?.message || 'Failed to load events.'
+          });
+          
+          wx.showToast({
+            title: 'Failed to load events',
+            icon: 'none'
+          });
+        }
+      },
+      fail: (err) => {
+        console.error('Failed to fetch events:', err);
+        this.setData({
+          loading: false,
+          error: 'Network error occurred.'
+        });
+        
+        wx.showToast({
+          title: 'Network error occurred',
+          icon: 'none'
+        });
+      }
+    });
   },
 
   // Handle swiper change
@@ -116,15 +106,29 @@ Page({
     });
   },
 
-  // Handle participate button
+  // Handle participate button click
   onParticipate() {
     const event = this.data.selectedEvent;
     if (!event) return;
 
-    // Check if event is full
+    // Get current user info
+    const userInfo = getApp().globalData.userInfo || {};
+
+    // Check participation limit
     if (event.allow_limit && event.students_count >= event.limit) {
       wx.showToast({
-        title: 'Event is at full capacity',
+        title: 'Event is full',
+        icon: 'none',
+        duration: 2000
+      });
+      return;
+    }
+    
+    // Check if other school students are allowed
+    if (!event.allow_other_school && 
+        userInfo.university_id !== event.user.university_id) {
+      wx.showToast({
+        title: 'This event is only for same school students',
         icon: 'none',
         duration: 2000
       });
@@ -155,8 +159,18 @@ Page({
       url: `/pages/event-detail/event-detail?eventId=${this.data.selectedEvent.id}`
     });
   },
-
-  // Format date function
+  
+  // Join event
+  joinEvent() {
+    const event = this.data.selectedEvent;
+    if (!event) return;
+    
+    wx.navigateTo({
+      url: `/pages/post/create-post?eventId=${event.id}&type=event`
+    });
+  },
+  
+  // Format date for display
   formatDate(dateString) {
     if (!dateString) return 'Not set';
     const date = new Date(dateString);
