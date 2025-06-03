@@ -86,7 +86,7 @@ Page({
         } else {
           this.setData({
             loading: false,
-            error: res.data?.message || this.data.messages.errors.loadFailed
+            error: res.data?.msg || this.data.messages.errors.loadFailed
           });
           
           wx.showToast({

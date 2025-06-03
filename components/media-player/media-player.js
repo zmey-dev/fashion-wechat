@@ -383,6 +383,12 @@ Component({
               postId: currentPost.id,
               isLiked: newLikeStatus,
             });
+          } else {
+            if (res.data.msg)
+              wx.showToast({
+                title: res.data.msg,
+                icon: "error",
+              });
           }
         },
         fail: (err) => {
@@ -438,6 +444,12 @@ Component({
               postId: currentPost.id,
               isFavorited: newFavoriteStatus,
             });
+          } else {
+            if (res.data.msg)
+              wx.showToast({
+                title: res.data.msg,
+                icon: "error",
+              });
           }
         },
         fail: (err) => {
@@ -533,6 +545,12 @@ Component({
               userId: currentPostUser.id,
               isFollowed: newFollowStatus,
             });
+          } else {
+            if (res.data.msg)
+              wx.showToast({
+                title: res.data.msg,
+                icon: "error",
+              });
           }
         },
         fail: (err) => {
@@ -632,11 +650,11 @@ Component({
               isLiked: state_flag,
             });
           } else {
-            wx.showToast({
-              title: "Failed to like comment",
-              icon: "none",
-              duration: 1500,
-            });
+            if (res.data.msg)
+              wx.showToast({
+                title: res.data.msg,
+                icon: "error",
+              });
           }
         },
         fail: (err) => {
@@ -709,6 +727,12 @@ Component({
               icon: "success",
               duration: 1000,
             });
+          } else {
+            if (res.data.msg)
+              wx.showToast({
+                title: res.data.msg,
+                icon: "error",
+              });
           }
         },
         fail: (err) => {

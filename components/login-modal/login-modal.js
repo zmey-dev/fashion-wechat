@@ -180,7 +180,9 @@ Component({
       }
 
       if (!password) {
-        this.setData({ passwordError: this.data.messages.errors.passwordRequired });
+        this.setData({
+          passwordError: this.data.messages.errors.passwordRequired,
+        });
         return;
       }
 
@@ -250,7 +252,14 @@ Component({
             if (res.statusCode === 200 && res.data.status === "success") {
               this.handleLoginSuccess(res.data);
             } else {
-              throw new Error(res.data.message || this.data.messages.errors.verificationFailed);
+              if (res.data.msg)
+                wx.showToast({
+                  title: res.data.msg,
+                  icon: "error",
+                });
+              throw new Error(
+                res.data.message || this.data.messages.errors.verificationFailed
+              );
             }
           },
         });

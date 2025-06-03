@@ -18,25 +18,25 @@ Page({
       errors: {
         loadFailed: "获取通知失败",
         networkError: "网络错误",
-        actionFailed: "操作失败"
+        actionFailed: "操作失败",
       },
       actions: {
         processing: "处理中...",
         friendAdded: "已添加好友！",
         requestRejected: "已拒绝请求",
-        notificationRemoved: "已移除通知"
+        notificationRemoved: "已移除通知",
       },
       time: {
         today: "今天",
         yesterday: "昨天",
-        daysAgo: "天前"
-      }
-    }
+        daysAgo: "天前",
+      },
+    },
   },
 
   onLoad() {
     this.setData({
-      userInfo: app.globalData.userInfo || {}
+      userInfo: app.globalData.userInfo || {},
     });
     this.getNotifications();
   },
@@ -50,49 +50,53 @@ Page({
 
     wx.request({
       url: `${config.BACKEND_URL}/notify/get_notifications`,
-      method: 'GET',
+      method: "GET",
       header: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.data.userInfo.token}`
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${this.data.userInfo.token}`,
       },
       success: (res) => {
-        if (res.data && res.data.status === 'success') {
+        if (res.data && res.data.status === "success") {
           const notifications = res.data.message || [];
-          
-          const friendNotifications = notifications.filter(item => item.event_type !== "new_post");
-          const postNotifications = notifications.filter(item => item.event_type === "new_post");
+
+          const friendNotifications = notifications.filter(
+            (item) => item.event_type !== "new_post"
+          );
+          const postNotifications = notifications.filter(
+            (item) => item.event_type === "new_post"
+          );
 
           this.setData({
             notifications,
             friendNotifications,
             postNotifications,
             loading: false,
-            error: null
+            error: null,
           });
         } else {
           this.setData({
             loading: false,
-            error: res.data?.message || this.data.messages.errors.loadFailed
+            error: res.data?.message || this.data.messages.errors.loadFailed,
           });
-          
+
           wx.showToast({
             title: this.data.messages.errors.loadFailed,
-            icon: 'none'
+            icon: "none",
           });
         }
       },
       fail: (err) => {
-        console.error('Failed to fetch notifications:', err);
+        console.error("Failed to fetch notifications:", err);
         this.setData({
           loading: false,
-          error: this.data.messages.errors.networkError
+          error: this.data.messages.errors.networkError,
         });
-        
+
         wx.showToast({
           title: this.data.messages.errors.networkError,
-          icon: 'none'
+          icon: "none",
         });
-      }
+      },
     });
   },
 
@@ -100,7 +104,7 @@ Page({
   switchTab(e) {
     const { index } = e.currentTarget.dataset;
     this.setData({
-      activeTab: parseInt(index)
+      activeTab: parseInt(index),
     });
   },
 
@@ -109,95 +113,98 @@ Page({
     const { id } = e.currentTarget.dataset;
     const expandedItems = { ...this.data.expandedItems };
     expandedItems[id] = !expandedItems[id];
-    
+
     this.setData({
-      expandedItems
+      expandedItems,
     });
   },
 
   // Handle friend request (accept/reject)
   handleFriendRequest(e) {
     const { action, notifyId } = e.currentTarget.dataset;
-    
+
     wx.showLoading({
-      title: this.data.messages.actions.processing
+      title: this.data.messages.actions.processing,
     });
 
     this.requestFriendAction({
       status: action,
-      notify_id: notifyId
+      notify_id: notifyId,
     });
   },
 
   // Handle post notification
   handlePostNotification(e) {
     const { notifyId } = e.currentTarget.dataset;
-    
+
     this.requestFriendAction({
-      status: 'removed',
-      notify_id: notifyId
+      status: "removed",
+      notify_id: notifyId,
     });
   },
 
   // Remove notification from local data
   removeNotification(notifyId) {
     const notifications = this.data.notifications.filter(
-      item => item.notify_id !== parseInt(notifyId)
+      (item) => item.notify_id !== parseInt(notifyId)
     );
     const friendNotifications = notifications.filter(
-      item => item.event_type !== "new_post"
+      (item) => item.event_type !== "new_post"
     );
     const postNotifications = notifications.filter(
-      item => item.event_type === "new_post"
+      (item) => item.event_type === "new_post"
     );
 
     this.setData({
       notifications,
       friendNotifications,
-      postNotifications
+      postNotifications,
     });
   },
 
   requestFriendAction(data) {
     wx.request({
       url: `${config.BACKEND_URL}/handle-friend`,
-      method: 'POST',
+      method: "POST",
       data: data,
       header: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.data.userInfo.token}`
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${this.data.userInfo.token}`,
       },
       success: (res) => {
         wx.hideLoading();
-        
-        if (res.data && res.data.status === 'success') {
-          const actionText = 
-            data.status === 'accept' ? this.data.messages.actions.friendAdded :
-            data.status === 'reject' ? this.data.messages.actions.requestRejected : 
-            this.data.messages.actions.notificationRemoved;
-          
+
+        if (res.data && res.data.status === "success") {
+          const actionText =
+            data.status === "accept"
+              ? this.data.messages.actions.friendAdded
+              : data.status === "reject"
+              ? this.data.messages.actions.requestRejected
+              : this.data.messages.actions.notificationRemoved;
+
           wx.showToast({
             title: actionText,
-            icon: 'success'
+            icon: "success",
           });
-          
+
           this.removeNotification(data.notify_id);
         } else {
-          wx.showToast({
-            title: this.data.messages.errors.actionFailed,
-            icon: 'none'
-          });
+          if (res.data.msg)
+            wx.showToast({
+              title: res.data.msg,
+              icon: "error",
+            });
         }
       },
       fail: (err) => {
         wx.hideLoading();
-        console.error('Friend action request failed:', err);
-        
+        console.error("Friend action request failed:", err);
+
         wx.showToast({
           title: this.data.messages.errors.networkError,
-          icon: 'none'
+          icon: "none",
         });
-      }
+      },
     });
   },
 
@@ -206,7 +213,7 @@ Page({
     const now = new Date();
     const diffTime = Math.abs(now - date);
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
+
     if (diffDays === 1) {
       return this.data.messages.time.today;
     } else if (diffDays === 2) {
@@ -217,18 +224,18 @@ Page({
       return `${date.getMonth() + 1}月${date.getDate()}日`;
     }
   },
-  
+
   navigateToUserProfile(e) {
     const { userId } = e.currentTarget.dataset;
     wx.navigateTo({
-      url: `/pages/profile/profile?userId=${userId}`
+      url: `/pages/profile/profile?userId=${userId}`,
     });
   },
-  
+
   navigateToPost(e) {
     const { postId } = e.currentTarget.dataset;
     wx.navigateTo({
-      url: `/pages/post/post-detail?postId=${postId}`
+      url: `/pages/post/post-detail?postId=${postId}`,
     });
-  }
+  },
 });

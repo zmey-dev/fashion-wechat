@@ -290,6 +290,12 @@ Page({
               : this.data.messages.actions.unfollowed,
             icon: "success",
           });
+        } else {
+          if (res.data.msg)
+            wx.showToast({
+              title: res.data.msg,
+              icon: "error",
+            });
         }
       },
       fail: () => {
@@ -371,10 +377,11 @@ Page({
               icon: "success",
             });
           } else {
-            wx.showToast({
-              title: this.data.messages.errors.addFriendFailed,
-              icon: "error",
-            });
+            if (res.data.msg)
+              wx.showToast({
+                title: res.data.msg,
+                icon: "error",
+              });
           }
         },
         fail: () => {
@@ -409,10 +416,11 @@ Page({
               icon: "success",
             });
           } else {
-            wx.showToast({
-              title: this.data.messages.errors.removeFriendFailed,
-              icon: "error",
-            });
+            if (res.data.msg)
+              wx.showToast({
+                title: res.data.msg,
+                icon: "error",
+              });
           }
         },
         fail: () => {

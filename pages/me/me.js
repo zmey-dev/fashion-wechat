@@ -216,10 +216,11 @@ Page({
               icon: "success",
             });
           } else {
-            wx.showToast({
-              title: this.data.messages.errors.loadFailed,
-              icon: "none",
-            });
+            if (res.data.msg)
+              wx.showToast({
+                title: res.data.msg,
+                icon: "error",
+              });
           }
         },
         fail: () => {

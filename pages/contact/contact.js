@@ -300,6 +300,11 @@ Page({
           if (res.statusCode === 200 && res.data.status === "success") {
             resolve(res.data);
           } else {
+            wx.showToast({
+              title: res.data.msg,
+              icon: "none",
+              duration: 3000,
+            });
             reject(
               new Error(res.data.message || this.data.messages.errors.submitFailed)
             );

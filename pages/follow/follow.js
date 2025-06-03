@@ -23,7 +23,7 @@ Page({
         networkError: "网络错误",
         operationFailed: "操作失败",
         addFriendFailed: "添加好友失败",
-        removeFriendFailed: "取消好友失败"
+        removeFriendFailed: "取消好友失败",
       },
       actions: {
         following: "关注中...",
@@ -33,13 +33,13 @@ Page({
         followed: "已关注",
         unfollowed: "已取消关注",
         friendAdded: "已添加好友",
-        friendRemoved: "已取消好友"
+        friendRemoved: "已取消好友",
       },
       confirmations: {
         removeFriendTitle: "提示",
-        removeFriendContent: "您确定要删除您的好友请求吗？"
-      }
-    }
+        removeFriendContent: "您确定要删除您的好友请求吗？",
+      },
+    },
   },
 
   onLoad: function (options) {
@@ -48,7 +48,7 @@ Page({
     // Subscribe to user info changes
     this.userInfoHandler = (userInfo) => {
       this.setData({ userInfo });
-    }
+    };
     app.subscribe("userInfo", this.userInfoHandler);
 
     this.setData({
@@ -247,7 +247,9 @@ Page({
     const newFollowStatus = !currentUser.isFollowed;
 
     wx.showLoading({
-      title: newFollowStatus ? this.data.messages.actions.following : this.data.messages.actions.unfollowing,
+      title: newFollowStatus
+        ? this.data.messages.actions.following
+        : this.data.messages.actions.unfollowing,
     });
 
     wx.request({
@@ -279,9 +281,17 @@ Page({
           });
 
           wx.showToast({
-            title: newFollowStatus ? this.data.messages.actions.followed : this.data.messages.actions.unfollowed,
+            title: newFollowStatus
+              ? this.data.messages.actions.followed
+              : this.data.messages.actions.unfollowed,
             icon: "success",
           });
+        } else {
+          if (res.data.msg)
+            wx.showToast({
+              title: res.data.msg,
+              icon: "error",
+            });
         }
       },
       fail: () => {
@@ -336,7 +346,9 @@ Page({
     const currentUser = this.data.currentUser;
 
     wx.showLoading({
-      title: addFriend ? this.data.messages.actions.addingFriend : this.data.messages.actions.removingFriend,
+      title: addFriend
+        ? this.data.messages.actions.addingFriend
+        : this.data.messages.actions.removingFriend,
     });
 
     if (addFriend)
@@ -361,10 +373,11 @@ Page({
               icon: "success",
             });
           } else {
-            wx.showToast({
-              title: this.data.messages.errors.addFriendFailed,
-              icon: "error",
-            });
+            if (res.data.msg)
+              wx.showToast({
+                title: res.data.msg,
+                icon: "error",
+              });
           }
         },
         fail: () => {
@@ -399,10 +412,11 @@ Page({
               icon: "success",
             });
           } else {
-            wx.showToast({
-              title: this.data.messages.errors.removeFriendFailed,
-              icon: "error",
-            });
+            if (res.data.msg)
+              wx.showToast({
+                title: res.data.msg,
+                icon: "error",
+              });
           }
         },
         fail: () => {

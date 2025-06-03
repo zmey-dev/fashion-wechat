@@ -94,7 +94,7 @@ Component({
             that.close();
           } else {
             that.setData({
-              errorMessage: res.data.message || '登录失败，请重试',
+              errorMessage: res.data.msg || '登录失败，请重试',
               isLoading: false
             });
           }
