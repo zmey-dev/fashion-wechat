@@ -32,7 +32,7 @@
   </view>
 
   <!-- Main Content Area -->
-  <view class="content-area">
+  <view class="content-area" id="contentArea">
     
     <!-- Posts Grid -->
     <view class="posts-grid">
@@ -53,17 +53,10 @@
             lazy-load="{{true}}"
           />
           
-          <!-- Like Stats Overlay -->
-          <view class="like-overlay">
-            <view 
-              class="like-action {{item.likes_exists ? 'liked' : ''}}"
-              data-post-id="{{item.id}}"
-              data-index="{{index}}"
-              bindtap="onLikeTap"
-            >
-              <text class="heart-icon">{{item.likes_exists ? '❤️' : '🤍'}}</text>
-              <text class="like-count">{{item.likes || 0}}</text>
-            </view>
+          <!-- Like Stats Display Only -->
+          <view class="like-display">
+            <text class="heart-icon">{{item.likes_exists ? '❤️' : '🤍'}}</text>
+            <text class="like-count">{{item.likes || 0}}</text>
           </view>
         </view>
 
@@ -92,7 +85,6 @@
       <text class="empty-icon">📸</text>
       <text class="empty-title">暂无内容</text>
       <text class="empty-desc">快来发布你的时尚作品吧</text>
-      <button class="upload-btn" bindtap="onUploadTap">立即发布</button>
     </view>
 
     <!-- Load More -->
@@ -107,9 +99,13 @@
     </view>
   </view>
 
-  <!-- Floating Upload Button -->
-  <view class="fab-button" bindtap="onUploadTap">
-    <text class="plus-icon">➕</text>
+  <!-- Scroll to Top Button (원래 + 버튼 위치에 배치) -->
+  <view 
+    wx:if="{{showScrollTop}}" 
+    class="scroll-top-button" 
+    bindtap="onScrollToTop"
+  >
+    <text class="scroll-up-icon">⬆️</text>
   </view>
 
   <!-- Login Modal -->

@@ -25,6 +25,8 @@ Page({
     currentFilter: "discover",
     // Search filter (search term)
     searchFilter: "",
+    // Show scroll to top button
+    showScrollTop: false,
     // Filter options
     filterOptions: [
       { key: "discover", name: "发现" },
@@ -62,6 +64,7 @@ Page({
     app.unsubscribe("showLoginModal", this.showLoginModal);
     app.unsubscribe("userInfo", this.userInfoHandler);
   },
+
   /**
    * Lifecycle function--Called when page show
    */
@@ -166,43 +169,6 @@ Page({
   },
 
   /**
-   * Handle like button tap
-   */
-  onLikeTap: function (e) {
-    e.stopPropagation();
-
-    if (!app.globalData.userInfo) {
-      this.setData({ showLoginModal: true });
-      return;
-    }
-
-    const { postId, index } = e.currentTarget.dataset;
-
-    wx.request({
-      url: `${app.globalData.baseUrl}/post/add_like`,
-      method: "POST",
-      data: { post_id: postId },
-      header: {
-        Authorization: `Bearer ${app.globalData.userInfo.token}`,
-        "Content-Type": "application/json",
-      },
-      success: (res) => {
-        if (res.data.status === "success") {
-          const posts = [...this.data.posts];
-          posts[index].likes = res.data.post.likes;
-          posts[index].likes_exists = !posts[index].likes_exists;
-
-          this.setData({ posts });
-          wx.vibrateShort();
-        }
-      },
-      fail: () => {
-        this.showToast("操作失败");
-      },
-    });
-  },
-
-  /**
    * Handle user avatar tap
    */
   onUserTap: function (e) {
@@ -300,6 +266,31 @@ Page({
     if (this.data.hasMore && !this.data.loading) {
       this.loadPosts(false);
     }
+  },
+
+  /**
+   * Page scroll event - show/hide scroll to top button
+   */
+  onPageScroll: function(e) {
+    const scrollTop = e.scrollTop;
+    const showScrollTop = scrollTop > 500; // 500px 이상 스크롤하면 버튼 표시
+    
+    if (this.data.showScrollTop !== showScrollTop) {
+      this.setData({ showScrollTop });
+    }
+  },
+
+  /**
+   * Scroll to top smoothly
+   */
+  onScrollToTop: function() {
+    wx.pageScrollTo({
+      scrollTop: 0,
+      duration: 600
+    });
+    
+    // 햅틱 피드백
+    wx.vibrateShort();
   },
 
   /**

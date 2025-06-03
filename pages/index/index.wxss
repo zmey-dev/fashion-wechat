@@ -170,14 +170,11 @@
   object-fit: cover;
 }
 
-/* Like Overlay */
-.like-overlay {
+/* Like Display Only (Non-interactive) */
+.like-display {
   position: absolute;
   bottom: 16rpx;
   right: 16rpx;
-}
-
-.like-action {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -186,15 +183,7 @@
   padding: 12rpx 16rpx;
   border-radius: 24rpx;
   backdrop-filter: blur(10rpx);
-  transition: all 0.2s ease;
-}
-
-.like-action:active {
-  transform: scale(0.95);
-}
-
-.like-action.liked {
-  background: rgba(255, 59, 48, 0.7);
+  pointer-events: none;
 }
 
 .heart-icon {
@@ -283,21 +272,6 @@
   line-height: 1.4;
 }
 
-.upload-btn {
-  background: linear-gradient(135deg, #ff6b6b, #feca57);
-  color: #000000;
-  font-size: 28rpx;
-  font-weight: 700;
-  padding: 20rpx 50rpx;
-  border-radius: 50rpx;
-  border: none;
-  transition: all 0.2s ease;
-}
-
-.upload-btn:active {
-  transform: scale(0.96);
-}
-
 /* Load More & End */
 .load-more, .end-message {
   display: flex;
@@ -312,8 +286,8 @@
   color: rgba(255, 255, 255, 0.4);
 }
 
-/* Floating Action Button */
-.fab-button {
+/* Scroll to Top Button - 원래 + 버튼 위치에 배치 */
+.scroll-top-button {
   position: fixed;
   bottom: 100rpx;
   right: 40rpx;
@@ -327,13 +301,15 @@
   box-shadow: 0 8rpx 32rpx rgba(255, 107, 107, 0.3);
   z-index: 99;
   transition: all 0.3s ease;
+  opacity: 0.9;
 }
 
-.fab-button:active {
+.scroll-top-button:active {
   transform: scale(0.9);
+  opacity: 1;
 }
 
-.plus-icon {
+.scroll-up-icon {
   font-size: 48rpx;
   color: #000000;
   font-weight: 700;
