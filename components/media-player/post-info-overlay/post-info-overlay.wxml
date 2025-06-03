@@ -1,5 +1,6 @@
 <!-- components/post-info-overlay/post-info-overlay.wxml -->
-<view class="post-info">
+<view class="post-info"
+>
   <view class="post-title">{{ displayTitle }}</view>
   <view class="post-content" wx:if="{{ displayContent }}">
     {{ displayContent }}

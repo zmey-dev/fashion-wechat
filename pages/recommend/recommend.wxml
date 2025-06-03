@@ -6,6 +6,7 @@
   <filter-bar currentFilter="recommend"></filter-bar>
   <view class="post-viewer-container">
     <media-player
+      class="media-player"
       wx:if="{{ currentPost }}"
       selectedPost="{{ currentPost }}"
       selectedPostUser="{{ currentPostUser }}"

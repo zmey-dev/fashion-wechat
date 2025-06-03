@@ -16,7 +16,8 @@ page {
 
 /* Container for all pages */
 .page-container {
-  padding-bottom: 130rpx;
+  padding-bottom: 110rpx;
+  box-sizing: border-box;
 }
 
 /* Common header styles */

@@ -1,5 +1,9 @@
 <!-- components/media-controls/media-controls.wxml -->
-<view class="media-controls" wx:if="{{ currentPost.type === 'image' }}">
+<view
+  class="media-controls" 
+  wx:if="{{ currentPost.type === 'image' }}"
+  style="{{ currentPost.type === 'image' ? 'padding-bottom: 130rpx; box-sizing: border-;' : '' }}"
+  >
   <view class="controls-bottom">
     <view class="progress-bars">
       <view
