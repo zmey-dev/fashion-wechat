@@ -247,4 +247,10 @@ Page({
       duration: 300,
     });
   },
+  onPostTap: function (e) {
+    const postId = e.currentTarget.dataset.id;
+    wx.navigateTo({
+      url: `/pages/post-detail/post-detail?postId=${postId}`,
+    });
+  },
 });

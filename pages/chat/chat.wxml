@@ -1,10 +1,13 @@
 <!-- pages/chat/chat.wxml -->
-<view class="app-container">
+<view class="page-container">
   <!-- Chat List View -->
-  <view class="chat-list-view {{currentView === 'list' ? 'active' : 'hidden'}}" >
+  <view class="chat-list-view {{currentView === 'list' ? 'active' : 'hidden'}}">
     <!-- Header -->
     <view class="list-header">
       <view class="header-title">聊天</view>
+      <view class="header-actions">
+        <view class="action-icon" bindtap="onCreateChat">✏️</view>
+      </view>
     </view>
 
     <!-- Search Bar -->
@@ -25,28 +28,27 @@
       <view 
         wx:for="{{filteredFriends}}" 
         wx:key="id"
-        class="chat-item relative"
+        class="chat-item"
         data-userid="{{item.id}}"
         bindtap="onSelectUser"
         bindlongpress="onLongPress"
         hover-class="chat-item-hover"
         hover-stay-time="100"
       >
-        <view class="friend-avatar-container relative">
+        <view class="friend-avatar-container">
           <avatar 
             class="friend-avatar" 
             avatar="{{item.avatar}}"
             name="{{item.username}}"
-            size="{{80}}"
+            size="{{100}}"
             mode="aspectFill"
-            lazy-load="{{true}}"
           />
-          <!-- Unread message badge -->
-          <view wx:if="{{item.unreadCount > 0}}" class="unread-badge absolute top-0 right-0">
-            {{item.unreadCount}}
-          </view>
           <!-- Online status indicator -->
-          <view wx:if="{{item.status === 'online'}}" class="online-indicator absolute bottom-0 right-0.5 h-2 w-2 rounded-full bg-green-500 border-2 border-white"></view>
+          <view wx:if="{{item.status === 'online'}}" class="online-dot"></view>
+          <!-- Unread message badge -->
+          <view wx:if="{{item.unreadCount > 0}}" class="unread-badge">
+            {{item.unreadCount > 99 ? '99+' : item.unreadCount}}
+          </view>
         </view>
         
         <view class="friend-content">
@@ -56,13 +58,17 @@
           </view>
           
           <view class="friend-bottom">
-            <view class="last-message">{{item.lastMessage || ''}}</view>
+            <!-- Show typing indicator or last message -->
+            <view wx:if="{{friendsTyping[item.id]}}" class="typing-indicator-inline">
+              <text class="typing-text">正在输入</text>
+              <view class="typing-dots-inline">
+                <view class="typing-dot-inline"></view>
+                <view class="typing-dot-inline"></view>
+                <view class="typing-dot-inline"></view>
+              </view>
+            </view>
+            <view wx:else class="last-message">{{item.lastMessage || ''}}</view>
           </view>
-        </view>
-        
-        <!-- Typing indicator - similar to React version -->
-        <view wx:if="{{friendsTyping[item.id]}}" class="typing-text">
-          正在输入...
         </view>
       </view>
     </scroll-view>
@@ -74,9 +80,9 @@
     <view class="chat-header">
       <view class="header-left">
         <view class="back-btn" bindtap="onBackToList">
-          ← 
+          <view class="back-icon">‹</view>
         </view>
-        <view class="relative" style="height: 80rpx; margin-right: 20rpx;">
+        <view class="user-avatar-container">
           <avatar 
             class="user-avatar" 
             avatar="{{selectedUser.avatar}}"
@@ -84,14 +90,13 @@
             size="{{80}}"
             mode="aspectFill"
           />
-          <!-- Online status indicator in chat header -->
-          <view wx:if="{{selectedUser.status === 'online'}}" class="online-indicator absolute bottom-0 right-0.5 h-2 w-2 rounded-full bg-green-500 border-2 border-white"></view>
+          <view wx:if="{{selectedUser.status === 'online'}}" class="online-dot"></view>
         </view>
         <view class="user-info">
           <view class="user-name">{{selectedUser.username}}</view>
           <!-- Show typing indicator in header when user is typing -->
-          <view wx:if="{{friendsTyping[selectedUser.id]}}" class="header-typing-indicator">
-            <text class="header-typing-text">正在输入...</text>
+          <view wx:if="{{friendsTyping[selectedUser.id]}}" class="header-typing">
+            <text class="header-typing-text">正在输入</text>
             <view class="header-typing-dots">
               <view class="header-typing-dot"></view>
               <view class="header-typing-dot"></view>
@@ -117,86 +122,67 @@
       show-scrollbar="{{false}}"
       scroll-into-view="{{scrollIntoView}}"
       scroll-with-animation="{{true}}"
-      style="bottom: {{keyboardHeight + 100}}px;"
+      style="bottom: {{keyboardHeight + 80}}px;"
     >
       <view class="messages-list">
         <view 
-          wx:for="{{messages}}" 
+          wx:for="{{chatMessages}}" 
           wx:key="id"
           id="msg-{{index}}"
-          class="message-wrapper"
+          class="message-wrapper {{item.sender_id === 'me' ? 'sent' : 'received'}}"
         >
-          <view wx:if="{{index === 0 || shouldShowDateSeparator(item, messages[index-1])}}" class="date-separator">
+          <!-- Date separator -->
+          <view wx:if="{{index === 0 || shouldShowDateSeparator(item, chatMessages[index-1])}}" class="date-separator">
             <view class="date-text">{{formatDate(item.updated_at)}}</view>
           </view>
           
-          <view wx:if="{{item.sender_id !== 'me'}}" class="message-group received">
-            <avatar 
-              class="message-avatar" 
-              avatar="{{selectedUser.avatar}}"
-              name="{{selectedUser.username}}"
-              size="{{80}}"
-              mode="aspectFill"
-            />
-            <view class="message-bubble received-bubble {{isEmojiOnly(item.message) ? 'emoji-only' : ''}}">
+          <!-- Message content -->
+          <view class="message-group">
+            <!-- Avatar for received messages -->
+            <view wx:if="{{item.sender_id !== 'me'}}" class="message-avatar-container">
+              <avatar 
+                class="message-avatar" 
+                avatar="{{selectedUser.avatar}}"
+                name="{{selectedUser.username}}"
+                size="{{70}}"
+                mode="aspectFill"
+              />
+            </view>
+            <!-- Seen indicator for sent messages -->
+            <view wx:if="{{item.sender_id === 'me' && item.id === lastViewedMessageId}}" class="message-seen-indicator">
+              <view class="seen-icon">
+                <image src="/images/icons/eye.svg" class="seen-icon" />
+              </view>
+            </view>
+            <!-- Message bubble -->
+            <view class="message-bubble {{item.sender_id === 'me' ? 'sent-bubble' : 'received-bubble'}} {{isEmojiOnly(item.message) ? 'emoji-only' : ''}}">
               <view class="message-text">{{item.message}}</view>
               <view class="message-time">{{item.formatted_time}}</view>
             </view>
-          </view>
-
-          <view wx:if="{{item.sender_id === 'me'}}" class="message-group sent">
-            <avatar 
-              class="message-avatar" 
-              avatar="{{userInfo.avatar}}"
-              name="{{userInfo.username}}"
-              size="{{80}}"
-              mode="aspectFill"
-            />
             
-            <view class="message-bubble sent-bubble {{isEmojiOnly(item.message) ? 'emoji-only' : ''}}">
-              <view class="message-text">{{item.message}}</view>
-              <view class="message-info">
-                <view class="message-time">{{item.formatted_time}}</view>
-              </view>
+            <!-- Avatar for sent messages -->
+            <view wx:if="{{item.sender_id === 'me'}}" class="message-avatar-container">
+              <avatar 
+                class="message-avatar" 
+                avatar="{{userInfo.avatar}}"
+                name="{{userInfo.username}}"
+                size="{{70}}"
+                mode="aspectFill"
+              />
             </view>
             
-            <!-- Add seen indicator on the left side of the message bubble -->
-            <view wx:if="{{item.id === lastViewedMessageId}}" class="message-seen-indicator-left">
-              <view class="seen-icon">
-                <!-- SVG Eye Icon -->
-                <image src="/images/icons/eye.svg" class="seen-icon" mode="aspectFit" />
-              </view>
-            </view>
           </view>
         </view>
       </view>
 
-      <!-- Typing indicator - Mobile optimized version -->
-      <view wx:if="{{friendIsTyping}}" class="typing-indicator-container">
-        <view class="typing-avatar">
-          <avatar 
-            avatar="{{selectedUser.avatar}}"
-            name="{{selectedUser.username}}"
-            size="{{60}}"
-            mode="aspectFill"
-          />
-        </view>
-        <view class="typing-bubble">
-          <view class="typing-dots">
-            <view class="typing-dot"></view>
-            <view class="typing-dot"></view>
-            <view class="typing-dot"></view>
-          </view>
-        </view>
-      </view>
-
-      <!-- Only show typing indicator if selected user is typing -->
+      <!-- Typing indicator - only show one version -->
       <view wx:if="{{selectedUser && friendsTyping[selectedUser.id]}}" class="typing-indicator-container">
-        <view class="typing-avatar">
+        <view class="typing-avatar-container">
           <avatar 
+            class="typing-avatar"
             avatar="{{selectedUser.avatar}}"
             name="{{selectedUser.username}}"
-            size="{{60}}"
+            size="{{70}}"
             mode="aspectFill"
           />
         </view>
@@ -211,7 +197,7 @@
     </scroll-view>
 
     <!-- Emoji Picker -->
-    <view wx:if="{{showEmojiPicker}}" class="emoji-picker" style="bottom: {{keyboardHeight + 60}}px;">
+    <view wx:if="{{showEmojiPicker}}" class="emoji-picker" style="bottom: {{keyboardHeight + 120}}px;">
       <scroll-view class="emoji-grid" scroll-y enhanced="{{true}}" show-scrollbar="{{false}}">
         <view 
           wx:for="{{emojis}}" 
@@ -228,7 +214,7 @@
     </view>
 
     <!-- Message Input -->
-    <view class="message-input-container" style="bottom: {{keyboardHeight}}px;">
+    <view class="message-input-container" style="bottom: {{keyboardHeight + 40}}px;">
       <view class="input-box">
         <view class="input-actions-left">
           <view class="input-action-btn" bindtap="toggleEmojiPicker">
@@ -252,9 +238,8 @@
         
         <view class="input-actions-right">
           <view wx:if="{{inputMessage.length > 0}}" class="send-btn" bindtap="onSendMessage">
-            ➤
+            <view class="send-icon">➤</view>
           </view>
-          <view wx:else class="input-action-btn"></view>
         </view>
       </view>
     </view>
@@ -288,7 +273,7 @@
         bindtap="onContextAction"
       >
         <view class="context-icon">🗑️</view>
-        <text class="context-text">删除消息</text>
+        <text class="context-text">删除聊天</text>
       </view>
       
       <view class="context-divider"></view>
@@ -304,6 +289,6 @@
     </view>
   </view>
 
-  <!-- Tab Bar - Add this section for the tab bar -->
+  <!-- Tab Bar -->
   <douyin-tabbar current="chat"></douyin-tabbar>
 </view>

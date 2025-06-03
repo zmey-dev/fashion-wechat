@@ -143,7 +143,7 @@ Page({
   onPostTap: function (e) {
     const postId = e.currentTarget.dataset.postId;
     wx.navigateTo({
-      url: `/pages/post-detail/post-detail?id=${postId}`
+      url: `/pages/post-detail/post-detail?postId=${postId}`
     });
   },
 

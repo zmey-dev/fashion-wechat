@@ -14,7 +14,7 @@ Page({
 
     // Selected chat data
     selectedUser: null,
-    messages: [],
+    chatMessages: [], 
     inputMessage: "",
     showEmojiPicker: false,
 
@@ -48,8 +48,7 @@ Page({
     // Add this to track the last viewed message
     lastViewedMessageId: null,
     
-    // Chinese messages for UI text
-    messages: {
+    uiTexts: {
       loading: "加载中...",
       loadingMessages: "加载消息中...",
       failedToLoad: "加载失败",
@@ -155,10 +154,10 @@ Page({
         formatted_time: this.formatTime(data.created_at || new Date().toISOString()),
       };
       
-      const messages = [...this.data.messages, newMessage];
+      const chatMessages = [...this.data.chatMessages, newMessage];
       
       this.setData({
-        messages,
+        chatMessages,
         friendsTyping: {
           ...this.data.friendsTyping,
           [data.sender_id]: false
@@ -337,7 +336,7 @@ Page({
       this.setData({
         currentView: "chat",
         selectedUser: user,
-        messages: [], // Initially empty until we fetch messages
+        chatMessages: [], // Initially empty until we fetch messages
         friendsTyping: {
           ...this.data.friendsTyping,
           [userId]: false
@@ -366,7 +365,7 @@ Page({
     if (!userId || !this.data.userInfo.token) return;
 
     wx.showLoading({
-      title: this.data.messages.loadingMessages,
+      title: this.data.uiTexts.loadingMessages,
     });
 
     wx.request({
@@ -393,7 +392,7 @@ Page({
 
           // Store in local state
           this.setData({
-            messages: formattedMessages
+            chatMessages: formattedMessages
           });
 
           // Find the last message sent by the current user that has been seen by the other user
@@ -413,7 +412,7 @@ Page({
           }, 300);
         } else {
           wx.showToast({
-            title: this.data.messages.failedToLoad,
+            title: this.data.uiTexts.failedToLoad,
             icon: "none",
           });
         }
@@ -422,7 +421,7 @@ Page({
         wx.hideLoading();
         console.error("Failed to fetch messages:", err);
         wx.showToast({
-          title: this.data.messages.networkError,
+          title: this.data.uiTexts.networkError,
           icon: "none",
         });
       },
@@ -434,7 +433,7 @@ Page({
     this.setData({
       currentView: "list",
       selectedUser: null,
-      messages: [],
+      chatMessages: [],
       showEmojiPicker: false,
       inputMessage: "",
     });
@@ -461,7 +460,7 @@ Page({
 
     switch (action) {
       case "profile":
-        wx.showToast({ title: this.data.messages.goToProfile, icon: "none" });
+        wx.showToast({ title: this.data.uiTexts.goToProfile, icon: "none" });
         break;
       case "delete":
         this.deleteMessages(friendId);
@@ -506,14 +505,14 @@ Page({
             this.checkFriendsStatus();
           } else {
             wx.showToast({
-              title: this.data.messages.failedToLoadFriends,
+              title: this.data.uiTexts.failedToLoadFriends,
               icon: "none",
             });
           }
         },
         fail: () => {
           wx.showToast({
-            title: this.data.messages.networkError,
+            title: this.data.uiTexts.networkError,
             icon: "none",
           });
         },
@@ -525,8 +524,8 @@ Page({
 
   deleteMessages(friendId) {
     wx.showModal({
-      title: this.data.messages.deleteConfirm,
-      content: this.data.messages.deletePrompt,
+      title: this.data.uiTexts.deleteConfirm,
+      content: this.data.uiTexts.deletePrompt,
       success: (res) => {
         if (res.confirm) {
           this.messageData[friendId] = [];
@@ -534,9 +533,9 @@ Page({
             this.data.selectedUser &&
             this.data.selectedUser.id === friendId
           ) {
-            this.setData({ messages: [] });
+            this.setData({ chatMessages: [] });
           }
-          wx.showToast({ title: this.data.messages.messagesDeleted, icon: "success" });
+          wx.showToast({ title: this.data.uiTexts.messagesDeleted, icon: "success" });
         }
       },
     });
@@ -544,8 +543,8 @@ Page({
 
   blockUser(friendId) {
     wx.showModal({
-      title: this.data.messages.blockConfirm,
-      content: this.data.messages.blockPrompt,
+      title: this.data.uiTexts.blockConfirm,
+      content: this.data.uiTexts.blockPrompt,
       success: (res) => {
         if (res.confirm) {
           const friends = this.data.friends.filter((f) => f.id !== friendId);
@@ -561,7 +560,7 @@ Page({
             this.onBackToList();
           }
 
-          wx.showToast({ title: this.data.messages.userBlocked, icon: "success" });
+          wx.showToast({ title: this.data.uiTexts.userBlocked, icon: "success" });
         }
       },
     });
@@ -600,7 +599,7 @@ Page({
     
     if (containsSwearWord) {
       wx.showToast({
-        title: this.data.messages.inappropriateLanguage,
+        title: this.data.uiTexts.inappropriateLanguage,
         icon: "none"
       });
       return;
@@ -657,7 +656,7 @@ Page({
             is_read: false, // Initialize as unread
           };
           
-          const messages = [...this.data.messages, newMessage];
+          const chatMessages = [...this.data.chatMessages, newMessage];
           
           // Update friends list with last message
           const updatedFriends = this.data.friends.map(friend => {
@@ -672,7 +671,7 @@ Page({
           });
           
           this.setData({
-            messages,
+            chatMessages,
             inputMessage: "",
             friends: updatedFriends,
             filteredFriends: updatedFriends
@@ -684,7 +683,7 @@ Page({
       fail: (err) => {
         console.error("Failed to send message:", err);
         wx.showToast({
-          title: this.data.messages.sendFailed,
+          title: this.data.uiTexts.sendFailed,
           icon: "none"
         });
       }
@@ -693,12 +692,39 @@ Page({
   
   // Scroll to bottom
   scrollToBottom() {
-    if (this.data.messages.length > 0) {
-      const lastMessageId = `msg-${this.data.messages.length - 1}`;
+    if (this.data.chatMessages.length > 0) {
+      const lastMessageId = `msg-${this.data.chatMessages.length - 1}`;
       this.setData({
         scrollIntoView: lastMessageId,
       });
     }
+  },
+
+  // Format date only
+  formatDate(timestamp) {
+    if (!timestamp) return "";
+    
+    const date = new Date(timestamp);
+    const now = new Date();
+    
+    // Check if today
+    if (date.toDateString() === now.toDateString()) {
+      return this.data.uiTexts.today;
+    }
+    
+    // Check if yesterday
+    const yesterday = new Date(now);
+    yesterday.setDate(now.getDate() - 1);
+    if (date.toDateString() === yesterday.toDateString()) {
+      return this.data.uiTexts.yesterday;
+    }
+    
+    // General date format
+    return date.toLocaleDateString("zh-CN", {
+      year: "numeric",
+      month: "short",
+      day: "numeric"
+    });
   },
 
   // Format message timestamp
@@ -718,7 +744,7 @@ Page({
     }
     
     if (diff < 172800000) { // Less than 2 days
-      return this.data.messages.yesterday + " " + date.toLocaleTimeString("zh-CN", {
+      return this.data.uiTexts.yesterday + " " + date.toLocaleTimeString("zh-CN", {
         hour: "2-digit",
         minute: "2-digit",
         hour12: false,
@@ -735,43 +761,6 @@ Page({
     });
   },
 
-  // Format date only
-  formatDate(timestamp) {
-    if (!timestamp) return "";
-    
-    const date = new Date(timestamp);
-    const now = new Date();
-    
-    // Check if today
-    if (date.toDateString() === now.toDateString()) {
-      return this.data.messages.today;
-    }
-    
-    // Check if yesterday
-    const yesterday = new Date(now);
-    yesterday.setDate(now.getDate() - 1);
-    if (date.toDateString() === yesterday.toDateString()) {
-      return this.data.messages.yesterday;
-    }
-    
-    // General date format
-    return date.toLocaleDateString("zh-CN", {
-      year: "numeric",
-      month: "short",
-      day: "numeric"
-    });
-  },
-
-  // Check if date separator should be shown in message groups
-  shouldShowDateSeparator(currentMsg, prevMsg) {
-    if (!prevMsg) return true; // Always show date for first message
-    
-    const currentDate = new Date(currentMsg.created_at).toDateString();
-    const prevDate = new Date(prevMsg.created_at).toDateString();
-    
-    return currentDate !== prevDate; // Show separator if dates are different
-  },
-
   // Handle read message event from socket
   handleReadMessage(data) {
     console.log("Read message event received:", data);
@@ -782,7 +771,7 @@ Page({
     // Only update if the event is related to the current chat
     if (this.data.selectedUser && this.data.selectedUser.id === data.sender_id) {
       // Find all messages sent by current user to this sender
-      const myMessages = this.data.messages.filter(msg => 
+      const myMessages = this.data.chatMessages.filter(msg => 
         msg.sender_id === 'me' && !msg.is_read
       );
       
@@ -796,7 +785,7 @@ Page({
         });
         
         // Mark all messages as read in the local state
-        const updatedMessages = this.data.messages.map(msg => {
+        const updatedMessages = this.data.chatMessages.map(msg => {
           if (msg.sender_id === 'me') {
             return { ...msg, is_read: true };
           }
@@ -804,7 +793,7 @@ Page({
         });
         
         this.setData({
-          messages: updatedMessages
+          chatMessages: updatedMessages
         });
       }
     }
@@ -865,5 +854,268 @@ Page({
         console.error('Failed to mark messages as read:', err);
       }
     });
-  }
+  },
+
+  onInputFocus() {
+    this.setData({
+      showEmojiPicker: false
+    });
+  },
+
+  onInputBlur() {
+  },
+
+  onKeyboardHeightChange(e) {
+    const keyboardHeight = e.detail.height || 0;
+    this.setData({
+      keyboardHeight
+    });
+    
+    if (keyboardHeight > 0) {
+      setTimeout(() => {
+        this.scrollToBottom();
+      }, 100);
+    }
+  },
+
+  onEmojiSelect(e) {
+    const emoji = e.currentTarget.dataset.emoji;
+    const currentMessage = this.data.inputMessage;
+    
+    this.setData({
+      inputMessage: currentMessage + emoji,
+      showEmojiPicker: false
+    });
+  },
+
+  toggleEmojiPicker() {
+    this.setData({
+      showEmojiPicker: !this.data.showEmojiPicker
+    });
+  },
+
+  onMoreActions() {
+    wx.showActionSheet({
+      itemList: ['拍照', '从相册选择', '位置', '文件'],
+      success: (res) => {
+        switch(res.tapIndex) {
+          case 0:
+            this.takePhoto();
+            break;
+          case 1:
+            this.chooseImage();
+            break;
+          case 2:
+            this.shareLocation();
+            break;
+          case 3:
+            this.chooseFile();
+            break;
+        }
+      }
+    });
+  },
+
+  takePhoto() {
+    wx.chooseMedia({
+      count: 1,
+      mediaType: ['image'],
+      sourceType: ['camera'],
+      success: (res) => {
+        const tempFilePath = res.tempFiles[0].tempFilePath;
+        this.uploadImage(tempFilePath);
+      }
+    });
+  },
+
+  chooseImage() {
+    wx.chooseMedia({
+      count: 1,
+      mediaType: ['image'],
+      sourceType: ['album'],
+      success: (res) => {
+        const tempFilePath = res.tempFiles[0].tempFilePath;
+        this.uploadImage(tempFilePath);
+      }
+    });
+  },
+
+  uploadImage(filePath) {
+    wx.showLoading({
+      title: '上传中...'
+    });
+    
+    wx.uploadFile({
+      url: `${config.BACKEND_URL}/upload/image`,
+      filePath: filePath,
+      name: 'image',
+      header: {
+        'Authorization': `Bearer ${this.data.userInfo.token}`
+      },
+      success: (res) => {
+        wx.hideLoading();
+        const data = JSON.parse(res.data);
+        if (data.status === 'success') {
+          // 发送图片消息
+          this.sendImageMessage(data.url);
+        }
+      },
+      fail: () => {
+        wx.hideLoading();
+        wx.showToast({
+          title: '上传失败',
+          icon: 'none'
+        });
+      }
+    });
+  },
+
+  // 发送图片消息
+  sendImageMessage(imageUrl) {
+    if (!this.data.selectedUser) return;
+    
+    const messageData = {
+      sender_id: this.data.userInfo.id,
+      receiver_id: this.data.selectedUser.id,
+      message: imageUrl,
+      message_type: "image"
+    };
+    
+    wx.request({
+      url: `${config.BACKEND_URL}/messages/send_message`,
+      method: 'POST',
+      data: messageData,
+      header: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.data.userInfo.token}`
+      },
+      success: (res) => {
+        if (res.data && res.data.status === 'success') {
+          // 发送socket事件
+          socketManager.sendMessage("new_message", {
+            id: res.data.message.id || Date.now(),
+            sender_id: this.data.userInfo.id,
+            receiver_id: this.data.selectedUser.id,
+            message: imageUrl,
+            message_type: "image",
+            created_at: res.data.message.created_at || new Date().toISOString()
+          });
+          
+          // 添加到本地状态
+          const newMessage = {
+            id: res.data.message.id || Date.now(),
+            sender_id: "me",
+            message: imageUrl,
+            message_type: "image",
+            created_at: res.data.message.created_at || new Date().toISOString(),
+            formatted_time: this.formatTime(res.data.message.created_at || new Date().toISOString()),
+            is_read: false
+          };
+          
+          const chatMessages = [...this.data.chatMessages, newMessage];
+          this.setData({ chatMessages });
+          this.scrollToBottom();
+        }
+      }
+    });
+  },
+
+  // 分享位置
+  shareLocation() {
+    wx.chooseLocation({
+      success: (res) => {
+        const locationMessage = `位置: ${res.name}\n地址: ${res.address}`;
+        this.sendLocationMessage(locationMessage, res.latitude, res.longitude);
+      }
+    });
+  },
+
+  // 发送位置消息
+  sendLocationMessage(message, latitude, longitude) {
+    const messageData = {
+      sender_id: this.data.userInfo.id,
+      receiver_id: this.data.selectedUser.id,
+      message: message,
+      message_type: "location",
+      latitude: latitude,
+      longitude: longitude
+    };
+    
+    // 类似于发送普通消息的处理...
+    this.setData({
+      inputMessage: message
+    });
+    this.onSendMessage();
+  },
+
+  // 选择文件
+  chooseFile() {
+    wx.chooseMessageFile({
+      count: 1,
+      success: (res) => {
+        const file = res.tempFiles[0];
+        this.uploadFile(file.path, file.name);
+      }
+    });
+  },
+
+  // 上传文件
+  uploadFile(filePath, fileName) {
+    wx.showLoading({
+      title: '上传中...'
+    });
+    
+    wx.uploadFile({
+      url: `${config.BACKEND_URL}/upload/file`,
+      filePath: filePath,
+      name: 'file',
+      formData: {
+        'fileName': fileName
+      },
+      header: {
+        'Authorization': `Bearer ${this.data.userInfo.token}`
+      },
+      success: (res) => {
+        wx.hideLoading();
+        const data = JSON.parse(res.data);
+        if (data.status === 'success') {
+          this.sendFileMessage(data.url, fileName);
+        }
+      },
+      fail: () => {
+        wx.hideLoading();
+        wx.showToast({
+          title: '上传失败',
+          icon: 'none'
+        });
+      }
+    });
+  },
+
+  // 发送文件消息
+  sendFileMessage(fileUrl, fileName) {
+    const message = `文件: ${fileName}`;
+    this.setData({
+      inputMessage: message
+    });
+    this.onSendMessage();
+  },
+
+  // 检查是否只包含表情符号
+  isEmojiOnly(message) {
+    if (!message || message.length === 0) return false;
+    
+    // 简单的表情符号检测
+    const emojiRegex = /^[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]+$/u;
+    return emojiRegex.test(message.trim());
+  },
+
+  // 创建新聊天
+  onCreateChat() {
+    wx.navigateTo({
+      url: '/pages/contacts/contacts'
+    });
+  },
+
+  // ...existing code...
 });
