@@ -13,8 +13,8 @@
             <text class="phone">(手机: {{userInfo.phone}},</text>
             <view class="gender-age">
               <text class="gender-icon">{{userInfo.gender === 'male' ? '♂' : '♀'}}</text>
-              <text class="age">{{age}} 岁)</text>
             </view>
+            )
           </view>
         </view>
         
