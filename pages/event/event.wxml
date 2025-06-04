@@ -152,26 +152,132 @@
   <view wx:if="{{showRulesModal}}" class="modal-backdrop" bindtap="onCloseRulesModal">
     <view class="modal-dialog" catchtap="">
       <view class="modal-content">
+        <!-- Modal Header -->
         <view class="modal-header">
-          <text class="modal-title">活动指南</text>
-          <button class="modal-close" bindtap="onCloseRulesModal">
-            <view class="close-icon"></view>
-          </button>
+          <view class="header-content">
+            <view class="modal-icon">
+              <image class="icon-image" src="/images/icons/info-circle.svg" mode="aspectFit"></image>
+            </view>
+            <view class="header-text">
+              <text class="modal-title">活动详情</text>
+              <text class="modal-subtitle">了解活动规则与要求</text>
+            </view>
+          </view>
+          <div class="modal-close" bindtap="onCloseRulesModal">
+            <image class="close-icon" src="/images/icons/X.svg" mode="aspectFit"></image>
+          </div>
         </view>
         
+        <!-- Modal Body -->
         <view class="modal-body">
-          <view class="event-preview">
-            <image class="preview-image" src="{{selectedEvent.poster_image}}" mode="aspectFill"></image>
-            <text class="preview-title">{{selectedEvent.title}}</text>
+          <!-- Event Preview Card -->
+          <view class="event-preview-card">
+            <view class="preview-image-container">
+              <image class="preview-image" src="{{selectedEvent.poster_image}}" mode="aspectFill"></image>
+              <view class="image-gradient"></view>
+            </view>
+            <view class="preview-content">
+              <text class="preview-title">{{selectedEvent.title}}</text>
+              <view class="preview-meta">
+                <view class="meta-row">
+                  <view class="meta-icon">
+                    <image src="/images/icons/calendar.svg" mode="aspectFit"></image>
+                  </view>
+                  <text class="meta-text">{{selectedEvent.start_date}} - {{selectedEvent.end_date}}</text>
+                </view>
+                <view class="meta-row">
+                  <view class="meta-icon">
+                    <image src="/images/icons/location.svg" mode="aspectFit"></image>
+                  </view>
+                  <text class="meta-text">{{selectedEvent.user.university.name}}</text>
+                </view>
+                <view class="meta-row" wx:if="{{selectedEvent.allow_limit}}">
+                  <view class="meta-icon">
+                    <image src="/images/icons/users.svg" mode="aspectFit"></image>
+                  </view>
+                  <text class="meta-text">限{{selectedEvent.limit}}人 · 已报名{{selectedEvent.students_count}}人</text>
+                </view>
+              </view>
+            </view>
           </view>
-          <view class="description-content">
-            <text class="description-text">{{selectedEvent.description}}</text>
+
+          <!-- Description Section -->
+          <view class="description-section">
+            <view class="section-header">
+              <view class="section-icon">
+                <image src="/images/icons/document-text.svg" mode="aspectFit"></image>
+              </view>
+              <text class="section-title">活动说明</text>
+            </view>
+            <view class="description-content">
+              <text class="description-text">{{selectedEvent.description}}</text>
+            </view>
+          </view>
+
+          <!-- Rules Section -->
+          <view class="rules-section">
+            <view class="section-header">
+              <view class="section-icon">
+                <image src="/images/icons/check-circle.svg" mode="aspectFit"></image>
+              </view>
+              <text class="section-title">参与规则</text>
+            </view>
+            <view class="rules-list">
+              <view class="rule-item">
+                <view class="rule-number">1</view>
+                <text class="rule-text">请确保您是{{selectedEvent.user.university.name}}的在校学生</text>
+              </view>
+              <view class="rule-item">
+                <view class="rule-number">2</view>
+                <text class="rule-text">报名成功后请按时参加活动，无故缺席将影响信用记录</text>
+              </view>
+              <view class="rule-item">
+                <view class="rule-number">3</view>
+                <text class="rule-text">活动期间请遵守相关规定，维护良好的活动秩序</text>
+              </view>
+              <view class="rule-item">
+                <view class="rule-number">4</view>
+                <text class="rule-text">如需取消报名，请提前24小时联系活动组织者</text>
+              </view>
+            </view>
+          </view>
+
+          <!-- Contact Section -->
+          <view class="contact-section">
+            <view class="section-header">
+              <view class="section-icon">
+                <image src="/images/icons/phone.svg" mode="aspectFit"></image>
+              </view>
+              <text class="section-title">联系方式</text>
+            </view>
+            <view class="contact-info">
+              <view class="contact-item">
+                <text class="contact-label">组织者:</text>
+                <text class="contact-value">{{selectedEvent.user.username}}</text>
+              </view>
+              <view class="contact-item" wx:if="{{selectedEvent.user.phone}}">
+                <text class="contact-label">电话:</text>
+                <text class="contact-value">{{selectedEvent.user.phone}}</text>
+              </view>
+              <view class="contact-item" wx:if="{{selectedEvent.user.email}}">
+                <text class="contact-label">邮箱:</text>
+                <text class="contact-value">{{selectedEvent.user.email}}</text>
+              </view>
+            </view>
           </view>
         </view>
         
+        <!-- Modal Footer -->
         <view class="modal-footer">
-          <button class="modal-btn secondary" bindtap="onCloseRulesModal">{{messages.actions.close}}</button>
-          <button class="modal-btn primary" bindtap="onAgreeRules">{{messages.actions.agree}}并继续</button>
+          <button class="modal-btn secondary" bindtap="onCloseRulesModal">
+            <text>{{messages.actions.close}}</text>
+          </button>
+          <button class="modal-btn primary" bindtap="onAgreeRules">
+            <view class="btn-content">
+              <image class="btn-icon" src="/images/icons/check.svg" mode="aspectFit"></image>
+              <text>{{messages.actions.agree}}并报名</text>
+            </view>
+          </button>
         </view>
       </view>
     </view>
