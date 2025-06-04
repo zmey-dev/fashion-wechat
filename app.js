@@ -297,7 +297,7 @@ App({
     return true;
   },
 
-  handleGoUserProfile(username, userId) {
+  handleGoUserProfile(username) {
     if (isEmpty(this.globalData.userInfo)) {
       this.setState("showLoginModal", true);
       return;

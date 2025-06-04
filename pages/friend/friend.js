@@ -224,7 +224,7 @@ Page({
   previewImage: function (e) {
     const current = e.currentTarget.dataset.id;
     wx.navigateTo({
-      url: `/pages/post-detai/post-detai?postId=${current}`,
+      url: `/pages/post-detai/post-detail?postId=${current}`,
     });
   },
 

@@ -25,7 +25,7 @@
         src="{{isExpanded ? '/images/icons/chevron-up.svg' : '/images/icons/chevron-down.svg'}}" 
       />
       <span class="toggle-text">
-        {{isExpanded ? 'Hide replies' : 'View replies'}} ({{replies.length}})
+        {{isExpanded ? '隐藏回复' : '查看回复'}} ({{replies.length}})
       </span>
     </button>
     <view class="reply-toggle-line"></view>

@@ -23,7 +23,7 @@ Component({
   },
 
   data: {
-    // Media state
+    // 媒体状态
     currentSlideIndex: 0,
     isPlaying: false,
     isContinue: true,
@@ -31,14 +31,14 @@ Component({
     showPlayIndicator: false,
     autoPlayTimer: null,
 
-    // Computed data for template binding
+    // 模板绑定的计算数据
     currentPost: null,
     currentPostUser: null,
     currentMedia: [],
     userComments: [],
     mediaLength: 0,
 
-    // Computed display values
+    // 计算显示值
     displayTitle: "",
     displayContent: "",
     displayLikes: "",
@@ -48,15 +48,15 @@ Component({
     displayFollowerCount: "",
     displayLikeCount: "",
 
-    // UI state
+    // UI状态
     showDetail: false,
     showReportModal: false,
-    tabIndex: 1, // 0: user posts, 1: comments, 2: details
+    tabIndex: 1, // 0: 用户帖子, 1: 评论, 2: 详情
 
-    // Dots and interaction
+    // 圆点和交互
     selectedDot: null,
 
-    // System info
+    // 系统信息
     windowWidth: 0,
     windowHeight: 0,
 
@@ -66,10 +66,10 @@ Component({
     touchEndX: 0,
     currentTouchY: 0,
     isVerticalSwiping: false,
-    verticalTransform: 0, // Current vertical transform value
-    minSwipeDistance: 50, // Minimum distance for a valid swipe
-    maxHorizontalThreshold: 100, // Maximum horizontal movement to still consider vertical swipe
-    maxTransformDistance: 150, // Maximum transform distance for visual feedback
+    verticalTransform: 0, // 当前垂直变换值
+    minSwipeDistance: 50, // 有效滑动的最小距离
+    maxHorizontalThreshold: 100, // 仍被视为垂直滑动的最大水平移动
+    maxTransformDistance: 150, // 视觉反馈的最大变换距离
   },
 
   /**
@@ -336,11 +336,7 @@ Component({
         this.showLoginToast();
         return;
       }
-      wx.showToast({
-        title: "Go to user profile",
-        icon: "none",
-        duration: 1000,
-      });
+      getApp().handleGoUserProfile(this.data.currentPost.user.username);
     },
 
     handleLike() {
@@ -374,7 +370,7 @@ Component({
 
             wx.vibrateShort();
             wx.showToast({
-              title: newLikeStatus ? "Liked" : "Like removed",
+              title: newLikeStatus ? "已点赞" : "已取消点赞",
               icon: "success",
               duration: 1000,
             });
@@ -394,7 +390,7 @@ Component({
         fail: (err) => {
           console.error("Like request failed:", err);
           wx.showToast({
-            title: "Failed to update like",
+            title: "点赞失败",
             icon: "none",
             duration: 1500,
           });
@@ -434,8 +430,8 @@ Component({
             wx.vibrateShort();
             wx.showToast({
               title: newFavoriteStatus
-                ? "Added to favorites"
-                : "Removed from favorites",
+                ? "已添加到收藏"
+                : "已从收藏中移除",
               icon: "success",
               duration: 1000,
             });
@@ -455,7 +451,7 @@ Component({
         fail: (err) => {
           console.error("Favorite request failed:", err);
           wx.showToast({
-            title: "Failed to update favorite",
+            title: "收藏失败",
             icon: "none",
             duration: 1500,
           });
@@ -465,7 +461,7 @@ Component({
 
     handleShare() {
       wx.setClipboardData({
-        data: `Check out this post: ${
+        data: `查看这个帖子: ${
           this.data.currentPost.media[this.data.currentSlideIndex].url
         }`,
         success: () => {
@@ -475,7 +471,7 @@ Component({
             displayShares: this.formatNumber(currentPost.shares + 1),
           });
           wx.showToast({
-            title: "Link copied to clipboard",
+            title: "链接已复制到剪贴板",
             icon: "success",
             duration: 1000,
           });
@@ -483,7 +479,7 @@ Component({
         fail: (err) => {
           console.error("Copy to clipboard failed:", err);
           wx.showToast({
-            title: "Failed to copy link",
+            title: "复制链接失败",
             icon: "none",
             duration: 1500,
           });
@@ -536,7 +532,7 @@ Component({
 
             wx.vibrateShort();
             wx.showToast({
-              title: newFollowStatus ? "Following" : "Unfollowed",
+              title: newFollowStatus ? "已关注" : "已取消关注",
               icon: "success",
               duration: 1000,
             });
@@ -556,7 +552,7 @@ Component({
         fail: (err) => {
           console.error("Follow request failed:", err);
           wx.showToast({
-            title: "Failed to update follow status",
+            title: "关注失败",
             icon: "none",
             duration: 1500,
           });
@@ -660,7 +656,7 @@ Component({
         fail: (err) => {
           console.error("Like request failed:", err);
           wx.showToast({
-            title: "Failed to like comment",
+            title: "点赞评论失败",
             icon: "none",
             duration: 1500,
           });
@@ -723,7 +719,7 @@ Component({
 
             this.triggerEvent("commentDeleted", e.detail);
             wx.showToast({
-              title: "Comment deleted",
+              title: "评论已删除",
               icon: "success",
               duration: 1000,
             });
@@ -738,7 +734,7 @@ Component({
         fail: (err) => {
           console.error("Delete request failed:", err);
           wx.showToast({
-            title: "Failed to delete comment",
+            title: "删除评论失败",
             icon: "none",
             duration: 1500,
           });
@@ -766,7 +762,7 @@ Component({
     onSubmitReport(e) {
       const { option } = e.detail;
       wx.showToast({
-        title: "Report submitted",
+        title: "举报已提交",
         icon: "success",
         duration: 1500,
       });
@@ -783,7 +779,7 @@ Component({
      */
     showLoginToast() {
       wx.showToast({
-        title: "Please login first",
+        title: "请先登录",
         icon: "none",
         duration: 1500,
       });
@@ -811,10 +807,10 @@ Component({
       const time = new Date(timestamp);
       const diff = now - time;
 
-      if (diff < 60000) return "Just now";
-      if (diff < 3600000) return `${Math.floor(diff / 60000)} minutes ago`;
-      if (diff < 86400000) return `${Math.floor(diff / 3600000)} hours ago`;
-      return `${Math.floor(diff / 86400000)} days ago`;
+      if (diff < 60000) return "刚刚";
+      if (diff < 3600000) return `${Math.floor(diff / 60000)} 分钟前`;
+      if (diff < 86400000) return `${Math.floor(diff / 3600000)} 小时前`;
+      return `${Math.floor(diff / 86400000)} 天前`;
     },
 
     /**
@@ -848,20 +844,19 @@ Component({
       const deltaX = Math.abs(touch.pageX - touchStartX);
       const absDeltaY = Math.abs(deltaY);
 
-      // Update current touch position
       this.setData({ currentTouchY: touch.pageY });
 
-      // Determine if this is a vertical swipe (reduced threshold for better detection)
+      // 判断是否为垂直滑动
       if (absDeltaY > 10 && (absDeltaY > deltaX || deltaX < 30)) {
         this.setData({ isVerticalSwiping: true });
 
-        // Calculate transform value with damping effect
+        // 计算带阻尼效果的变换值
         let transformValue = deltaY;
 
-        // Apply damping when exceeding max distance
+        // 超过最大距离时应用阻尼
         if (Math.abs(transformValue) > maxTransformDistance) {
           const excess = Math.abs(transformValue) - maxTransformDistance;
-          const dampingFactor = 0.3; // Reduce movement when exceeding limit
+          const dampingFactor = 0.3; // 超过限制时减少移动
           transformValue =
             transformValue > 0
               ? maxTransformDistance + excess * dampingFactor
@@ -870,7 +865,7 @@ Component({
 
         this.setData({ verticalTransform: transformValue });
 
-        // Return false to prevent default behavior
+        // 返回false以防止默认行为
         return false;
       }
     },
@@ -898,21 +893,21 @@ Component({
       const deltaX = Math.abs(touch.pageX - touchStartX);
       const absDeltalY = Math.abs(deltaY);
 
-      // Check if it's a valid vertical swipe
+      // 检查是否为有效的垂直滑动
       if (absDeltalY >= minSwipeDistance && deltaX <= maxHorizontalThreshold) {
         if (deltaY < 0) {
-          // Swipe up - go to next post
+          // 向上滑动 - 下一个帖子
           this.handleVerticalSwipeUp();
         } else {
-          // Swipe down - go to previous post
+          // 向下滑动 - 上一个帖子
           this.handleVerticalSwipeDown();
         }
       } else {
-        // Invalid swipe - animate back to original position
+        // 无效滑动 - 动画回到原始位置
         this.animateBackToCenter();
       }
 
-      // Reset touch data
+      // 重置触摸数据
       this.setData({
         touchStartY: 0,
         touchStartX: 0,
@@ -927,10 +922,7 @@ Component({
      * Handle vertical swipe up (next post)
      */
     handleVerticalSwipeUp() {
-      // Add haptic feedback
-      // wx.vibrateShort();
-
-      // Animate out and trigger next post
+      // 动画滑出并触发下一个帖子
       this.animateSwipeOut("up", () => {
         this.moveToNextPost();
       });
@@ -940,10 +932,7 @@ Component({
      * Handle vertical swipe down (previous post)
      */
     handleVerticalSwipeDown() {
-      // Add haptic feedback
-      // wx.vibrateShort();
-
-      // Animate out and trigger previous post
+      // 动画滑出并触发上一个帖子
       this.animateSwipeOut("down", () => {
         this.moveToPreviousPost();
       });
@@ -958,10 +947,10 @@ Component({
 
       this.setData({ verticalTransform: targetTransform });
 
-      // Execute callback after animation
+      // 动画后执行回调
       setTimeout(() => {
         if (callback) callback();
-        // Reset transform for next post
+        // 为下一个帖子重置变换
         this.setData({ verticalTransform: 0 });
       }, 300);
     },

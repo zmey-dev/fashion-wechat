@@ -3,12 +3,12 @@
   <view class="user-info">
 
     <view class="user-stats">
-      <span>标题 :</span>{{ selectedPost.title || 'No Title' }} ,
-      <span>内容 :</span>{{ selectedPost.content || 'No Content' }}
+      <span>标题 :</span>{{ selectedPost.title || '无标题' }} ,
+      <span>内容 :</span>{{ selectedPost.content || '无内容' }}
     </view>  
     <view class="user-stats">
-      <text class="stat-item">Followers: {{ displayFollowerCount }}</text>
-      <text class="stat-item">Likes: {{ displayLikeCount }}</text>
+      <text class="stat-item">关注者: {{ displayFollowerCount }}</text>
+      <text class="stat-item">点赞: {{ displayLikeCount }}</text>
     </view>
 
     <view
@@ -24,7 +24,7 @@
         ></image>
       </view>
       <text>{{
-        currentPostUser.is_followed ? "Unfollow" : "Follow"
+        currentPostUser.is_followed ? "取消关注" : "关注"
       }}</text>
     </view>
   </view>
@@ -57,7 +57,7 @@
     
     <!-- Empty state -->
     <view wx:if="{{ !currentPostUser.posts || currentPostUser.posts.length === 0 }}" class="empty-posts">
-      <text>No posts available</text>
+      <text>暂无帖子</text>
     </view>
   </scroll-view>
 </view>

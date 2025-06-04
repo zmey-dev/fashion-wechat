@@ -9,21 +9,21 @@
         data-index="0"
         bindtap="onTabChange"
       >
-        <text>{{ currentPostUser.username || 'User' }}'s posts</text>
+        <text>{{ currentPostUser.username || 'User' }}的帖子</text>
       </view>
       <view
         class="tab-item {{ tabIndex === 1 ? 'active' : '' }}"
         data-index="1"
         bindtap="onTabChange"
       >
-        <text>Comments</text>
+        <text>评论</text>
       </view>
       <view
         class="tab-item {{ tabIndex === 2 ? 'active' : '' }}"
         data-index="2"
         bindtap="onTabChange"
       >
-        <text>Details</text>
+        <text>详情</text>
       </view>
     </view>
 
@@ -67,7 +67,7 @@
         style="width: 100%;height: 100%;"
       />
       <view wx:else class="no-comments-placeholder">
-        <text>Loading comments...</text>
+        <text>正在加载评论...</text>
       </view>
     </view>
 

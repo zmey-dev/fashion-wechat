@@ -3,7 +3,7 @@
   <!-- Comments List -->
   <scroll-view class="comments-list" scroll-y="true" enhanced="true">
     <view wx:if="{{comments.length === 0}}" class="no-comments">
-      <text class="no-comments-text">No comments yet. Be the first to comment!</text>
+      <text class="no-comments-text">暂无评论，快来发表第一条评论吧！</text>
     </view>
     
     <view wx:else class="comments-container">
@@ -25,9 +25,9 @@
     </view>
   </scroll-view>
 
-  <!-- Comment Input Section - Fixed at bottom -->
+  <!-- Comment Input Section -->
   <view class="comment-input-section">
-    <!-- Reply Header (when replying to someone) -->
+    <!-- Reply Header -->
     <view wx:if="{{commentId}}" class="reply-header">
       <div class="reply-close-btn" bindtap="onCancelReply">
         <image class="close-icon" src="/images/icons/X.svg" />
@@ -59,7 +59,7 @@
     <view wx:if="{{authUser.role === 'user'}}" class="comment-input-container">
       <textarea 
         class="comment-textarea {{commentId ? 'has-reply' : ''}}"
-        placeholder="Enter your comment"
+        placeholder="请输入评论内容"
         value="{{personalComment}}"
         bindinput="onCommentInput"
         bindconfirm="onSendComment"

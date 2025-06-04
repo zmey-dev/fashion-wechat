@@ -220,7 +220,7 @@ Page({
   previewImage: function (e) {
     const current = e.currentTarget.dataset.id;
     wx.navigateTo({
-      url: `/pages/post-detail/post-detai?postId=${current}`,
+      url: `/pages/post-detail/post-detail?postId=${current}`,
     });
   },
 
