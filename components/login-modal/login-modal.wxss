@@ -95,7 +95,6 @@
 /* Forms */
 .login-forms {
   padding: 24px;
-  min-height: 200px;
 }
 
 .form-container {

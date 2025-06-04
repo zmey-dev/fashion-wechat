@@ -135,13 +135,15 @@
         <!-- Title Input -->
         <view class="form-group">
           <text class="form-label">📝 作品标题</text>
-          <input 
-            class="form-input"
-            placeholder="请输入作品标题"
-            value="{{title}}"
-            bindinput="onTitleInput"
-            maxlength="100"
-          />
+          <div style="display: flex;">
+            <input 
+              class="form-input"
+              placeholder="请输入作品标题"
+              value="{{title}}"
+              bindinput="onTitleInput"
+              maxlength="100"
+            />
+          </div>
         </view>
 
         <!-- Content Input -->

@@ -46,26 +46,30 @@
       <!-- Name -->
       <view class="form-field">
         <label class="field-label">姓名</label>
-        <input 
+        <div style="display: flex;">
+          <input 
           class="field-input {{errors.name ? 'error' : ''}}"
           value="{{form.name}}"
           placeholder="{{messages.placeholders.name}}"
           data-field="name"
           bindinput="onInputChange"
-        />
+          />
+        </div>
         <text wx:if="{{errors.name}}" class="error-text">{{errors.name}}</text>
       </view>
 
       <!-- ID Number -->
       <view class="form-field">
         <label class="field-label">身份证号码</label>
-        <input 
-          class="field-input {{errors.id_number ? 'error' : ''}}"
-          value="{{form.id_number}}"
-          placeholder="{{messages.placeholders.id_number}}"
-          data-field="id_number"
-          bindinput="onInputChange"
-        />
+        <div style="display: flex;">
+          <input 
+            class="field-input {{errors.id_number ? 'error' : ''}}"
+            value="{{form.id_number}}"
+            placeholder="{{messages.placeholders.id_number}}"
+            data-field="id_number"
+            bindinput="onInputChange"
+          />
+        </div>
         <text wx:if="{{errors.id_number}}" class="error-text">{{errors.id_number}}</text>
       </view>
 
@@ -125,14 +129,15 @@
             <text>✓ 已验证</text>
           </view>
         </label>
-        <input 
-          class="field-input {{errors.email ? 'error' : ''}}"
-          value="{{form.email}}"
-          placeholder="{{messages.placeholders.email}}"
-          data-field="email"
-          bindinput="onInputChange"
-        />
-        
+        <div style="display: flex;">
+          <input 
+            class="field-input {{errors.email ? 'error' : ''}}"
+            value="{{form.email}}"
+            placeholder="{{messages.placeholders.email}}"
+            data-field="email"
+            bindinput="onInputChange"
+          />
+        </div>
         <!-- Email Verification -->
         <view wx:if="{{emailChanged && !emailVerified}}" class="verification-section">
           <button class="send-code-btn" bindtap="sendEmailVerification">
