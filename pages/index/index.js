@@ -148,10 +148,8 @@ Page({
   },
 
   onUserTap: function (e) {
-    const userId = e.currentTarget.dataset.userId;
-    wx.navigateTo({
-      url: `/pages/user-profile/user-profile?id=${userId}`
-    });
+    const username = e.currentTarget.dataset.username;
+    getApp().handleGoUserProfile(username);
   },
 
   onSearchTap: function () {

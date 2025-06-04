@@ -107,6 +107,23 @@ App({
     return true;
   },
 
+  handleGoUserProfile(username, userId) {
+    if (isEmpty(this.globalData.userInfo)) {
+      this.setState("showLoginModal", true);
+      return;
+    }
+    if (username) {
+      if( this.globalData.userInfo.username === username) {
+        wx.navigateTo({ url: "/pages/me/me" });
+      }
+      else {
+        wx.navigateTo({ url: `/pages/user-profile/user-profile?username=${username}` });
+      }
+    } else {
+      console.error("Username is required to navigate to user profile");
+    }
+  },
+
   // Enhanced method for checking if current navigation requires login
   checkLoginRequired(targetPath) {
     const loginRequiredPaths = [
@@ -388,17 +405,14 @@ App({
     }
   },
 
-  // 각 페이지에서 탭 클릭 시 사용할 예시 코드
   onTabItemTap(item) {
     const app = getApp();
     const pagePath = item.pagePath;
     
-    // 로그인 체크
     if (!app.handleTabNavigation(pagePath)) {
-      return false; // 로그인 모달이 표시되고 탭 전환 중단
+      return false; 
     }
     
-    // 로그인이 되어있거나 로그인이 필요없는 페이지면 계속 진행
     return true;
   }
 });

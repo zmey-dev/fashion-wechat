@@ -10,7 +10,8 @@
     "pages/chat/chat",
     "pages/notification/notification",
     "pages/event/event",
-    "pages/post-detail/post-detail"
+    "pages/post-detail/post-detail",
+    "pages/user-profile/user-profile"
   ],
   "window": {
     "backgroundTextStyle": "light",

@@ -1,21 +1,16 @@
 const { default: config } = require("../../config");
-
 const app = getApp();
 
 Page({
   data: {
-    currentPath: "friend",
     userInfo: app.globalData.userInfo || {},
-    userList: [],
-    filteredUserList: [],
     currentUser: null,
     userMediaList: [],
-    showUserMedia: false,
     loading: false,
     hasMore: true,
     page: 1,
     pageSize: 10,
-    searchValue: "",
+    error: false,
     // Chinese messages for UI text
     messages: {
       loading: "加载中...",
@@ -25,6 +20,7 @@ Page({
         operationFailed: "操作失败",
         addFriendFailed: "添加好友失败",
         removeFriendFailed: "取消好友失败",
+        userNotFound: "用户不存在",
       },
       actions: {
         following: "关注中...",
@@ -44,48 +40,77 @@ Page({
   },
 
   onLoad: function (options) {
-    const postId = options.postId || null;
-    const app = getApp();
+    const { username } = options;
 
-    // Remove sidebar related code
+    if (!username) {
+      wx.showToast({
+        title: this.data.messages.errors.userNotFound,
+        icon: "none",
+      });
+      setTimeout(() => {
+        wx.navigateBack();
+      }, 1500);
+      return;
+    }
+
+    // Subscribe to user info changes
     this.userInfoHandler = (userInfo) => {
       this.setData({ userInfo });
     };
-    // Subscribe to user info changes
     app.subscribe("userInfo", this.userInfoHandler);
 
     this.setData({
       userInfo: app.globalData.userInfo || {},
     });
 
-    this.loadUserList();
+    this.loadUserProfile(username);
   },
 
   onUnload: function () {
-    const app = getApp();
     // Unsubscribe from user info changes
     app.unsubscribe("userInfo", this.userInfoHandler);
   },
 
-  // Load user list from API
-  loadUserList: function () {
+  // Load user profile from API
+  loadUserProfile: function (username) {
+    this.setData({ loading: true, error: false });
+
     wx.showLoading({
       title: this.data.messages.loading,
     });
+
     wx.request({
-      url: `${config.BACKEND_URL}/friend/get_friends`,
+      url: `${config.BACKEND_URL}/profile/get_profile`,
       method: "GET",
+      data: {
+        username: username,
+      },
       header: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${getApp().globalData.userInfo.token}`, // Assuming token is stored in local storage
+        Authorization: `Bearer ${getApp().globalData.userInfo.token}`,
       },
       success: (res) => {
         if (res.statusCode === 200) {
+          // Prepare user data with required properties for UI interactions
+          const userWithState = {
+            ...res.data.user,
+            // Ensure these properties exist for the UI controls
+            isFollowed: res.data.user.is_followed || false,
+            isFriend: res.data.user.is_friend || false,
+            isAllowed: res.data.user.is_allowed || false,
+          };
+          this.setData({ loading: false });
+
           this.setData({
-            userList: res.data.users,
-            filteredUserList: res.data.users,
+            currentUser: userWithState,
+            userMediaList: [],
+            page: 1,
+            hasMore: true,
           });
+
+          this.loadUserMedia(userWithState.id);
         } else {
+          this.setData({ error: true });
           wx.showToast({
             title: this.data.messages.errors.loadFailed,
             icon: "none",
@@ -93,71 +118,17 @@ Page({
         }
       },
       fail: () => {
+        this.setData({ error: true });
         wx.showToast({
           title: this.data.messages.errors.networkError,
           icon: "none",
         });
       },
       complete: () => {
+        this.setData({ loading: false });
         wx.hideLoading();
       },
     });
-  },
-
-  // Search users functionality
-  searchUsers: function (e) {
-    const searchValue = e.detail.value.toLowerCase();
-    this.setData({
-      searchValue: searchValue,
-    });
-
-    if (!searchValue) {
-      this.setData({
-        filteredUserList: this.data.userList,
-      });
-      return;
-    }
-
-    const filtered = this.data.userList.filter((user) =>
-      user.username.toLowerCase().includes(searchValue)
-    );
-
-    this.setData({
-      filteredUserList: filtered,
-    });
-  },
-
-  // Clear search input
-  clearSearch: function () {
-    this.setData({
-      searchValue: "",
-      filteredUserList: this.data.userList,
-    });
-  },
-
-  // Select user and show their media
-  selectUser: function (e) {
-    const userId = e.currentTarget.dataset.id;
-    const selectedUser = this.data.userList.find((user) => user.id === userId);
-
-    // Prepare user data with required properties for UI interactions
-    const userWithState = {
-      ...selectedUser,
-      // Ensure these properties exist for the UI controls
-      isFollowed: selectedUser.is_followed || false,
-      isFriend: selectedUser.is_friend || false,
-      isAllowed: selectedUser.is_allowed || false,
-    };
-
-    this.setData({
-      currentUser: userWithState,
-      showUserMedia: true,
-      userMediaList: [],
-      page: 1,
-      hasMore: true,
-    });
-
-    this.loadUserMedia(userId);
   },
 
   // Load user's media posts
@@ -207,38 +178,28 @@ Page({
 
   // Handle reaching bottom of page for infinite scroll
   onReachBottom: function () {
-    if (this.data.showUserMedia && this.data.currentUser) {
+    if (this.data.currentUser) {
       this.loadUserMedia(this.data.currentUser.id);
     }
-  },
-
-  // Go back to user list
-  backToUserList: function () {
-    this.setData({
-      showUserMedia: false,
-      currentUser: null,
-    });
   },
 
   // Preview image by navigating to post detail
   previewImage: function (e) {
     const current = e.currentTarget.dataset.id;
     wx.navigateTo({
-      url: `/pages/post-detai/post-detai?postId=${current}`,
+      url: `/pages/post-detail/post-detail?postId=${current}`,
     });
   },
 
   // Handle pull down refresh
   onPullDownRefresh: function () {
-    if (this.data.showUserMedia && this.data.currentUser) {
+    if (this.data.currentUser) {
       this.setData({
         userMediaList: [],
         page: 1,
         hasMore: true,
       });
       this.loadUserMedia(this.data.currentUser.id);
-    } else {
-      this.loadUserList();
     }
     wx.stopPullDownRefresh();
   },
@@ -271,17 +232,8 @@ Page({
           // Update local state
           const updatedUser = { ...currentUser, isFollowed: newFollowStatus };
 
-          // Also update in the main user list
-          const updatedUserList = this.data.userList.map((user) =>
-            user.id === currentUser.id
-              ? { ...user, is_followed: newFollowStatus }
-              : user
-          );
-
           this.setData({
             currentUser: updatedUser,
-            userList: updatedUserList,
-            filteredUserList: this.filterUsersBySearch(updatedUserList),
           });
 
           wx.showToast({
@@ -308,16 +260,6 @@ Page({
         wx.hideLoading();
       },
     });
-  },
-
-  // Helper function to filter users based on current search
-  filterUsersBySearch: function (userList) {
-    const searchValue = this.data.searchValue.toLowerCase();
-    if (!searchValue) return userList;
-
-    return userList.filter((user) =>
-      user.username.toLowerCase().includes(searchValue)
-    );
   },
 
   /**
