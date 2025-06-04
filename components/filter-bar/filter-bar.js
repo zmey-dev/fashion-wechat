@@ -21,7 +21,7 @@ Component({
         { key: "follow", name: "关注" },
         { key: "friend", name: "朋友" },
         { key: "event", name: "活动" },
-        { key: "contact", name: "联系人" },
+        { key: "contact", name: "联系" },
       ]
     },
     // Dark mode flag

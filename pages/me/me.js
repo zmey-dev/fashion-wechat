@@ -95,13 +95,7 @@ Page({
     const app = getApp();
     app.unsubscribe("userInfo", this.userInfoHandler);
   },
-
-  onShow() {
-    if (this.data.currentTab !== 4) {
-      this.loadPosts();
-    }
-  },
-
+  
   onReachBottom() {
     if (this.data.hasMore && !this.data.loading && this.data.currentTab !== 4) {
       this.loadMorePosts();
@@ -804,17 +798,42 @@ Page({
   async loadMorePosts() {
     if (this.data.currentTab === 4) return;
     
+    if (this.data.loading) return;
+    
     this.setData({ loading: true });
 
     try {
+      const requestData = {
+        scope: "15"
+      };
+
+      // Add user_id for user posts tab
+      if (this.data.currentTab == 0) {
+        requestData.user_id = this.data.userInfo?.id;
+      }
+
+      // Add filter parameters
+      requestData.isLike = this.data.currentTab == 1;
+      requestData.isFavorite = this.data.currentTab == 2;
+      requestData.isHistory = this.data.currentTab == 3;
+
+      // Add exist_post_ids for pagination
+      if (this.data.posts.length > 0) {
+        requestData.exist_post_ids = this.data.posts.map(post => post.id);
+      }
+
+      // Convert to query string
+      const queryParams = new URLSearchParams();
+      Object.keys(requestData).forEach(key => {
+        if (Array.isArray(requestData[key])) {
+          requestData[key].forEach(item => queryParams.append(key, item));
+        } else {
+          queryParams.append(key, requestData[key]);
+        }
+      });
+
       wx.request({
-        url: `${config.BACKEND_URL}/post/get_posts?scope=15&${
-          this.data.currentTab == 0 && "user_id="
-        }${this.data.currentTab == 0 ? this.data.userInfo?.id : ""}&isLike=${
-          this.data.currentTab == 1
-        }&isFavorite=${this.data.currentTab == 2}&isHistory=${
-          this.data.currentTab == 3
-        }`,
+        url: `${config.BACKEND_URL}/post/get_posts?${queryParams.toString()}`,
         header: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${getApp().globalData.userInfo?.token}`,
