@@ -3,7 +3,7 @@
   <view class="profile-header">
     <view class="profile-info">
       <view class="avatar-container">
-        <avatar class="avatar" src="{{userInfo.avatar}}" name="{{userInfo.username}}" size="{{100}}" mode="aspectFill" />
+        <image class="avatar" src="{{userInfo.avatar}}" mode="aspectFill" />
       </view>
       
       <view class="user-details">
@@ -12,7 +12,7 @@
           <view class="user-meta">
             <text class="phone">(手机: {{userInfo.phone}},</text>
             <view class="gender-age">
-              <text class="gender-icon">{{user.gender === 'male' ? '♂' : '♀'}}</text>
+              <text class="gender-icon">{{userInfo.gender === 'male' ? '♂' : '♀'}}</text>
               <text class="age">{{age}} 岁)</text>
             </view>
           </view>
@@ -20,19 +20,19 @@
         
         <view class="stats-container">
           <view class="stat-item">
-            <text class="stat-number">{{userInfo.likes_count}}</text>
+            <text class="stat-number">{{userInfo.likes_count || 0}}</text>
             <text class="stat-label">获赞</text>
           </view>
           <view class="stat-item">
-            <text class="stat-number">{{userInfo.friends_count}}</text>
+            <text class="stat-number">{{userInfo.friends_count || 0}}</text>
             <text class="stat-label">好友</text>
           </view>
           <view class="stat-item">
-            <text class="stat-number">{{userInfo.follows_count}}</text>
+            <text class="stat-number">{{userInfo.follows_count || 0}}</text>
             <text class="stat-label">关注</text>
           </view>
           <view class="stat-item">
-            <text class="stat-number">{{userInfo.followers_count}}</text>
+            <text class="stat-number">{{userInfo.followers_count || 0}}</text>
             <text class="stat-label">粉丝</text>
           </view>
         </view>
@@ -55,8 +55,8 @@
     </view>
   </view>
 
-  <!-- Posts Grid -->
-  <view class="posts-container">
+  <!-- Posts Grid (for tabs 0-3) -->
+  <view class="posts-container" wx:if="{{currentTab !== 4}}">
     <view wx:if="{{!loading && posts.length === 0}}" class="empty-state">
       <text class="empty-text">暂无内容</text>
     </view>
@@ -100,6 +100,286 @@
     <view wx:if="{{loading}}" class="loading-container">
       <view class="loading-spinner"></view>
       <text class="loading-text">{{messages.loading}}</text>
+    </view>
+  </view>
+
+  <!-- Profile Tab Content (tab 4) -->
+  <view class="profile-tab-container" wx:if="{{currentTab === 4}}">
+    <!-- Profile Header Actions -->
+    <view class="profile-actions">
+      <view class="left-actions">
+        <button 
+          class="profile-action-btn edit-btn" 
+          bindtap="toggleProfileEdit"
+          wx:if="{{!isEditingProfile}}"
+        >
+          <text class="btn-icon">✏️</text>
+          <text class="btn-text">编辑资料</text>
+        </button>
+        
+        <view class="edit-actions" wx:if="{{isEditingProfile}}">
+          <button class="profile-action-btn save-btn" bindtap="saveProfile">
+            <text class="btn-icon">✅</text>
+            <text class="btn-text">保存</text>
+          </button>
+          <button class="profile-action-btn cancel-btn" bindtap="cancelProfileEdit">
+            <text class="btn-icon">❌</text>
+            <text class="btn-text">取消</text>
+          </button>
+        </view>
+      </view>
+      
+      <!-- Hide logout button when editing -->
+      <button 
+        class="profile-action-btn logout-btn" 
+        bindtap="handleLogout"
+        wx:if="{{!isEditingProfile}}"
+      >
+        <text class="btn-icon">🚪</text>
+        <text class="btn-text">退出登录</text>
+      </button>
+    </view>
+
+    <!-- Avatar Section -->
+    <view class="avatar-section">
+      <view class="avatar-container-large" bindtap="selectAvatar">
+        <image class="avatar-large" src="{{selectedAvatar || userInfo.avatar}}" mode="aspectFill" />
+        <view class="avatar-overlay" wx:if="{{isEditingProfile}}">
+          <text class="avatar-edit-icon">📷</text>
+          <text class="avatar-edit-text">更换头像</text>
+        </view>
+      </view>
+      <view class="avatar-info">
+        <text class="avatar-name">{{userInfo.name || userInfo.username}}</text>
+        <text class="avatar-university">{{university.name || '未设置大学'}}</text>
+      </view>
+    </view>
+
+    <!-- Profile Form -->
+    <view class="profile-form">
+      <!-- Basic Information -->
+      <view class="form-section">
+        <view class="section-title">基本信息</view>
+        
+        <!-- Name -->
+        <view class="form-field">
+          <label class="field-label">姓名</label>
+          <input 
+            class="field-input {{profileErrors.name ? 'error' : ''}}"
+            value="{{profileForm.name}}"
+            placeholder="请输入姓名"
+            disabled="{{!isEditingProfile}}"
+            data-field="name"
+            bindinput="onProfileInputChange"
+          />
+          <text class="error-text" wx:if="{{profileErrors.name}}">{{profileErrors.name}}</text>
+        </view>
+
+        <!-- Phone -->
+        <view class="form-field">
+          <label class="field-label">
+            手机号
+            <view class="verification-status" wx:if="{{phoneChanged && !phoneVerified}}">
+              <text class="status-text">需要验证</text>
+            </view>
+          </label>
+          <view class="phone-input">
+            <text class="phone-prefix">+86</text>
+            <input 
+              class="field-input phone-number {{profileErrors.phone ? 'error' : ''}}"
+              value="{{profileForm.phone}}"
+              placeholder="请输入手机号"
+              disabled="{{!isEditingProfile}}"
+              data-field="phone"
+              bindinput="onProfileInputChange"
+            />
+          </view>
+          
+          <!-- Phone Verification Section -->
+          <view wx:if="{{phoneChanged && !phoneVerified && isEditingProfile}}" class="verification-section">
+            <button class="send-code-btn" bindtap="sendPhoneVerificationCode">
+              发送验证码
+            </button>
+            <view class="otp-input-container">
+              <input 
+                class="otp-input"
+                placeholder="请输入手机验证码"
+                value="{{phoneOtpCode}}"
+                bindinput="onPhoneOtpInput"
+              />
+              <button class="verify-code-btn" bindtap="verifyPhoneCode">
+                验证
+              </button>
+            </view>
+          </view>
+          
+          <text class="error-text" wx:if="{{profileErrors.phone}}">{{profileErrors.phone}}</text>
+        </view>
+
+        <!-- Email -->
+        <view class="form-field">
+          <label class="field-label">
+            邮箱
+            <view class="verification-status" wx:if="{{emailChanged && !emailVerified}}">
+              <text class="status-text">需要验证</text>
+            </view>
+          </label>
+          <input 
+            class="field-input {{profileErrors.email ? 'error' : ''}}"
+            value="{{profileForm.email}}"
+            placeholder="请输入邮箱"
+            disabled="{{!isEditingProfile}}"
+            data-field="email"
+            bindinput="onProfileInputChange"
+          />
+          
+          <!-- Email Verification Section -->
+          <view wx:if="{{emailChanged && !emailVerified && isEditingProfile}}" class="verification-section">
+            <button class="send-code-btn" bindtap="sendEmailVerificationCode">
+              发送验证码
+            </button>
+            <view class="otp-input-container">
+              <input 
+                class="otp-input"
+                placeholder="请输入邮箱验证码"
+                value="{{emailOtpCode}}"
+                bindinput="onEmailOtpInput"
+              />
+              <button class="verify-code-btn" bindtap="verifyEmailCode">
+                验证
+              </button>
+            </view>
+          </view>
+          
+          <text class="error-text" wx:if="{{profileErrors.email}}">{{profileErrors.email}}</text>
+        </view>
+
+        <!-- Gender -->
+        <view class="form-field">
+          <label class="field-label">性别</label>
+          <view class="gender-options">
+            <view 
+              class="gender-option {{profileForm.gender === 'male' ? 'selected' : ''}} {{!isEditingProfile ? 'disabled' : ''}}"
+              data-gender="male"
+              bindtap="{{isEditingProfile ? 'onGenderChange' : ''}}"
+            >
+              <text class="gender-icon">♂</text>
+              <text class="gender-text">男</text>
+            </view>
+            <view 
+              class="gender-option {{profileForm.gender === 'female' ? 'selected' : ''}} {{!isEditingProfile ? 'disabled' : ''}}"
+              data-gender="female"
+              bindtap="{{isEditingProfile ? 'onGenderChange' : ''}}"
+            >
+              <text class="gender-icon">♀</text>
+              <text class="gender-text">女</text>
+            </view>
+          </view>
+          <text class="error-text" wx:if="{{profileErrors.gender}}">{{profileErrors.gender}}</text>
+        </view>
+      </view>
+
+      <!-- Academic Information -->
+      <view class="form-section">
+        <view class="section-title">学术信息</view>
+        
+        <!-- ID Number -->
+        <view class="form-field">
+          <label class="field-label">身份证号</label>
+          <input 
+            class="field-input {{profileErrors.id_number ? 'error' : ''}}"
+            value="{{profileForm.id_number}}"
+            placeholder="请输入身份证号"
+            disabled="{{!isEditingProfile}}"
+            data-field="id_number"
+            bindinput="onProfileInputChange"
+          />
+          <text class="error-text" wx:if="{{profileErrors.id_number}}">{{profileErrors.id_number}}</text>
+        </view>
+
+        <!-- Student Number -->
+        <view class="form-field">
+          <label class="field-label">学号</label>
+          <input 
+            class="field-input {{profileErrors.student_number ? 'error' : ''}}"
+            value="{{profileForm.student_number}}"
+            placeholder="请输入学号"
+            disabled="{{!isEditingProfile}}"
+            data-field="student_number"
+            bindinput="onProfileInputChange"
+          />
+          <text class="error-text" wx:if="{{profileErrors.student_number}}">{{profileErrors.student_number}}</text>
+        </view>
+
+        <!-- Faculty -->
+        <view class="form-field">
+          <label class="field-label">学院</label>
+          <picker 
+            mode="selector"
+            range="{{faculties}}"
+            range-key="name"
+            disabled="{{!isEditingProfile}}"
+            data-field="faculty"
+            bindchange="onProfileInputChange"
+          >
+            <view class="picker-view {{profileErrors.faculty ? 'error' : ''}}">
+              <text wx:if="{{profileForm.faculty}}">{{profileForm.faculty}}</text>
+              <text wx:else class="placeholder">请选择学院</text>
+            </view>
+          </picker>
+          <text class="error-text" wx:if="{{profileErrors.faculty}}">{{profileErrors.faculty}}</text>
+        </view>
+
+        <!-- Major -->
+        <view class="form-field">
+          <label class="field-label">专业</label>
+          <picker 
+            mode="selector"
+            range="{{availableMajors}}"
+            range-key="name"
+            disabled="{{!isEditingProfile || !profileForm.faculty}}"
+            data-field="major"
+            bindchange="onProfileInputChange"
+          >
+            <view class="picker-view {{profileErrors.major ? 'error' : ''}}">
+              <text wx:if="{{profileForm.major}}">{{profileForm.major}}</text>
+              <text wx:else class="placeholder">请选择专业</text>
+            </view>
+          </picker>
+          <text class="error-text" wx:if="{{profileErrors.major}}">{{profileErrors.major}}</text>
+        </view>
+
+        <!-- Class -->
+        <view class="form-field">
+          <label class="field-label">班级</label>
+          <input 
+            class="field-input {{profileErrors.class ? 'error' : ''}}"
+            value="{{profileForm.class}}"
+            placeholder="请输入班级"
+            disabled="{{!isEditingProfile}}"
+            data-field="class"
+            bindinput="onProfileInputChange"
+          />
+          <text class="error-text" wx:if="{{profileErrors.class}}">{{profileErrors.class}}</text>
+        </view>
+
+        <!-- Admission Year -->
+        <view class="form-field">
+          <label class="field-label">入学年份</label>
+          <picker 
+            mode="date"
+            fields="year"
+            value="{{profileForm.admissionYear}}"
+            disabled="{{!isEditingProfile}}"
+            data-field="admissionYear"
+            bindchange="onProfileInputChange"
+          >
+            <view class="picker-view">
+              <text>{{profileForm.admissionYear}}年</text>
+            </view>
+          </picker>
+        </view>
+      </view>
     </view>
   </view>
 

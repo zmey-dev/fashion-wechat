@@ -40,7 +40,7 @@
             class="friend-avatar" 
             avatar="{{item.avatar}}"
             name="{{item.username}}"
-            size="{{100}}"
+            size="{{80}}"
             mode="aspectFill"
           />
           <!-- Online status indicator -->

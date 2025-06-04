@@ -34,7 +34,7 @@
           <view class="wechat-icon">
             <span class="icon">🔴</span>
           </view>
-          <span class="wechat-span">微信一键登录</span>
+          <span class="wechat-text">微信一键登录</span>
           <span class="wechat-desc">安全便捷</span>
         </view>
       </view>
@@ -44,28 +44,28 @@
         <view class="input-group">
           <input
             class="form-input {{emailError ? 'error' : ''}}"
-            type="span"
+            type="text"
             placeholder="{{messages.formLabels.email}}"
             value="{{email}}"
             bindinput="onEmailInput"
           />
-          <span class="error-span" wx:if="{{emailError}}">{{emailError}}</span>
+          <text class="error-text" wx:if="{{emailError}}">{{emailError}}</text>
         </view>
         
         <view class="input-group">
           <view class="password-wrapper">
             <input
               class="form-input {{passwordError ? 'error' : ''}}"
-              type="{{showPassword ? 'span' : 'password'}}"
+              type="{{showPassword ? 'text' : 'password'}}"
               placeholder="{{messages.formLabels.password}}"
               value="{{password}}"
               bindinput="onPasswordInput"
             />
             <view class="password-toggle" bindtap="togglePassword">
-              <span class="toggle-icon">{{showPassword ? '👁️' : '👁️‍🗨️'}}</span>
+              <text class="toggle-icon">{{showPassword ? '👁️' : '👁️‍🗨️'}}</text>
             </view>
           </view>
-          <span class="error-span" wx:if="{{passwordError}}">{{passwordError}}</span>
+          <text class="error-text" wx:if="{{passwordError}}">{{passwordError}}</text>
         </view>
       </view>
 
@@ -82,7 +82,7 @@
               bindinput="onPhoneInput"
             />
           </view>
-          <span class="error-span" wx:if="{{phoneError}}">{{phoneError}}</span>
+          <text class="error-text" wx:if="{{phoneError}}">{{phoneError}}</text>
         </view>
         
         <view class="input-group">
@@ -103,7 +103,7 @@
               {{countdown > 0 ? countdown + ' ' + messages.buttons.seconds : messages.buttons.sendCode}}
             </button>
           </view>
-          <span class="error-span" wx:if="{{codeError}}">{{codeError}}</span>
+          <text class="error-text" wx:if="{{codeError}}">{{codeError}}</text>
         </view>
       </view>
     </view>
@@ -115,20 +115,28 @@
         bindtap="handleLogin"
         disabled="{{loading}}"
       >
-        <span wx:if="{{!loading}}">
+        <text wx:if="{{!loading}}">
           {{loginType === 'wechat' ? '微信登录' : messages.buttons.login}}
-        </span>
-        <span wx:if="{{loading}}">登录中...</span>
+        </text>
+        <text wx:if="{{loading}}">登录中...</text>
       </button>
+    </view>
+
+    <!-- Register Link -->
+    <view class="register-link-wrapper">
+      <view class="register-link" bindtap="goToRegister">
+        <text class="register-text">还没有账号？</text>
+        <text class="register-btn-text">{{messages.buttons.register}}</text>
+      </view>
     </view>
 
     <!-- Footer -->
     <view class="modal-footer">
-      <span class="terms-span">
+      <text class="terms-text">
         登录即表示您同意我们的
-        <span class="link">服务条款</span> 和
-        <span class="link">隐私政策</span>
-      </span>
+        <text class="link">服务条款</text> 和
+        <text class="link">隐私政策</text>
+      </text>
     </view>
   </view>
 </view>

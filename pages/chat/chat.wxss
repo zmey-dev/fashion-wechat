@@ -300,8 +300,8 @@ page {
 
 .user-avatar-container {
   position: relative;
-  width: 40px;
-  height: 40px;
+  width: 50px;
+  height: 50px;
   margin-right: 12px;
 }
 

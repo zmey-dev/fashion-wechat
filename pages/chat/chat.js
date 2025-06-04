@@ -78,7 +78,15 @@ Page({
     this.userInfoHandler = (userInfo) => {
       this.setData({ userInfo });
     };
+    
+    // Subscribe to centralized unread messages
+    this.unreadMessagesHandler = (unreadMessagesByUser) => {
+      this.updateFriendsFromCentralizedData(unreadMessagesByUser);
+    };
+    
     app.subscribe("userInfo", this.userInfoHandler);
+    app.subscribe("unreadMessagesByUser", this.unreadMessagesHandler);
+    
     this.setData({
       userInfo: app.globalData.userInfo || {},
     });
@@ -92,6 +100,7 @@ Page({
   onUnload: function () {
     const app = getApp();
     app.unsubscribe("userInfo", this.userInfoHandler);
+    app.unsubscribe("unreadMessagesByUser", this.unreadMessagesHandler);
     
     // Remove socket event listeners when page unloads
     this.removeSocketListeners();
@@ -142,7 +151,6 @@ Page({
   handleNewMessage(data) {
     console.log("New message received:", data);
     
-    // Only show messages in current chat and mark as read if in chat view with that user
     if (this.data.currentView === 'chat' && 
         this.data.selectedUser && 
         data.sender_id === this.data.selectedUser.id) {
@@ -150,6 +158,7 @@ Page({
         id: data.id || Date.now(),
         sender_id: data.sender_id,
         message: data.message,
+        message_type: data.message_type || "text",
         created_at: data.created_at || new Date().toISOString(),
         formatted_time: this.formatTime(data.created_at || new Date().toISOString()),
       };
@@ -164,41 +173,18 @@ Page({
         }
       });
       
-      // Mark as read only if currently in chat view
-      this.markMessagesAsRead(data.sender_id);
-      
       this.scrollToBottom();
-    } else {
-      // Update friends list with unread count for messages not in current chat
-      const { friends, filteredFriends } = this.data;
       
-      const updatedFriends = friends.map(friend => {
-        if (friend.id === data.sender_id) {
-          return { 
-            ...friend, 
-            unreadCount: (friend.unreadCount || 0) + 1,
-            lastMessage: data.message
-          };
+      setTimeout(() => {
+        if (this.data.currentView === 'chat' && 
+            this.data.selectedUser?.id === data.sender_id &&
+            !this.isPageHidden) { 
+          this.markMessagesAsRead(data.sender_id);
         }
-        return friend;
-      });
-      
-      const updatedFilteredFriends = filteredFriends.map(friend => {
-        if (friend.id === data.sender_id) {
-          return { 
-            ...friend, 
-            unreadCount: (friend.unreadCount || 0) + 1,
-            lastMessage: data.message
-          };
-        }
-        return friend;
-      });
-      
-      this.setData({
-        friends: updatedFriends,
-        filteredFriends: updatedFilteredFriends
-      });
+      }, 1000);
     }
+    
+    // No need to handle unread count here - app.js handles it centrally
   },
   
   // Handle typing message event from socket - closely follows React implementation
@@ -336,7 +322,7 @@ Page({
       this.setData({
         currentView: "chat",
         selectedUser: user,
-        chatMessages: [], // Initially empty until we fetch messages
+        chatMessages: [],
         friendsTyping: {
           ...this.data.friendsTyping,
           [userId]: false
@@ -347,12 +333,15 @@ Page({
         ),
       });
 
+      // Clear unread count in centralized app state
+      const app = getApp();
+      app.clearUnreadForUser(userId);
+      
       // Fetch messages from the database
       this.getMessagesByUserId(userId);
       
       // Mark messages as read after fetching
       setTimeout(() => {
-        // Only mark as read if still in chat view with this user
         if (this.data.currentView === 'chat' && this.data.selectedUser?.id === userId) {
           this.markMessagesAsRead(userId);
         }
@@ -384,6 +373,7 @@ Page({
             id: msg.id,
             sender_id: msg.sender_id === this.data.userInfo.id ? "me" : msg.sender_id,
             message: msg.message,
+            message_type: msg.message_type || "text",
             created_at: msg.created_at,
             formatted_time: this.formatTime(msg.created_at),
             is_read: msg.seen_at ? true : false,
@@ -493,13 +483,18 @@ Page({
             const friends = res.data.users.map((friend) => ({
               ...friend,
               unreadCount: 0,
-              status: "unknown" // Initialize status as unknown
+              status: "unknown"
             }));
             this.setData({
               friends: friends,
               filteredFriends: friends,
             });
-            this.messageData = {};
+            
+            // Use centralized unread message fetching
+            const app = getApp();
+            app.fetchUnreadMessages().then(() => {
+              this.updateFriendsFromCentralizedData(app.globalData.unreadMessagesByUser);
+            });
             
             // Check online status for all friends after fetching the list
             this.checkFriendsStatus();
@@ -522,47 +517,39 @@ Page({
     }
   },
 
-  deleteMessages(friendId) {
-    wx.showModal({
-      title: this.data.uiTexts.deleteConfirm,
-      content: this.data.uiTexts.deletePrompt,
-      success: (res) => {
-        if (res.confirm) {
-          this.messageData[friendId] = [];
-          if (
-            this.data.selectedUser &&
-            this.data.selectedUser.id === friendId
-          ) {
-            this.setData({ chatMessages: [] });
-          }
-          wx.showToast({ title: this.data.uiTexts.messagesDeleted, icon: "success" });
-        }
-      },
+  // Replace updateFriendsWithUnreadCounts with this method
+  updateFriendsFromCentralizedData(unreadMessagesByUser) {
+    const { friends, filteredFriends } = this.data;
+    
+    // Update friends list with centralized unread data
+    const updatedFriends = friends.map(friend => {
+      const unreadData = unreadMessagesByUser[friend.id];
+      if (unreadData) {
+        return {
+          ...friend,
+          unreadCount: unreadData.count,
+          lastMessage: unreadData.lastMessage
+        };
+      }
+      return { ...friend, unreadCount: 0 };
     });
-  },
-
-  blockUser(friendId) {
-    wx.showModal({
-      title: this.data.uiTexts.blockConfirm,
-      content: this.data.uiTexts.blockPrompt,
-      success: (res) => {
-        if (res.confirm) {
-          const friends = this.data.friends.filter((f) => f.id !== friendId);
-          this.setData({
-            friends: friends,
-            filteredFriends: friends,
-          });
-
-          if (
-            this.data.selectedUser &&
-            this.data.selectedUser.id === friendId
-          ) {
-            this.onBackToList();
-          }
-
-          wx.showToast({ title: this.data.uiTexts.userBlocked, icon: "success" });
-        }
-      },
+    
+    // Update filtered friends list
+    const updatedFilteredFriends = filteredFriends.map(friend => {
+      const unreadData = unreadMessagesByUser[friend.id];
+      if (unreadData) {
+        return {
+          ...friend,
+          unreadCount: unreadData.count,
+          lastMessage: unreadData.lastMessage
+        };
+      }
+      return { ...friend, unreadCount: 0 };
+    });
+    
+    this.setData({
+      friends: updatedFriends,
+      filteredFriends: updatedFilteredFriends
     });
   },
 
@@ -652,7 +639,9 @@ Page({
             id: res.data.message.id || Date.now(),
             sender_id: "me",
             message: message,
+            message_type: "text",
             created_at: res.data.message.created_at || new Date().toISOString(),
+            formatted_time: this.formatTime(res.data.message.created_at || new Date().toISOString()),
             is_read: false, // Initialize as unread
           };
           
@@ -1101,12 +1090,12 @@ Page({
     this.onSendMessage();
   },
 
-  // 检查是否只包含表情符号
+  // 检查是否只包含表情符号 - Fixed regex
   isEmojiOnly(message) {
     if (!message || message.length === 0) return false;
     
-    // 简单的表情符号检测
-    const emojiRegex = /^[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]+$/u;
+    // Simplified emoji detection that doesn't cause parsing errors
+    const emojiRegex = /^[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]+$/u;
     return emojiRegex.test(message.trim());
   },
 
@@ -1117,5 +1106,36 @@ Page({
     });
   },
 
-  // ...existing code...
+  // Remove these methods as they're now handled by app.js:
+  // - clearTabbarUnreadCount
+  // - updateTabbarUnreadCount  
+  // - getTabbarComponent
+  // - clearTabbarUnreadCountForUser
+
+  // Switch to chat with user
+  switchToChat: function(user) {
+    this.setData({
+      currentView: 'chat',
+      selectedUser: user,
+      chatMessages: []
+    });
+    
+    // Mark messages as read when entering chat
+    this.markMessagesAsRead(user.id);
+    
+    // Load chat messages
+    this.getMessagesByUserId(user.id);
+    
+    this.scrollToBottom();
+  },
+
+  // Handle friend tap
+  onFriendTap: function(e) {
+    const friendId = e.currentTarget.dataset.friendId;
+    const friend = this.data.friends.find(f => f.id === friendId);
+    
+    if (friend) {
+      this.switchToChat(friend);
+    }
+  },
 });

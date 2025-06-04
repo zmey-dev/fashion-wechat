@@ -1,0 +1,8 @@
+{
+  "navigationBarTitleText": "学生注册",
+  "navigationBarBackgroundColor": "#0f0f0f",
+  "navigationBarTextStyle": "white",
+  "backgroundColor": "#1a1a1a",
+  "backgroundTextStyle": "light",
+  "enablePullDownRefresh": false
+}

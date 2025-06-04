@@ -1,0 +1,324 @@
+<view class="register-container">
+  <!-- Header -->
+  <view class="register-header">
+    <view class="header-content">
+      <text class="register-title">学生注册</text>
+      <view class="register-subtitle">
+        <text>创建您的学生账户</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- Progress Indicator -->
+  <view class="progress-container">
+    <view class="progress-bar">
+      <view 
+        wx:for="{{totalSteps}}" 
+        wx:key="index"
+        class="progress-step {{index + 1 === formStep ? 'current' : ''}} {{index + 1 < formStep ? 'completed' : ''}}"
+      >
+        <view class="step-circle">
+          <text class="step-number">{{index + 1}}</text>
+        </view>
+        <view wx:if="{{index < totalSteps - 1}}" class="step-line {{index + 1 < formStep ? 'completed' : ''}}"></view>
+      </view>
+    </view>
+    <view class="step-labels">
+      <text 
+        wx:for="{{messages.stepTitles}}" 
+        wx:key="index"
+        class="step-label {{index + 1 === formStep ? 'active' : ''}}"
+      >
+        {{item}}
+      </text>
+    </view>
+  </view>
+
+  <!-- Form Content -->
+  <view class="form-container">
+    <!-- Step Title -->
+    <view class="step-title">
+      <text>{{messages.stepTitles[formStep - 1]}}</text>
+    </view>
+
+    <!-- Step 1: Basic Information -->
+    <view wx:if="{{formStep === 1}}" class="form-step">
+      <!-- Name -->
+      <view class="form-field">
+        <label class="field-label">姓名</label>
+        <input 
+          class="field-input {{errors.name ? 'error' : ''}}"
+          value="{{form.name}}"
+          placeholder="{{messages.placeholders.name}}"
+          data-field="name"
+          bindinput="onInputChange"
+        />
+        <text wx:if="{{errors.name}}" class="error-text">{{errors.name}}</text>
+      </view>
+
+      <!-- ID Number -->
+      <view class="form-field">
+        <label class="field-label">身份证号码</label>
+        <input 
+          class="field-input {{errors.id_number ? 'error' : ''}}"
+          value="{{form.id_number}}"
+          placeholder="{{messages.placeholders.id_number}}"
+          data-field="id_number"
+          bindinput="onInputChange"
+        />
+        <text wx:if="{{errors.id_number}}" class="error-text">{{errors.id_number}}</text>
+      </view>
+
+      <!-- Phone with Verification -->
+      <view class="form-field">
+        <label class="field-label">
+          手机号码
+          <view wx:if="{{phoneChanged && !phoneVerified}}" class="verification-badge">
+            <text>需要验证</text>
+          </view>
+          <view wx:if="{{phoneVerified}}" class="verified-badge">
+            <text>✓ 已验证</text>
+          </view>
+        </label>
+        <view class="phone-input-container">
+          <text class="phone-prefix">+86</text>
+          <input 
+            class="field-input phone-input {{errors.phone ? 'error' : ''}}"
+            value="{{form.phone}}"
+            placeholder="{{messages.placeholders.phone}}"
+            data-field="phone"
+            bindinput="onInputChange"
+            type="number"
+          />
+        </view>
+        
+        <!-- Phone Verification -->
+        <view wx:if="{{phoneChanged && !phoneVerified}}" class="verification-section">
+          <button class="send-code-btn" bindtap="sendPhoneVerification">
+            发送验证码
+          </button>
+          <view class="otp-input-container">
+            <input 
+              class="otp-input"
+              placeholder="请输入手机验证码"
+              value="{{phoneOtpCode}}"
+              bindinput="onPhoneOtpInput"
+              type="number"
+            />
+            <button class="verify-btn" bindtap="verifyPhoneCode">
+              验证
+            </button>
+          </view>
+        </view>
+        
+        <text wx:if="{{errors.phone}}" class="error-text">{{errors.phone}}</text>
+      </view>
+
+      <!-- Email with Verification -->
+      <view class="form-field">
+        <label class="field-label">
+          电子邮箱
+          <view wx:if="{{emailChanged && !emailVerified}}" class="verification-badge">
+            <text>需要验证</text>
+          </view>
+          <view wx:if="{{emailVerified}}" class="verified-badge">
+            <text>✓ 已验证</text>
+          </view>
+        </label>
+        <input 
+          class="field-input {{errors.email ? 'error' : ''}}"
+          value="{{form.email}}"
+          placeholder="{{messages.placeholders.email}}"
+          data-field="email"
+          bindinput="onInputChange"
+        />
+        
+        <!-- Email Verification -->
+        <view wx:if="{{emailChanged && !emailVerified}}" class="verification-section">
+          <button class="send-code-btn" bindtap="sendEmailVerification">
+            发送验证码
+          </button>
+          <view class="otp-input-container">
+            <input 
+              class="otp-input"
+              placeholder="请输入邮箱验证码"
+              value="{{emailOtpCode}}"
+              bindinput="onEmailOtpInput"
+            />
+            <button class="verify-btn" bindtap="verifyEmailCode">
+              验证
+            </button>
+          </view>
+        </view>
+        
+        <text wx:if="{{errors.email}}" class="error-text">{{errors.email}}</text>
+      </view>
+
+      <!-- Step 1 Navigation -->
+      <view class="step-navigation">
+        <button class="nav-btn primary-btn" bindtap="nextStep">
+          下一步
+        </button>
+      </view>
+    </view>
+
+    <!-- Step 2: Student Information -->
+    <view wx:if="{{formStep === 2}}" class="form-step">
+      <!-- School -->
+      <view class="form-field">
+        <label class="field-label">学校名称</label>
+        <picker 
+          mode="selector"
+          range="{{universities}}"
+          range-key="name"
+          bindchange="onSchoolChange"
+        >
+          <view class="picker-view {{errors.school ? 'error' : ''}}">
+            <text wx:if="{{form.school}}">{{form.school.name}}</text>
+            <text wx:else class="placeholder">{{messages.placeholders.school}}</text>
+          </view>
+        </picker>
+        <text wx:if="{{errors.school}}" class="error-text">{{errors.school}}</text>
+      </view>
+
+      <!-- Student Number -->
+      <view class="form-field">
+        <label class="field-label">学号</label>
+        <input 
+          class="field-input {{errors.student_number ? 'error' : ''}}"
+          value="{{form.student_number}}"
+          placeholder="{{messages.placeholders.student_number}}"
+          data-field="student_number"
+          bindinput="onInputChange"
+        />
+        <text wx:if="{{errors.student_number}}" class="error-text">{{errors.student_number}}</text>
+      </view>
+
+      <!-- Class -->
+      <view class="form-field">
+        <label class="field-label">班级</label>
+        <input 
+          class="field-input {{errors.class ? 'error' : ''}}"
+          value="{{form.class}}"
+          placeholder="{{messages.placeholders.class}}"
+          data-field="class"
+          bindinput="onInputChange"
+        />
+        <text wx:if="{{errors.class}}" class="error-text">{{errors.class}}</text>
+      </view>
+
+      <!-- Admission Year -->
+      <view class="form-field">
+        <label class="field-label">入学年份</label>
+        <picker 
+          mode="selector"
+          range="{{years}}"
+          bindchange="onYearChange"
+        >
+          <view class="picker-view {{errors.attend_year ? 'error' : ''}}">
+            <text>{{form.attend_year}}年</text>
+          </view>
+        </picker>
+        <text wx:if="{{errors.attend_year}}" class="error-text">{{errors.attend_year}}</text>
+      </view>
+
+      <!-- Faculty -->
+      <view class="form-field">
+        <label class="field-label">学院</label>
+        <picker 
+          mode="selector"
+          range="{{availableFaculties}}"
+          range-key="name"
+          disabled="{{!form.school}}"
+          bindchange="onFacultyChange"
+        >
+          <view class="picker-view {{errors.faculty ? 'error' : ''}} {{!form.school ? 'disabled' : ''}}">
+            <text wx:if="{{form.faculty}}">{{form.faculty.name}}</text>
+            <text wx:else class="placeholder">{{messages.placeholders.faculty}}</text>
+          </view>
+        </picker>
+        <text wx:if="{{errors.faculty}}" class="error-text">{{errors.faculty}}</text>
+      </view>
+
+      <!-- Major -->
+      <view class="form-field">
+        <label class="field-label">专业</label>
+        <picker 
+          mode="selector"
+          range="{{availableMajors}}"
+          range-key="name"
+          disabled="{{!form.faculty}}"
+          bindchange="onMajorChange"
+        >
+          <view class="picker-view {{errors.major ? 'error' : ''}} {{!form.faculty ? 'disabled' : ''}}">
+            <text wx:if="{{form.major}}">{{form.major.name}}</text>
+            <text wx:else class="placeholder">{{messages.placeholders.major}}</text>
+          </view>
+        </picker>
+        <text wx:if="{{errors.major}}" class="error-text">{{errors.major}}</text>
+      </view>
+
+      <!-- Step 2 Navigation -->
+      <view class="step-navigation">
+        <button class="nav-btn secondary-btn" bindtap="prevStep">
+          上一步
+        </button>
+        <button class="nav-btn primary-btn" bindtap="nextStep">
+          下一步
+        </button>
+      </view>
+    </view>
+
+    <!-- Step 3: Password -->
+    <view wx:if="{{formStep === 3}}" class="form-step">
+      <!-- Password -->
+      <view class="form-field">
+        <label class="field-label">密码</label>
+        <input 
+          class="field-input {{errors.password ? 'error' : ''}}"
+          value="{{form.password}}"
+          placeholder="{{messages.placeholders.password}}"
+          data-field="password"
+          bindinput="onInputChange"
+          password="true"
+        />
+        <text wx:if="{{errors.password}}" class="error-text">{{errors.password}}</text>
+      </view>
+
+      <!-- Confirm Password -->
+      <view class="form-field">
+        <label class="field-label">确认密码</label>
+        <input 
+          class="field-input {{errors.password_confirmation ? 'error' : ''}}"
+          value="{{form.password_confirmation}}"
+          placeholder="{{messages.placeholders.password_confirmation}}"
+          data-field="password_confirmation"
+          bindinput="onInputChange"
+          password="true"
+        />
+        <text wx:if="{{errors.password_confirmation}}" class="error-text">{{errors.password_confirmation}}</text>
+      </view>
+
+      <!-- Step 3 Navigation -->
+      <view class="step-navigation">
+        <button class="nav-btn secondary-btn" bindtap="prevStep">
+          上一步
+        </button>
+        <button 
+          class="nav-btn submit-btn {{isLoading ? 'loading' : ''}}" 
+          bindtap="handleSubmit"
+          disabled="{{isLoading}}"
+        >
+          <text wx:if="{{isLoading}}">注册中...</text>
+          <text wx:else>完成注册</text>
+        </button>
+      </view>
+    </view>
+  </view>
+
+  <!-- Login Link -->
+  <view class="login-link">
+    <text class="login-text">已有账号？</text>
+    <text class="login-btn" bindtap="goToLogin">立即登录</text>
+  </view>
+</view>

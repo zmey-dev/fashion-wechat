@@ -242,7 +242,7 @@
 
 /* Login Button */
 .login-button-wrapper {
-  padding: 0 24px 24px;
+  padding: 0 24px 20px;
 }
 
 .login-btn {
@@ -273,9 +273,43 @@
   cursor: not-allowed;
 }
 
+/* Register Link */
+.register-link-wrapper {
+  padding: 0 24px 20px;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.register-link {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.register-link:active {
+  transform: scale(0.98);
+}
+
+.register-text {
+  font-size: 14px;
+  color: #888;
+  margin-right: 8rpx;
+}
+
+.register-btn-text {
+  font-size: 14px;
+  color: #f06292;
+  font-weight: 600;
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+.register-link:active .register-btn-text {
+  color: #ec407a;
+}
+
 /* Footer */
 .modal-footer {
-  padding: 0 24px 24px;
+  padding: 20px 24px 24px;
   text-align: center;
 }
 

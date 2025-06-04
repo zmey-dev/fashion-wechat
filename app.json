@@ -11,7 +11,8 @@
     "pages/notification/notification",
     "pages/event/event",
     "pages/post-detail/post-detail",
-    "pages/user-profile/user-profile"
+    "pages/user-profile/user-profile",
+    "pages/register/register"
   ],
   "window": {
     "backgroundTextStyle": "light",

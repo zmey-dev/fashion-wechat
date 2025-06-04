@@ -7,12 +7,19 @@
     data-path="{{item.path}}"
     data-name="{{item.name}}"
   >
-    <view class="{{item.isSpecial ? 'upload-btn' : ''}}">
+    <view class="{{item.isSpecial ? 'upload-btn' : 'tab-icon-container'}}">
       <image 
         class="tab-icon" 
         src="{{current === item.name ? item.activeIcon : item.icon}}" 
         mode="aspectFit"
       ></image>
+      <!-- Unread message badge for chat tab only -->
+      <view 
+        wx:if="{{item.name === 'chat' && totalUnreadCount > 0}}" 
+        class="unread-badge"
+      >
+        <text class="unread-count">{{totalUnreadCount > 99 ? '99+' : totalUnreadCount}}</text>
+      </view>
     </view>
     <text class="tab-text" wx:if="{{item.text}}">{{item.text}}</text>
   </view>

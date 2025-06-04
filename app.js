@@ -14,6 +14,10 @@ App({
     currentPath: "discover",
     observers: {},
     socketManager: socketManager,
+    // Centralized unread message management
+    unreadMessageCount: 0,
+    totalUnreadCount: 0,
+    unreadMessagesByUser: {}, // { userId: { count: number, lastMessage: string } }
   },
 
   // Subscribe to state changes
@@ -47,6 +51,189 @@ App({
   // Get current state
   getState(key) {
     return this.globalData[key];
+  },
+
+  // Centralized unread message management methods
+  updateUnreadMessages(unreadMessages) {
+    console.log("Updating unread messages:", unreadMessages);
+
+    // Reset the unread messages map
+    this.globalData.unreadMessagesByUser = {};
+
+    // Update unread messages by user
+    unreadMessages.forEach((msg) => {
+      this.globalData.unreadMessagesByUser[msg.sender_id] = {
+        count: msg.count || 0,
+        lastMessage: msg.last_message || "",
+      };
+    });
+
+    // Calculate total unread count
+    const totalUnread = unreadMessages.reduce(
+      (total, message) => total + (message.count || 0),
+      0
+    );
+
+    this.globalData.totalUnreadCount = totalUnread;
+    this.globalData.unreadMessageCount = totalUnread; // For backward compatibility
+
+    // Notify observers
+    this.setState("totalUnreadCount", totalUnread);
+    this.setState("unreadMessageCount", totalUnread);
+    this.setState("unreadMessagesByUser", this.globalData.unreadMessagesByUser);
+
+    console.log(`Total unread count updated to: ${totalUnread}`);
+  },
+
+  // Increment unread count for a specific user
+  incrementUnreadForUser(senderId, message) {
+    console.log(`Incrementing unread count for user ${senderId}`);
+
+    if (!this.globalData.unreadMessagesByUser[senderId]) {
+      this.globalData.unreadMessagesByUser[senderId] = { count: 0, lastMessage: "" };
+    }
+
+    this.globalData.unreadMessagesByUser[senderId].count += 1;
+    this.globalData.unreadMessagesByUser[senderId].lastMessage = message;
+
+    // Recalculate total
+    const totalUnread = Object.values(this.globalData.unreadMessagesByUser).reduce(
+      (total, user) => total + user.count,
+      0
+    );
+
+    this.globalData.totalUnreadCount = totalUnread;
+    this.globalData.unreadMessageCount = totalUnread;
+
+    // Notify observers
+    this.setState("totalUnreadCount", totalUnread);
+    this.setState("unreadMessageCount", totalUnread);
+    this.setState("unreadMessagesByUser", this.globalData.unreadMessagesByUser);
+
+    console.log(`Total unread count after increment: ${totalUnread}`);
+  },
+
+  // Clear unread count for a specific user
+  clearUnreadForUser(userId) {
+    console.log(`Clearing unread count for user ${userId}`);
+
+    if (this.globalData.unreadMessagesByUser[userId]) {
+      delete this.globalData.unreadMessagesByUser[userId];
+
+      // Recalculate total
+      const totalUnread = Object.values(this.globalData.unreadMessagesByUser).reduce(
+        (total, user) => total + user.count,
+        0
+      );
+
+      this.globalData.totalUnreadCount = totalUnread;
+      this.globalData.unreadMessageCount = totalUnread;
+
+      // Notify observers
+      this.setState("totalUnreadCount", totalUnread);
+      this.setState("unreadMessageCount", totalUnread);
+      this.setState("unreadMessagesByUser", this.globalData.unreadMessagesByUser);
+
+      console.log(`Total unread count after clearing user ${userId}: ${totalUnread}`);
+    }
+  },
+
+  // Clear all unread counts
+  clearAllUnreadMessages() {
+    console.log("Clearing all unread messages");
+
+    this.globalData.unreadMessagesByUser = {};
+    this.globalData.totalUnreadCount = 0;
+    this.globalData.unreadMessageCount = 0;
+
+    // Notify observers
+    this.setState("totalUnreadCount", 0);
+    this.setState("unreadMessageCount", 0);
+    this.setState("unreadMessagesByUser", {});
+  },
+
+  // Get unread count for a specific user
+  getUnreadCountForUser(userId) {
+    return this.globalData.unreadMessagesByUser[userId]?.count || 0;
+  },
+
+  // Get total unread count
+  getTotalUnreadCount() {
+    return this.globalData.totalUnreadCount;
+  },
+
+  // Fetch unread messages from server
+  fetchUnreadMessages() {
+    if (!this.globalData.userInfo || !this.globalData.userInfo.token) {
+      console.log("No user info or token available for fetching unread messages");
+      return Promise.resolve();
+    }
+
+    return new Promise((resolve, reject) => {
+      wx.request({
+        url: `${config.BACKEND_URL}/messages/get_unread_message`,
+        method: "GET",
+        header: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${this.globalData.userInfo.token}`,
+        },
+        success: (res) => {
+          if (
+            res.statusCode === 200 &&
+            res.data &&
+            res.data.status === "success"
+          ) {
+            const unreadMessages = res.data.messages || [];
+            console.log("Fetched unread messages:", unreadMessages);
+
+            // Update centralized unread messages
+            this.updateUnreadMessages(unreadMessages);
+            resolve(unreadMessages);
+          } else {
+            console.log("Failed to fetch unread messages or no unread messages");
+            this.updateUnreadMessages([]);
+            resolve([]);
+          }
+        },
+        fail: (err) => {
+          console.error("Failed to fetch unread messages:", err);
+          reject(err);
+        },
+      });
+    });
+  },
+
+  // Setup socket listeners for unread message management
+  setupUnreadMessageSocketListeners() {
+    // Handle new message events
+    socketManager.on("new_message", (data) => {
+      console.log("App received new message:", data);
+
+      // Get current page info to determine if user is in chat with sender
+      const pages = getCurrentPages();
+      const currentPage = pages[pages.length - 1];
+      const isInChatWithSender =
+        currentPage?.route?.includes("chat") &&
+        currentPage?.data?.selectedUser?.id === data.sender_id;
+
+      // Only increment unread count if not currently chatting with sender
+      if (!isInChatWithSender) {
+        this.incrementUnreadForUser(data.sender_id, data.message);
+      }
+    });
+
+    // Handle read message events
+    socketManager.on("read_message", (data) => {
+      console.log("App received read message event:", data);
+      // When someone reads our messages, we don't need to update unread counts
+      // as unread counts are for messages WE haven't read
+    });
+  },
+
+  // Remove socket listeners
+  cleanupUnreadMessageSocketListeners() {
+    socketManager.off("new_message");
+    socketManager.off("read_message");
   },
 
   // Set current path
@@ -87,18 +274,21 @@ App({
   handleTabNavigation(pagePath) {
     const loginRequiredPages = [
       "pages/recommend/recommend",
-      "pages/follow/follow", 
+      "pages/follow/follow",
       "pages/chat/chat",
-      "pages/upload/upload", 
+      "pages/upload/upload",
       "pages/notification/notification",
       "pages/friend/friend",
       "pages/me/me",
       "pages/event/event",
-      "pages/contact/contact"
+      "pages/contact/contact",
     ];
 
     // Check if the page requires login
-    if (loginRequiredPages.includes(pagePath) && isEmpty(this.globalData.userInfo)) {
+    if (
+      loginRequiredPages.includes(pagePath) &&
+      isEmpty(this.globalData.userInfo)
+    ) {
       this.setState("showLoginModal", true);
       return false;
     }
@@ -113,11 +303,12 @@ App({
       return;
     }
     if (username) {
-      if( this.globalData.userInfo.username === username) {
+      if (this.globalData.userInfo.username === username) {
         wx.navigateTo({ url: "/pages/me/me" });
-      }
-      else {
-        wx.navigateTo({ url: `/pages/user-profile/user-profile?username=${username}` });
+      } else {
+        wx.navigateTo({
+          url: `/pages/user-profile/user-profile?username=${username}`,
+        });
       }
     } else {
       console.error("Username is required to navigate to user profile");
@@ -127,11 +318,21 @@ App({
   // Enhanced method for checking if current navigation requires login
   checkLoginRequired(targetPath) {
     const loginRequiredPaths = [
-      "recommend", "follow", "chat", "friend", "me", 
-      "notification", "upload", "event", "contact"
+      "recommend",
+      "follow",
+      "chat",
+      "friend",
+      "me",
+      "notification",
+      "upload",
+      "event",
+      "contact",
     ];
-    
-    if (loginRequiredPaths.includes(targetPath) && isEmpty(this.globalData.userInfo)) {
+
+    if (
+      loginRequiredPaths.includes(targetPath) &&
+      isEmpty(this.globalData.userInfo)
+    ) {
       this.setState("showLoginModal", true);
       return false;
     }
@@ -147,8 +348,18 @@ App({
 
     // Check if user is trying to navigate from home page and needs login
     // (except for post-detail which should be accessible without login)
-    const needsLogin = ["recommend", "follow", "chat", "friend", "me", "notification", "upload", "event", "contact"];
-    
+    const needsLogin = [
+      "recommend",
+      "follow",
+      "chat",
+      "friend",
+      "me",
+      "notification",
+      "upload",
+      "event",
+      "contact",
+    ];
+
     if (needsLogin.includes(path) && isEmpty(this.globalData.userInfo)) {
       this.setState("showLoginModal", true);
       return;
@@ -217,6 +428,8 @@ App({
     wx.setStorageSync("userInfo", userInfo);
     // Initialize socket when user info changes
     this.initializeSocket();
+    // Fetch unread messages when user logs in
+    this.fetchUnreadMessages();
   },
 
   // Handle force disconnect event
@@ -240,9 +453,12 @@ App({
 
       if (userId && token) {
         socketManager.connect(userId, token);
+        // Setup unread message socket listeners
+        this.setupUnreadMessageSocketListeners();
       }
     } else {
       socketManager.disconnect();
+      this.cleanupUnreadMessageSocketListeners();
     }
   },
 
@@ -252,6 +468,10 @@ App({
       const userInfo = wx.getStorageSync("userInfo");
       if (userInfo) {
         this.globalData.userInfo = userInfo;
+
+        // Fetch unread messages after setting user info
+        this.fetchUnreadMessages();
+
         wx.request({
           url: `${config.BACKEND_URL}/user/get_my_follow_users`,
           method: "GET",
@@ -377,6 +597,9 @@ App({
   async logout() {
     console.log("Logging out user");
 
+    // Clear unread messages
+    this.clearAllUnreadMessages();
+
     this.globalData.userInfo = null;
     await wx.setStorageSync("userInfo", null);
     await this.cleanupSocketListeners();
@@ -384,6 +607,9 @@ App({
     if (this.globalData.socketManager) {
       this.globalData.socketManager.disconnect();
     }
+
+    // Cleanup unread message socket listeners
+    this.cleanupUnreadMessageSocketListeners();
 
     wx.redirectTo({ url: "/pages/login/login" });
   },
@@ -408,11 +634,11 @@ App({
   onTabItemTap(item) {
     const app = getApp();
     const pagePath = item.pagePath;
-    
+
     if (!app.handleTabNavigation(pagePath)) {
-      return false; 
+      return false;
     }
-    
+
     return true;
-  }
+  },
 });

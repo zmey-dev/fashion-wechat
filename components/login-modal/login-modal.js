@@ -36,6 +36,7 @@ Component({
         sendCode: "发送验证码",
         resend: "重新发送",
         seconds: "秒",
+        register: "立即注册", // Added register button text
       },
       // Error messages
       errors: {
@@ -66,6 +67,17 @@ Component({
     closeModal() {
       const app = getApp();
       app.setState("showLoginModal", false);
+    },
+
+    // Navigate to register page
+    goToRegister() {
+      // Close the login modal first
+      this.closeModal();
+      
+      // Navigate to register page
+      wx.navigateTo({
+        url: "/pages/register/register"
+      });
     },
 
     // Prevent modal close when clicking inside
@@ -204,6 +216,8 @@ Component({
 
         this.handleLoginSuccess(authResult);
       } catch (error) {
+        console.log(error);
+        
         this.handleLoginError(this.data.messages.errors.emailLoginFailed);
       } finally {
         this.setData({ loading: false });
