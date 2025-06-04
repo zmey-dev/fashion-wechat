@@ -75,19 +75,17 @@
           <view class="action-buttons" wx:if="{{item.type === 'add_friend'}}">
             <view 
               class="action-btn accept-btn"
-              bindtap="handleFriendRequest"
+              catchtap="handleFriendRequest"
               data-action="accept"
               data-notify-id="{{item.notify_id}}"
-              catchtap="true"
             >
               <image src="/images/icons/check.svg" class="action-icon" mode="aspectFit"></image>
             </view>
             <view 
               class="action-btn decline-btn"
-              bindtap="handleFriendRequest"
+              catchtap="handleFriendRequest"
               data-action="declined"
               data-notify-id="{{item.notify_id}}"
-              catchtap="true"
             >
               <image src="/images/icons/close.svg" class="action-icon" mode="aspectFit"></image>
             </view>
@@ -96,10 +94,9 @@
           <view class="action-buttons" wx:else>
             <view 
               class="action-btn remove-btn"
-              bindtap="handleFriendRequest"
+              catchtap="handleFriendRequest"
               data-action="removed"
               data-notify-id="{{item.notify_id}}"
-              catchtap="true"
             >
               <image src="/images/icons/check.svg" class="action-icon" mode="aspectFit"></image>
             </view>

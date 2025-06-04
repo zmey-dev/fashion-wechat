@@ -87,6 +87,7 @@
 .notification-list {
   height: calc(100vh - 280rpx);
   padding: 0 20rpx;
+  box-sizing: border-box;
 }
 
 .notification-item {

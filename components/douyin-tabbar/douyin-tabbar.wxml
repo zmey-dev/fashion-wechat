@@ -13,12 +13,19 @@
         src="{{current === item.name ? item.activeIcon : item.icon}}" 
         mode="aspectFit"
       ></image>
-      <!-- Unread message badge for chat tab only -->
+      <!-- Unread message badge for chat tab -->
       <view 
         wx:if="{{item.name === 'chat' && totalUnreadCount > 0}}" 
         class="unread-badge"
       >
         <text class="unread-count">{{totalUnreadCount > 99 ? '99+' : totalUnreadCount}}</text>
+      </view>
+      <!-- Notification badge for notification tab -->
+      <view 
+        wx:if="{{item.name === 'notification' && notificationCount > 0}}" 
+        class="unread-badge"
+      >
+        <text class="unread-count">{{notificationCount > 99 ? '99+' : notificationCount}}</text>
       </view>
     </view>
     <text class="tab-text" wx:if="{{item.text}}">{{item.text}}</text>

@@ -121,6 +121,8 @@ Page({
 
   // Handle friend request (accept/reject)
   handleFriendRequest(e) {
+    console.log(e);
+    
     const { action, notifyId } = e.currentTarget.dataset;
 
     wx.showLoading({
@@ -164,7 +166,7 @@ Page({
 
   requestFriendAction(data) {
     wx.request({
-      url: `${config.BACKEND_URL}/handle-friend`,
+      url: `${config.BACKEND_URL}/friend/handle_friend`,
       method: "POST",
       data: data,
       header: {

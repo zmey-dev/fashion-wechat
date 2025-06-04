@@ -51,6 +51,8 @@ Component({
     userInfo: getApp().globalData.userInfo || {},
     // Get unread count from app's centralized state
     totalUnreadCount: 0,
+    // Add notification count for alarm
+    notificationCount: 0,
     // Add Chinese messages for error states and UI text
     messages: {
       navigationError: "页面跳转失败",
@@ -58,6 +60,9 @@ Component({
       loading: "加载中...",
     }
   },
+
+  // Add timer property
+  notificationTimer: null,
 
   lifetimes: {
     attached() {
@@ -70,6 +75,12 @@ Component({
       
       this.userInfoHandler = (userInfo) => {
         this.setData({ userInfo });
+        // Start notification polling when user logs in
+        if (userInfo && userInfo.token) {
+          this.startNotificationPolling();
+        } else {
+          this.stopNotificationPolling();
+        }
       };
 
       // Subscribe to centralized unread count changes
@@ -97,6 +108,11 @@ Component({
       });
       
       console.log('Tabbar initialized with totalUnreadCount:', app.getTotalUnreadCount());
+      
+      // Start notification polling if user is logged in
+      if (app.globalData.userInfo && app.globalData.userInfo.token) {
+        this.startNotificationPolling();
+      }
     },
 
     detached() {
@@ -106,6 +122,9 @@ Component({
       app.unsubscribe("userInfo", this.userInfoHandler);
       app.unsubscribe("totalUnreadCount", this.totalUnreadCountHandler);
       app.unsubscribe("unreadMessageCount", this.unreadMessageCountHandler);
+      
+      // Stop notification polling
+      this.stopNotificationPolling();
     }
   },
 
@@ -145,12 +164,89 @@ Component({
       return this.data.totalUnreadCount;
     },
 
+    // Method to get notification count for display
+    getNotificationCount() {
+      return this.data.notificationCount;
+    },
+
     // Method to manually refresh unread count from app
     refreshUnreadCount() {
       const app = getApp();
       const currentCount = app.getTotalUnreadCount();
       this.setData({ totalUnreadCount: currentCount });
       console.log('Tabbar manually refreshed unread count:', currentCount);
+    },
+
+    // Start notification polling every 10 seconds
+    startNotificationPolling() {
+      console.log('Starting notification polling');
+      
+      // Clear existing timer if any
+      if (this.notificationTimer) {
+        clearInterval(this.notificationTimer);
+      }
+      
+      // Fetch notifications immediately
+      this.fetchNotifications();
+      
+      // Set up polling every 10 seconds
+      this.notificationTimer = setInterval(() => {
+        this.fetchNotifications();
+      }, 10000);
+    },
+
+    // Stop notification polling
+    stopNotificationPolling() {
+      console.log('Stopping notification polling');
+      if (this.notificationTimer) {
+        clearInterval(this.notificationTimer);
+        this.notificationTimer = null;
+      }
+    },
+
+    // Fetch notifications from server
+    fetchNotifications() {
+      const userInfo = this.data.userInfo;
+      
+      if (!userInfo || !userInfo.token) {
+        console.log('No user token available for fetching notifications');
+        return;
+      }
+
+      wx.request({
+        url: `${config.BACKEND_URL}/notify/get_notifications`,
+        method: 'GET',
+        header: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${userInfo.token}`
+        },
+        success: (res) => {
+          if (res.data) {
+            if (res.data.status === 'success') {
+              const notifications = res.data.message || res.data.notifications || [];
+              const notificationCount = notifications.length;
+              
+              console.log('Fetched notifications:', notificationCount);
+              
+              this.setData({
+                notificationCount: notificationCount
+              });
+            } else {
+              console.error('Failed to fetch notifications:', res.data.message);
+            }
+          }
+        },
+        fail: (err) => {
+          console.error('Network error fetching notifications:', err);
+        }
+      });
+    },
+
+    // Method to clear notification count (call when user views notifications)
+    clearNotificationCount() {
+      this.setData({
+        notificationCount: 0
+      });
     },
   },
 });
