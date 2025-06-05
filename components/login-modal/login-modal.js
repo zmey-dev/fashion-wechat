@@ -73,10 +73,10 @@ Component({
     goToRegister() {
       // Close the login modal first
       this.closeModal();
-      
+
       // Navigate to register page
       wx.navigateTo({
-        url: "/pages/register/register"
+        url: "/pages/register/register",
       });
     },
 
@@ -217,7 +217,7 @@ Component({
         this.handleLoginSuccess(authResult);
       } catch (error) {
         console.log(error);
-        
+
         this.handleLoginError(this.data.messages.errors.emailLoginFailed);
       } finally {
         this.setData({ loading: false });
@@ -249,39 +249,33 @@ Component({
         return;
       }
 
-      try {
-        this.setData({ loading: true });
+      this.setData({ loading: true });
 
-        wx.request({
-          url: `${config.BACKEND_URL}/verification/verify_and_login`,
-          method: "POST",
-          data: {
-            phone: "+86" + phone,
-            code: verificationCode,
-          },
-          header: {
-            "Content-Type": "application/json",
-          },
-          success: async (res) => {
-            if (res.statusCode === 200 && res.data.status === "success") {
-              this.handleLoginSuccess(res.data);
-            } else {
-              if (res.data.msg)
-                wx.showToast({
-                  title: res.data.msg,
-                  icon: "error",
-                });
-              throw new Error(
-                res.data.message || this.data.messages.errors.verificationFailed
-              );
-            }
-          },
-        });
-      } catch (error) {
-        this.handleLoginError(this.data.messages.errors.phoneLoginFailed);
-      } finally {
-        this.setData({ loading: false });
-      }
+      wx.request({
+        url: `${config.BACKEND_URL}/verification/verify_and_login`,
+        method: "POST",
+        data: {
+          phone: "+86" + phone,
+          code: verificationCode,
+        },
+        header: {
+          "Content-Type": "application/json",
+        },
+        success: (res) => {
+          if (res.statusCode === 200 && res.data.status === "success") {
+            this.handleLoginSuccess(res.data);
+          } else {
+            this.handleLoginError(res.data.msg || res.data.error || "登录失败");
+          }
+        },
+        fail: (err) => {
+          console.error("Phone login request failed:", err);
+          this.handleLoginError(this.data.messages.errors.phoneLoginFailed);
+        },
+        complete: () => {
+          this.setData({ loading: false });
+        },
+      });
     },
 
     // Send verification code
@@ -307,13 +301,13 @@ Component({
           title: this.data.messages.status.sendingCode,
           mask: true,
         });
-        await this.requestVerificationCode("+86" + phone);
-
+        const data = await this.requestVerificationCode("+86" + phone);
+        console.log("Verification code sent:", data);
         // Start countdown
         this.startCountdown();
 
         wx.showToast({
-          title: this.data.messages.status.codeSent,
+          title: data.msg,
           icon: "success",
         });
       } catch (error) {
@@ -459,7 +453,11 @@ Component({
             if (res.statusCode === 200 && res.data.status === "success") {
               resolve(res.data);
             } else {
-              reject(new Error(res.data.message || "Login failed"));
+              wx.showToast({
+                title: res.data.msg || res.data.error || "登录失败",
+                icon: "error",
+              });
+              reject(new Error(res.data.msg || res.data.msg || "Login failed"));
             }
           },
           fail: reject,
@@ -481,6 +479,11 @@ Component({
             if (res.statusCode === 200 && res.data.status === "success") {
               resolve(res.data);
             } else {
+              wx.showToast({
+                title: res.data.msg || res.data.msg || "登录失败",
+                icon: "error",
+              });
+
               reject(new Error(res.data.message || "Failed to send code"));
             }
           },
