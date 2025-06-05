@@ -427,7 +427,9 @@ Component({
 
       // Close modal
       this.closeModal();
-
+      wx.redirectTo({
+        url: "/pages/index/index",
+      });
       wx.showToast({
         title: this.data.messages.status.loginSuccess,
         icon: "success",

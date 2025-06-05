@@ -730,7 +730,7 @@ Page({
       audio,
     };
 
-    if (eventId && mediaCreateType === "event") {
+    if (eventId) {
       formData.eventId = eventId;
     }
 

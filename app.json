@@ -12,7 +12,8 @@
     "pages/event/event",
     "pages/post-detail/post-detail",
     "pages/user-profile/user-profile",
-    "pages/register/register"
+    "pages/register/register",
+    "pages/event-detail/event-detail"
   ],
   "window": {
     "backgroundTextStyle": "light",

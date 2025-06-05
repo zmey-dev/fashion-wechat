@@ -20,11 +20,9 @@ class WeChatSocketManager {
     this.pendingMessages = [];
     this.typingTimeout = null;
     
-    // ✅ UPDATED: Changed from messageHandlers to handlers
     this.handlers = new Map();
   }
 
-  // ✅ UPDATED: Register event handlers using handlers property
   on(eventType, handler) {
     if (typeof handler !== 'function') {
       console.error('Handler must be a function');
@@ -37,7 +35,6 @@ class WeChatSocketManager {
     this.handlers.get(eventType).push(handler);
   }
 
-  // ✅ UPDATED: Remove event handlers using handlers property
   off(eventType, handler) {
     if (this.handlers.has(eventType)) {
       const handlers = this.handlers.get(eventType);
@@ -48,14 +45,12 @@ class WeChatSocketManager {
     }
   }
 
-  // ✅ UPDATED: Remove all handlers for an event type
   removeAllHandlers(eventType) {
     if (this.handlers.has(eventType)) {
       this.handlers.delete(eventType);
     }
   }
 
-  // ✅ UPDATED: Trigger message handler using handlers property
   triggerHandler(eventType, data) {
     if (this.handlers.has(eventType)) {
       this.handlers.get(eventType).forEach((handler) => {
@@ -68,7 +63,6 @@ class WeChatSocketManager {
     }
   }
 
-  // Initialize connection
   connect(userId, token) {
     // Validate input parameters
     if (!userId || !token) {
@@ -80,7 +74,6 @@ class WeChatSocketManager {
       return;
     }
 
-    // Prevent multiple connection attempts
     if (this.isConnecting || this.isConnected) {
       console.log("Already connected or connecting");
       return;
@@ -126,11 +119,9 @@ class WeChatSocketManager {
     }
   }
 
-  // Setup all event listeners
   setupEventListeners() {
     if (!this.socketTask) return;
 
-    // Connection opened
     this.socketTask.onOpen(() => {
       this.clearConnectionTimeout();
       this.isConnected = true;
