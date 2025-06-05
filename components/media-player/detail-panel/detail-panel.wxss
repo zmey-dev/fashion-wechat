@@ -2,25 +2,124 @@
 
 /* Detail Panel Container */
 .detail-panel {
-  position: absolute;
+  position: fixed;
   box-sizing: border-box;
-  top: 0;
-  right: -100%;
+  padding-bottom: 110rpx;
+  bottom: -60%;
+  left: 0;
   width: 100%;
-  height: 100%;
-  padding-top: 100rpx;
+  height: 60%;
   background: rgba(0, 0, 0, 0.95);
   backdrop-filter: blur(20rpx);
-  transition: right 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   z-index: 500;
   display: flex;
   flex-direction: column;
-  border-left: 1rpx solid rgba(255, 255, 255, 0.1);
+  border-top: 1rpx solid rgba(255, 255, 255, 0.1);
+  border-radius: 20rpx 20rpx 0 0;
+  will-change: transform, height, bottom;
+  overflow: hidden;
 }
 
+/* Panel States */
 .detail-panel.show {
+  box-shadow: 0 -10rpx 30rpx rgba(0, 0, 0, 0.5);
+}
+
+.detail-panel.closed {
+  bottom: -60%;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.detail-panel.half {
+  height: 60%;
+  bottom: 0;
+  border-radius: 20rpx 20rpx 0 0;
+}
+
+.detail-panel.full {
+  height: 100vh;
+  bottom: 0;
+  border-radius: 0;
+  padding-top: var(--status-bar-height, 44px);
+  border-top: none;
+}
+
+/* Drag Handle */
+.drag-handle {
+  padding: 16rpx 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 20rpx 20rpx 0 0;
+  cursor: grab;
+  user-select: none;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.drag-handle::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
   right: 0;
-  box-shadow: -10rpx 0 30rpx rgba(0, 0, 0, 0.3);
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 20rpx 20rpx 0 0;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.drag-handle:active::before {
+  opacity: 1;
+}
+
+.handle-bar {
+  width: 60rpx;
+  height: 8rpx;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 4rpx;
+  transition: all 0.2s ease;
+  box-shadow: 0 1rpx 3rpx rgba(0, 0, 0, 0.3);
+}
+
+.drag-handle:active .handle-bar {
+  background: rgba(255, 255, 255, 0.8);
+  width: 80rpx;
+  height: 10rpx;
+  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.4);
+}
+
+/* Full screen adjustments */
+.detail-panel.full .drag-handle {
+  display: none;
+}
+
+.detail-panel.full .panel-header {
+  cursor: default;
+  padding-top: 30rpx;
+}
+
+.detail-panel.full .panel-header:active {
+  background: rgba(0, 0, 0, 0.3);
+  cursor: default;
+}
+
+.detail-panel.full .panel-header:active::before {
+  opacity: 0;
+}
+
+.detail-panel.full .handle-bar {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 /* Panel Header */
@@ -28,13 +127,30 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 30rpx;
+  padding: 20rpx 30rpx;
   border-bottom: 2rpx solid rgba(255, 255, 255, 0.1);
   background: rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(10rpx);
   position: relative;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+  cursor: grab;
+  user-select: none;
 }
 
+.panel-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.03);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+/* Add subtle gradient to indicate touchable area */
 .panel-header::after {
   content: '';
   position: absolute;
@@ -43,6 +159,20 @@
   right: 30rpx;
   height: 1rpx;
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+}
+
+.panel-header:active {
+  cursor: grabbing;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.panel-header:active::before {
+  opacity: 1;
+}
+
+.detail-panel.full .panel-header {
+  padding-top: 30rpx;
+  cursor: default;
 }
 
 /* Tab Bar */
@@ -352,4 +482,29 @@
 .panel-content.error::before {
   content: '⚠️ Failed to load content';
   font-size: 28rpx;
+}
+
+/* Dragging State */
+.detail-panel.dragging {
+  transition: none;
+  box-shadow: 0 -15rpx 40rpx rgba(0, 0, 0, 0.6);
+}
+
+.detail-panel.dragging .drag-handle {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.detail-panel.dragging .handle-bar {
+  background: rgba(255, 255, 255, 0.8);
+  width: 80rpx;
+  height: 10rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.5);
+}
+
+.detail-panel.dragging .panel-header {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.detail-panel.dragging .panel-header::before {
+  opacity: 1;
 }

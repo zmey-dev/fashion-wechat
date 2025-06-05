@@ -503,25 +503,7 @@
   }
 }
 
-/* Detail Panel */
-.detail-panel {
-  position: absolute;
-  box-sizing: border-box;
-  top: 0;
-  right: -100%;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.95);
-  backdrop-filter: blur(20rpx);
-  transition: right 0.3s ease;
-  z-index: 500;
-  display: flex;
-  flex-direction: column;
-}
-
-.detail-panel.show {
-  right: 0;
-}
+/* Detail Panel styles are defined in detail-panel component */
 
 /* Panel Header */
 .panel-header {

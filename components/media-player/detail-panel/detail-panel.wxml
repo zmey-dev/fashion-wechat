@@ -1,7 +1,26 @@
 <!-- components/detail-panel/detail-panel.wxml -->
-<view class="detail-panel {{ showDetail ? 'show' : '' }}" wx:if="{{ currentPost && currentPostUser }}">
-  <!-- Panel header -->
-  <view class="panel-header">
+<view 
+  class="detail-panel {{ panelState }} {{ isDragging ? 'dragging' : '' }}" 
+  wx:if="{{ currentPost && currentPostUser }}"
+  style="transform: translateY({{ isDragging ? translateY + 'px' : '0' }});"
+>  <!-- Drag handle -->
+  <view 
+    class="drag-handle"
+    bindtouchstart="onTouchStart"
+    bindtouchmove="onTouchMove"
+    bindtouchend="onTouchEnd"
+    catchtouchmove="onTouchMove"
+  >
+    <view class="handle-bar"></view>
+  </view>
+    <!-- Panel header -->
+  <view 
+    class="panel-header"
+    bindtouchstart="{{ panelState !== 'full' ? 'onTouchStart' : '' }}"
+    bindtouchmove="{{ panelState !== 'full' ? 'onTouchMove' : '' }}"
+    bindtouchend="{{ panelState !== 'full' ? 'onTouchEnd' : '' }}"
+    catchtouchmove="{{ panelState !== 'full' ? 'onTouchMove' : '' }}"
+  >
     <view class="tab-bar">
       <view
         wx:if="{{ currentPost && !currentPost.event_id }}"
@@ -69,12 +88,12 @@
       <view wx:else class="no-comments-placeholder">
         <text>正在加载评论...</text>
       </view>
-    </view>
-
-    <!-- Details tab -->
+    </view>    <!-- Details tab -->
     <details-tab
       wx:if="{{ tabIndex === 2 }}"
       selected-dot="{{ selectedDot }}"
+      current-post="{{ currentPost }}"
+      current-post-user="{{ currentPostUser }}"
     />
   </view>
 </view>

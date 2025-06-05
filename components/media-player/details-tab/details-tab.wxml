@@ -1,36 +1,30 @@
 <!-- components/details-tab/details-tab.wxml -->
 <view class="details-tab">
-  <!-- Title Section -->
-  <view class="detail-section">
+  <!-- Selected Dot Information Section -->
+  <view wx:if="{{ selectedDot }}" class="detail-section">
     <view class="detail-header">
-      <text class="detail-title">标题</text>
+      <text class="detail-title">标记信息</text>
     </view>
-    <view class="detail-content" data-type="title">
-      <text wx:if="{{ selectedDot }}" class="content-text">{{ selectedDot.title }}</text>
-      <view wx:else class="no-selection">
-        <icon class="selection-icon" type="info" size="24" color="rgba(255,255,255,0.5)"></icon>
-        <text>选择一个圆点查看详情</text>
+    <view class="detail-content">
+      <view wx:if="{{ selectedDot.title }}" class="info-item">
+        <text class="info-label">标题:</text>
+        <text class="info-value">{{ selectedDot.title }}</text>
+      </view>
+      <view wx:if="{{ selectedDot.description }}" class="info-item">
+        <text class="info-label">描述:</text>
+        <text class="info-value">{{ selectedDot.description }}</text>
       </view>
     </view>
   </view>
 
-  <!-- Description Section -->
-  <view class="detail-section">
+  <!-- No Dot Selected Message -->
+  <view wx:else class="detail-section">
     <view class="detail-header">
-      <text class="detail-title">描述</text>
+      <text class="detail-title">标记信息</text>
     </view>
-    <view class="detail-content" data-type="description">
-      <text wx:if="{{ selectedDot }}" class="content-text">{{ selectedDot.description }}</text>
-      <view wx:else class="no-selection">
-        <icon class="selection-icon" type="info" size="24" color="rgba(255,255,255,0.5)"></icon>
-        <text>选择一个圆点查看详情</text>
-      </view>
+    <view class="no-selection">
+      <view class="no-selection-icon">📍</view>
+      <text class="no-selection-text">点击图片上的标记点查看详细信息</text>
     </view>
-  </view>
-
-  <!-- Footer with Metadata -->
-  <view wx:if="{{ selectedDot }}" class="detail-footer">
-    <text class="detail-meta">圆点ID: {{ selectedDot.id }}</text>
-    <text wx:if="{{ selectedDot.timestamp }}" class="detail-timestamp">添加时间: {{ selectedDot.timestamp }}</text>
   </view>
 </view>

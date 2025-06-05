@@ -961,5 +961,11 @@ Component({
     animateBackToCenter() {
       this.setData({ verticalTransform: 0 });
     },
+
+    onDetailStateChange(e) {
+      const { state } = e.detail;
+      console.log('Detail panel state changed to:', state);
+      // Additional logic can be added here based on panel state
+    },
   },
 });

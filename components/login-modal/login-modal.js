@@ -15,22 +15,26 @@ Component({
     passwordError: "",
     codeError: "",
     wechatError: "",
-    generalError: "",    phoneSuccessMessage: "",
+    generalError: "",
+    phoneSuccessMessage: "",
     messages: {
       loginTypes: {
         wechat: "微信登录",
         email: "邮箱登录",
-        phone: "手机登录",      },
+        phone: "手机登录",
+      },
       formLabels: {
         email: "邮箱地址",
         phone: "手机号码",
         password: "密码",
-        verificationCode: "验证码",      },
+        verificationCode: "验证码",
+      },
       buttons: {
         login: "登录",
         sendCode: "发送验证码",
         resend: "重新发送",
-        seconds: "秒",        register: "立即注册",
+        seconds: "秒",
+        register: "立即注册",
       },
       errors: {
         emailRequired: "请输入邮箱地址",
@@ -44,7 +48,8 @@ Component({
         wechatLoginFailed: "微信登录失败，请重试",
         emailLoginFailed: "邮箱登录失败，请检查凭据",
         phoneLoginFailed: "手机登录失败，请检查验证码",
-        verificationFailed: "验证失败",      },
+        verificationFailed: "验证失败",
+      },
       status: {
         sendingCode: "发送验证码中...",
         codeSent: "验证码已发送",
@@ -78,7 +83,8 @@ Component({
         codeError: "",
         wechatError: "",
         generalError: "",
-        phoneSuccessMessage: "",      });
+        phoneSuccessMessage: "",
+      });
     },
 
     onEmailInput(e) {
@@ -89,7 +95,8 @@ Component({
       });
     },
 
-    onPhoneInput(e) {      this.setData({
+    onPhoneInput(e) {
+      this.setData({
         phone: e.detail.value,
         phoneError: "",
         phoneSuccessMessage: "",
@@ -111,23 +118,27 @@ Component({
         codeError: "",
         generalError: "",
       });
-    },    togglePassword(e) {
+    },
+    togglePassword(e) {
       if (e && e.stopPropagation) {
         e.stopPropagation();
       }
-      
+
       const currentState = this.data.showPassword;
-      console.log('Toggle password - current state:', currentState);
-      
-      this.setData({
-        showPassword: !currentState,
-      }, () => {
-        console.log('Toggle password - new state:', this.data.showPassword);
-      });
-      
+      console.log("Toggle password - current state:", currentState);
+
+      this.setData(
+        {
+          showPassword: !currentState,
+        },
+        () => {
+          console.log("Toggle password - new state:", this.data.showPassword);
+        }
+      );
+
       if (wx.vibrateShort) {
         wx.vibrateShort({
-          type: 'light'
+          type: "light",
         });
       }
     },
@@ -140,11 +151,13 @@ Component({
 
     validatePhone(phone) {
       const phoneRegex = /\d{11}$/;
-      return phoneRegex.test(phone);    },
+      return phoneRegex.test(phone);
+    },
 
     async wechatLogin() {
       try {
-        this.setData({ loading: true });        const loginResult = await this.promiseWrapper(wx.login);
+        this.setData({ loading: true });
+        const loginResult = await this.promiseWrapper(wx.login);
 
         if (!loginResult.code) {
           throw new Error("Failed to get WeChat login code");
@@ -158,17 +171,23 @@ Component({
           type: "wechat",
           code: loginResult.code,
           userInfo: userInfoResult.userInfo,
-          signature: userInfoResult.signature,          rawData: userInfoResult.rawData,
+          signature: userInfoResult.signature,
+          rawData: userInfoResult.rawData,
         });
 
         this.handleLoginSuccess(authResult);
       } catch (error) {
-        this.handleLoginError(this.data.messages.errors.wechatLoginFailed, "wechat");
+        this.handleLoginError(
+          this.data.messages.errors.wechatLoginFailed,
+          "wechat"
+        );
       } finally {
         this.setData({ loading: false });
-      }    },
+      }
+    },
 
-    async emailLogin() {      const { email, password } = this.data;
+    async emailLogin() {
+      const { email, password } = this.data;
 
       if (!email) {
         this.setData({ emailError: this.data.messages.errors.emailRequired });
@@ -205,7 +224,8 @@ Component({
 
         this.handleLoginSuccess(authResult);
       } catch (error) {
-        console.log(error);        this.setData({
+        console.log(error);
+        this.setData({
           emailError: "",
           passwordError: "",
         });
@@ -225,9 +245,11 @@ Component({
         }
       } finally {
         this.setData({ loading: false });
-      }    },
+      }
+    },
 
-    async phoneLogin() {      const { phone, verificationCode } = this.data;
+    async phoneLogin() {
+      const { phone, verificationCode } = this.data;
 
       if (!phone) {
         this.setData({ phoneError: this.data.messages.errors.phoneRequired });
@@ -311,7 +333,8 @@ Component({
 
       if (countdown > 0) {
         return;
-      }      try {
+      }
+      try {
         wx.showLoading({
           title: this.data.messages.status.sendingCode,
           mask: true,
@@ -319,7 +342,7 @@ Component({
         const data = await this.requestVerificationCode("+86" + phone);
         console.log("Verification code sent:", data);
         // Start countdown
-        this.startCountdown();        // Clear any previous errors and show success message
+        this.startCountdown(); // Clear any previous errors and show success message
         this.setData({
           phoneError: "",
           codeError: "",
@@ -372,7 +395,7 @@ Component({
           this.phoneLogin();
           break;
       }
-    },    // Handle successful login
+    }, // Handle successful login
     handleLoginSuccess(result) {
       const app = getApp();
       wx.request({
@@ -444,7 +467,7 @@ Component({
       wx.redirectTo({
         url: "/pages/index/index",
       });
-    },    // Handle login error
+    }, // Handle login error
     handleLoginError(message, fieldType = null) {
       // Set field-specific error instead of showing toast
       if (fieldType === "email") {
@@ -459,9 +482,9 @@ Component({
         this.setData({ wechatError: message });
       } else {
         // For general errors, set general error field or default to email field
-        this.setData({ 
+        this.setData({
           generalError: message,
-          emailError: message // Fallback to email field for general errors
+          emailError: message, // Fallback to email field for general errors
         });
       }
     },

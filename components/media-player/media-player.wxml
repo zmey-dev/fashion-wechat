@@ -50,18 +50,7 @@
       bind:playpause="onPlayPause"
       bind:continuetoggle="onContinueToggle"
       bind:progresstap="onProgressTap"
-    />
-
-    <!-- Post Info Overlay Component -->
-    <post-info-overlay
-      currentPost="{{ currentPost }}"
-      display-title="{{ displayTitle }}"
-      display-content="{{ displayContent }}"
-      class="post-info"
-      style="{{ currentPost.type === 'image' ? 'bottom: 300rpx;' : 'bottom: 200rpx;' }}"
-    />
-
-    <!-- Action Buttons Component -->
+    />    <!-- Action Buttons Component -->
     <action-buttons
       class="action-buttons"
       current-post="{{ currentPost }}"
@@ -80,7 +69,6 @@
       bind:reportmodal="onShowReportModal"
     />
   </view>
-
   <detail-panel
     show-detail="{{ showDetail }}"
     tab-index="{{ tabIndex }}"
@@ -93,6 +81,7 @@
     display-like-count="{{ displayLikeCount }}"
     bind:tabchange="onTabChange"
     bind:closedetail="onCloseDetail"
+    bind:statechange="onDetailStateChange"
     bind:follow="handleFollow"
     bind:selectpost="onSelectUserPost"
     bind:commentlike="onCommentLike"
