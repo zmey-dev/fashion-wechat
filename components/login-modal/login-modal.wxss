@@ -164,12 +164,43 @@
   border-color: #ff6b6b;
 }
 
+.form-input:disabled {
+  background: #1a1a1a;
+  color: #666;
+  cursor: not-allowed;
+}
+
 .error-text {
   display: block;
   font-size: 12px;
   color: #ff6b6b;
   margin-top: 8px;
   margin-left: 4px;
+}
+
+/* Success message styling for messages starting with checkmark */
+.error-text {
+  color: #ff6b6b; /* default error color */
+}
+
+/* Override color for success messages (starting with ✓) */
+.success-text {
+  display: block;
+  font-size: 12px;
+  color: #4caf50 !important;
+  margin-top: 8px;
+  margin-left: 4px;
+}
+
+/* General error area */
+.general-error {
+  padding: 0 24px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.general-error .error-text {
+  margin: 0;
 }
 
 /* Password Input */
@@ -179,26 +210,37 @@
 
 .password-toggle {
   position: absolute;
-  right: 16px;
+  right: 8px;
   top: 50%;
   transform: translateY(-50%);
-  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
-  z-index: 10;
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  z-index: 100;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  transition: all 0.2s ease;
+}
+
+.password-toggle:active {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-50%) scale(0.95);
 }
 
 .toggle-icon {
-  font-size: 18px;
+  font-size: 20px;
   color: #888;
   transition: color 0.2s ease;
+  line-height: 1;
+  pointer-events: none;
 }
 
-.toggle-icon:hover {
-  color: #aaa;
+.password-toggle:active .toggle-icon {
+  color: #fff;
 }
 
 /* Code Input */
@@ -247,7 +289,7 @@
 .login-btn {
   width: 100%;
   height: 48px;
-  background: #f06292;
+  background: #62f092;
   color: #ffffff;
   border: none;
   border-radius: 8px;
@@ -262,7 +304,7 @@
 }
 
 .login-btn:active {
-  background: #ec407a;
+  background: #40ec7a;
   transform: translateY(1px);
 }
 

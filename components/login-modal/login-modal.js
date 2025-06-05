@@ -1,8 +1,7 @@
 const { default: config } = require("../../config");
 
 // components/login-modal/login-modal.js
-Component({
-  data: {
+Component({  data: {
     loginType: "email", // 'wechat', 'email', 'phone'
     email: "",
     phone: "",
@@ -15,6 +14,9 @@ Component({
     phoneError: "",
     passwordError: "",
     codeError: "",
+    wechatError: "",
+    generalError: "",
+    phoneSuccessMessage: "", // For verification code sent confirmation
     // Add Chinese messages
     messages: {
       // Login type labels
@@ -81,9 +83,7 @@ Component({
     },
 
     // Prevent modal close when clicking inside
-    preventClose(e) {},
-
-    // Switch login type
+    preventClose(e) {},    // Switch login type
     switchLoginType(e) {
       const type = e.currentTarget.dataset.type;
       this.setData({
@@ -92,21 +92,23 @@ Component({
         phoneError: "",
         passwordError: "",
         codeError: "",
+        wechatError: "",
+        generalError: "",
+        phoneSuccessMessage: "",
       });
-    },
-
-    // Input handlers
+    },// Input handlers
     onEmailInput(e) {
       this.setData({
         email: e.detail.value,
         emailError: "",
+        generalError: "", // Clear general error when user starts typing
       });
-    },
-
-    onPhoneInput(e) {
+    },    onPhoneInput(e) {
       this.setData({
         phone: e.detail.value,
         phoneError: "",
+        phoneSuccessMessage: "", // Clear success message when user types
+        generalError: "", // Clear general error when user starts typing
       });
     },
 
@@ -114,6 +116,7 @@ Component({
       this.setData({
         password: e.detail.value,
         passwordError: "",
+        generalError: "", // Clear general error when user starts typing
       });
     },
 
@@ -121,14 +124,33 @@ Component({
       this.setData({
         verificationCode: e.detail.value,
         codeError: "",
+        generalError: "", // Clear general error when user starts typing
       });
-    },
-
-    // Toggle password visibility
-    togglePassword() {
+    },    // Toggle password visibility
+    togglePassword(e) {
+      // 이벤트 버블링 방지
+      if (e && e.stopPropagation) {
+        e.stopPropagation();
+      }
+      
+      // 현재 상태 확인 및 로그
+      const currentState = this.data.showPassword;
+      console.log('Toggle password - current state:', currentState);
+      
+      // 상태 변경
       this.setData({
-        showPassword: !this.data.showPassword,
+        showPassword: !currentState,
+      }, () => {
+        // 상태 변경 완료 후 로그
+        console.log('Toggle password - new state:', this.data.showPassword);
       });
+      
+      // 햅틱 피드백 (선택사항)
+      if (wx.vibrateShort) {
+        wx.vibrateShort({
+          type: 'light'
+        });
+      }
     },
 
     // Validation methods
@@ -166,11 +188,9 @@ Component({
           userInfo: userInfoResult.userInfo,
           signature: userInfoResult.signature,
           rawData: userInfoResult.rawData,
-        });
-
-        this.handleLoginSuccess(authResult);
+        });        this.handleLoginSuccess(authResult);
       } catch (error) {
-        this.handleLoginError(this.data.messages.errors.wechatLoginFailed);
+        this.handleLoginError(this.data.messages.errors.wechatLoginFailed, "wechat");
       } finally {
         this.setData({ loading: false });
       }
@@ -217,8 +237,26 @@ Component({
         this.handleLoginSuccess(authResult);
       } catch (error) {
         console.log(error);
+        // Clear any existing errors first
+        this.setData({
+          emailError: "",
+          passwordError: "",
+        });
 
-        this.handleLoginError(this.data.messages.errors.emailLoginFailed);
+        // Set appropriate error based on response
+        if (error.message && error.message.includes("email")) {
+          this.setData({
+            emailError: this.data.messages.errors.emailLoginFailed,
+          });
+        } else if (error.message && error.message.includes("password")) {
+          this.setData({
+            passwordError: this.data.messages.errors.emailLoginFailed,
+          });
+        } else {
+          this.setData({
+            emailError: this.data.messages.errors.emailLoginFailed,
+          });
+        }
       } finally {
         this.setData({ loading: false });
       }
@@ -265,12 +303,29 @@ Component({
           if (res.statusCode === 200 && res.data.status === "success") {
             this.handleLoginSuccess(res.data);
           } else {
-            this.handleLoginError(res.data.msg || res.data.error || "登录失败");
+            // Clear existing errors and set phone-related error
+            this.setData({
+              phoneError: "",
+              codeError: "",
+            });
+
+            const errorMessage = res.data.msg || res.data.error || "登录失败";
+            if (
+              errorMessage.includes("验证码") ||
+              errorMessage.includes("code")
+            ) {
+              this.setData({ codeError: errorMessage });
+            } else {
+              this.setData({ phoneError: errorMessage });
+            }
           }
         },
         fail: (err) => {
           console.error("Phone login request failed:", err);
-          this.handleLoginError(this.data.messages.errors.phoneLoginFailed);
+          this.setData({
+            phoneError: "",
+            codeError: this.data.messages.errors.phoneLoginFailed,
+          });
         },
         complete: () => {
           this.setData({ loading: false });
@@ -294,9 +349,7 @@ Component({
 
       if (countdown > 0) {
         return;
-      }
-
-      try {
+      }      try {
         wx.showLoading({
           title: this.data.messages.status.sendingCode,
           mask: true,
@@ -304,16 +357,23 @@ Component({
         const data = await this.requestVerificationCode("+86" + phone);
         console.log("Verification code sent:", data);
         // Start countdown
-        this.startCountdown();
-
-        wx.showToast({
-          title: data.msg,
-          icon: "success",
+        this.startCountdown();        // Clear any previous errors and show success message
+        this.setData({
+          phoneError: "",
+          codeError: "",
+          phoneSuccessMessage: data.msg || this.data.messages.status.codeSent,
         });
+
+        // Clear the success message after 3 seconds
+        setTimeout(() => {
+          this.setData({
+            phoneSuccessMessage: "",
+          });
+        }, 3000);
       } catch (error) {
-        wx.showToast({
-          title: this.data.messages.status.sendFailed,
-          icon: "error",
+        this.setData({
+          phoneError: this.data.messages.status.sendFailed,
+          phoneSuccessMessage: "", // Clear any success message
         });
       } finally {
         wx.hideLoading();
@@ -350,9 +410,7 @@ Component({
           this.phoneLogin();
           break;
       }
-    },
-
-    // Handle successful login
+    },    // Handle successful login
     handleLoginSuccess(result) {
       const app = getApp();
       wx.request({
@@ -419,24 +477,31 @@ Component({
       this.triggerEvent("loginSuccess", result);
       app.setUserInfo(result.user);
 
-      // Close modal
+      // Close modal and navigate
       this.closeModal();
       wx.redirectTo({
         url: "/pages/index/index",
       });
-      wx.showToast({
-        title: this.data.messages.status.loginSuccess,
-        icon: "success",
-      });
-    },
-
-    // Handle login error
-    handleLoginError(message) {
-      wx.showToast({
-        title: message,
-        icon: "error",
-        duration: 3000,
-      });
+    },    // Handle login error
+    handleLoginError(message, fieldType = null) {
+      // Set field-specific error instead of showing toast
+      if (fieldType === "email") {
+        this.setData({ emailError: message });
+      } else if (fieldType === "phone") {
+        this.setData({ phoneError: message });
+      } else if (fieldType === "password") {
+        this.setData({ passwordError: message });
+      } else if (fieldType === "code") {
+        this.setData({ codeError: message });
+      } else if (fieldType === "wechat") {
+        this.setData({ wechatError: message });
+      } else {
+        // For general errors, set general error field or default to email field
+        this.setData({ 
+          generalError: message,
+          emailError: message // Fallback to email field for general errors
+        });
+      }
     },
 
     // API request wrapper
@@ -453,11 +518,9 @@ Component({
             if (res.statusCode === 200 && res.data.status === "success") {
               resolve(res.data);
             } else {
-              wx.showToast({
-                title: res.data.msg || res.data.error || "登录失败",
-                icon: "error",
-              });
-              reject(new Error(res.data.msg || res.data.msg || "Login failed"));
+              reject(
+                new Error(res.data.msg || res.data.error || "Login failed")
+              );
             }
           },
           fail: reject,
@@ -479,12 +542,11 @@ Component({
             if (res.statusCode === 200 && res.data.status === "success") {
               resolve(res.data);
             } else {
-              wx.showToast({
-                title: res.data.msg || res.data.msg || "登录失败",
-                icon: "error",
-              });
-
-              reject(new Error(res.data.message || "Failed to send code"));
+              reject(
+                new Error(
+                  res.data.msg || res.data.message || "Failed to send code"
+                )
+              );
             }
           },
           fail: reject,

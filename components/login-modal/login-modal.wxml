@@ -27,8 +27,7 @@
     </view>
 
     <!-- Login Forms -->
-    <view class="login-forms">
-      <!-- WeChat Login -->
+    <view class="login-forms">      <!-- WeChat Login -->
       <view class="form-container {{loginType === 'wechat' ? 'active' : ''}}">
         <view class="wechat-login">
           <view class="wechat-icon">
@@ -36,18 +35,19 @@
           </view>
           <span class="wechat-text">微信一键登录</span>
           <span class="wechat-desc">安全便捷</span>
+          <text class="error-text" wx:if="{{wechatError}}">{{wechatError}}</text>
         </view>
       </view>
 
       <!-- Email Login -->
-      <view class="form-container {{loginType === 'email' ? 'active' : ''}}">
-        <view class="input-group">
+      <view class="form-container {{loginType === 'email' ? 'active' : ''}}">        <view class="input-group">
           <input
             class="form-input {{emailError ? 'error' : ''}}"
             type="text"
             placeholder="{{messages.formLabels.email}}"
             value="{{email}}"
             bindinput="onEmailInput"
+            disabled="{{loading}}"
           />
           <text class="error-text" wx:if="{{emailError}}">{{emailError}}</text>
         </view>
@@ -60,9 +60,9 @@
               placeholder="{{messages.formLabels.password}}"
               value="{{password}}"
               bindinput="onPasswordInput"
-            />
-            <view class="password-toggle" bindtap="togglePassword">
-              <text class="toggle-icon">{{showPassword ? '👁️' : '👁️‍🗨️'}}</text>
+              disabled="{{loading}}"
+            />            <view class="password-toggle" bindtap="togglePassword" data-action="toggle">
+              <text class="toggle-icon">{{showPassword ? '🙈' : '👁'}}</text>
             </view>
           </view>
           <text class="error-text" wx:if="{{passwordError}}">{{passwordError}}</text>
@@ -70,8 +70,7 @@
       </view>
 
       <!-- Phone Login -->
-      <view class="form-container {{loginType === 'phone' ? 'active' : ''}}">
-        <view class="input-group">
+      <view class="form-container {{loginType === 'phone' ? 'active' : ''}}">        <view class="input-group">
           <view class="phone-wrapper">
             <view class="country-code">+86</view>
             <input
@@ -80,9 +79,11 @@
               placeholder="{{messages.formLabels.phone}}"
               value="{{phone}}"
               bindinput="onPhoneInput"
+              disabled="{{loading}}"
             />
           </view>
           <text class="error-text" wx:if="{{phoneError}}">{{phoneError}}</text>
+          <text class="success-text" wx:if="{{phoneSuccessMessage}}">✓ {{phoneSuccessMessage}}</text>
         </view>
         
         <view class="input-group">
@@ -94,11 +95,12 @@
               value="{{verificationCode}}"
               bindinput="onCodeInput"
               maxlength="6"
+              disabled="{{loading}}"
             />
             <button
               class="code-btn {{countdown > 0 ? 'disabled' : ''}}"
               bindtap="sendVerificationCode"
-              disabled="{{countdown > 0}}"
+              disabled="{{countdown > 0 || loading}}"
             >
               {{countdown > 0 ? countdown + ' ' + messages.buttons.seconds : messages.buttons.sendCode}}
             </button>
@@ -106,6 +108,9 @@
           <text class="error-text" wx:if="{{codeError}}">{{codeError}}</text>
         </view>
       </view>
+    </view>    <!-- General Error Message -->
+    <view class="general-error" wx:if="{{generalError}}">
+      <text class="error-text">{{generalError}}</text>
     </view>
 
     <!-- Login Button -->
@@ -115,10 +120,10 @@
         bindtap="handleLogin"
         disabled="{{loading}}"
       >
-        <text wx:if="{{!loading}}">
+        <span wx:if="{{!loading}}">
           {{loginType === 'wechat' ? '微信登录' : messages.buttons.login}}
-        </text>
-        <text wx:if="{{loading}}">登录中...</text>
+        </span>
+        <span wx:if="{{loading}}">登录中...</span>
       </button>
     </view>
 
