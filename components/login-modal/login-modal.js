@@ -1,8 +1,8 @@
 const { default: config } = require("../../config");
 
-// components/login-modal/login-modal.js
-Component({  data: {
-    loginType: "email", // 'wechat', 'email', 'phone'
+Component({
+  data: {
+    loginType: "email",
     email: "",
     phone: "",
     password: "",
@@ -15,32 +15,23 @@ Component({  data: {
     passwordError: "",
     codeError: "",
     wechatError: "",
-    generalError: "",
-    phoneSuccessMessage: "", // For verification code sent confirmation
-    // Add Chinese messages
+    generalError: "",    phoneSuccessMessage: "",
     messages: {
-      // Login type labels
       loginTypes: {
         wechat: "微信登录",
         email: "邮箱登录",
-        phone: "手机登录",
-      },
-      // Form labels
+        phone: "手机登录",      },
       formLabels: {
         email: "邮箱地址",
         phone: "手机号码",
         password: "密码",
-        verificationCode: "验证码",
-      },
-      // Button texts
+        verificationCode: "验证码",      },
       buttons: {
         login: "登录",
         sendCode: "发送验证码",
         resend: "重新发送",
-        seconds: "秒",
-        register: "立即注册", // Added register button text
+        seconds: "秒",        register: "立即注册",
       },
-      // Error messages
       errors: {
         emailRequired: "请输入邮箱地址",
         emailInvalid: "请输入有效的邮箱地址",
@@ -53,9 +44,7 @@ Component({  data: {
         wechatLoginFailed: "微信登录失败，请重试",
         emailLoginFailed: "邮箱登录失败，请检查凭据",
         phoneLoginFailed: "手机登录失败，请检查验证码",
-        verificationFailed: "验证失败",
-      },
-      // Status messages
+        verificationFailed: "验证失败",      },
       status: {
         sendingCode: "发送验证码中...",
         codeSent: "验证码已发送",
@@ -65,25 +54,20 @@ Component({  data: {
     },
   },
   methods: {
-    // Close modal
     closeModal() {
       const app = getApp();
       app.setState("showLoginModal", false);
     },
 
-    // Navigate to register page
     goToRegister() {
-      // Close the login modal first
       this.closeModal();
-
-      // Navigate to register page
       wx.navigateTo({
         url: "/pages/register/register",
       });
     },
 
-    // Prevent modal close when clicking inside
-    preventClose(e) {},    // Switch login type
+    preventClose(e) {},
+
     switchLoginType(e) {
       const type = e.currentTarget.dataset.type;
       this.setData({
@@ -94,21 +78,22 @@ Component({  data: {
         codeError: "",
         wechatError: "",
         generalError: "",
-        phoneSuccessMessage: "",
-      });
-    },// Input handlers
+        phoneSuccessMessage: "",      });
+    },
+
     onEmailInput(e) {
       this.setData({
         email: e.detail.value,
         emailError: "",
-        generalError: "", // Clear general error when user starts typing
+        generalError: "",
       });
-    },    onPhoneInput(e) {
-      this.setData({
+    },
+
+    onPhoneInput(e) {      this.setData({
         phone: e.detail.value,
         phoneError: "",
-        phoneSuccessMessage: "", // Clear success message when user types
-        generalError: "", // Clear general error when user starts typing
+        phoneSuccessMessage: "",
+        generalError: "",
       });
     },
 
@@ -116,7 +101,7 @@ Component({  data: {
       this.setData({
         password: e.detail.value,
         passwordError: "",
-        generalError: "", // Clear general error when user starts typing
+        generalError: "",
       });
     },
 
@@ -124,28 +109,22 @@ Component({  data: {
       this.setData({
         verificationCode: e.detail.value,
         codeError: "",
-        generalError: "", // Clear general error when user starts typing
+        generalError: "",
       });
-    },    // Toggle password visibility
-    togglePassword(e) {
-      // 이벤트 버블링 방지
+    },    togglePassword(e) {
       if (e && e.stopPropagation) {
         e.stopPropagation();
       }
       
-      // 현재 상태 확인 및 로그
       const currentState = this.data.showPassword;
       console.log('Toggle password - current state:', currentState);
       
-      // 상태 변경
       this.setData({
         showPassword: !currentState,
       }, () => {
-        // 상태 변경 완료 후 로그
         console.log('Toggle password - new state:', this.data.showPassword);
       });
       
-      // 햅틱 피드백 (선택사항)
       if (wx.vibrateShort) {
         wx.vibrateShort({
           type: 'light'
@@ -161,46 +140,36 @@ Component({  data: {
 
     validatePhone(phone) {
       const phoneRegex = /\d{11}$/;
-      return phoneRegex.test(phone);
-    },
+      return phoneRegex.test(phone);    },
 
-    // WeChat login
     async wechatLogin() {
       try {
-        this.setData({ loading: true });
-
-        // Get WeChat login code
-        const loginResult = await this.promiseWrapper(wx.login);
+        this.setData({ loading: true });        const loginResult = await this.promiseWrapper(wx.login);
 
         if (!loginResult.code) {
           throw new Error("Failed to get WeChat login code");
         }
 
-        // Get user info (requires user authorization)
         const userInfoResult = await this.promiseWrapper(wx.getUserProfile, {
-          desc: "登录以访问个性化功能", // Chinese: "Login to access personalized features"
+          desc: "登录以访问个性化功能",
         });
 
-        // Send to backend for authentication
         const authResult = await this.requestLogin({
           type: "wechat",
           code: loginResult.code,
           userInfo: userInfoResult.userInfo,
-          signature: userInfoResult.signature,
-          rawData: userInfoResult.rawData,
-        });        this.handleLoginSuccess(authResult);
+          signature: userInfoResult.signature,          rawData: userInfoResult.rawData,
+        });
+
+        this.handleLoginSuccess(authResult);
       } catch (error) {
         this.handleLoginError(this.data.messages.errors.wechatLoginFailed, "wechat");
       } finally {
         this.setData({ loading: false });
-      }
-    },
+      }    },
 
-    // Email login
-    async emailLogin() {
-      const { email, password } = this.data;
+    async emailLogin() {      const { email, password } = this.data;
 
-      // Validation
       if (!email) {
         this.setData({ emailError: this.data.messages.errors.emailRequired });
         return;
@@ -236,14 +205,11 @@ Component({  data: {
 
         this.handleLoginSuccess(authResult);
       } catch (error) {
-        console.log(error);
-        // Clear any existing errors first
-        this.setData({
+        console.log(error);        this.setData({
           emailError: "",
           passwordError: "",
         });
 
-        // Set appropriate error based on response
         if (error.message && error.message.includes("email")) {
           this.setData({
             emailError: this.data.messages.errors.emailLoginFailed,
@@ -259,14 +225,10 @@ Component({  data: {
         }
       } finally {
         this.setData({ loading: false });
-      }
-    },
+      }    },
 
-    // Phone login
-    async phoneLogin() {
-      const { phone, verificationCode } = this.data;
+    async phoneLogin() {      const { phone, verificationCode } = this.data;
 
-      // Validation
       if (!phone) {
         this.setData({ phoneError: this.data.messages.errors.phoneRequired });
         return;

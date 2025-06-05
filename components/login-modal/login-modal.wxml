@@ -1,14 +1,11 @@
 <view class="login-modal" bindtap="closeModal">
   <view class="modal-content" catch:tap="preventClose">
-    <!-- Header -->
     <view class="modal-header">
       <span class="modal-title">登录</span>
       <view class="close-btn" bindtap="closeModal">
         <span class="iconfont icon-close">×</span>
-      </view>
-    </view>
+      </view>    </view>
 
-    <!-- Login Type Tabs -->
     <view class="login-tabs">
       <view 
         class="tab-item {{loginType === 'email' ? 'active' : ''}}"
@@ -23,11 +20,9 @@
         bindtap="switchLoginType"
       >
         <span>{{messages.loginTypes.phone}}</span>
-      </view>
-    </view>
+      </view>    </view>
 
-    <!-- Login Forms -->
-    <view class="login-forms">      <!-- WeChat Login -->
+    <view class="login-forms">
       <view class="form-container {{loginType === 'wechat' ? 'active' : ''}}">
         <view class="wechat-login">
           <view class="wechat-icon">
@@ -36,11 +31,9 @@
           <span class="wechat-text">微信一键登录</span>
           <span class="wechat-desc">安全便捷</span>
           <text class="error-text" wx:if="{{wechatError}}">{{wechatError}}</text>
-        </view>
-      </view>
+        </view>      </view>
 
-      <!-- Email Login -->
-      <view class="form-container {{loginType === 'email' ? 'active' : ''}}">        <view class="input-group">
+      <view class="form-container {{loginType === 'email' ? 'active' : ''}}"><view class="input-group">
           <input
             class="form-input {{emailError ? 'error' : ''}}"
             type="text"
