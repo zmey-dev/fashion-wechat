@@ -1,5 +1,6 @@
 <!--页面/创建媒体/创建媒体.wxml-->
 <app-layout current-tab="upload" current-filter="discover">
+  <view class="upload-container">
   <!-- 主要内容 -->
   <view class="main-content">
     <!-- 标签导航 -->
@@ -304,8 +305,8 @@
     
     <view class="modal-actions">
       <button class="modal-btn cancel" bindtap="cancelDotEdit">取消</button>
-      <button class="modal-btn confirm" bindtap="saveDot">保存</button>
-    </view>
+      <button class="modal-btn confirm" bindtap="saveDot">保存</button>    </view>
   </view>
 </view>
+  </view>
 </app-layout>

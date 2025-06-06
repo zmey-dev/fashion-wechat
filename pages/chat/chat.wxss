@@ -14,6 +14,16 @@ page {
   overflow: hidden;
 }
 
+/* Chat Container */
+.chat-container {
+  height: 100%;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
 /* View States */
 .chat-list-view,
 .chat-detail-view {
@@ -373,7 +383,7 @@ page {
 }
 
 .messages-list {
-  padding: 16px 0 80px 0;
+  padding: 16px 0 16px 0;
 }
 
 /* Date separator */
@@ -708,18 +718,6 @@ page {
 /* Scrollbar hidden */
 ::-webkit-scrollbar {
   display: none;
-}
-
-/* Safe area handling */
-@supports (padding: max(0px)) {
-  .list-header,
-  .chat-header {
-    padding-top: max(12px, env(safe-area-inset-top));
-  }
-
-  .message-input-container {
-    padding-bottom: max(8px, env(safe-area-inset-bottom));
-  }
 }
 
 /* Responsive adjustments */

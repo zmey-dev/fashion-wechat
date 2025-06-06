@@ -1,5 +1,6 @@
 <!-- pages/notification/notification.wxml -->
 <app-layout current-tab="notification" current-filter="discover">
+  <view class="notification-container">
   <!-- Header -->
   <view class="header">
     <text class="header-title">通知</text>
@@ -157,10 +158,10 @@
             </view>
           </view>
         </view>
-        
-        <view class="notification-message" wx:if="{{expandedItems[item.notify_id] && item.message}}">
+          <view class="notification-message" wx:if="{{expandedItems[item.notify_id] && item.message}}">
           <text>{{item.message}}</text>
         </view>
       </view>
     </view>  </scroll-view>
+  </view>
 </app-layout>

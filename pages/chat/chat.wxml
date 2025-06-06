@@ -1,11 +1,12 @@
 <!-- pages/chat/chat.wxml -->
 <app-layout current-tab="chat" current-filter="discover">
-  <!-- Chat List View -->
-  <view class="chat-list-view {{currentView === 'list' ? 'active' : 'hidden'}}">
-    <!-- Header -->
-    <view class="list-header">
-      <view class="header-title">聊天</view>
-    </view>
+  <view class="chat-container">
+    <!-- Chat List View -->
+    <view class="chat-list-view {{currentView === 'list' ? 'active' : 'hidden'}}">
+      <!-- Header -->
+      <view class="list-header">
+        <view class="header-title">聊天</view>
+      </view>
 
     <!-- Search Bar -->
     <view class="search-container">
@@ -206,7 +207,7 @@
     </view>
 
     <!-- Message Input -->
-    <view class="message-input-container" style="bottom: {{keyboardHeight + 40}}px;">
+    <view class="message-input-container" style="bottom: {{keyboardHeight}}px;">
       <view class="input-box">
         <view class="input-actions-left">
           <view class="input-action-btn" bindtap="toggleEmojiPicker">
@@ -269,15 +270,15 @@
       </view>
       
       <view class="context-divider"></view>
-      
-      <view 
+        <view 
         class="context-item danger"
         data-action="block"
         bindtap="onContextAction"
       >
         <view class="context-icon">🚫</view>
-        <text class="context-text">屏蔽用户</text>
+        <text class="context-text">屏蔽用户</text>      
       </view>
     </view>  
+  </view>
   </view>
 </app-layout>

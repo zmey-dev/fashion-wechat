@@ -123,6 +123,7 @@
   overflow-y: auto;
   padding-top: 120rpx; /* Space for fixed filter bar */
   padding-bottom: 180rpx; /* Space for fixed tab bar */
+  overflow: hidden;
 }
 
 /* Tab Bar Styles */

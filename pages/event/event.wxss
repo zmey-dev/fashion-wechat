@@ -9,6 +9,15 @@
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
 }
 
+.event-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow-y:auto ;
+}
+
 .page-container {
   display: flex;
   flex-direction: column;
@@ -86,7 +95,6 @@
 /* Main Container */
 .main-container {
   max-width: 750rpx;
-  margin: 0 auto;
   padding: 0 32rpx 60rpx;
 }
 

@@ -20,6 +20,8 @@
 .content-container {
   flex: 1;
   width: 100%;
+  height: 100%;
+  overflow-y: auto;
 }
 
 /* User List Styles */
@@ -137,7 +139,7 @@
   margin-bottom: 20rpx;
   border-radius: 10rpx;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 }
 
 .media-image {
@@ -156,7 +158,8 @@
   padding: 16rpx 20rpx;
 }
 
-.media-likes, .media-comments {
+.media-likes,
+.media-comments {
   margin-right: 20rpx;
   font-size: 28rpx;
   color: #aaa;
@@ -167,7 +170,8 @@
   color: #ddd;
 }
 
-.loading-indicator, .no-more {
+.loading-indicator,
+.no-more {
   text-align: center;
   padding: 20rpx;
   color: #777;
@@ -200,7 +204,7 @@
   border-color: #3b82f6;
 }
 
-.follow-button{
+.follow-button {
   padding: 10rpx 20rpx;
   background-color: #3b82f6;
   color: #fff;

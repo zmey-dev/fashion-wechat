@@ -1,32 +1,25 @@
 /* pages/contact/contact.wxss */
 .container {
-  min-height: 100vh;
-  padding-top: 100rpx;
   background-color: #121212;
   color: #ffffff;
-  padding-bottom: env(safe-area-inset-bottom);
   flex: 1;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
+  height: 100%;
+  animation: fadeIn 0.3s ease;
 }
 
-/* 페이지 컨테이너 스타일 추가 */
 .page-container {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  padding-bottom: 110rpx; /* 탭 바 높이만큼 패딩 추가 */
-}
-
-/* 기존 컨테이너 스타일 유지 */
-.container {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+  padding-bottom: 110rpx; 
 }
 
 /* Header */
 .header {
+  position: sticky;
   background: linear-gradient(135deg, #4a1d96, #1e3a8a);
   padding: 40rpx 30rpx;
   margin-bottom: 30rpx;
@@ -332,10 +325,6 @@
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
-}
-
-.container {
-  animation: fadeIn 0.3s ease;
 }
 
 /* Media queries for different screen sizes */
