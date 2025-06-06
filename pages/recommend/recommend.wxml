@@ -1,9 +1,6 @@
-<!-- pages/index/index.wxml -->
-<view
-  class="page-container"
->
+<!-- pages/recommend/recommend.wxml -->
+<app-layout current-tab="" current-filter="recommend">
   <login-modal wx:if="{{ showLoginModal }}" class="login-modal" />
-  <filter-bar currentFilter="recommend"></filter-bar>
   <view class="post-viewer-container">
     <media-player
       class="media-player"
@@ -29,8 +26,6 @@
     <!-- Loading indicator -->
     <view wx:if="{{ isLoading }}" class="loading-container">
       <view class="loading-spinner"></view>
-      <text class="loading-text">加载中...</text>
-    </view>
+      <text class="loading-text">加载中...</text>    </view>
   </view>
-  <douyin-tabbar current="me"></douyin-tabbar>
-</view>
+</app-layout>

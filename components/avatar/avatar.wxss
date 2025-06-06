@@ -20,7 +20,7 @@
   justify-content: center;
 }
 
-.avatar-placeholder text {
+.avatar-placeholder .avatar-text {
   color: #ffffff;
   font-weight: bold;
   line-height: 1;

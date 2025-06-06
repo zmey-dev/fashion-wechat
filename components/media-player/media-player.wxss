@@ -672,11 +672,10 @@
 
 .detail-content {
   padding: 20rpx;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 8rpx;
+  background: rgba(255, 255, 255, 0.05);  border-radius: 8rpx;
 }
 
-.detail-content text {
+.detail-content .detail-text {
   color: rgba(255, 255, 255, 0.8);
   font-size: 28rpx;
   line-height: 1.5;

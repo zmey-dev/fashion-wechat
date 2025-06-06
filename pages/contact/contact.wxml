@@ -1,8 +1,5 @@
 <!--pages/contact/contact.wxml-->
-<view class="page-container">
-  <!-- 필터 바 추가 -->
-  <filter-bar currentFilter="contact"></filter-bar>
-
+<app-layout current-tab="" current-filter="contact">
   <view class="container">
     <!-- Header -->
     <view class="header">
@@ -73,10 +70,7 @@
 
         <view class="clear-button" bindtap="removeAllImages" wx:if="{{images.length > 0}}">
           <text>清除所有图片</text>
-        </view>
-      </view>
+        </view>      </view>
     </view>
   </view>
-
-  <douyin-tabbar current="home"></douyin-tabbar>
-</view>
+</app-layout>

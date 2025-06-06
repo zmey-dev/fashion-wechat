@@ -1,0 +1,66 @@
+<!-- app-layout.wxml -->
+<view class="app-layout">  <!-- Top Filter Bar -->
+  <view class="app-layout-header">
+    <scroll-view class="filter-scroll" scroll-x="true" scroll-left="{{filterScrollLeft}}">
+      <view class="filter-tabs {{dynamicTabStyle === 'compact' ? 'compact-mode' : 'expanded-mode'}}">
+        <view 
+          wx:for="{{filterOptions}}" 
+          wx:key="key"
+          class="filter-tab {{currentFilter === item.key ? 'active' : ''}}"
+          data-filter="{{item.key}}"
+          bindtap="onFilterTap"
+        >
+          <text class="filter-text">{{item.name}}</text>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- Main Content Area -->
+  <view class="app-layout-content">
+    <slot></slot>
+  </view>
+  <!-- Bottom Tab Bar -->
+  <view class="app-layout-footer">
+    <view class="tab-container">
+      <view 
+        wx:for="{{tabs}}" 
+        wx:key="key"
+        class="tab-item {{currentTab === item.key ? 'active' : ''}} {{item.isSpecial ? 'special' : ''}}"
+        data-tab="{{item.key}}"
+        bindtap="onTabTap"
+      >        
+        <view class="tab-icon-container">
+          <view class="tab-icon">
+            <image 
+              src="{{currentTab === item.key ? item.activeIcon : item.icon}}" 
+              mode="aspectFit"
+              class="tab-icon-image"
+            />
+          </view>
+          <!-- Unread Badge -->
+          <view 
+            wx:if="{{item.key === 'chat' && totalUnreadCount > 0}}"
+            class="unread-badge"
+          >
+            <text class="unread-count">{{totalUnreadCount > 99 ? '99+' : totalUnreadCount}}</text>
+          </view>
+          <view 
+            wx:if="{{item.key === 'notification' && notificationCount > 0}}"
+            class="unread-badge"
+          >
+            <text class="unread-count">{{notificationCount > 99 ? '99+' : notificationCount}}</text>
+          </view>
+        </view>        
+        <text class="tab-text">{{item.name}}</text>
+      </view>
+    </view>
+  </view>
+  
+  <!-- Login Modal -->
+  <login-modal 
+    wx:if="{{showLoginModal}}"
+    bind:close="onLoginModalClose"
+    bind:success="onLoginSuccess"
+  ></login-modal>
+</view>

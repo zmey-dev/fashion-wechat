@@ -1,8 +1,5 @@
 <!--pages/friend/friend.wxml-->
-<view class="page-container">
-  <!-- Filter bar component -->
-  <filter-bar currentFilter="friend"></filter-bar>
-
+<app-layout current-tab="friend" current-filter="">
   <!-- Main content container -->
   <view class="content-container">
     <!-- User List View -->
@@ -43,28 +40,25 @@
           <text class="arrow-icon">></text>
         </view>
       </view>
-    </view>
-
-    <!-- User Media View -->
-    <view class="user-media-container" wx:if="{{showUserMedia}}">
+    </view>    <!-- User Media View -->
+    <view class="user-media-container" wx:if="{{showUserMedia && currentUser}}">
       <!-- Media header with back button and user profile -->
       <view class="media-header">
         <view class="back-button" bindtap="backToUserList">
           <text class="back-icon">←</text>
         </view>
         <view class="user-profile">
-          <avatar class="user-avatar" avatar="{{currentUser.avatar}}" name="{{currentUser.username}}" size="{{70}}"></avatar>
-          <text class="profile-nickname">{{currentUser.username}}</text>
+          <avatar class="user-avatar" avatar="{{currentUser.avatar || ''}}" name="{{currentUser.username || ''}}" size="{{70}}"></avatar>
+          <text class="profile-nickname">{{currentUser.username || ''}}</text>
         </view>
       </view>
       
       <!-- Action buttons for follow, friend, and message -->
-      <view class="media-stats">
-        <!-- Follow/Unfollow Button -->
+      <view class="media-stats">        <!-- Follow/Unfollow Button -->
         <button 
-          class="action-button {{currentUser.isFollowed ? 'bg-green-800' : 'bg-dark'}}" 
+          class="action-button {{(currentUser && currentUser.isFollowed) ? 'bg-green-800' : 'bg-dark'}}" 
           bindtap="handleFollowToggle">
-          <block wx:if="{{currentUser.isFollowed}}">
+          <block wx:if="{{currentUser && currentUser.isFollowed}}">
             <view class="button-content">
               <text class="icon">-</text>
               <text class="label">取消关注</text>
@@ -80,9 +74,9 @@
 
         <!-- Friend Button -->
         <button 
-          class="action-button {{currentUser.isFriend ? 'bg-green-800' : 'bg-dark'}}" 
+          class="action-button {{(currentUser && currentUser.isFriend) ? 'bg-green-800' : 'bg-dark'}}" 
           bindtap="handleFriendToggle">
-          <block wx:if="{{currentUser.isFriend}}">
+          <block wx:if="{{currentUser && currentUser.isFriend}}">
             <view class="button-content">
               <text class="icon">-</text>
               <text class="label">取消好友</text>
@@ -100,7 +94,7 @@
         <button 
           class="action-button bg-dark" 
           bindtap="handleSendMessage"
-          wx:if="{{currentUser.isFriend}}">
+          wx:if="{{currentUser && currentUser.isFriend}}">
           <view class="button-content">
             <text class="icon">💬</text>
             <text class="label">发消息</text>
@@ -126,15 +120,11 @@
       <!-- Loading indicator -->
       <view class="loading-indicator" wx:if="{{loading}}">
         <text>{{messages.loading}}</text>
-      </view>
-      
+      </view>      
       <!-- No more content message -->
       <view class="no-more" wx:if="{{!hasMore && userMediaList.length > 0}}">
         <text>没有更多内容</text>
       </view>
     </view>
   </view>
-
-  <!-- Bottom tab bar component -->
-  <douyin-tabbar current="friend"></douyin-tabbar>
-</view>
+</app-layout>

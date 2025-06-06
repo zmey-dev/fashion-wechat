@@ -1,6 +1,4 @@
-<view class="page-container">
-  <filter-bar currentFilter="discover"></filter-bar>
-
+<app-layout current-tab="" current-filter="discover">
   <!-- Main Content Area -->
   <view class="content-area" id="contentArea">
     <!-- Posts Grid -->
@@ -66,10 +64,7 @@
   >
     <text class="scroll-up-icon">⬆️</text>
   </view>
-  
-  <!-- Tab Bar Component -->
-  <douyin-tabbar current="index"></douyin-tabbar>
-  
+    
   <!-- Login Modal -->
   <login-modal wx:if="{{showLoginModal}}" bind:close="onLoginClose" bind:success="onLoginSuccess" />
   
@@ -120,7 +115,6 @@
             </button>
           </view>
         </view>
-      </view>
-    </view>
+      </view>    </view>
   </view>
-</view>
+</app-layout>

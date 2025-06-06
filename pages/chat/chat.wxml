@@ -1,5 +1,5 @@
 <!-- pages/chat/chat.wxml -->
-<view class="page-container">
+<app-layout current-tab="chat" current-filter="discover">
   <!-- Chat List View -->
   <view class="chat-list-view {{currentView === 'list' ? 'active' : 'hidden'}}">
     <!-- Header -->
@@ -278,9 +278,6 @@
         <view class="context-icon">🚫</view>
         <text class="context-text">屏蔽用户</text>
       </view>
-    </view>
+    </view>  
   </view>
-
-  <!-- Tab Bar -->
-  <douyin-tabbar current="chat"></douyin-tabbar>
-</view>
+</app-layout>

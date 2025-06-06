@@ -134,11 +134,18 @@ Page({
       filteredUserList: this.data.userList,
     });
   },
-
   // Select user and show their media
   selectUser: function (e) {
     const userId = e.currentTarget.dataset.id;
     const selectedUser = this.data.userList.find((user) => user.id === userId);
+
+    if (!selectedUser) {
+      wx.showToast({
+        title: this.data.messages.errors.loadFailed,
+        icon: "none",
+      });
+      return;
+    }
 
     // Prepare user data with required properties for UI interactions
     const userWithState = {
@@ -204,7 +211,6 @@ Page({
       },
     });
   },
-
   // Handle reaching bottom of page for infinite scroll
   onReachBottom: function () {
     if (this.data.showUserMedia && this.data.currentUser) {
@@ -242,11 +248,18 @@ Page({
     }
     wx.stopPullDownRefresh();
   },
-
   /**
    * Handle follow/unfollow action
    */
   handleFollowToggle: function () {
+    if (!this.data.currentUser) {
+      wx.showToast({
+        title: this.data.messages.errors.operationFailed,
+        icon: "none",
+      });
+      return;
+    }
+
     const currentUser = this.data.currentUser;
     const newFollowStatus = !currentUser.isFollowed;
 
@@ -319,11 +332,18 @@ Page({
       user.username.toLowerCase().includes(searchValue)
     );
   },
-
   /**
    * Handle friend request/cancel
    */
   handleFriendToggle: function () {
+    if (!this.data.currentUser) {
+      wx.showToast({
+        title: this.data.messages.errors.operationFailed,
+        icon: "none",
+      });
+      return;
+    }
+
     const currentUser = this.data.currentUser;
 
     if (currentUser.isFriend) {
@@ -342,11 +362,18 @@ Page({
       this.updateFriendStatus(true);
     }
   },
-
   /**
    * Update friend status with API
    */
   updateFriendStatus: function (addFriend) {
+    if (!this.data.currentUser) {
+      wx.showToast({
+        title: this.data.messages.errors.operationFailed,
+        icon: "none",
+      });
+      return;
+    }
+
     const currentUser = this.data.currentUser;
 
     wx.showLoading({
@@ -434,11 +461,18 @@ Page({
         },
       });
   },
-
   /**
    * Navigate to message page
    */
   handleSendMessage: function () {
+    if (!this.data.currentUser) {
+      wx.showToast({
+        title: this.data.messages.errors.operationFailed,
+        icon: "none",
+      });
+      return;
+    }
+
     const currentUser = this.data.currentUser;
 
     wx.navigateTo({

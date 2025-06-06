@@ -334,18 +334,18 @@
 }
 
 /* RTL Support */
-[dir="rtl"] .post-info {
+.rtl .post-info {
   left: 120rpx;
   right: 30rpx;
 }
 
-[dir="rtl"] .post-title::before {
+.rtl .post-title::before {
   left: auto;
   right: -10rpx;
 }
 
-[dir="rtl"] .post-info:active .post-title,
-[dir="rtl"] .post-info:active .post-content {
+.rtl .post-info:active .post-title,
+.rtl .post-info:active .post-content {
   transform: translateX(-5rpx);
 }
 

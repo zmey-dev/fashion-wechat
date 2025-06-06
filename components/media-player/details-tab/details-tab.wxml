@@ -4,15 +4,14 @@
   <view wx:if="{{ selectedDot }}" class="detail-section">
     <view class="detail-header">
       <text class="detail-title">标记信息</text>
-    </view>
-    <view class="detail-content">
+    </view>    <view class="detail-content">
       <view wx:if="{{ selectedDot.title }}" class="info-item">
-        <text class="info-label">标题:</text>
-        <text class="info-value">{{ selectedDot.title }}</text>
+        <text class="info-label detail-text">标题:</text>
+        <text class="info-value detail-text">{{ selectedDot.title }}</text>
       </view>
       <view wx:if="{{ selectedDot.description }}" class="info-item">
-        <text class="info-label">描述:</text>
-        <text class="info-value">{{ selectedDot.description }}</text>
+        <text class="info-label detail-text">描述:</text>
+        <text class="info-value detail-text">{{ selectedDot.description }}</text>
       </view>
     </view>
   </view>
@@ -21,10 +20,9 @@
   <view wx:else class="detail-section">
     <view class="detail-header">
       <text class="detail-title">标记信息</text>
-    </view>
-    <view class="no-selection">
+    </view>    <view class="no-selection">
       <view class="no-selection-icon">📍</view>
-      <text class="no-selection-text">点击图片上的标记点查看详细信息</text>
+      <text class="no-selection-text detail-text">点击图片上的标记点查看详细信息</text>
     </view>
   </view>
 </view>

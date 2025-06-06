@@ -1,4 +1,4 @@
-<view class="container">
+<app-layout current-tab="me" current-filter="discover">
   <!-- User Profile Header -->
   <view class="profile-header">
     <view class="profile-info">
@@ -382,10 +382,8 @@
       </view>
     </view>
   </view>
-
   <!-- Floating Action Button -->
   <view class="fab" bindtap="scrollToTop">
     <text class="fab-icon">↑</text>
   </view>
-  <douyin-tabbar current="me"></douyin-tabbar>
-</view>
+</app-layout>

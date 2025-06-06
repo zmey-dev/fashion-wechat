@@ -1,4 +1,4 @@
-<view class="page-container">
+<app-layout current-tab="" current-filter="event">
   <!-- Event Header with Poster -->
   <view wx:if="{{event.poster_image}}" class="event-header">
     <image class="header-image" src="{{event.poster_image}}" mode="aspectFill"></image>
@@ -163,9 +163,6 @@
     </div>
     <div class="float-btn scroll-top" bindtap="onScrollToTop">
       <image class="btn-icon" src="/images/icons/arrow-up.svg"></image>
-    </div>
+  </div>
   </view>
-
-  <!-- Tab Bar -->
-  <douyin-tabbar current="event"></douyin-tabbar>
-</view>
+</app-layout>

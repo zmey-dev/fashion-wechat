@@ -83,7 +83,6 @@
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding-top: 80rpx;
   box-sizing:border-box;
 }
 

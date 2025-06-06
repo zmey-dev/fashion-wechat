@@ -1,4 +1,4 @@
-<view class="page-container">
+<app-layout current-tab="" current-filter="discover">
   <!-- Page Header -->
   <view class="page-header">
     <text class="page-title">用户资料</text>
@@ -104,4 +104,4 @@
   <view class="loading-container" wx:if="{{loading && !currentUser}}">
     <text class="loading-text">{{messages.loading}}</text>
   </view>
-</view>
+</app-layout>

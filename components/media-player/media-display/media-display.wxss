@@ -332,12 +332,11 @@
 
 .media-error::before {
   content: '⚠️';
-  display: block;
-  font-size: 48rpx;
+  display: block;  font-size: 48rpx;
   margin-bottom: 20rpx;
 }
 
-video::-webkit-media-controls-panel {
+/* video::-webkit-media-controls-panel {
   display: flex !important;
   opacity: 1 !important;
-}
+} */

@@ -1,8 +1,5 @@
 <!--pages/follow/follow.wxml-->
-<view class="page-container">
-  <!-- Filter bar component -->
-  <filter-bar currentFilter="follow"></filter-bar>
-
+<app-layout current-tab="" current-filter="follow">
   <!-- Main content container -->
   <view class="content-container">
     <!-- User List View -->
@@ -131,10 +128,6 @@
       <!-- No more content message -->
       <view class="no-more" wx:if="{{!hasMore && userMediaList.length > 0}}">
         <text>没有更多内容</text>
-      </view>
-    </view>
+      </view>    </view>
   </view>
-
-  <!-- Bottom tab bar component -->
-  <douyin-tabbar current="me"></douyin-tabbar>
-</view>
+</app-layout>

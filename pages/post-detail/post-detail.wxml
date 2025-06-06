@@ -1,7 +1,5 @@
-<!-- pages/index/index.wxml -->
-<view class="page-container">
-
-  
+<!-- pages/post-detail/post-detail.wxml -->
+<app-layout current-tab="" current-filter="discover">
   <!-- Login Modal -->
   <login-modal wx:if="{{ showLoginModal }}" class="login-modal" />
   
@@ -44,9 +42,7 @@
     <!-- Empty State -->
     <view wx:elif="{{ !currentPost }}" class="empty-container">
       <view class="empty-icon">📭</view>
-      <text class="empty-text">内容不存在</text>
-      <button class="back-btn" bindtap="goBack">返回</button>
+      <text class="empty-text">内容不存在</text>      <button class="back-btn" bindtap="goBack">返回</button>
     </view>
   </view>
-  <douyin-tabbar current="me"></douyin-tabbar>
-</view>
+</app-layout>

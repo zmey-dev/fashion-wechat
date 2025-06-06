@@ -1,5 +1,5 @@
 <!-- pages/notification/notification.wxml -->
-<view class="notification-container">
+<app-layout current-tab="notification" current-filter="discover">
   <!-- Header -->
   <view class="header">
     <text class="header-title">通知</text>
@@ -162,7 +162,5 @@
           <text>{{item.message}}</text>
         </view>
       </view>
-    </view>
-  </scroll-view>
-  <douyin-tabbar current="notification"></douyin-tabbar>
-</view>
+    </view>  </scroll-view>
+</app-layout>

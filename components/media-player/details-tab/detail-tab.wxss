@@ -140,11 +140,11 @@
 }
 
 /* Content Type Indicators */
-.detail-content[data-type="title"]::before {
+.detail-content.type-title::before {
   background: linear-gradient(180deg, #3498db, #2980b9);
 }
 
-.detail-content[data-type="description"]::before {
+.detail-content.type-description::before {
   background: linear-gradient(180deg, #2ecc71, #27ae60);
 }
 
