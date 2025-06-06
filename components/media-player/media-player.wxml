@@ -1,7 +1,6 @@
 <!-- components/media-player/media-player.wxml -->
 <view 
   class="media-player" 
-  style="height: {{ windowHeight }}px;"
   bindtouchstart="onTouchStart"
   bindtouchmove="onTouchMove"
   bindtouchend="onTouchEnd"

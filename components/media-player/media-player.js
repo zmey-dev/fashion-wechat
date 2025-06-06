@@ -55,6 +55,8 @@ Component({
     selectedDot: null,    // System information
     windowWidth: 0,
     windowHeight: 0,
+    containerWidth: 0,
+    containerHeight: 0,
 
     touchStartY: 0,
     touchStartX: 0,
@@ -66,19 +68,38 @@ Component({
     minSwipeDistance: 50, // Minimum distance for valid swipe
     maxHorizontalThreshold: 100, // Maximum horizontal movement still considered vertical swipe
     maxTransformDistance: 150, // Maximum transform distance for visual feedback
-  },
-
-  /**
+  },  /**
    * Component lifecycle
    */
   attached() {
     this.initializeComponent();
+    
+    // Add resize event listener
+    this.onScreenResize = () => {
+      const systemInfo = wx.getSystemInfoSync();
+      this.setData({
+        windowWidth: systemInfo.windowWidth,
+        windowHeight: systemInfo.windowHeight,
+      });
+      this.getContainerDimensions();
+    };
+    
+    wx.onWindowResize(this.onScreenResize);
+  },
+
+  ready() {
+    // Update container dimensions after component is fully rendered
+    this.getContainerDimensions();
   },
 
   detached() {
     this.cleanup();
+    
+    // Remove resize event listener
+    if (this.onScreenResize) {
+      wx.offWindowResize(this.onScreenResize);
+    }
   },
-
   /**
    * Component observers
    */
@@ -94,14 +115,15 @@ Component({
       } else {
         this.resumeAutoPlay();
       }
+      // Update container dimensions when detail panel is shown/hidden
+      setTimeout(() => this.getContainerDimensions(), 300);
     },
   },
 
   /**
    * Component methods
    */
-  methods: {
-    /**
+  methods: {    /**
      * Initialize component
      */
     initializeComponent() {
@@ -111,9 +133,27 @@ Component({
         windowHeight: systemInfo.windowHeight,
       });
 
+      // Get actual container dimensions
+      this.getContainerDimensions();
+
       if (this.properties.selectedPost) {
         this.loadPostData();
       }
+    },
+
+    /**
+     * Get actual container dimensions
+     */
+    getContainerDimensions() {
+      const query = this.createSelectorQuery();
+      query.select('.media-player').boundingClientRect((rect) => {
+        if (rect) {
+          this.setData({
+            containerHeight: rect.height,
+            containerWidth: rect.width
+          });
+        }
+      }).exec();
     },
 
     /**
@@ -928,14 +968,15 @@ Component({
       this.animateSwipeOut("down", () => {
         this.moveToPreviousPost();
       });
-    },
-
-    /**
+    },    /**
      * Animate swipe out effect
      */
     animateSwipeOut(direction, callback) {
-      const { windowHeight } = this.data;
-      const targetTransform = direction === "up" ? -windowHeight : windowHeight;      this.setData({ verticalTransform: targetTransform });
+      const { containerHeight, windowHeight } = this.data;
+      // Use containerHeight if available, fallback to windowHeight
+      const height = containerHeight || windowHeight;
+      const targetTransform = direction === "up" ? -height : height;
+      this.setData({ verticalTransform: targetTransform });
 
       // Execute callback after animation
       setTimeout(() => {

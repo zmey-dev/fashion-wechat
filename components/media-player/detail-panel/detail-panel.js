@@ -10,8 +10,7 @@ Component({
     selectedDot: { type: Object, value: null },
     displayFollowerCount: { type: String, value: "0" },
     displayLikeCount: { type: String, value: "0" },
-  },
-  data: {
+  },  data: {
     panelState: 'closed', // 'closed', 'half', 'full'
     isDragging: false,
     startY: 0,
@@ -19,6 +18,7 @@ Component({
     startTime: 0,
     translateY: 0,
     windowHeight: 0,
+    containerHeight: 0,
   },
 
   attached() {
@@ -27,6 +27,14 @@ Component({
     this.setData({
       windowHeight: systemInfo.windowHeight
     });
+    
+    // Get container dimensions
+    this.getContainerDimensions();
+  },
+  
+  ready() {
+    // Update container dimensions after component is fully rendered
+    this.getContainerDimensions();
   },
 
   observers: {
@@ -70,7 +78,10 @@ Component({
       
       const touch = e.touches[0];
       const deltaY = touch.clientY - this.data.startY;
-      const { panelState, windowHeight } = this.data;
+      const { panelState, containerHeight, windowHeight } = this.data;
+      
+      // Use containerHeight if available, fallback to windowHeight
+      const height = containerHeight || windowHeight;
       
       let newTranslateY = 0;
       
@@ -78,7 +89,7 @@ Component({
       if (panelState === 'half') {
         if (deltaY > 0) {
           // Dragging down - allow closing
-          newTranslateY = Math.min(deltaY, windowHeight * 0.6);
+          newTranslateY = Math.min(deltaY, height * 0.6);
         } else {
           // Dragging up - allow full screen
           newTranslateY = deltaY;
@@ -104,10 +115,13 @@ Component({
     },    onTouchEnd(e) {
       if (!this.data.isDragging) return;
       
-      const { startY, currentY, startTime, panelState, windowHeight } = this.data;
+      const { startY, currentY, startTime, panelState, containerHeight, windowHeight } = this.data;
       const deltaY = currentY - startY;
       const deltaTime = Date.now() - startTime;
       const velocity = Math.abs(deltaY) / deltaTime; // pixels per ms
+      
+      // Use containerHeight if available, fallback to windowHeight
+      const height = containerHeight || windowHeight;
       
       let newPanelState = panelState;
       
@@ -124,15 +138,15 @@ Component({
       } else {
         // Slow drag - check distance
         if (panelState === 'half') {
-          if (deltaY > windowHeight * 0.2) {
+          if (deltaY > height * 0.2) {
             // Dragged down more than 20% of screen
             newPanelState = 'closed';
-          } else if (deltaY < -windowHeight * 0.15) {
+          } else if (deltaY < -height * 0.15) {
             // Dragged up more than 15% of screen
             newPanelState = 'full';
           }
         } else if (panelState === 'full') {
-          if (deltaY > windowHeight * 0.15) {
+          if (deltaY > height * 0.15) {
             // Dragged down more than 15% of screen
             newPanelState = 'half';
           }
@@ -183,14 +197,36 @@ Component({
 
     onCommentDelete(e) {
       this.triggerEvent("commentdelete", e.detail);
-    },
-
-    onImagePreview(e) {
+    },    onImagePreview(e) {
       this.triggerEvent("imagepreview", e.detail);
     },
 
     onLoginRequired() {
       this.triggerEvent("loginrequired");
+    },
+    
+    /**
+     * Get actual container dimensions from the parent media-player
+     */
+    getContainerDimensions() {
+      const query = this.createSelectorQuery().in(this);
+      query.select('.detail-panel').boundingClientRect((rect) => {
+        if (rect) {
+          this.setData({
+            containerHeight: rect.height
+          });
+        }
+      }).exec();
+      
+      // Also try to get the parent container dimensions
+      const parentQuery = this.createSelectorQuery().selectViewport();
+      parentQuery.boundingClientRect((rect) => {
+        if (rect && !this.data.containerHeight) {
+          this.setData({
+            containerHeight: rect.height
+          });
+        }
+      }).exec();
     },
   },
 });

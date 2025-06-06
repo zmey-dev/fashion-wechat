@@ -7,9 +7,10 @@
   left: 0;
   right: 0;
   background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
-  padding: 40rpx 30rpx 30rpx;
+  padding: 40rpx 30rpx 0rpx;
   z-index: 200;
   backdrop-filter: blur(10rpx);
+  box-sizing: border-box;
 }
 
 /* Controls Bottom Container */

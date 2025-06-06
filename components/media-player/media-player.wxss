@@ -3,6 +3,7 @@
 .media-player {
   position: relative;
   width: 100%;
+  height: 100%;
   background: #000;
   overflow: hidden;
   /* touch-action is not supported in WXSS, use catchtouchmove instead */

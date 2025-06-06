@@ -38,7 +38,7 @@
 }
 
 .detail-panel.full {
-  height: 100vh;
+  height: 100%;
   bottom: 0;
   border-radius: 0;
   padding-top: var(--status-bar-height, 44px);

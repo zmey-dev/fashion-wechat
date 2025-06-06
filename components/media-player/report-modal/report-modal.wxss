@@ -24,7 +24,7 @@
 /* 弹窗容器 */
 .modal-container {
   width: 100%;
-  max-height: 85vh;
+  max-height: 85%;
   background: linear-gradient(180deg, #1A1A1A 0%, #0F0F0F 100%);
   border-radius: 32rpx 32rpx 0 0;
   box-shadow: 0 -20rpx 60rpx rgba(0, 0, 0, 0.5);

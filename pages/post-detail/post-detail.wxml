@@ -1,5 +1,5 @@
 <!-- pages/post-detail/post-detail.wxml -->
-<app-layout current-tab="" current-filter="discover">
+<app-layout current-tab="" current-filter="">
   <!-- Login Modal -->
   <login-modal wx:if="{{ showLoginModal }}" class="login-modal" />
   
