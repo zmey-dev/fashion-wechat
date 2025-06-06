@@ -1,4 +1,4 @@
-<view class="login-modal" bindtap="closeModal">
+<view class="login-modal">
   <view class="modal-content" catch:tap="preventClose">
     <view class="modal-header">
       <span class="modal-title">登录</span>

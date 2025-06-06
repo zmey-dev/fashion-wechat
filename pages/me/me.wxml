@@ -4,7 +4,7 @@
   <view class="profile-header">
     <view class="profile-info">
       <view class="avatar-container">
-        <image class="avatar" src="{{userInfo.avatar}}" mode="aspectFill" />
+        <avatar class="avatar" avatar="{{userInfo.avatar}}" name="{{userInfo.username}}" size="120" mode="aspectFill" />
       </view>
       
       <view class="user-details">
@@ -144,7 +144,7 @@
     <!-- Avatar Section -->
     <view class="avatar-section">
       <view class="avatar-container-large" bindtap="selectAvatar">
-        <image class="avatar-large" src="{{selectedAvatar || userInfo.avatar}}" mode="aspectFill" />
+        <avatar class="avatar-large" avatar="{{selectedAvatar || userInfo.avatar}}" name="{{userInfo.username}}" size="156" mode="aspectFill" />
         <view class="avatar-overlay" wx:if="{{isEditingProfile}}">
           <text class="avatar-edit-icon">📷</text>
           <text class="avatar-edit-text">更换头像</text>
@@ -382,9 +382,6 @@
         </view>
       </view>
     </view>
-  </view>  <!-- Floating Action Button -->
-  <view class="fab" bindtap="scrollToTop">
-    <text class="fab-icon">↑</text>
   </view>
   </view>
 </app-layout>

@@ -1,9 +1,9 @@
 <!-- components/detail-panel/detail-panel.wxml -->
 <view 
-  class="detail-panel {{ panelState }} {{ isDragging ? 'dragging' : '' }}" 
+  class="detail-panel {{ panelState }} {{ isDragging ? 'dragging' : '' }} {{ showDetail ? 'show' : '' }}" 
   wx:if="{{ currentPost && currentPostUser }}"
   style="transform: translateY({{ isDragging ? translateY + 'px' : '0' }});"
->  <!-- Drag handle -->
+><!-- Drag handle -->
   <view 
     class="drag-handle"
     bindtouchstart="onTouchStart"

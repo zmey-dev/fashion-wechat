@@ -29,6 +29,165 @@
   transition: transform 0.3s ease-out !important; /* Simplified for WXSS compatibility */
 }
 
+/* Responsive layout when detail panel is open */
+.media-content.detail-open {
+  height: 40% !important;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  overflow: hidden;
+  position: relative;
+}
+
+/* Ensure media display fits properly in reduced space */
+.media-content.detail-open .media-display {
+  height: 100%;
+  width: 100%;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Adjust swiper container in detail panel open state */
+.media-content.detail-open .media-display swiper {
+  height: 100% !important;
+}
+
+.media-content.detail-open .media-display swiper-item {
+  height: 100% !important;
+}
+
+/* Scale down user section when detail panel is open */
+.media-content.detail-open .user-section {
+  transform: scale(0.85);
+  transform-origin: left center;
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Scale down user avatar and info section */
+.media-content.detail-open .user-info {
+  transform: scale(0.8);
+  transform-origin: left top;
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Adjust text content when detail panel is open */
+.media-content.detail-open .text-content {
+  font-size: 26rpx;
+  line-height: 1.3;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.media-content.detail-open .title {
+  font-size: 28rpx;
+  margin-bottom: 8rpx;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.media-content.detail-open .content {
+  font-size: 24rpx;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Hide controls and action buttons when detail panel is open */
+.media-content.detail-open .media-controls {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+  transform: scale(0.9);
+  transform-origin: center bottom;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.media-content.detail-open .action-buttons {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+  transform: scale(0.85);
+  transform-origin: right center;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Direct hiding with hidden class */
+.media-controls.hidden,
+.action-buttons.hidden {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+  transform: scale(0.8);
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Additional specific selectors for media-controls component */
+media-controls.hidden,
+action-buttons.hidden {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+  display: none !important;
+}
+
+/* Full state layout when detail panel is fully open */
+.media-content.detail-full {
+  height: 20% !important;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  overflow: hidden;
+  position: relative;
+}
+
+/* Hide controls and action buttons in full state as well */
+.media-content.detail-full .media-controls,
+.media-content.detail-full .action-buttons {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+  display: none !important;
+}
+
+/* Ensure media display fits properly in full state */
+.media-content.detail-full .media-display {
+  height: 100%;
+  width: 100%;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Scale down elements even more in full state */
+.media-content.detail-full .user-section {
+  transform: scale(0.7);
+  transform-origin: left center;
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.media-content.detail-full .user-info {
+  transform: scale(0.6);
+  transform-origin: left top;
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Also hide any post info overlay when detail panel is open */
+.media-content.detail-open .post-info-overlay {
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Adjust dots indicator position and size */
+.media-content.detail-open .dots-container {
+  transform: scale(0.8);
+  bottom: 10rpx;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Scale down progress bar */
+.media-content.detail-open .progress-container {
+  transform: scale(0.9);
+  transform-origin: center bottom;
+  bottom: 5rpx;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Ensure smooth transitions for all child elements */
+.media-content.detail-open .media-display,
+.media-content.detail-open .post-info-overlay {
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
 /* SVG Icon Base Styles */
 .svg-icon {
   display: flex;
@@ -878,4 +1037,49 @@
 
 .fade-in {
   animation: fadeIn 0.3s ease-out;
+}
+
+/* Hide controls and action buttons when detail panel is in full state */
+.media-content.detail-full .media-controls,
+.media-content.detail-full .action-buttons {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.media-content.detail-full .post-info-overlay {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Completely hide all UI elements when detail panel is open - Alternative approach */
+.media-content.detail-open .media-controls,
+.media-content.detail-open .action-buttons,
+.media-content.detail-open .post-info,
+.media-content.detail-open .user-section {
+  display: none !important;
+}
+
+.media-content.detail-full .media-controls,
+.media-content.detail-full .action-buttons,
+.media-content.detail-full .post-info,
+.media-content.detail-full .user-section {
+  display: none !important;
+}
+
+/* Adjust media content when detail panel is in full state */
+.media-content.detail-full {
+  height: 20% !important;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  overflow: hidden;
+  position: relative;
+}
+
+.media-content.detail-full .media-display {
+  height: 100%;
+  width: 100%;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }

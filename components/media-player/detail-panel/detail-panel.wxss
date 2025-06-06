@@ -23,6 +23,7 @@
 
 /* Panel States */
 .detail-panel.show {
+  bottom: 0;
   box-shadow: 0 -10rpx 30rpx rgba(0, 0, 0, 0.5);
 }
 
@@ -35,6 +36,7 @@
   height: 60%;
   bottom: 0;
   border-radius: 20rpx 20rpx 0 0;
+  box-shadow: 0 -10rpx 30rpx rgba(0, 0, 0, 0.5);
 }
 
 .detail-panel.full {
@@ -43,6 +45,7 @@
   border-radius: 0;
   padding-top: var(--status-bar-height, 44px);
   border-top: none;
+  box-shadow: 0 -10rpx 30rpx rgba(0, 0, 0, 0.5);
 }
 
 /* Drag Handle */

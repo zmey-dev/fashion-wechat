@@ -44,11 +44,10 @@ Component({
     displayComments: "",
     displayFavorites: "",
     displayShares: "",
-    displayFollowerCount: "",    displayLikeCount: "",
-
-    // UI state
+    displayFollowerCount: "",    displayLikeCount: "",    // UI state
     showDetail: false,
     showReportModal: false,
+    detailPanelState: 'closed', // 'closed', 'half', 'full'
     tabIndex: 1, // 0: User posts, 1: Comments, 2: Details
 
     // Dots and interactions
@@ -306,19 +305,25 @@ Component({
     onSlideChange(e) {
       const newIndex = e.detail.current;
       this.setData({ currentSlideIndex: newIndex });
-    },
-
-    onDotTap(e) {
+    },    onDotTap(e) {
       const { index } = e.detail;
       const { currentMedia, currentSlideIndex } = this.data;
       const media = currentMedia[currentSlideIndex];
 
       if (media && media.dots && media.dots[index]) {
+        console.log('onDotTap called, opening detail panel');
         this.setData({
           selectedDot: media.dots[index],
           tabIndex: 2,
           showDetail: true,
+          detailPanelState: 'half' // Add this line to update detail panel state
         });
+        
+        // Pause auto-play when detail panel opens via dot tap
+        if (this.data.isPlaying) {
+          console.log('Pausing auto-play as detail panel opened via dot tap');
+          this.pauseAutoPlay();
+        }
       }
     },
 
@@ -594,14 +599,28 @@ Component({
           });
         },
       });
-    },
-
-    onToggleDetail() {
+    },    onToggleDetail() {
+      console.log('onToggleDetail called');
       if (isEmpty(this.properties.authUser)) {
+        console.log('User not authenticated, showing login modal');
         const app = getApp();
         app.setState("showLoginModal", true);
+        return;
       }
-      this.setData({ showDetail: !this.data.showDetail });
+      
+      const newShowDetail = !this.data.showDetail;
+      console.log('Toggling detail panel:', { current: this.data.showDetail, new: newShowDetail });
+      
+      this.setData({ 
+        showDetail: newShowDetail,
+        detailPanelState: newShowDetail ? 'half' : 'closed'
+      });
+      
+      // Pause auto-play when detail panel opens
+      if (newShowDetail && this.data.isPlaying) {
+        console.log('Pausing auto-play as detail panel opened');
+        this.pauseAutoPlay();
+      }
     },
 
     onShowReportModal() {
@@ -617,13 +636,21 @@ Component({
     onTabChange(e) {
       const { index } = e.detail;
       this.setData({ tabIndex: parseInt(index) });
-    },
-
-    onCloseDetail() {
+    },    onCloseDetail() {
+      console.log('onCloseDetail called');
       this.setData({
         showDetail: false,
         selectedDot: null,
+        detailPanelState: 'closed',
       });
+      
+      console.log('Detail panel closed, detailPanelState set to: closed');
+      
+      // Resume auto-play when detail panel closes
+      if (this.data.isContinue && this.data.currentPost.type === 'image' && this.data.mediaLength > 1) {
+        console.log('Resuming auto-play as detail panel was closed');
+        this.resumeAutoPlay();
+      }
     },
 
     onSelectUserPost(e) {
@@ -991,12 +1018,29 @@ Component({
      */
     animateBackToCenter() {
       this.setData({ verticalTransform: 0 });
-    },
-
-    onDetailStateChange(e) {
+    },    onDetailStateChange(e) {
       const { state } = e.detail;
       console.log('Detail panel state changed to:', state);
-      // Additional logic can be added here based on panel state
+      console.log('Previous detailPanelState:', this.data.detailPanelState);
+      
+      this.setData({
+        detailPanelState: state
+      });
+      
+      console.log('Updated detailPanelState to:', state);
+      
+      // Handle auto-play based on panel state
+      if (state === 'half' || state === 'full') {
+        if (this.data.isPlaying) {
+          console.log('Pausing auto-play for panel state:', state);
+          this.pauseAutoPlay();
+        }
+      } else if (state === 'closed') {
+        if (this.data.isContinue && this.data.currentPost.type === 'image' && this.data.mediaLength > 1) {
+          console.log('Resuming auto-play as panel closed');
+          this.resumeAutoPlay();
+        }
+      }
     },
   },
 });

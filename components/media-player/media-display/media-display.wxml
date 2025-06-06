@@ -39,7 +39,7 @@
           class="interactive-dot {{selectedDot && selectedDot.id === dot.id ? 'active' : ''}}"
           style="left: {{ dot.x * 100 }}%; top: {{ dot.y * 100 }}%;"
           data-index="{{ dotIndex }}"
-          bindtap="onDotTap"
+          catchtap="onDotTap"
         >
           <view class="dot-pulse"></view>
           <view class="dot-core"></view>

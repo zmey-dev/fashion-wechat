@@ -1,168 +1,169 @@
 <app-layout current-tab="" current-filter="event">
-  <!-- Event Header with Poster -->
-  <view wx:if="{{event.poster_image}}" class="event-header">
-    <image class="header-image" src="{{event.poster_image}}" mode="aspectFill"></image>
-    <view class="header-overlay"></view>
+  <view class="event-detail-container">
+    <!-- Content Container -->
+    <view class="content-wrapper">
+      <!-- Event Header with Poster -->
+      <view wx:if="{{event.poster_image}}" class="event-header">
+        <image class="header-image" src="{{event.poster_image}}" mode="aspectFill"></image>
+        <view class="header-overlay"></view>
     
-    <!-- Join Event Button (User Role Only) -->
-    <view wx:if="{{userInfo.role === 'user' && canJoinEvent}}" class="header-actions">
-      <button class="join-btn" bindtap="onJoinEvent">
-        参加活动
-      </button>
-    </view>
-    
-    <!-- Warning for other schools -->
-    <view wx:if="{{userInfo.role === 'user' && !event.allow_other_school && userInfo.university_id !== event.user.university_id}}" class="header-warning">
-      <text class="warning-text">该活动不允许外校报名</text>
-    </view>
-    
-    <!-- Full capacity warning -->
-    <view wx:if="{{event.allow_limit && event.students_count >= event.limit}}" class="header-warning">
-      <text class="warning-text">该活动已满员</text>
-    </view>
-  </view>
-
-  <!-- Event Info Section -->
-  <view class="event-info-section">
-    <view class="info-container">
-      <view class="event-title-wrapper">
-        <text class="event-title">{{event.title || '活动发现页'}}</text>
-        
-        <view class="event-meta">
-          <!-- Date Info -->
-          <view wx:if="{{event.start_date && event.end_date}}" class="meta-item">
-            <image class="meta-icon calendar" src="/images/icons/calendar.svg"></image>
-            <text class="meta-text">{{formatEventDate(event.start_date)}} - {{formatEventDate(event.end_date)}}</text>
-          </view>
-          
-          <!-- Current Time -->
-          <view class="meta-item">
-            <image class="meta-icon clock" src="/images/icons/clock.svg"></image>
-            <text class="meta-text">今日: {{currentDate}} {{currentTime}}</text>
-          </view>
-          
-          <!-- Participants -->
-          <view class="meta-item">
-            <image class="meta-icon users" src="/images/icons/users.svg"></image>
-            <text class="meta-text">{{event.students_count || 0}} 参与者</text>
-          </view>
-          
-          <!-- University -->
-          <view wx:if="{{event.user.university.name}}" class="meta-item">
-            <image class="meta-icon location" src="/images/icons/location.svg"></image>
-            <text class="meta-text">{{event.user.university.name}}</text>
-          </view>
-        </view>
-      </view>
-    </view>
-  </view>
-
-  <!-- Event Description -->
-  <view wx:if="{{event.description}}" class="description-section">
-    <view class="section-header">
-      <image class="section-icon" src="/images/icons/document-text.svg"></image>
-      <text class="section-title">活动说明</text>
-    </view>
-    <view class="description-content">
-      <text class="description-text">{{event.description}}</text>
-    </view>
-  </view>
-
-  <!-- Posts Content Area -->
-  <view class="content-area">
-    <!-- Loading State -->
-    <view wx:if="{{loading && posts.length === 0}}" class="loading-container">
-      <view class="loading-spinner"></view>
-      <text class="loading-text">正在加载活动内容...</text>
-    </view>
-
-    <!-- Empty State -->
-    <view wx:elif="{{!loading && posts.length === 0}}" class="empty-container">
-      <view class="empty-content">
-        <image class="empty-icon" src="/images/icons/users.svg"></image>
-        <text class="empty-title">暂无作品可展示</text>
-        <text class="empty-desc">敬请期待更多精彩内容</text>
-      </view>
-    </view>
-
-    <!-- Posts Grid -->
-    <view wx:else class="posts-grid">
-      <view 
-        wx:for="{{posts}}" 
-        wx:key="id"
-        class="post-card"
-        data-post-id="{{item.id}}"
-        data-index="{{index}}"
-        bindtap="onPostTap"
-      >
-        <!-- Crown for Top 3 -->
-        <view wx:if="{{index < 3}}" class="crown-wrapper">
-          <image class="crown-icon" src="/images/crown{{index + 4}}.png" mode="aspectFit"></image>
-        </view>
-
-        <!-- Blocked Post Overlay -->
-        <view wx:if="{{!item.active}}" class="blocked-overlay">
-          <image class="ban-icon" src="/images/icons/ban.svg"></image>
-          <text class="blocked-text">已阻止</text>
-        </view>
-
-        <!-- Media Container -->
-        <view class="media-container">
-          <image 
-            class="post-image"
-            src="{{item.type === 'video' ? item.media[0].preview_url : item.media[0].url}}"
-            lazy-load="{{true}}"
-            mode="aspectFill"
-          />
+        <!-- Join Event Button (User Role Only) -->
+        <view wx:if="{{userInfo.role === 'user' && canJoinEvent}}" class="header-actions">
+          <button class="join-btn" bindtap="onJoinEvent">
+            参加活动
+          </button>
         </view>
         
-        <!-- Post Info -->
-        <view class="post-info">
-          <view class="post-title-wrapper">
-            <text class="post-title">{{item.title}}</text>
-          </view>
-          
-          <view class="post-actions">
-            <!-- User Info (Hidden for Event) -->
-            <!-- <view class="user-info" catchtap="onUserTap" data-username="{{item.user.username}}" data-userId="{{item.user.id}}">
-              <avatar avatar="{{item.user.avatar}}" name="{{item.user.username}}" size="32"></avatar>
-              <text class="username">@{{item.user.username}}</text>
-            </view> -->
+        <!-- Warning for other schools -->
+        <view wx:if="{{userInfo.role === 'user' && !event.allow_other_school && userInfo.university_id !== event.user.university_id}}" class="header-warning">
+          <text class="warning-text">该活动不允许外校报名</text>
+        </view>
+        
+        <!-- Full capacity warning -->
+        <view wx:if="{{event.allow_limit && event.students_count >= event.limit}}" class="header-warning">
+          <text class="warning-text">该活动已满员</text>
+        </view>
+      </view>
+
+      <!-- Event Info Section -->
+      <view class="event-info-section">
+        <view class="info-container">
+          <view class="event-title-wrapper">
+            <text class="event-title">{{event.title || '活动发现页'}}</text>
             
-            <!-- Like Button (User Role Only) -->
+            <view class="event-meta">
+              <!-- Date Info -->
+              <view wx:if="{{event.start_date && event.end_date}}" class="meta-item">
+                <image class="meta-icon calendar" src="/images/icons/calendar.svg"></image>
+                <text class="meta-text">{{formatEventDate(event.start_date)}} - {{formatEventDate(event.end_date)}}</text>
+              </view>
+              
+              <!-- Current Time -->
+              <view class="meta-item">
+                <image class="meta-icon clock" src="/images/icons/clock.svg"></image>
+                <text class="meta-text">今日: {{currentDate}} {{currentTime}}</text>
+              </view>
+              
+              <!-- Participants -->
+              <view class="meta-item">
+                <image class="meta-icon users" src="/images/icons/users.svg"></image>
+                <text class="meta-text">{{event.students_count || 0}} 参与者</text>
+              </view>
+              
+              <!-- University -->
+              <view wx:if="{{event.user.university.name}}" class="meta-item">
+                <image class="meta-icon location" src="/images/icons/location.svg"></image>
+                <text class="meta-text">{{event.user.university.name}}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- Event Description -->
+      <view wx:if="{{event.description}}" class="description-section">
+        <view class="section-header">
+          <image class="section-icon" src="/images/icons/document-text.svg"></image>
+          <text class="section-title">活动说明</text>
+        </view>
+        <view class="description-content">
+          <text class="description-text">{{event.description}}</text>
+        </view>
+      </view>
+
+      <!-- Posts Content Area -->
+      <view class="content-area">
+        <!-- Loading State -->
+        <view wx:if="{{loading && posts.length === 0}}" class="loading-container">
+          <view class="loading-spinner"></view>
+          <text class="loading-text">正在加载活动内容...</text>
+        </view>
+
+        <!-- Empty State -->
+        <view wx:elif="{{!loading && posts.length === 0}}" class="empty-container">
+          <view class="empty-content">
+            <image class="empty-icon" src="/images/icons/users.svg"></image>
+            <text class="empty-title">暂无作品可展示</text>
+            <text class="empty-desc">敬请期待更多精彩内容</text>
+          </view>
+        </view>
+
+        <!-- Posts Grid -->
+        <view wx:else class="posts-grid">
+          <view 
+            wx:for="{{posts}}" 
+            wx:key="id"
+            class="post-card"
+            data-post-id="{{item.id}}"
+            data-index="{{index}}"
+            bindtap="onPostTap"
+          >
+            <!-- Crown for Top 3 -->
+            <view wx:if="{{index < 3}}" class="crown-wrapper">
+              <image class="crown-icon" src="/images/crown{{index + 4}}.png" mode="aspectFit"></image>
+            </view>
+
+            <!-- Blocked Post Overlay -->
+            <view wx:if="{{!item.active}}" class="blocked-overlay">
+              <image class="ban-icon" src="/images/icons/ban.svg"></image>
+              <text class="blocked-text">已阻止</text>
+            </view>
+
+            <!-- Media Container -->
+            <view class="media-container">
+              <image 
+                class="post-image"
+                src="{{item.type === 'video' ? item.media[0].preview_url : item.media[0].url}}"
+                lazy-load="{{true}}"
+                mode="aspectFill"
+              />
+            </view>
+            
+            <!-- Post Info -->
+            <view class="post-info">
+              <view class="post-title-wrapper">
+                <text class="post-title">{{item.title}}</text>
+              </view>
+              
+              <view class="post-actions">
+                <!-- User Info (Hidden for Event) -->
+                <!-- <view class="user-info" catchtap="onUserTap" data-username="{{item.user.username}}" data-userId="{{item.user.id}}">
+                  <avatar avatar="{{item.user.avatar}}" name="{{item.user.username}}" size="32"></avatar>
+                  <text class="username">@{{item.user.username}}</text>
+                </view> -->
+                      <!-- Like Button (User Role Only) -->
             <view wx:if="{{userInfo.role === 'user'}}" class="like-section">
-              <div class="like-btn" bindtap="onLikePost" data-post-id="{{item.id}}" data-index="{{index}}">
+              <view class="like-btn" bindtap="onLikePost" data-post-id="{{item.id}}" data-index="{{index}}">
                 <image 
                   class="heart-icon {{item.likes_exists ? 'liked' : ''}}" 
                   src="/images/icons/heart.svg"
                 ></image>
                 <text class="like-count">{{item.likes}}</text>
-              </div>
+              </view>
+            </view>
+              </view>
             </view>
           </view>
+        </view>
+
+        <!-- Loading More Indicator -->
+        <view wx:if="{{loading && posts.length > 0}}" class="loading-more">
+          <view class="loading-spinner small"></view>
+        </view>
+
+        <!-- End Message -->
+        <view wx:if="{{!hasMore && posts.length > 0}}" class="end-message">
+          <text class="end-text">已经到底了</text>
         </view>
       </view>
     </view>
 
-    <!-- Loading More Indicator -->
-    <view wx:if="{{loading && posts.length > 0}}" class="loading-more">
-      <view class="loading-spinner small"></view>
+    <!-- Floating Action Buttons -->
+    <view class="floating-actions">
+      <view class="float-btn refresh" bindtap="onRefresh">
+        <view wx:if="{{loading}}" class="loading-spinner mini"></view>
+        <image wx:else class="btn-icon" src="/images/icons/refresh.svg"></image>
+      </view>    
     </view>
-
-    <!-- End Message -->
-    <view wx:if="{{!hasMore && posts.length > 0}}" class="end-message">
-      <text class="end-text">已经到底了</text>
-    </view>
-  </view>
-
-  <!-- Floating Action Buttons -->
-  <view class="floating-actions">
-    <div class="float-btn refresh" bindtap="onRefresh">
-      <view wx:if="{{loading}}" class="loading-spinner mini"></view>
-      <image wx:else class="btn-icon" src="/images/icons/refresh.svg"></image>
-    </div>
-    <div class="float-btn scroll-top" bindtap="onScrollToTop">
-      <image class="btn-icon" src="/images/icons/arrow-up.svg"></image>
-  </div>
   </view>
 </app-layout>

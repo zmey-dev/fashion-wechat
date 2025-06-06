@@ -36,13 +36,18 @@ Component({
     // Update container dimensions after component is fully rendered
     this.getContainerDimensions();
   },
-
   observers: {
     showDetail: function(show) {
+      console.log('detail-panel showDetail observer:', show, 'current panelState:', this.data.panelState);
+      
       if (show && this.data.panelState === 'closed') {
         this.setData({ panelState: 'half' });
+        // Trigger state change event when opening via observer
+        this.triggerEvent("statechange", { state: 'half' });
+        console.log('detail-panel triggered statechange to half via observer');
       } else if (!show) {
         this.setData({ panelState: 'closed' });
+        // No need to trigger statechange for closing as it's handled by closedetail event
       }
     }
   },

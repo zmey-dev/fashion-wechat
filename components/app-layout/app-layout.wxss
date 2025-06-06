@@ -120,7 +120,8 @@
 /* Content Area */
 .app-layout-content {
   flex: 1;
-  overflow-y: auto;
+  overflow-y: hidden;
+  position: relative;
   padding-top: 120rpx; /* Space for fixed filter bar */
   padding-bottom: 180rpx; /* Space for fixed tab bar */
   overflow: hidden;

@@ -11,15 +11,14 @@
     <view class="loading-spinner"></view>
   </view>
 
- <report-modal
+  <report-modal
     visible="{{ showReportModal }}"
     postId="{{ currentPost.id }}"
     bind:close="onCloseReportModal"
     bind:submit="onSubmitReport"
   />
-  
-  <view 
-    class="media-content {{ isVerticalSwiping ? 'swiping' : '' }}"
+    <view 
+    class="media-content {{ isVerticalSwiping ? 'swiping' : '' }} {{ detailPanelState === 'half' ? 'detail-open' : '' }} {{ detailPanelState === 'full' ? 'detail-full' : '' }}"
     style="transform: translateY({{ verticalTransform }}px);"
   >
     <!-- Media Display Component -->
@@ -36,11 +35,10 @@
       bind:dottap="onDotTap"
       bind:previousslide="moveToPreviousSlide"
       bind:nextslide="moveToNextSlide"
-    />
-
-    <!-- Media Controls Component -->
+    />    <!-- Media Controls Component -->
     <media-controls
       wx:if="{{ currentPost.type === 'image' }}"
+      class="media-controls {{ detailPanelState !== 'closed' ? 'hidden' : '' }}"
       current-post="{{ currentPost }}"
       current-media="{{ currentMedia }}"
       current-slide-index="{{ currentSlideIndex }}"
@@ -51,7 +49,7 @@
       bind:progresstap="onProgressTap"
     />    <!-- Action Buttons Component -->
     <action-buttons
-      class="action-buttons"
+      class="action-buttons {{ detailPanelState !== 'closed' ? 'hidden' : '' }}"
       current-post="{{ currentPost }}"
       current-post-user="{{ currentPostUser }}"
       auth-user="{{ authUser }}"
@@ -68,6 +66,7 @@
       bind:reportmodal="onShowReportModal"
     />
   </view>
+  
   <detail-panel
     show-detail="{{ showDetail }}"
     tab-index="{{ tabIndex }}"
@@ -90,17 +89,4 @@
     bind:imagepreview="onImagePreview"
     bind:loginrequired="onLoginRequired"
   />
-
-  <!-- Swipe direction indicator -->
-  <view 
-    wx:if="{{ isVerticalSwiping && Math.abs(verticalTransform) > 30 }}" 
-    class="swipe-direction-indicator"
-  >
-    <view class="direction-arrow {{ verticalTransform < 0 ? 'arrow-up' : 'arrow-down' }}">
-      {{ verticalTransform < 0 ? '↑' : '↓' }}
-    </view>
-    <view class="direction-text">
-      {{ verticalTransform < 0 ? 'Next' : 'Previous' }}
-    </view>
-  </view>
 </view>
