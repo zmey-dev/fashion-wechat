@@ -166,8 +166,7 @@ Component({
   /**
    * Component methods
    */
-  methods: {
-    /**
+  methods: {    /**
      * Filter tab click event handler
      */
     onFilterTap: function(e) {
@@ -187,24 +186,32 @@ Component({
         }
       }
       
+      // Check if clicking on currently active filter
+      // Only allow redirection for "discover" page when already active
+      if (this.data.currentFilter === filter && filter !== 'discover') {
+        // Don't navigate if it's the same filter and not discover page
+        return;
+      }
+      
       // Update current filter, clear tab selection
       this.setData({ 
         currentFilter: filter,
         currentTab: ''
       });
-      
-      // Find filter option
+        // Find filter option
       const filterOption = this.data.filterOptions.find(item => item.key === filter);
       
       if (filterOption && filterOption.path) {
-        // Navigate to corresponding page
-        this.navigateToPage(filterOption.path);
-      }      
+        // For discover page, use redirectTo; for others, use navigateTo
+        if (filter === 'discover') {
+          this.redirectToPage(filterOption.path);
+        } else {
+          this.navigateToPage(filterOption.path);
+        }
+      }
       // Trigger filter change event to parent component
       this.triggerEvent('filterChange', { filter });
-    },
-
-    /**
+    },    /**
      * Tab click event handler
      */
     onTabTap: function(e) {
@@ -222,6 +229,13 @@ Component({
           app.setState("showLoginModal", true);
           return;
         }
+      }
+      
+      // Check if clicking on currently active tab
+      // Don't navigate if it's the same tab (no discover tab in tabs)
+      if (this.data.currentTab === tab) {
+        // Don't navigate if it's the same tab
+        return;
       }
       
       // Update current tab, clear filter selection
@@ -245,11 +259,10 @@ Component({
       
       // Trigger tab change event to parent component
       this.triggerEvent('tabChange', { tab });
-    },
-
-    /**
+    },    /**
      * Page navigation handler
-     */    navigateToPage: function(path) {
+     */
+    navigateToPage: function(path) {
       wx.navigateTo({
         url: path,
         fail: () => {
@@ -260,6 +273,18 @@ Component({
               this.showToast(this.data.messages.navigationError);
             }
           });
+        }
+      });
+    },
+
+    /**
+     * Page redirect handler (for discover page)
+     */
+    redirectToPage: function(path) {
+      wx.redirectTo({
+        url: path,
+        fail: () => {
+          this.showToast(this.data.messages.navigationError);
         }
       });
     },

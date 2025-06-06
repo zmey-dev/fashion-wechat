@@ -60,11 +60,12 @@
       >
         <view class="notification-header">
           <view class="avatar-container">
-            <image 
-              src="{{item.sender_avatar || '/images/default-avatar.png'}}" 
-              class="avatar"
+            <avatar 
+              avatar="{{item.sender_avatar}}" 
+              name="{{item.sender_name}}"
               mode="aspectFill"
-            ></image>
+              size="80"
+            ></avatar>
           </view>
           
           <view class="notification-info">
@@ -134,11 +135,12 @@
       >
         <view class="notification-header">
           <view class="avatar-container">
-            <image 
-              src="{{item.sender_avatar || '/images/default-avatar.png'}}" 
-              class="avatar"
+            <avatar 
+              avatar="{{item.sender_avatar}}" 
+              name="{{item.sender_name}}"
               mode="aspectFill"
-            ></image>
+              size="80"
+            ></avatar>
           </view>
           
           <view class="notification-info">
