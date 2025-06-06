@@ -22,25 +22,23 @@
   height: 80rpx;
   white-space: nowrap;
   width: 100%;
-  overflow-x: auto;
 }
 
 .filter-tabs {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: flex-start;
   padding: 0 30rpx;
   height: 100%;
-  white-space: nowrap;
-  min-width: 100%;
+  overflow-x: auto;
 }
 
 .filter-tabs.expanded-mode {
-  justify-content: flex-start;
+  justify-content: space-between;
 }
 
 .filter-tabs.compact-mode {
-  justify-content: flex-start;
+  justify-content: space-evenly;
   flex-wrap: nowrap;
 }
 
@@ -50,24 +48,23 @@
 }
 
 .filter-tabs.expanded-mode .filter-tab {
-  flex: none;
-  min-width: auto;
+  flex: 1;
+  min-width: 0;
 }
 
 .filter-tab {
-  flex: none;
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 8rpx;
-  padding: 10rpx 20rpx;
+  padding: 10rpx 15rpx;
   border-radius: 20rpx;
   transition: all 0.3s ease;
   text-align: center;
-  min-width: auto;
-  width: auto;
+  min-width: 0;
   position: relative;
-  white-space: nowrap;
+  overflow: hidden;
 }
 
 .filter-tab:first-child {
@@ -109,8 +106,10 @@
   color: #fff;
   font-weight: 500;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   text-align: center;
-  width: auto;
+  width: 100%;
 }
 
 .filter-tab.active .filter-text {

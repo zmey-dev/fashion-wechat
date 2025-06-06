@@ -4,10 +4,10 @@
 .action-buttons {
   position: absolute;
   right: 30rpx;
-  bottom: 120rpx;
+  bottom: 180rpx;
   display: flex;
   flex-direction: column;
-  gap: 40rpx;
+  gap: 10rpx;
   z-index: 300;
 }
 

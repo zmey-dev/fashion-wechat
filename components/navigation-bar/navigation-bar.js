@@ -1,9 +1,9 @@
 Component({
   options: {
-    multipleSlots: true // 在组件定义时的选项中启用多slot支持
+    multipleSlots: true // Enable multiple slot support in component definition
   },
   /**
-   * 组件的属性列表
+   * Component properties list
    */
   properties: {
     extClass: {
@@ -33,26 +33,23 @@ Component({
     homeButton: {
       type: Boolean,
       value: false,
-    },
-    animated: {
-      // 显示隐藏的时候opacity动画效果
+    },    animated: {
+      // Show/hide with opacity animation effect
       type: Boolean,
       value: true
     },
     show: {
-      // 显示隐藏导航，隐藏的时候navigation-bar的高度占位还在
+      // Show/hide navigation, when hidden the navigation-bar height placeholder remains
       type: Boolean,
       value: true,
       observer: '_showChange'
-    },
-    // back为true的时候，返回的页面深度
+    },    // Page depth to navigate back when back is true
     delta: {
       type: Number,
       value: 1
-    },
-  },
+    },  },
   /**
-   * 组件的初始数据
+   * Component initial data
    */
   data: {
     displayStyle: ''
@@ -70,10 +67,9 @@ Component({
         leftWidth: `width: ${windowWidth - rect.left}px`,
         safeAreaTop: isDevtools || isAndroid ? `height: calc(var(--height) + ${top}px); padding-top: ${top}px` : ``
       })
-    },
-  },
+    },  },
   /**
-   * 组件的方法列表
+   * Component methods list
    */
   methods: {
     _showChange(show) {

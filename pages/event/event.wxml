@@ -2,15 +2,14 @@
 <app-layout current-tab="" current-filter="event">
   <!-- Navigation Header -->
   <view class="nav-header">
-    <view class="nav-content">
-      <view class="nav-brand">
+    <view class="nav-content">      <view class="nav-brand">
         <view class="brand-icon">
           <view class="icon-dot"></view>
         </view>
-        <text class="brand-text">활동展示</text>
+        <text class="brand-text">活动展示</text>
       </view>
       <view class="nav-badge">
-        <text class="badge-text">{{events.length}} 진행 중</text>
+        <text class="badge-text">{{events.length}} 进行中</text>
       </view>
     </view>
   </view>

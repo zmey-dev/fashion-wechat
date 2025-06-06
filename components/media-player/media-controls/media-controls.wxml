@@ -2,7 +2,7 @@
 <view
   class="media-controls" 
   wx:if="{{ currentPost.type === 'image' }}"
-  style="{{ currentPost.type === 'image' ? 'padding-bottom: 130rpx; box-sizing: border-;' : '' }}"
+  style="{{ currentPost.type === 'image' ? 'padding-bottom: 180rpx; box-sizing: border-box;' : '' }}"
   >
   <view class="controls-bottom">
     <view class="progress-bars">
@@ -31,10 +31,8 @@
             mode="aspectFit"
           ></image>
         </view>
-      </view>
-
-      <view class="continue-control">
-        <text class="continue-text">Auto-Play</text>
+      </view>      <view class="continue-control">
+        <text class="continue-text">自动播放</text>
         <switch
           checked="{{ isContinue }}"
           bindchange="onContinueToggle"

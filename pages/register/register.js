@@ -607,9 +607,8 @@ Page({
             icon: "success"
           });
           
-          setTimeout(() => {
-            wx.navigateBack({
-              delta: 1, // 回退前 delta(默认为1) 页面
+          setTimeout(() => {            wx.navigateBack({
+              delta: 1, // Go back delta (default 1) pages
               success: function(res){
                 // success
               },

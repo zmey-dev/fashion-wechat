@@ -1,25 +1,25 @@
 Component({
   /**
-   * 组件属性
+   * Component properties
    */
   properties: {
-    // 当前选中的标签页
+    // Currently selected tab
     currentTab: {
       type: String,
       value: '',
       observer: function(newVal) {
-        // 当标签页改变时，清除过滤器选择
+        // When tab changes, clear filter selection
         if (newVal && this.data.currentFilter) {
           this.setData({ currentFilter: '' });
         }
       }
     },
-    // 当前选中的过滤器
+    // Currently selected filter
     currentFilter: {
       type: String,
       value: '',
       observer: function(newVal) {
-        // 当过滤器改变时，清除标签页选择
+        // When filter changes, clear tab selection
         if (newVal && this.data.currentTab) {
           this.setData({ currentTab: '' });
         }
@@ -29,18 +29,20 @@ Component({
   },
 
   /**
-   * 组件数据
-   */  data: {
+   * Component data
+   */
+  data: {
     filterScrollLeft: 0,
-    dynamicTabStyle: 'expanded', // 'expanded' or 'compact'    // 过滤器选项列表 (去掉friend)
+    dynamicTabStyle: 'expanded', // 'expanded' or 'compact'
+    // Filter options list (removed friend)
     filterOptions: [
       { key: "discover", name: "精选", path: "/pages/index/index" },
       { key: "recommend", name: "推荐", path: "/pages/recommend/recommend" },
       { key: "follow", name: "关注", path: "/pages/follow/follow" },
       { key: "event", name: "比赛", path: "/pages/event/event" },
-            { key: "contact", name: "联系我们", path: "/pages/contact/contact" }
+      { key: "contact", name: "联系我们", path: "/pages/contact/contact" }
     ],
-    // 标签页选项列表 (이미지 아이콘 사용)
+    // Tab options list (using image icons)
     tabs: [
       { 
         key: "chat", 
@@ -78,7 +80,7 @@ Component({
         activeIcon: "/images/icons/me-active.png",
         path: "/pages/me/me" 
       }
-    ],
+        ],
     messages: {
       navigationError: "页面跳转失败"
     },
@@ -89,7 +91,7 @@ Component({
     notificationCount: 0
   },
   /**
-   * 组件生命周期函数
+   * Component lifecycle functions
    */
   lifetimes: {
     attached: function() {
@@ -140,8 +142,7 @@ Component({
       if (app.globalData.userInfo && app.globalData.userInfo.token) {
         this.startNotificationPolling();
       }
-      
-      // 组件附加时滚动到当前过滤器
+        // Scroll to current filter when component is attached
       setTimeout(() => {
         this.scrollToCurrentFilter();
       }, 100);
@@ -162,94 +163,97 @@ Component({
       this.stopNotificationPolling();
     }
   },
-
   /**
-   * 组件方法
+   * Component methods
    */
   methods: {
     /**
-     * 过滤器标签点击事件处理
-     */    onFilterTap: function(e) {
+     * Filter tab click event handler
+     */
+    onFilterTap: function(e) {
       const { filter } = e.currentTarget.dataset;
       const app = getApp();
       
-      // 需要登录验证的过滤器页面 (discover除外)
-      const needLoginFilters = ['recommend', 'follow', 'event', 'contact'];        // 检查是否需要登录
+      // Filter pages that require login authentication (except discover)
+      const needLoginFilters = ['recommend', 'follow', 'event', 'contact'];
+      
+      // Check if login is required
       if (needLoginFilters.includes(filter)) {
         const userInfo = app.globalData.userInfo;
         if (!userInfo || !userInfo.token) {
-          // 显示登录模态框
+          // Show login modal
           app.setState("showLoginModal", true);
           return;
         }
       }
       
-      // 更新当前过滤器，清除标签页选择
+      // Update current filter, clear tab selection
       this.setData({ 
         currentFilter: filter,
         currentTab: ''
       });
       
-      // 查找过滤器选项
+      // Find filter option
       const filterOption = this.data.filterOptions.find(item => item.key === filter);
       
       if (filterOption && filterOption.path) {
-        // 导航到对应页面
+        // Navigate to corresponding page
         this.navigateToPage(filterOption.path);
-      }
-      
-      // 向父组件传递过滤器变化事件
+      }      
+      // Trigger filter change event to parent component
       this.triggerEvent('filterChange', { filter });
-    },/**
-     * 标签页点击事件处理
+    },
+
+    /**
+     * Tab click event handler
      */
     onTabTap: function(e) {
       const { tab } = e.currentTarget.dataset;
       const app = getApp();
       
-      // 需要登录验证的页面
+      // Pages that require login authentication
       const needLoginPages = ['chat', 'notification','friend', 'me', 'upload'];
-        // 检查是否需要登录
+      
+      // Check if login is required
       if (needLoginPages.includes(tab)) {
         const userInfo = app.globalData.userInfo;
         if (!userInfo || !userInfo.token) {
-          // 显示登录模态框
+          // Show login modal
           app.setState("showLoginModal", true);
           return;
         }
       }
       
-      // 更新当前标签页，清除过滤器选择
+      // Update current tab, clear filter selection
       this.setData({ 
         currentTab: tab,
         currentFilter: ''
       });
       
-      // 查找标签页选项
+      // Find tab option
       const tabOption = this.data.tabs.find(item => item.key === tab);
       
       if (tabOption && tabOption.path) {
-        // 导航到对应页面
+        // Navigate to corresponding page
         this.navigateToPage(tabOption.path);
         
-        // 如果是通知页面，清除通知计数
+        // If it's notification page, clear notification count
         if (tab === 'notification') {
           this.clearNotificationCount();
         }
       }
       
-      // 向父组件传递标签页变化事件
+      // Trigger tab change event to parent component
       this.triggerEvent('tabChange', { tab });
     },
 
     /**
-     * 页面导航处理
-     */
-    navigateToPage: function(path) {
+     * Page navigation handler
+     */    navigateToPage: function(path) {
       wx.navigateTo({
         url: path,
         fail: () => {
-          // 如果navigateTo失败，尝试redirectTo
+          // If navigateTo fails, try redirectTo
           wx.redirectTo({
             url: path,
             fail: () => {
@@ -261,7 +265,7 @@ Component({
     },
 
     /**
-     * 自动滚动到当前过滤器
+     * Auto scroll to current filter
      */
     scrollToCurrentFilter: function() {
       const currentFilter = this.data.currentFilter;
@@ -269,12 +273,12 @@ Component({
       
       const query = this.createSelectorQuery();
       
-      // 查找当前过滤器的索引
+      // Find current filter index
       const index = this.data.filterOptions.findIndex(item => item.key === currentFilter);
       
       if (index === -1) return;
       
-      // 获取位置信息
+      // Get position information
       query.selectAll('.filter-tab').boundingClientRect();
       query.select('.filter-scroll').boundingClientRect();
       
@@ -287,17 +291,19 @@ Component({
         if (index < tabRects.length) {
           const tabRect = tabRects[index];
           
-          // 计算滚动位置以居中当前过滤器标签
+          // Calculate scroll position to center current filter tab
           const scrollLeft = Math.max(0, 
             tabRect.left - scrollRect.left - (scrollRect.width / 2) + (tabRect.width / 2)
           );
           
-          // 设置滚动位置
+          // Set scroll position
           this.setData({ filterScrollLeft: scrollLeft });
-        }
+                }
       });
-    },    /**
-     * 显示提示消息
+    },
+
+    /**
+     * Show toast message
      */
     showToast: function(title) {
       wx.showToast({

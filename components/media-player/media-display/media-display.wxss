@@ -5,8 +5,8 @@
   position: relative;
   width: 100vw;
   height: 100vh;
-  padding-bottom: 110rpx;
-  padding-top: 80rpx;
+  padding-bottom: 180rpx;
+  padding-top: 120rpx;
   box-sizing: border-box;
 }
 

@@ -21,9 +21,8 @@ Component({
       value: 0,
     },
   },
-
   data: {
-    // 媒体状态
+    // Media state
     currentSlideIndex: 0,
     isPlaying: false,
     isContinue: true,
@@ -31,32 +30,29 @@ Component({
     showPlayIndicator: false,
     autoPlayTimer: null,
 
-    // 模板绑定的计算数据
+    // Template-bound computed data
     currentPost: null,
     currentPostUser: null,
     currentMedia: [],
     userComments: [],
     mediaLength: 0,
 
-    // 计算显示值
+    // Computed display values
     displayTitle: "",
     displayContent: "",
     displayLikes: "",
     displayComments: "",
     displayFavorites: "",
     displayShares: "",
-    displayFollowerCount: "",
-    displayLikeCount: "",
+    displayFollowerCount: "",    displayLikeCount: "",
 
-    // UI状态
+    // UI state
     showDetail: false,
     showReportModal: false,
-    tabIndex: 1, // 0: 用户帖子, 1: 评论, 2: 详情
+    tabIndex: 1, // 0: User posts, 1: Comments, 2: Details
 
-    // 圆点和交互
-    selectedDot: null,
-
-    // 系统信息
+    // Dots and interactions
+    selectedDot: null,    // System information
     windowWidth: 0,
     windowHeight: 0,
 
@@ -66,10 +62,10 @@ Component({
     touchEndX: 0,
     currentTouchY: 0,
     isVerticalSwiping: false,
-    verticalTransform: 0, // 当前垂直变换值
-    minSwipeDistance: 50, // 有效滑动的最小距离
-    maxHorizontalThreshold: 100, // 仍被视为垂直滑动的最大水平移动
-    maxTransformDistance: 150, // 视觉反馈的最大变换距离
+    verticalTransform: 0, // Current vertical transform value
+    minSwipeDistance: 50, // Minimum distance for valid swipe
+    maxHorizontalThreshold: 100, // Maximum horizontal movement still considered vertical swipe
+    maxTransformDistance: 150, // Maximum transform distance for visual feedback
   },
 
   /**
@@ -844,19 +840,17 @@ Component({
       const deltaX = Math.abs(touch.pageX - touchStartX);
       const absDeltaY = Math.abs(deltaY);
 
-      this.setData({ currentTouchY: touch.pageY });
-
-      // 判断是否为垂直滑动
+      this.setData({ currentTouchY: touch.pageY });      // Check if this is a vertical swipe
       if (absDeltaY > 10 && (absDeltaY > deltaX || deltaX < 30)) {
         this.setData({ isVerticalSwiping: true });
 
-        // 计算带阻尼效果的变换值
+        // Calculate transform value with damping effect
         let transformValue = deltaY;
 
-        // 超过最大距离时应用阻尼
+        // Apply damping when exceeding maximum distance
         if (Math.abs(transformValue) > maxTransformDistance) {
           const excess = Math.abs(transformValue) - maxTransformDistance;
-          const dampingFactor = 0.3; // 超过限制时减少移动
+          const dampingFactor = 0.3; // Reduce movement when exceeding limit
           transformValue =
             transformValue > 0
               ? maxTransformDistance + excess * dampingFactor
@@ -865,7 +859,7 @@ Component({
 
         this.setData({ verticalTransform: transformValue });
 
-        // 返回false以防止默认行为
+        // Return false to prevent default behavior
         return false;
       }
     },
@@ -890,24 +884,23 @@ Component({
       });
 
       const deltaY = touch.pageY - touchStartY;
-      const deltaX = Math.abs(touch.pageX - touchStartX);
-      const absDeltalY = Math.abs(deltaY);
+      const deltaX = Math.abs(touch.pageX - touchStartX);      const absDeltalY = Math.abs(deltaY);
 
-      // 检查是否为有效的垂直滑动
+      // Check if this is a valid vertical swipe
       if (absDeltalY >= minSwipeDistance && deltaX <= maxHorizontalThreshold) {
         if (deltaY < 0) {
-          // 向上滑动 - 下一个帖子
+          // Swipe up - next post
           this.handleVerticalSwipeUp();
         } else {
-          // 向下滑动 - 上一个帖子
+          // Swipe down - previous post
           this.handleVerticalSwipeDown();
         }
       } else {
-        // 无效滑动 - 动画回到原始位置
+        // Invalid swipe - animate back to original position
         this.animateBackToCenter();
       }
 
-      // 重置触摸数据
+      // Reset touch data
       this.setData({
         touchStartY: 0,
         touchStartX: 0,
@@ -920,9 +913,8 @@ Component({
 
     /**
      * Handle vertical swipe up (next post)
-     */
-    handleVerticalSwipeUp() {
-      // 动画滑出并触发下一个帖子
+     */    handleVerticalSwipeUp() {
+      // Animate swipe out and trigger next post
       this.animateSwipeOut("up", () => {
         this.moveToNextPost();
       });
@@ -932,7 +924,7 @@ Component({
      * Handle vertical swipe down (previous post)
      */
     handleVerticalSwipeDown() {
-      // 动画滑出并触发上一个帖子
+      // Animate swipe out and trigger previous post
       this.animateSwipeOut("down", () => {
         this.moveToPreviousPost();
       });
@@ -943,14 +935,12 @@ Component({
      */
     animateSwipeOut(direction, callback) {
       const { windowHeight } = this.data;
-      const targetTransform = direction === "up" ? -windowHeight : windowHeight;
+      const targetTransform = direction === "up" ? -windowHeight : windowHeight;      this.setData({ verticalTransform: targetTransform });
 
-      this.setData({ verticalTransform: targetTransform });
-
-      // 动画后执行回调
+      // Execute callback after animation
       setTimeout(() => {
         if (callback) callback();
-        // 为下一个帖子重置变换
+        // Reset transform for next post
         this.setData({ verticalTransform: 0 });
       }, 300);
     },

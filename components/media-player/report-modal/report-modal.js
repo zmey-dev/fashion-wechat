@@ -3,15 +3,15 @@ const { default: config } = require("../../../config");
 // components/report-modal/report-modal.js
 Component({
   /**
-   * 组件的属性列表
+   * Component properties list
    */
   properties: {
-    // 是否显示弹窗
+    // Whether to show modal
     visible: {
       type: Boolean,
       value: false,
     },
-    // 要举报的帖子ID
+    // Post ID to report
     postId: {
       type: String,
       value: "",
@@ -19,10 +19,10 @@ Component({
   },
 
   /**
-   * 组件的初始数据
+   * Component initial data
    */
   data: {
-    // 举报原因列表
+    // Report reason list
     reasons: [
       { title: "色情低俗", value: "色情低俗", icon: "🔞" },
       { title: "违法违规", value: "违法违规", icon: "⚠️" },
@@ -32,24 +32,20 @@ Component({
       { title: "危害人身安全", value: "危害人身安全", icon: "🚨" },
       { title: "未成年相关", value: "未成年相关", icon: "👶" },
       { title: "侵犯权益", value: "侵犯权益", icon: "⚖️" },
-      { title: "其他", value: "其他", icon: "📝" },
-    ],
+      { title: "其他", value: "其他", icon: "📝" },    ],
 
-    // 表单数据
+    // Form data
     selectedReason: "",
     description: "",
-    images: [],
-    maxImages: 4,
+    images: [],    maxImages: 4,
 
-    // UI状态
-    isSubmitting: false,
-  },
+    // UI state
+    isSubmitting: false,},
 
   /**
-   * 组件的方法列表
-   */
-  methods: {
-    // 处理原因选择
+   * Component methods list
+   */  methods: {
+    // Handle reason selection
     onReasonChange(e) {
       this.setData({
         selectedReason: e.detail.value,
@@ -57,14 +53,14 @@ Component({
       this.addHapticFeedback("light");
     },
 
-    // 处理描述输入
+    // Handle description input
     onDescriptionInput(e) {
       this.setData({
         description: e.detail.value,
       });
     },
 
-    // 处理图片上传
+    // Handle image upload
     onChooseImage() {
       const { images, maxImages } = this.data;
       const remainingSlots = maxImages - images.length;
@@ -102,10 +98,9 @@ Component({
             icon: "none",
           });
         },
-      });
-    },
+      });    },
 
-    // 删除图片
+    // Remove image
     onRemoveImage(e) {
       const { index } = e.currentTarget.dataset;
       const { images } = this.data;
@@ -118,7 +113,7 @@ Component({
       this.addHapticFeedback("medium");
     },
 
-    // 替换图片
+    // Replace image
     onReplaceImage(e) {
       const { index } = e.currentTarget.dataset;
 
@@ -142,18 +137,17 @@ Component({
         fail: (err) => {
           console.error("替换图片失败:", err);
         },
-      });
-    },
+      });    },
 
-    // 提交举报
+    // Submit report
     async onSubmit() {
       const { selectedReason, description, images, isSubmitting } = this.data;
       const { postId } = this.properties;
 
-      // 防止重复提交
+      // Prevent duplicate submission
       if (isSubmitting) return;
 
-      // 验证
+      // Validation
       if (!postId || !selectedReason || !description.trim()) {
         wx.showToast({
           title: "请填写完整信息",
@@ -164,17 +158,16 @@ Component({
         return;
       }
 
-      // 设置提交状态
+      // Set submission state
       this.setData({ isSubmitting: true });
 
-      // 显示加载动画
+      // Show loading animation
       wx.showLoading({
         title: "提交中...",
         mask: true,
       });
 
-      try {
-        // 初始化表单数据
+      try {        // Initialize form data
         const formData = {
           post_id: postId,
           reason: selectedReason,
@@ -182,9 +175,9 @@ Component({
           image_urls: []
         };
 
-        // 处理图片上传
+        // Handle image upload
         if (images && images.length > 0) {
-          // 将所有图片上传包装为Promise数组
+          // Wrap all image uploads as Promise array
           const uploadPromises = images.map((image) => {
             if (!image.tempFilePath) return Promise.resolve(null);
             
@@ -214,35 +207,31 @@ Component({
                 }
               });
             });
-          });
-
-          // 等待所有图片上传完成
+          });          // Wait for all image uploads to complete
           const uploadedUrls = await Promise.all(uploadPromises);
           formData.image_urls = uploadedUrls.filter(url => url !== null);
         }
 
-        // 所有图片上传完成后，提交举报
+        // After all images uploaded, submit report
         const result = await this.submitReport(formData);
 
         wx.hideLoading();
 
         if (result.status === "success") {
-          // 成功反馈
+          // Success feedback
           wx.showToast({
             title: "举报提交成功",
             icon: "success",
             duration: 2000,
           });
 
-          this.addHapticFeedback("heavy");
-
-          // 触发成功事件
+          this.addHapticFeedback("heavy");          // Trigger success event
           this.triggerEvent("success", {
             message: "举报提交成功",
             data: result,
           });
 
-          // 延迟关闭，让用户看到成功提示
+          // Delay close to let user see success message
           setTimeout(() => {
             this.resetForm();
             this.triggerEvent("close");
@@ -261,20 +250,18 @@ Component({
           duration: 3000,
         });
 
-        this.addHapticFeedback("heavy");
-
-        // 触发失败事件
+        this.addHapticFeedback("heavy");        // Trigger error event
         this.triggerEvent("error", {
           error: error,
           message: errorMessage,
         });
       } finally {
-        // 重置提交状态
+        // Reset submission state
         this.setData({ isSubmitting: false });
       }
     },
 
-    // 提交举报到服务器
+    // Submit report to server
     submitReport(data) {
       return new Promise((resolve, reject) => {
         const app = getApp();
@@ -284,7 +271,7 @@ Component({
           data: data,
           header: {
             "content-type": "application/json",
-            // 可以添加认证头部
+            // Can add authentication headers
             Authorization: "Bearer " + app.globalData.userInfo.token,
           },
           success: (res) => {
@@ -292,10 +279,9 @@ Component({
           },
           fail: reject,
         });
-      });
-    },
+      });    },
 
-    // 重置表单
+    // Reset form
     resetForm() {
       this.setData({
         selectedReason: "",
@@ -305,9 +291,9 @@ Component({
       });
     },
 
-    // 关闭弹窗
+    // Close modal
     onClose() {
-      // 如果正在提交，询问用户是否确认关闭
+      // If submitting, ask user to confirm close
       if (this.data.isSubmitting) {
         wx.showModal({
           title: "提示",
@@ -319,10 +305,9 @@ Component({
             }
           },
         });
-        return;
-      }
+        return;      }
 
-      // 如果有未保存的内容，询问用户
+      // If there's unsaved content, ask user
       const { selectedReason, description, images } = this.data;
       if (selectedReason || description.trim() || images.length > 0) {
         wx.showModal({
@@ -339,34 +324,31 @@ Component({
       }
 
       this.resetForm();
-      this.triggerEvent("close");
-    },
+      this.triggerEvent("close");    },
 
-    // 阻止冒泡
+    // Prevent bubbling
     preventBubble() {
-      // 空函数，用于阻止事件冒泡
+      // Empty function to prevent event bubbling
     },
 
-    // 添加触觉反馈
+    // Add haptic feedback
     addHapticFeedback(type = "light") {
       if (wx.vibrateShort) {
         wx.vibrateShort({
           type: type, // light, medium, heavy
         });
       }
-    },
-  },
+    },  },
 
   /**
-   * 监听器
-   */
-  observers: {
+   * Observers
+   */  observers: {
     visible: function (visible) {
       if (visible) {
-        // 弹窗显示时的逻辑
+        // Logic when modal is shown
         this.addHapticFeedback("light");
       } else {
-        // 弹窗隐藏时重置表单
+        // Reset form when modal is hidden
         this.resetForm();
       }
     },

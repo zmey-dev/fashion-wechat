@@ -943,9 +943,8 @@ Page({
       },
       success: (res) => {
         wx.hideLoading();
-        const data = JSON.parse(res.data);
-        if (data.status === 'success') {
-          // 发送图片消息
+        const data = JSON.parse(res.data);        if (data.status === 'success') {
+          // Send image message
           this.sendImageMessage(data.url);
         }
       },
@@ -956,10 +955,9 @@ Page({
           icon: 'none'
         });
       }
-    });
-  },
+    });  },
 
-  // 发送图片消息
+  // Send image message
   sendImageMessage(imageUrl) {
     if (!this.data.selectedUser) return;
     
@@ -977,20 +975,18 @@ Page({
       header: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${this.data.userInfo.token}`
-      },
-      success: (res) => {
+      },      success: (res) => {
         if (res.data && res.data.status === 'success') {
-          // 发送socket事件
+          // Send socket event
           socketManager.sendMessage("new_message", {
             id: res.data.message.id || Date.now(),
             sender_id: this.data.userInfo.id,
             receiver_id: this.data.selectedUser.id,
             message: imageUrl,
             message_type: "image",
-            created_at: res.data.message.created_at || new Date().toISOString()
-          });
+            created_at: res.data.message.created_at || new Date().toISOString()          });
           
-          // 添加到本地状态
+          // Add to local state
           const newMessage = {
             id: res.data.message.id || Date.now(),
             sender_id: "me",
@@ -1006,20 +1002,18 @@ Page({
           this.scrollToBottom();
         }
       }
-    });
-  },
+    });  },
 
-  // 分享位置
+  // Share location
   shareLocation() {
     wx.chooseLocation({
       success: (res) => {
         const locationMessage = `位置: ${res.name}\n地址: ${res.address}`;
         this.sendLocationMessage(locationMessage, res.latitude, res.longitude);
       }
-    });
-  },
+    });  },
 
-  // 发送位置消息
+  // Send location message
   sendLocationMessage(message, latitude, longitude) {
     const messageData = {
       sender_id: this.data.userInfo.id,
@@ -1028,16 +1022,14 @@ Page({
       message_type: "location",
       latitude: latitude,
       longitude: longitude
-    };
-    
-    // 类似于发送普通消息的处理...
+    };    
+    // Similar to sending normal message handling...
     this.setData({
       inputMessage: message
     });
-    this.onSendMessage();
-  },
+    this.onSendMessage();  },
 
-  // 选择文件
+  // Choose file
   chooseFile() {
     wx.chooseMessageFile({
       count: 1,
@@ -1045,10 +1037,9 @@ Page({
         const file = res.tempFiles[0];
         this.uploadFile(file.path, file.name);
       }
-    });
-  },
+    });  },
 
-  // 上传文件
+  // Upload file
   uploadFile(filePath, fileName) {
     wx.showLoading({
       title: '上传中...'
@@ -1078,28 +1069,25 @@ Page({
           icon: 'none'
         });
       }
-    });
-  },
+    });  },
 
-  // 发送文件消息
+  // Send file message
   sendFileMessage(fileUrl, fileName) {
     const message = `文件: ${fileName}`;
     this.setData({
       inputMessage: message
     });
-    this.onSendMessage();
-  },
+    this.onSendMessage();  },
 
-  // 检查是否只包含表情符号 - Fixed regex
+  // Check if message contains only emoji - Fixed regex
   isEmojiOnly(message) {
     if (!message || message.length === 0) return false;
     
     // Simplified emoji detection that doesn't cause parsing errors
     const emojiRegex = /^[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]+$/u;
-    return emojiRegex.test(message.trim());
-  },
+    return emojiRegex.test(message.trim());  },
 
-  // 创建新聊天
+  // Create new chat
   onCreateChat() {
     wx.navigateTo({
       url: '/pages/contacts/contacts'
