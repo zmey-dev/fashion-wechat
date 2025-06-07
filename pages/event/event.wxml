@@ -67,9 +67,25 @@
                       <text class="stat-number" wx:else>∞</text>
                       <text class="stat-label">剩余名额</text>
                     </view>
+                  </view>                  
+                  <!-- Teacher action buttons -->
+                  <view wx:if="{{isTeacher}}" class="teacher-actions">
+                    <button wx:if="{{selectedEvent.user.id === userInfo.id}}" class="teacher-btn edit-btn" bindtap="onUpdateEvent">
+                      <view class="btn-icon">
+                        <image src="/images/icons/edit.svg" mode="aspectFit"></image>
+                      </view>
+                      <text class="btn-text">{{messages.actions.edit}}</text>
+                    </button>
+                    <button wx:if="{{selectedEvent.user.id === userInfo.id}}" class="teacher-btn delete-btn" bindtap="onDeleteEvent">
+                      <view class="btn-icon">
+                        <image src="/images/icons/trash.svg" mode="aspectFit"></image>
+                      </view>
+                      <text class="btn-text">{{messages.actions.delete}}</text>
+                    </button>
                   </view>
                   
-                  <button class="cta-button" bindtap="onParticipate">
+                  <!-- Student action button -->
+                  <button wx:else class="cta-button" bindtap="onParticipate">
                     <text class="cta-text">查看详情</text>
                     <view class="cta-arrow"></view>
                   </button>
@@ -266,18 +282,27 @@
             </view>
           </view>
         </view>
-        
-        <!-- Modal Footer -->
+          <!-- Modal Footer -->
         <view class="modal-footer">
           <button class="modal-btn secondary" bindtap="onCloseRulesModal">
             <text>{{messages.actions.close}}</text>
           </button>
-          <button class="modal-btn primary" bindtap="onAgreeRules">
+          <!-- Show join button only for students -->
+          <button wx:if="{{!isTeacher}}" class="modal-btn primary" bindtap="onAgreeRules">
             <view class="btn-content">
               <image class="btn-icon" src="/images/icons/check.svg" mode="aspectFit"></image>
               <text>{{messages.actions.agree}}并报名</text>
             </view>
           </button>
+          <!-- Show teacher management buttons if teacher owns the event -->
+          <view wx:elif="{{isTeacher && selectedEvent.user.id === userInfo.id}}" class="teacher-modal-actions">
+            <button class="modal-btn edit" bindtap="onUpdateEvent">
+              <view class="btn-content">
+                <image class="btn-icon" src="/images/icons/edit.svg" mode="aspectFit"></image>
+                <text>{{messages.actions.edit}}</text>
+              </view>
+            </button>
+          </view>
         </view>
       </view>
     </view>
@@ -309,6 +334,38 @@
     </block>
       <block wx:else>
       <!-- Event display content here -->
-    </block>  </view>
+    </block>  </view>  </view>
+
+  <!-- Delete Confirmation Modal -->
+  <view wx:if="{{showDeleteModal}}" class="modal-backdrop" bindtap="onCloseDeleteModal">
+    <view class="modal-dialog delete-modal" catchtap="">
+      <view class="modal-content">
+        <!-- Modal Header -->
+        <view class="modal-header">
+          <view class="header-icon delete-icon">
+            <image src="/images/icons/trash.svg" mode="aspectFit"></image>
+          </view>
+          <text class="modal-title">{{messages.actions.delete}}活动</text>
+        </view>
+        
+        <!-- Modal Body -->
+        <view class="modal-body">
+          <text class="confirm-text">{{messages.confirmMessages.deleteEvent}}</text>
+          <view class="event-preview">
+            <text class="event-name">{{selectedEvent.title}}</text>
+          </view>
+        </view>
+        
+        <!-- Modal Footer -->
+        <view class="modal-footer">
+          <button class="modal-btn secondary" bindtap="onCloseDeleteModal">
+            <text>{{messages.actions.cancel}}</text>
+          </button>
+          <button class="modal-btn danger" bindtap="onConfirmDelete">
+            <text>{{messages.actions.confirmDelete}}</text>
+          </button>
+        </view>
+      </view>
+    </view>
   </view>
 </app-layout>

@@ -1,4 +1,4 @@
-const { default: config } = require("../../config");
+const config = require("../../config.js");
 const app = getApp();
 
 Page({

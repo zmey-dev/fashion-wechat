@@ -1,8 +1,10 @@
 // utils/http.js
+
+const config = require("../config");
+
 /**
  * HTTP request utility for WeChat Mini App
  */
-import config from './config.js';
 const BASE_URL = config.BACKEND_URL;
 
 const request = (url, method = 'GET', data = null, auth = true) => {
