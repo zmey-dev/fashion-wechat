@@ -1,5 +1,5 @@
 <!-- app-layout.wxml -->
-<view class="app-layout">  <!-- Top Filter Bar -->
+<view class="app-layout {{isTeacher ? 'teacher-layout' : ''}}">  <!-- Top Filter Bar -->
   <view class="app-layout-header">
     <scroll-view class="filter-scroll" scroll-x="true" scroll-left="{{filterScrollLeft}}">
       <view class="filter-tabs {{dynamicTabStyle === 'compact' ? 'compact-mode' : 'expanded-mode'}}">        <view 
@@ -19,9 +19,8 @@
   <!-- Main Content Area -->
   <view class="app-layout-content">
     <slot></slot>
-  </view>
-  <!-- Bottom Tab Bar -->
-  <view class="app-layout-footer">
+  </view>  <!-- Bottom Tab Bar - Only show for non-teacher users -->
+  <view class="app-layout-footer" wx:if="{{!isTeacher}}">
     <view class="tab-container">      <view 
         wx:for="{{pages}}" 
         wx:key="key"

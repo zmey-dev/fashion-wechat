@@ -19,7 +19,8 @@ Component({
   data: {
     filterScrollLeft: 0,
     dynamicTabStyle: 'expanded', // 'expanded' or 'compact'
-    // All pages list - unified structure
+    isTeacher: false, // Flag to determine if current user is a teacher
+    // All pages list - unified structure for regular users
     pages: [
       // Filter pages (top navigation)
       { key: "discover", name: "精选", path: "/pages/index/index", type: "filter" },
@@ -68,7 +69,23 @@ Component({
         activeIcon: "/images/icons/me-active.png",
         path: "/pages/me/me",
         type: "tab"
-      }    ],
+      }
+    ],    // Teacher pages configuration - only filter pages (top bar only)
+    teacherPages: [
+      { key: "discover", name: "精选", path: "/pages/index/index", type: "filter" },
+      { key: "recommend", name: "推荐", path: "/pages/recommend/recommend", type: "filter" },
+      { key: "follow", name: "关注", path: "/pages/follow/follow", type: "filter" },
+      { key: "event", name: "比赛", path: "/pages/teacher-event/teacher-event", type: "filter" },
+      { key: "contact", name: "联系我们", path: "/pages/contact/contact", type: "filter" },
+      { 
+        key: "me", 
+        name: "我的", 
+        icon: "/images/icons/me.png",
+        activeIcon: "/images/icons/me-active.png",
+        path: "/pages/teacher-me/teacher-me",
+        type: "filter" // Note: me page becomes a filter for teachers
+      }
+    ],
     messages: {
       navigationError: "页面跳转失败"
     },
@@ -109,6 +126,8 @@ Component({
       
       this.userInfoHandler = (userInfo) => {
         this.setData({ userInfo });
+        // Update layout for user role
+        this.updateLayoutForUserRole(userInfo);
         // Start notification polling when user logs in
         if (userInfo && userInfo.token) {
           this.startNotificationPolling();
@@ -138,6 +157,9 @@ Component({
         userInfo: app.globalData.userInfo || {},
         totalUnreadCount: app.getTotalUnreadCount(),
       });
+      
+      // Check if user is teacher and update layout accordingly
+      this.updateLayoutForUserRole(app.globalData.userInfo);
       
       console.log('App-layout initialized with totalUnreadCount:', app.getTotalUnreadCount());
       
@@ -439,6 +461,23 @@ Component({
       });
       
       console.log(`Filter pages: ${filterCount}, using compact mode for full text display`);
+    },    /**
+     * Update layout based on user role
+     */
+    updateLayoutForUserRole: function(userInfo) {
+      const isTeacher = userInfo && userInfo.role === 'teacher';
+      
+      // Store original pages configuration if not already stored
+      if (!this.originalPages) {
+        this.originalPages = this.data.pages;
+      }
+      
+      this.setData({
+        isTeacher: isTeacher,
+        pages: isTeacher ? this.data.teacherPages : this.originalPages
+      });
+      
+      console.log('Layout updated for user role:', isTeacher ? 'teacher' : 'regular');
     },
 
     /**

@@ -127,6 +127,11 @@
   overflow: hidden;
 }
 
+/* Teacher layout - no bottom tab bar, so no bottom padding needed */
+.app-layout.teacher-layout .app-layout-content {
+  padding-bottom: 0; /* Remove bottom padding for teacher layout */
+}
+
 /* Tab Bar Styles */
 .app-layout-footer {
   position: fixed;
