@@ -54,12 +54,11 @@
             <image class="action-icon" src="/images/icons/edit.svg" />
             <text class="action-text">Edit</text>
           </view>
-        </block>
-
-        <!-- Non-owner Actions -->
+        </block>        <!-- Non-owner Actions -->
         <block wx:else>
           <!-- Like Button -->
           <view 
+            wx:if="{{ loggedUser.role !== 'teacher' }}"
             class="action-btn like-btn {{item.like > 0 ? 'active' : ''}}" 
             bindtap="onLikeHandle"
             data-item="{{item}}"
@@ -71,6 +70,7 @@
 
           <!-- Unlike Button -->
           <view 
+            wx:if="{{ loggedUser.role !== 'teacher' }}"
             class="action-btn unlike-btn {{item.unlike > 0 ? 'active' : ''}}" 
             bindtap="onLikeHandle"
             data-item="{{item}}"
@@ -81,6 +81,7 @@
           </view>
           <!-- Reply Button -->
           <view 
+            wx:if="{{ loggedUser.role !== 'teacher' }}"
             class="action-btn reply-btn" 
             bindtap="onReplyClick"
             data-item="{{item}}"

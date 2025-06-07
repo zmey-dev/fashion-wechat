@@ -33,9 +33,8 @@ style="{{ currentPost.type === 'image' ? 'margin-bottom: 100rpx;' : '' }}"
     </view>
   </view>
   <text class="username">@{{ currentPostUser.username }}</text>
-
   <!-- Like button -->
-  <view class="action-item" bindtap="handleLike">
+  <view wx:if="{{ authUser.role !== 'teacher' }}" class="action-item" bindtap="handleLike">
     <view class="action-icon {{ currentPost.likes_exists ? 'liked' : '' }}">
       <view class="svg-icon">
         <image
@@ -68,9 +67,8 @@ style="{{ currentPost.type === 'image' ? 'margin-bottom: 100rpx;' : '' }}"
     </view>
     <text class="action-count">{{ displayComments }}</text>
   </view>
-
   <!-- Favorite button -->
-  <view class="action-item" bindtap="handleFavorite">
+  <view wx:if="{{ authUser.role !== 'teacher' }}" class="action-item" bindtap="handleFavorite">
     <view
       class="action-icon {{ currentPost.favorites_exists ? 'favorited' : '' }}"
     >
