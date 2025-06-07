@@ -2,13 +2,13 @@
 <view class="app-layout">  <!-- Top Filter Bar -->
   <view class="app-layout-header">
     <scroll-view class="filter-scroll" scroll-x="true" scroll-left="{{filterScrollLeft}}">
-      <view class="filter-tabs {{dynamicTabStyle === 'compact' ? 'compact-mode' : 'expanded-mode'}}">
-        <view 
-          wx:for="{{filterOptions}}" 
+      <view class="filter-tabs {{dynamicTabStyle === 'compact' ? 'compact-mode' : 'expanded-mode'}}">        <view 
+          wx:for="{{pages}}" 
           wx:key="key"
-          class="filter-tab {{currentFilter === item.key ? 'active' : ''}}"
-          data-filter="{{item.key}}"
-          bindtap="onFilterTap"
+          wx:if="{{item.type === 'filter'}}"
+          class="filter-tab {{currentPage === item.key ? 'active' : ''}}"
+          data-page="{{item.key}}"
+          bindtap="onPageTap"
         >
           <text class="filter-text">{{item.name}}</text>
         </view>
@@ -22,18 +22,17 @@
   </view>
   <!-- Bottom Tab Bar -->
   <view class="app-layout-footer">
-    <view class="tab-container">
-      <view 
-        wx:for="{{tabs}}" 
+    <view class="tab-container">      <view 
+        wx:for="{{pages}}" 
         wx:key="key"
-        class="tab-item {{currentTab === item.key ? 'active' : ''}} {{item.isSpecial ? 'special' : ''}}"
-        data-tab="{{item.key}}"
-        bindtap="onTabTap"
-      >        
+        wx:if="{{item.type === 'tab'}}"
+        class="tab-item {{currentPage === item.key ? 'active' : ''}} {{item.isSpecial ? 'special' : ''}}"
+        data-page="{{item.key}}"
+        bindtap="onPageTap"
+      >
         <view class="tab-icon-container">
-          <view class="tab-icon">
-            <image 
-              src="{{currentTab === item.key ? item.activeIcon : item.icon}}" 
+          <view class="tab-icon">            <image 
+              src="{{currentPage === item.key ? item.activeIcon : item.icon}}" 
               mode="aspectFit"
               class="tab-icon-image"
             />

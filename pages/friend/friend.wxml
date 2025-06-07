@@ -1,5 +1,5 @@
 <!--pages/friend/friend.wxml-->
-<app-layout current-tab="friend" current-filter="">
+<app-layout current-page="friend">
   <!-- Main content container -->
   <view class="content-container">
     <!-- User List View -->

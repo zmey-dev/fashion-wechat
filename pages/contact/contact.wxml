@@ -1,5 +1,5 @@
 <!--pages/contact/contact.wxml-->
-<app-layout current-tab="" current-filter="contact">
+<app-layout current-page="contact">
   <view class="container">
     <!-- Header -->
     <view class="header">

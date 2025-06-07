@@ -1,5 +1,5 @@
 <!-- pages/chat/chat.wxml -->
-<app-layout current-tab="chat" current-filter="discover">
+<app-layout current-page="chat">
   <view class="chat-container">
     <!-- Chat List View -->
     <view class="chat-list-view {{currentView === 'list' ? 'active' : 'hidden'}}">

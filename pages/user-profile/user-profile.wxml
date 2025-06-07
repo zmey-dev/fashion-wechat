@@ -1,4 +1,4 @@
-<app-layout current-tab="" current-filter="discover">
+<app-layout current-page="">
   <!-- Page Header -->
   <view class="page-header">
     <text class="page-title">用户资料</text>

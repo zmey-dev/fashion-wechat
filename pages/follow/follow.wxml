@@ -1,5 +1,5 @@
 <!--pages/follow/follow.wxml-->
-<app-layout current-tab="" current-filter="follow">
+<app-layout current-page="follow">
   <!-- Main content container -->
   <view class="content-container">
     <!-- User List View -->

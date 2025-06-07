@@ -3,27 +3,12 @@ Component({
    * Component properties
    */
   properties: {
-    // Currently selected tab
-    currentTab: {
+    // Currently active page
+    currentPage: {
       type: String,
       value: '',
       observer: function(newVal) {
-        // When tab changes, clear filter selection
-        if (newVal && this.data.currentFilter) {
-          this.setData({ currentFilter: '' });
-        }
-      }
-    },
-    // Currently selected filter
-    currentFilter: {
-      type: String,
-      value: '',
-      observer: function(newVal) {
-        // When filter changes, clear tab selection
-        if (newVal && this.data.currentTab) {
-          this.setData({ currentTab: '' });
-        }
-        this.scrollToCurrentFilter();
+        this.scrollToCurrentPage();
       }
     }
   },
@@ -34,29 +19,30 @@ Component({
   data: {
     filterScrollLeft: 0,
     dynamicTabStyle: 'expanded', // 'expanded' or 'compact'
-    // Filter options list (removed friend)
-    filterOptions: [
-      { key: "discover", name: "精选", path: "/pages/index/index" },
-      { key: "recommend", name: "推荐", path: "/pages/recommend/recommend" },
-      { key: "follow", name: "关注", path: "/pages/follow/follow" },
-      { key: "event", name: "比赛", path: "/pages/event/event" },
-      { key: "contact", name: "联系我们", path: "/pages/contact/contact" }
-    ],
-    // Tab options list (using image icons)
-    tabs: [
+    // All pages list - unified structure
+    pages: [
+      // Filter pages (top navigation)
+      { key: "discover", name: "精选", path: "/pages/index/index", type: "filter" },
+      { key: "recommend", name: "推荐", path: "/pages/recommend/recommend", type: "filter" },
+      { key: "follow", name: "关注", path: "/pages/follow/follow", type: "filter" },
+      { key: "event", name: "比赛", path: "/pages/event/event", type: "filter" },
+      { key: "contact", name: "联系我们", path: "/pages/contact/contact", type: "filter" },
+      // Tab pages (bottom navigation)
       { 
         key: "chat", 
         name: "对话", 
         icon: "/images/icons/message.png",
         activeIcon: "/images/icons/message-active.png",
-        path: "/pages/chat/chat" 
+        path: "/pages/chat/chat",
+        type: "tab"
       },
       { 
         key: "friend", 
         name: "朋友", 
         icon: "/images/icons/friend.png",
         activeIcon: "/images/icons/friend-active.png",
-        path: "/pages/friend/friend" 
+        path: "/pages/friend/friend",
+        type: "tab"
       },
       { 
         key: "upload", 
@@ -64,23 +50,25 @@ Component({
         icon: "/images/icons/upload.png",
         activeIcon: "/images/icons/upload-active.png",
         path: "/pages/upload/upload",
-        isSpecial: true 
+        isSpecial: true,
+        type: "tab"
       },
       { 
         key: "notification", 
         name: "通知", 
         icon: "/images/icons/notification.png",
         activeIcon: "/images/icons/notification-active.png",
-        path: "/pages/notification/notification" 
+        path: "/pages/notification/notification",
+        type: "tab"
       },
       { 
         key: "me", 
         name: "我的", 
         icon: "/images/icons/me.png",
         activeIcon: "/images/icons/me-active.png",
-        path: "/pages/me/me" 
-      }
-        ],
+        path: "/pages/me/me",
+        type: "tab"
+      }    ],
     messages: {
       navigationError: "页面跳转失败"
     },
@@ -88,7 +76,24 @@ Component({
     showLoginModal: false,
     userInfo: {},
     totalUnreadCount: 0,
-    notificationCount: 0
+    notificationCount: 0,
+    
+    // Computed properties for template
+    filterPages: [],
+    tabPages: []
+  },
+
+  /**
+   * Component observers
+   */
+  observers: {
+    'pages': function(pages) {
+      // Update computed properties when pages change
+      this.setData({
+        filterPages: pages.filter(page => page.type === 'filter'),
+        tabPages: pages.filter(page => page.type === 'tab')
+      });
+    }
   },
   /**
    * Component lifecycle functions
@@ -127,9 +132,7 @@ Component({
       app.subscribe("showLoginModal", this.showLoginModalHandler);
       app.subscribe("userInfo", this.userInfoHandler);
       app.subscribe("totalUnreadCount", this.totalUnreadCountHandler);
-      app.subscribe("unreadMessageCount", this.unreadMessageCountHandler);
-
-      // Set initial data from app's centralized state
+      app.subscribe("unreadMessageCount", this.unreadMessageCountHandler);      // Set initial data from app's centralized state
       this.setData({
         showLoginModal: app.globalData.showLoginModal || false,
         userInfo: app.globalData.userInfo || {},
@@ -142,13 +145,13 @@ Component({
       if (app.globalData.userInfo && app.globalData.userInfo.token) {
         this.startNotificationPolling();
       }
-        // Scroll to current filter when component is attached
+      // Scroll to current page when component is attached
       setTimeout(() => {
-        this.scrollToCurrentFilter();
+        this.scrollToCurrentPage();
       }, 100);
 
-      // Calculate filter tab widths for optimal display
-      this.calculateFilterTabWidths();
+      // Calculate page tab widths for optimal display
+      this.calculatePageTabWidths();
     },
 
     detached: function() {
@@ -162,22 +165,26 @@ Component({
       // Stop notification polling
       this.stopNotificationPolling();
     }
-  },
-  /**
+  },  /**
    * Component methods
    */
-  methods: {    /**
-     * Filter tab click event handler
+  methods: {
+    /**
+     * Page click event handler (unified for both filters and tabs)
      */
-    onFilterTap: function(e) {
-      const { filter } = e.currentTarget.dataset;
+    onPageTap: function(e) {
+      const { page } = e.currentTarget.dataset;
       const app = getApp();
       
-      // Filter pages that require login authentication (except discover)
-      const needLoginFilters = ['recommend', 'follow', 'event', 'contact'];
+      // Find page configuration
+      const pageConfig = this.data.pages.find(item => item.key === page);
+      if (!pageConfig) return;
+      
+      // Pages that require login authentication (except discover)
+      const needLoginPages = ['recommend', 'follow', 'event', 'contact', 'chat', 'notification', 'friend', 'me', 'upload'];
       
       // Check if login is required
-      if (needLoginFilters.includes(filter)) {
+      if (needLoginPages.includes(page)) {
         const userInfo = app.globalData.userInfo;
         if (!userInfo || !userInfo.token) {
           // Show login modal
@@ -186,80 +193,36 @@ Component({
         }
       }
       
-      // Check if clicking on currently active filter
+      // Check if clicking on currently active page
       // Only allow redirection for "discover" page when already active
-      if (this.data.currentFilter === filter && filter !== 'discover') {
-        // Don't navigate if it's the same filter and not discover page
+      if (this.data.currentPage === page && page !== 'discover') {
+        // Don't navigate if it's the same page and not discover page
         return;
       }
       
-      // Update current filter, clear tab selection
+      // Update current page
       this.setData({ 
-        currentFilter: filter,
-        currentTab: ''
+        currentPage: page
       });
-        // Find filter option
-      const filterOption = this.data.filterOptions.find(item => item.key === filter);
       
-      if (filterOption && filterOption.path) {
+      // Navigate to the page
+      if (pageConfig.path) {
         // For discover page, use redirectTo; for others, use navigateTo
-        if (filter === 'discover') {
-          this.redirectToPage(filterOption.path);
+        if (page === 'discover') {
+          this.redirectToPage(pageConfig.path);
         } else {
-          this.navigateToPage(filterOption.path);
+          this.navigateToPage(pageConfig.path);
         }
-      }
-      // Trigger filter change event to parent component
-      this.triggerEvent('filterChange', { filter });
-    },    /**
-     * Tab click event handler
-     */
-    onTabTap: function(e) {
-      const { tab } = e.currentTarget.dataset;
-      const app = getApp();
-      
-      // Pages that require login authentication
-      const needLoginPages = ['chat', 'notification','friend', 'me', 'upload'];
-      
-      // Check if login is required
-      if (needLoginPages.includes(tab)) {
-        const userInfo = app.globalData.userInfo;
-        if (!userInfo || !userInfo.token) {
-          // Show login modal
-          app.setState("showLoginModal", true);
-          return;
-        }
-      }
-      
-      // Check if clicking on currently active tab
-      // Don't navigate if it's the same tab (no discover tab in tabs)
-      if (this.data.currentTab === tab) {
-        // Don't navigate if it's the same tab
-        return;
-      }
-      
-      // Update current tab, clear filter selection
-      this.setData({ 
-        currentTab: tab,
-        currentFilter: ''
-      });
-      
-      // Find tab option
-      const tabOption = this.data.tabs.find(item => item.key === tab);
-      
-      if (tabOption && tabOption.path) {
-        // Navigate to corresponding page
-        this.navigateToPage(tabOption.path);
         
         // If it's notification page, clear notification count
-        if (tab === 'notification') {
+        if (page === 'notification') {
           this.clearNotificationCount();
         }
       }
       
-      // Trigger tab change event to parent component
-      this.triggerEvent('tabChange', { tab });
-    },    /**
+      // Trigger page change event to parent component
+      this.triggerEvent('pageChange', { page, type: pageConfig.type });
+    },/**
      * Page navigation handler
      */
     navigateToPage: function(path) {
@@ -287,19 +250,18 @@ Component({
           this.showToast(this.data.messages.navigationError);
         }
       });
-    },
-
-    /**
-     * Auto scroll to current filter
+    },    /**
+     * Auto scroll to current page
      */
-    scrollToCurrentFilter: function() {
-      const currentFilter = this.data.currentFilter;
-      if (!currentFilter) return;
+    scrollToCurrentPage: function() {
+      const currentPage = this.data.currentPage;
+      if (!currentPage) return;
       
       const query = this.createSelectorQuery();
       
-      // Find current filter index
-      const index = this.data.filterOptions.findIndex(item => item.key === currentFilter);
+      // Find current page index in filter pages only (for scrolling)
+      const filterPages = this.data.pages.filter(page => page.type === 'filter');
+      const index = filterPages.findIndex(item => item.key === currentPage);
       
       if (index === -1) return;
       
@@ -316,14 +278,14 @@ Component({
         if (index < tabRects.length) {
           const tabRect = tabRects[index];
           
-          // Calculate scroll position to center current filter tab
+          // Calculate scroll position to center current page tab
           const scrollLeft = Math.max(0, 
             tabRect.left - scrollRect.left - (scrollRect.width / 2) + (tabRect.width / 2)
           );
           
           // Set scroll position
           this.setData({ filterScrollLeft: scrollLeft });
-                }
+        }
       });
     },
 
@@ -465,17 +427,32 @@ Component({
       
       console.log('User logged in successfully:', userInfo);
     },    /**
-     * Calculate and set optimal filter tab widths
+     * Calculate and set optimal page tab widths
      */
-    calculateFilterTabWidths: function() {
-      const filterCount = this.data.filterOptions.length;
+    calculatePageTabWidths: function() {
+      const filterPages = this.data.pages.filter(page => page.type === 'filter');
+      const filterCount = filterPages.length;
       
       // Always use compact mode to allow horizontal scrolling for full text display
       this.setData({
         dynamicTabStyle: 'compact'
       });
       
-      console.log(`Filter tabs: ${filterCount}, using compact mode for full text display`);
+      console.log(`Filter pages: ${filterCount}, using compact mode for full text display`);
+    },
+
+    /**
+     * Get filter pages for template rendering
+     */
+    getFilterPages: function() {
+      return this.data.pages.filter(page => page.type === 'filter');
+    },
+
+    /**
+     * Get tab pages for template rendering
+     */
+    getTabPages: function() {
+      return this.data.pages.filter(page => page.type === 'tab');
     },
   }
 });

@@ -1,5 +1,5 @@
 <!-- pages/notification/notification.wxml -->
-<app-layout current-tab="notification" current-filter="discover">
+<app-layout current-page="notification">
   <view class="notification-container">
   <!-- Header -->
   <view class="header">

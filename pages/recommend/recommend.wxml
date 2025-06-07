@@ -1,5 +1,5 @@
 <!-- pages/recommend/recommend.wxml -->
-<app-layout current-tab="" current-filter="recommend">
+<app-layout current-page="recommend">
   <login-modal wx:if="{{ showLoginModal }}" class="login-modal" />
   <view class="post-viewer-container">
     <media-player

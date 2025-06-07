@@ -1,4 +1,4 @@
-<app-layout current-tab="" current-filter="event">
+<app-layout current-page="event">
   <view class="event-detail-container">
     <!-- Content Container -->
     <view class="content-wrapper">

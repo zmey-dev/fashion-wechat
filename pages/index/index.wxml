@@ -1,4 +1,4 @@
-<app-layout current-tab="" current-filter="discover">
+<app-layout current-page="discover">
   <!-- Main Content Area -->
   <view class="content-area" id="contentArea">
     <!-- Posts Grid -->

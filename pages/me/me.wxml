@@ -1,4 +1,4 @@
-<app-layout current-tab="me" current-filter="discover">
+<app-layout current-page="me">
   <view class="me-container">
   <!-- User Profile Header -->
   <view class="profile-header">
