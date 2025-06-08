@@ -1,3 +1,5 @@
+const { default: config } = require("../../config");
+
 Component({
   /**
    * Component properties
@@ -428,7 +430,6 @@ Component({
     },
 
     fetchNotifications: function () {
-      const config = require("../../config");
       const userInfo = this.data.userInfo;
 
       if (!userInfo || !userInfo.token) {

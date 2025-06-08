@@ -122,7 +122,7 @@ Page({
   loadEventInfo(eventId) {
     // Simulate API call to get event info
     wx.request({
-      url: `${getApp().globalData.apiBase}/events/${eventId}`,
+      url: `${config.BACKEND_URL}/event/${eventId}`,
       method: "GET",
       success: (res) => {
         if (res.data.status === "success") {
