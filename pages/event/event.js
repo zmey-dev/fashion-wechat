@@ -1,5 +1,4 @@
 const { default: config } = require("../../config");
-const { EventService } = require("../../services/api");
 const { USER_ROLES } = require("../../services/constants");
 
 Page({
@@ -13,8 +12,7 @@ Page({
     loading: false,
     error: null,
     isTeacher: false, // Teacher role flag
-    userInfo: null,
-    // Chinese messages for UI text
+    userInfo: null, // Chinese messages for UI text
     messages: {
       loading: "加载中...",
       errors: {
@@ -24,162 +22,186 @@ Page({
         schoolRestriction: "此活动仅限同校学生参加",
         notSet: "未设置",
         deleteError: "删除活动失败",
-        updateError: "编辑活动失败"
+        updateError: "编辑活动失败",
+        hasParticipants: "已有参与者的活动不能删除",
       },
-      actions: {
-        participate: "参加",
+      actions: {        participate: "参加",
         join: "加入活动",
         agree: "同意",
         close: "关闭",
         edit: "编辑",
         delete: "删除",
         confirmDelete: "确认删除",
-        cancel: "取消"
+        cancel: "取消",
+        viewDetails: "查看详情",
+        teacherJoin: "参与活动",
       },
       status: {
         active: "进行中",
         past: "已结束",
-        upcoming: "即将开始"
+        upcoming: "即将开始",
       },
       confirmMessages: {
-        deleteEvent: "确定要删除这个活动吗？此操作无法撤销。"
-      }
-    }
-  },  onLoad(options) {
+        deleteEvent: "确定要删除这个活动吗？此操作无法撤销。",
+      },
+    },
+  },
+  onLoad(options) {
     // Get user info and check if teacher
     const app = getApp();
     const userInfo = app.globalData.userInfo || {};
-    
-    console.log('Event page - User info:', userInfo);
-    console.log('Event page - Is teacher:', userInfo.role === USER_ROLES.TEACHER);
-    
+
+    console.log("Event page - User info:", userInfo);
+    console.log(
+      "Event page - Is teacher:",
+      userInfo.role === USER_ROLES.TEACHER
+    );
+
     this.setData({
       userInfo: userInfo,
-      isTeacher: userInfo.role === USER_ROLES.TEACHER
+      isTeacher: userInfo.role == USER_ROLES.TEACHER,
     });
-    
     // Load event data
     this.fetchEvents();
   },
-    onShow() {
+  onShow() {
     // Refresh events whenever page is shown
     // Also refresh user info in case role changed
     const app = getApp();
     const userInfo = app.globalData.userInfo || {};
-    
+
     this.setData({
       userInfo: userInfo,
-      isTeacher: userInfo.role === USER_ROLES.TEACHER
+      isTeacher: userInfo.role === USER_ROLES.TEACHER,
     });
-    
+
     this.fetchEvents();
   },
 
   // Fetch event data from API
   fetchEvents() {
     this.setData({ loading: true });
-    
+
     wx.request({
       url: `${config.BACKEND_URL}/event`,
-      method: 'GET',
+      method: "GET",
       header: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${getApp().globalData.userInfo?.token}`
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getApp().globalData.userInfo?.token}`,
       },
       success: (res) => {
-        if (res.data && res.data.status === 'success') {
+        if (res.data && res.data.status === "success") {
           const allEvents = res.data.events || [];
-          
+
           // Current date
           const now = new Date();
-          
+
           // Separate active and past events
           const activeEvents = allEvents.filter(
-            event => new Date(event.end_date) >= now
+            (event) => new Date(event.end_date) >= now
           );
-          
+
           const pastEvents = allEvents.filter(
-            event => new Date(event.end_date) < now
+            (event) => new Date(event.end_date) < now
           );
-            this.setData({
+          this.setData({
             events: activeEvents,
             pastEvents: pastEvents,
             loading: false,
-            error: null
+            error: null,
           });
-          
+
           // Initialize selected event
           if (activeEvents.length > 0) {
             this.setData({
-              selectedEvent: activeEvents[0]
+              currentEventIndex: 0,
+              selectedEvent: activeEvents[0],
             });
-            
-            console.log('Selected event:', activeEvents[0]);
-            console.log('Event owner ID:', activeEvents[0].user?.id);
-            console.log('Current user ID:', this.data.userInfo?.id);
-            console.log('Can manage event:', this.canManageEvent(activeEvents[0]));
+
+            console.log("Selected event:", activeEvents[0]);
+            console.log("Event owner ID:", activeEvents[0].user?.id);
+            console.log("Current user ID:", this.data.userInfo?.id);
+            console.log(
+              "Can manage event:",
+              this.canManageEvent(activeEvents[0])
+            );
+          } else {
+            // Reset selected event and index if no active events
+            this.setData({
+              currentEventIndex: 0,
+              selectedEvent: null,
+            });
           }
         } else {
           this.setData({
             loading: false,
-            error: res.data?.msg || this.data.messages.errors.loadFailed
+            error: res.data?.msg || this.data.messages.errors.loadFailed,
           });
-          
+
           wx.showToast({
             title: this.data.messages.errors.loadFailed,
-            icon: 'none'
+            icon: "none",
           });
         }
       },
       fail: (err) => {
-        console.error('Failed to fetch events:', err);
+        console.error("Failed to fetch events:", err);
         this.setData({
           loading: false,
-          error: this.data.messages.errors.networkError
+          error: this.data.messages.errors.networkError,
         });
-        
+
         wx.showToast({
           title: this.data.messages.errors.networkError,
-          icon: 'none'
+          icon: "none",
         });
-      }
+      },
     });
-  },
-  // Handle swiper change
+  }, // Handle swiper change
   onSwiperChange(e) {
     const currentIndex = e.detail.current;
-    const selectedEvent = this.data.events[currentIndex];
-    
-    this.setData({
-      currentEventIndex: currentIndex,
-      selectedEvent: selectedEvent
-    });
-    
-    console.log('Swiper changed to event:', selectedEvent?.title);
-    console.log('Can manage this event:', this.canManageEvent(selectedEvent));
-  },
-  // Handle event card selection
+
+    // Verify the index is valid
+    if (currentIndex >= 0 && currentIndex < this.data.events.length) {
+      const selectedEvent = this.data.events[currentIndex];
+
+      this.setData({
+        currentEventIndex: currentIndex,
+        selectedEvent: selectedEvent,
+      });
+
+      console.log("Swiper changed to event:", selectedEvent?.title);
+      console.log("Can manage this event:", this.canManageEvent(selectedEvent));
+    } else {
+      console.error("Invalid swiper index:", currentIndex);
+    }
+  }, // Handle event card selection
   onEventSelect(e) {
     const index = e.currentTarget.dataset.index;
-    const selectedEvent = this.data.events[index];
-    
-    this.setData({
-      currentEventIndex: index,
-      selectedEvent: selectedEvent
-    });
-    
-    console.log('Event selected:', selectedEvent?.title);
-    console.log('Can manage this event:', this.canManageEvent(selectedEvent));
-  },
-  // Handle participate button click
+
+    // Verify the index is valid
+    if (index >= 0 && index < this.data.events.length) {
+      const selectedEvent = this.data.events[index];
+
+      this.setData({
+        currentEventIndex: index,
+        selectedEvent: selectedEvent,
+      });
+
+      console.log("Event selected:", selectedEvent?.title);
+      console.log("Can manage this event:", this.canManageEvent(selectedEvent));
+    } else {
+      console.error("Invalid event index:", index);
+    }
+  }, // Handle participate button click
   onParticipate() {
     const event = this.data.selectedEvent;
     if (!event) return;
 
-    // If teacher, show event details without participation logic
+    // If teacher, show event details without participation checks
     if (this.data.isTeacher) {
       this.setData({
-        showRulesModal: true
+        showRulesModal: true,
       });
       return;
     }
@@ -191,164 +213,270 @@ Page({
     if (event.allow_limit && event.students_count >= event.limit) {
       wx.showToast({
         title: this.data.messages.errors.eventFull,
-        icon: 'none',
-        duration: 2000
+        icon: "none",
+        duration: 2000,
       });
       return;
     }
-    
+
     // Check if other school students are allowed
-    if (!event.allow_other_school && 
-        userInfo.university_id !== event.user.university_id) {
+    if (
+      !event.allow_other_school &&
+      userInfo.university_id !== event.user.university_id
+    ) {
       wx.showToast({
         title: this.data.messages.errors.schoolRestriction,
-        icon: 'none',
-        duration: 2000
+        icon: "none",
+        duration: 2000,
       });
       return;
     }
 
     // Show rules modal
     this.setData({
-      showRulesModal: true
+      showRulesModal: true,
     });
   },
 
   // Close rules modal
   onCloseRulesModal() {
     this.setData({
-      showRulesModal: false
+      showRulesModal: false,
     });
-  },
-  // Handle rules agreement
+  }, // Handle rules agreement
   onAgreeRules() {
     this.setData({
-      showRulesModal: false
+      showRulesModal: false,
     });
-    
-    // Only students can join events
-    if (!this.data.isTeacher) {
-      // Navigate to event detail page
-      wx.navigateTo({
-        url: `/pages/event-detail/event-detail?eventId=${this.data.selectedEvent.id}`
-      });
-    }
-  },
-    // Join event
+
+    // Navigate to event detail page for both teachers and students
+    wx.navigateTo({
+      url: `/pages/event-detail/event-detail?eventId=${this.data.selectedEvent.id}`,
+    });
+  },  // Join event
   joinEvent() {
     const event = this.data.selectedEvent;
     if (!event) return;
-    
+
     wx.navigateTo({
-      url: `/pages/post/create-post?eventId=${event.id}&type=event`
+      url: `/pages/post/create-post?eventId=${event.id}&type=event`,
     });
   },
-  // Teacher functions - Update event
-  onUpdateEvent() {
+  
+  // Handle teacher participation in an event
+  onTeacherParticipate() {
     const event = this.data.selectedEvent;
     if (!event) return;
     
-    // Check if user is teacher and owns this event
-    if (!this.data.isTeacher) {
-      wx.showToast({
-        title: '无权限操作',
-        icon: 'none'
-      });
-      return;
-    }
-    
-    // Check if current teacher owns this event
-    if (!this.canManageEvent(event)) {
-      wx.showToast({
-        title: '只能编辑自己创建的活动',
-        icon: 'none'
-      });
-      return;
-    }
-    
-    // For now, navigate to upload page with event context
-    // In a complete implementation, you would create a dedicated event-edit page
-    wx.showToast({
-      title: '活动编辑功能开发中',
-      icon: 'none',
-      duration: 2000
-    });
-    
-    // Placeholder for event editing navigation
-    // wx.navigateTo({
-    //   url: `/pages/event-create/event-create?eventId=${event.id}&mode=edit`
-    // });
-  },
-  // Teacher functions - Show delete confirmation
-  onDeleteEvent() {
-    const event = this.data.selectedEvent;
-    if (!event) return;
-    
-    // Check if user is teacher and owns this event
-    if (!this.data.isTeacher) {
-      wx.showToast({
-        title: '无权限操作',
-        icon: 'none'
-      });
-      return;
-    }
-    
-    // Check if current teacher owns this event
-    if (!this.canManageEvent(event)) {
-      wx.showToast({
-        title: '只能删除自己创建的活动',
-        icon: 'none'
-      });
-      return;
-    }
-    
+    // Close the modal
     this.setData({
-      showDeleteModal: true
+      showRulesModal: false,
     });
-  },
-
-  // Close delete confirmation modal
-  onCloseDeleteModal() {
-    this.setData({
-      showDeleteModal: false
-    });
-  },
-
-  // Confirm delete event
-  onConfirmDelete() {
-    const event = this.data.selectedEvent;
-    if (!event) return;
     
-    this.setData({
-      showDeleteModal: false,
-      loading: true
+    // Show loading
+    wx.showLoading({
+      title: '处理中...',
+      mask: true
     });
-
-    EventService.deleteEvent(event.id)
-      .then((res) => {
-        if (res.status === 'success') {
+    
+    // Use a teacher-specific API endpoint to join the event
+    wx.request({
+      url: `${config.BACKEND_URL}/teacher/event/${event.id}/join`,
+      method: 'POST',
+      header: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getApp().globalData.userInfo?.token}`
+      },
+      success: (res) => {
+        wx.hideLoading();
+        
+        if (res.data && res.data.status === 'success') {
           wx.showToast({
-            title: '活动删除成功',
+            title: '已成功参与活动',
             icon: 'success'
           });
+          
+          // Navigate to event detail page
+          setTimeout(() => {
+            wx.navigateTo({
+              url: `/pages/event-detail/event-detail?eventId=${event.id}`
+            });
+          }, 1500);
           
           // Refresh events list
           this.fetchEvents();
         } else {
-          throw new Error(res.msg || this.data.messages.errors.deleteError);
+          wx.showToast({
+            title: res.data?.msg || '参与活动失败',
+            icon: 'none'
+          });
         }
-      })
-      .catch((error) => {
-        console.error('Delete event failed:', error);
-        this.setData({
-          loading: false
-        });
+      },
+      fail: (err) => {
+        wx.hideLoading();
+        console.error('Teacher join event failed:', err);
         
         wx.showToast({
-          title: error.message || this.data.messages.errors.deleteError,
+          title: '参与活动失败，请重试',
           icon: 'none'
         });
+      }
+    });
+  },// Teacher functions - Update event
+  onUpdateEvent() {
+    const event = this.data.selectedEvent;
+    if (!event) return;
+
+    // Check if user is teacher and owns this event
+    if (!this.data.isTeacher) {
+      wx.showToast({
+        title: "无权限操作",
+        icon: "none",
       });
+      return;
+    }
+
+    // Check if current teacher owns this event
+    if (!this.canManageEvent(event)) {
+      wx.showToast({
+        title: "只能编辑自己创建的活动",
+        icon: "none",
+      });
+      return;
+    }
+
+    // Navigate to event creation page in edit mode
+    wx.navigateTo({
+      url: `/pages/event-create/event-create?eventId=${event.id}&mode=edit`,
+    });
+  },
+
+  // Teacher functions - Create new event
+  onCreateEvent() {
+    // Check if user is teacher
+    if (!this.data.isTeacher) {
+      wx.showToast({
+        title: "无权限操作",
+        icon: "none",
+      });
+      return;
+    }
+
+    // Navigate to event creation page in create mode
+    wx.navigateTo({
+      url: "/pages/event-create/event-create?mode=create",
+    });
+  }, // Teacher functions - Show delete confirmation
+  onDeleteEvent() {
+    const event = this.data.selectedEvent;
+    if (!event) return;
+
+    // Check if user is teacher and owns this event
+    if (!this.data.isTeacher) {
+      wx.showToast({
+        title: "无权限操作",
+        icon: "none",
+      });
+      return;
+    }
+
+    // Check if current teacher owns this event
+    if (!this.canManageEvent(event)) {
+      wx.showToast({
+        title: "只能删除自己创建的活动",
+        icon: "none",
+      });
+      return;
+    }
+    // Check if event has participants
+    if (event.students_count && event.students_count > 0) {
+      wx.showToast({
+        title: this.data.messages.errors.hasParticipants,
+        icon: "none",
+        duration: 2000,
+      });
+      return;
+    }
+
+    // Use WeChat standard modal
+    wx.showModal({
+      title: "删除活动",
+      content: this.data.messages.confirmMessages.deleteEvent,
+      confirmText: "删除",
+      confirmColor: "#FF4949",
+      cancelText: "取消",
+      success: (res) => {
+        if (res.confirm) {
+          this.performDeleteEvent();
+        }
+      },
+    });
+  },
+
+  // Close delete confirmation modal (deprecated, kept for compatibility)
+  onCloseDeleteModal() {
+    this.setData({
+      showDeleteModal: false,
+    });
+  }, // Perform the event deletion
+  performDeleteEvent() {
+    const event = this.data.selectedEvent;
+    if (!event) return;
+
+    // Double-check that event has no participants
+    if (event.students_count && event.students_count > 0) {
+      wx.showToast({
+        title: this.data.messages.errors.hasParticipants,
+        icon: "none",
+        duration: 2000,
+      });
+      return;
+    }
+
+    this.setData({
+      loading: true,
+    });
+
+    // Using WeChat standard request approach instead of EventService
+    wx.request({
+      url: `${config.BACKEND_URL}/teacher/event/${event.id}`,
+      method: "DELETE",
+      header: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getApp().globalData.userInfo?.token}`,
+      },
+      success: (res) => {
+        if (res.data && res.data.status === "success") {
+          wx.showToast({
+            title: "活动删除成功",
+            icon: "success",
+          });
+
+          // Refresh events list
+          this.fetchEvents();
+        } else {
+          wx.showToast({
+            title: res.data?.msg || this.data.messages.errors.deleteError,
+            icon: "none",
+          });
+
+          this.setData({
+            loading: false,
+          });
+        }
+      },
+      fail: (err) => {
+        console.error("Delete event failed:", err);
+        this.setData({
+          loading: false,
+        });
+
+        wx.showToast({
+          title: this.data.messages.errors.deleteError,
+          icon: "none",
+        });
+      },
+    });
   },
 
   // Check if current user can manage the event (is teacher and owns the event)
@@ -356,28 +484,43 @@ Page({
     if (!this.data.isTeacher || !event || !this.data.userInfo) {
       return false;
     }
-    
+
     // Check if current teacher created this event
     return event.user && event.user.id === this.data.userInfo.id;
   },
-  
+
   // Format date for display
   formatDate(dateString) {
     if (!dateString) return this.data.messages.errors.notSet;
-    
+
     const date = new Date(dateString);
-    const months = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
-    return `${date.getFullYear()}年${months[date.getMonth()]}${date.getDate()}日`;
+    const months = [
+      "1月",
+      "2月",
+      "3月",
+      "4月",
+      "5月",
+      "6月",
+      "7月",
+      "8月",
+      "9月",
+      "10月",
+      "11月",
+      "12月",
+    ];
+    return `${date.getFullYear()}年${
+      months[date.getMonth()]
+    }${date.getDate()}日`;
   },
 
   // Get event status text in Chinese
   getEventStatus(event) {
-    if (!event) return '';
-    
+    if (!event) return "";
+
     const now = new Date();
     const startDate = new Date(event.start_date);
     const endDate = new Date(event.end_date);
-    
+
     if (now < startDate) {
       return this.data.messages.status.upcoming;
     } else if (now >= startDate && now <= endDate) {
@@ -390,17 +533,17 @@ Page({
   // Format event time for display
   formatEventTime(startDate, endDate) {
     if (!startDate || !endDate) return this.data.messages.errors.notSet;
-    
+
     const start = new Date(startDate);
     const end = new Date(endDate);
-    
+
     // Format time in Chinese style
     const formatTime = (date) => {
-      const hours = date.getHours().toString().padStart(2, '0');
-      const minutes = date.getMinutes().toString().padStart(2, '0');
+      const hours = date.getHours().toString().padStart(2, "0");
+      const minutes = date.getMinutes().toString().padStart(2, "0");
       return `${hours}:${minutes}`;
     };
-    
+
     return `${formatTime(start)} - ${formatTime(end)}`;
-  }
+  },
 });

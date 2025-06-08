@@ -25,9 +25,9 @@
       </view>
 
       <view class="featured-showcase">
-        <!-- Main Event Display -->
-        <view class="showcase-main">
+        <!-- Main Event Display -->        <view class="showcase-main">
           <swiper 
+            wx:if="{{events.length > 0}}"
             class="event-swiper" 
             indicator-dots="false"
             circular="true"
@@ -67,8 +67,7 @@
                       <text class="stat-number" wx:else>∞</text>
                       <text class="stat-label">剩余名额</text>
                     </view>
-                  </view>                  
-                  <!-- Teacher action buttons -->
+                  </view>                    <!-- Teacher action buttons -->
                   <view wx:if="{{isTeacher}}" class="teacher-actions">
                     <button wx:if="{{selectedEvent.user.id === userInfo.id}}" class="teacher-btn edit-btn" bindtap="onUpdateEvent">
                       <view class="btn-icon">
@@ -82,9 +81,14 @@
                       </view>
                       <text class="btn-text">{{messages.actions.delete}}</text>
                     </button>
+                    <button class="teacher-btn join-btn" bindtap="onParticipate">
+                      <view class="btn-icon">
+                        <image src="/images/icons/eye.svg" mode="aspectFit"></image>
+                      </view>
+                      <text class="btn-text">参与活动</text>
+                    </button>
                   </view>
-                  
-                  <!-- Student action button -->
+                    <!-- Student action button -->
                   <button wx:else class="cta-button" bindtap="onParticipate">
                     <text class="cta-text">查看详情</text>
                     <view class="cta-arrow"></view>
@@ -281,25 +285,32 @@
               </view>
             </view>
           </view>
-        </view>
-          <!-- Modal Footer -->
+        </view>       
         <view class="modal-footer">
           <button class="modal-btn secondary" bindtap="onCloseRulesModal">
             <text>{{messages.actions.close}}</text>
           </button>
-          <!-- Show join button only for students -->
+            <!-- Show for students - join button -->
           <button wx:if="{{!isTeacher}}" class="modal-btn primary" bindtap="onAgreeRules">
             <view class="btn-content">
               <image class="btn-icon" src="/images/icons/check.svg" mode="aspectFit"></image>
               <text>{{messages.actions.agree}}并报名</text>
             </view>
           </button>
-          <!-- Show teacher management buttons if teacher owns the event -->
+          
+          <!-- Show for teachers - view details button -->
+          <button wx:elif="{{isTeacher && selectedEvent.user.id !== userInfo.id}}" class="modal-btn primary" bindtap="onTeacherParticipate">
+            <view class="btn-content">
+              <image class="btn-icon" src="/images/icons/users.svg" mode="aspectFit"></image>
+              <text>{{messages.actions.teacherJoin}}</text>
+            </view>
+          </button>
+            <!-- Show management buttons if teacher owns the event -->
           <view wx:elif="{{isTeacher && selectedEvent.user.id === userInfo.id}}" class="teacher-modal-actions">
-            <button class="modal-btn edit" bindtap="onUpdateEvent">
+            <button class="modal-btn primary" bindtap="onAgreeRules">
               <view class="btn-content">
-                <image class="btn-icon" src="/images/icons/edit.svg" mode="aspectFit"></image>
-                <text>{{messages.actions.edit}}</text>
+                <image class="btn-icon" src="/images/icons/eye.svg" mode="aspectFit"></image>
+                <text>{{messages.actions.viewDetails}}</text>
               </view>
             </button>
           </view>
@@ -335,37 +346,15 @@
       <block wx:else>
       <!-- Event display content here -->
     </block>  </view>  </view>
+  <!-- Custom delete modal has been removed as we now use wx.showModal instead -->
 
-  <!-- Delete Confirmation Modal -->
-  <view wx:if="{{showDeleteModal}}" class="modal-backdrop" bindtap="onCloseDeleteModal">
-    <view class="modal-dialog delete-modal" catchtap="">
-      <view class="modal-content">
-        <!-- Modal Header -->
-        <view class="modal-header">
-          <view class="header-icon delete-icon">
-            <image src="/images/icons/trash.svg" mode="aspectFit"></image>
-          </view>
-          <text class="modal-title">{{messages.actions.delete}}活动</text>
-        </view>
-        
-        <!-- Modal Body -->
-        <view class="modal-body">
-          <text class="confirm-text">{{messages.confirmMessages.deleteEvent}}</text>
-          <view class="event-preview">
-            <text class="event-name">{{selectedEvent.title}}</text>
-          </view>
-        </view>
-        
-        <!-- Modal Footer -->
-        <view class="modal-footer">
-          <button class="modal-btn secondary" bindtap="onCloseDeleteModal">
-            <text>{{messages.actions.cancel}}</text>
-          </button>
-          <button class="modal-btn danger" bindtap="onConfirmDelete">
-            <text>{{messages.actions.confirmDelete}}</text>
-          </button>
-        </view>
+  <!-- Floating Action Button for Teachers -->
+  <view class="fab-container" wx:if="{{isTeacher}}">
+    <button class="fab" bindtap="onCreateEvent">
+      <view class="fab-icon">
+        <text class="fab-plus">+</text>
       </view>
-    </view>
+      <text class="fab-text">创建活动</text>
+    </button>
   </view>
 </app-layout>

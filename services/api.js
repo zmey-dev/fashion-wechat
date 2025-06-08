@@ -141,7 +141,7 @@ const EventService = {
   
   // Get event details
   getEvent: (eventId) => {
-    return http.get(`/events/${eventId}`);
+    return http.get(`/teacher/event/${eventId}`);
   },
   
   // Create event (teacher role)
@@ -156,7 +156,7 @@ const EventService = {
   
   // Delete event (teacher role)
   deleteEvent: (eventId) => {
-    return http.delete(`/events/${eventId}`);
+    return http.delete(`/teacher/event/${eventId}`);
   },
   
   // Join event (student role)

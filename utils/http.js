@@ -1,6 +1,6 @@
 // utils/http.js
 
-const config = require("../config");
+const { default: config } = require("../config");
 
 /**
  * HTTP request utility for WeChat Mini App
@@ -13,7 +13,7 @@ const request = (url, method = 'GET', data = null, auth = true) => {
     
     // Add auth token if needed
     if (auth) {
-      const token = wx.getStorageSync('token');
+      const token = getApp().globalData.userInfo?.token ;
       if (token) {
         header['Authorization'] = 'Bearer ' + token;
       }

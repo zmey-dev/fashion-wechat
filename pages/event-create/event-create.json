@@ -1,0 +1,9 @@
+{
+  "navigationBarTitleText": "创建活动",
+  "navigationBarBackgroundColor": "#000000",
+  "navigationBarTextStyle": "white",
+  "backgroundColor": "#000000",
+  "usingComponents": {
+    "app-layout": "../../components/app-layout/app-layout"
+  }
+}

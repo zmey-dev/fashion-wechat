@@ -1,0 +1,265 @@
+<!-- create-event.wxml -->
+<view class="page-container">
+  <!-- Main Content -->
+  <scroll-view scroll-y="{{true}}" class="content-scroll">
+    <view class="content-wrapper">
+      
+      <!-- Poster Upload Section -->
+      <view class="poster-section">
+        <view class="poster-container" bindtap="triggerFileInput">
+          <view wx:if="{{posterImageUrl}}" class="poster-preview">
+            <image 
+              src="{{posterImageUrl}}" 
+              class="poster-image"
+              mode="aspectFill"
+            />
+            <view class="poster-overlay">
+              <text class="camera-icon">📷</text>
+              <text class="upload-text">点击更换海报</text>
+            </view>
+          </view>
+          <view wx:else class="poster-placeholder">
+            <text class="camera-icon">📷</text>
+            <text class="upload-text">点击上传活动海报</text>
+            <text class="upload-hint">建议尺寸 750x400</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- Form Content -->
+      <view class="form-content">
+        
+        <!-- Event Title -->
+        <view class="form-group">
+          <view class="form-label">
+            <text class="label-text">活动标题</text>
+            <text class="required">*</text>
+          </view>
+          <view class="input-wrapper">
+            <input 
+              class="form-input"
+              value="{{title}}"
+              bindinput="onTitleInput"
+              placeholder="请输入活动标题"
+              maxlength="50"
+            />
+            <view class="char-count">{{title.length}}/50</view>
+          </view>
+        </view>        <!-- Event Time -->
+        <view class="form-group">
+          <view class="form-label">
+            <text class="label-text">活动时间</text>
+            <text class="required">*</text>
+          </view>
+          <view class="time-selector">
+            <view class="time-item" bindtap="showStartCalendar">
+              <view class="time-label">开始时间</view>
+              <view class="time-value">
+                <text class="{{startDateDisplay === '选择开始时间' ? 'placeholder' : ''}}">
+                  {{startDateDisplay}}
+                </text>
+                <text class="arrow-icon">›</text>
+              </view>
+            </view>
+            <view class="time-divider"></view>
+            <view class="time-item" bindtap="showEndCalendar">
+              <view class="time-label">结束时间</view>
+              <view class="time-value">
+                <text class="{{endDateDisplay === '选择结束时间' ? 'placeholder' : ''}}">
+                  {{endDateDisplay}}
+                </text>
+                <text class="arrow-icon">›</text>
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <!-- University -->
+        <view class="form-group">
+          <view class="form-label">
+            <text class="label-text">主办方</text>
+          </view>
+          <view class="readonly-field">
+            <text class="readonly-text">{{universityName}}</text>
+          </view>
+        </view>
+
+        <!-- Registration Settings -->
+        <view class="form-group">
+          <view class="form-label">
+            <text class="label-text">报名设置</text>
+          </view>
+          
+          <!-- School Restriction -->
+          <view class="setting-item">
+            <view class="setting-info">
+              <text class="setting-title">允许其他学校学生参加</text>
+              <text class="setting-desc">开启后，其他学校学生也可以报名参加</text>
+            </view>
+            <switch 
+              checked="{{allowOtherSchool}}"
+              bindchange="onSchoolSwitchChange"
+              color="#007aff"
+            />
+          </view>
+
+          <!-- Participant Limit -->
+          <view class="setting-item">
+            <view class="setting-info">
+              <text class="setting-title">限制参与人数</text>
+              <text class="setting-desc">设置活动最大参与人数</text>
+            </view>
+            <switch 
+              checked="{{allowLimit}}"
+              bindchange="onLimitSwitchChange"
+              color="#007aff"
+            />
+          </view>          <!-- Limit Input -->
+          <view wx:if="{{allowLimit}}" class="limit-input-section">
+            <view class="input-wrapper">
+              <input 
+                class="form-input number-input"
+                type="number"
+                value="{{limit}}"
+                bindinput="onLimitInput"
+                placeholder="请输入人数上限"
+              />
+              <text class="input-unit">人</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- Event Description -->
+        <view class="form-group">
+          <view class="form-label">
+            <text class="label-text">活动说明</text>
+            <text class="required">*</text>
+          </view>
+          <view class="editor-section">
+            <!-- Editor Toolbar -->
+            <view class="editor-toolbar">
+              <view class="toolbar-group">
+                <view 
+                  class="toolbar-btn {{formats.bold ? 'active' : ''}}"
+                  bindtap="onEditorFormat"
+                  data-name="bold"
+                >
+                  <text class="btn-icon">B</text>
+                </view>
+                <view 
+                  class="toolbar-btn {{formats.italic ? 'active' : ''}}"
+                  bindtap="onEditorFormat"
+                  data-name="italic"
+                >
+                  <text class="btn-icon italic">I</text>
+                </view>
+                <view 
+                  class="toolbar-btn {{formats.underline ? 'active' : ''}}"
+                  bindtap="onEditorFormat"
+                  data-name="underline"
+                >
+                  <text class="btn-icon underline">U</text>
+                </view>
+              </view>
+              <view class="toolbar-group">
+                <view 
+                  class="toolbar-btn"
+                  bindtap="onEditorFormat"
+                  data-name="align"
+                  data-value="left"
+                >
+                  <text class="btn-icon">≡</text>
+                </view>
+                <view 
+                  class="toolbar-btn"
+                  bindtap="onEditorFormat"
+                  data-name="align"
+                  data-value="center"
+                >
+                  <text class="btn-icon">≣</text>
+                </view>
+              </view>
+            </view>
+            
+            <!-- Rich Text Editor -->
+            <editor 
+              id="editor"
+              class="rich-editor"
+              placeholder="请详细描述活动内容、规则、奖品等信息..."
+              bindinput="onEditorInput"
+              bindready="onEditorReady"
+              show-img-size="{{false}}"
+              show-img-toolbar="{{false}}"
+            />
+          </view>
+        </view>
+
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- Bottom Action -->
+  <view class="bottom-action">
+    <button 
+      class="submit-btn {{isUploading ? 'loading' : ''}}"
+      bindtap="handleSubmit"
+      disabled="{{isUploading}}"
+    >
+      <view wx:if="{{isUploading}}" class="loading-content">
+        <view class="loading-spinner"></view>
+        <text>发布中...</text>
+      </view>
+      <text wx:else>{{eventId ? '保存修改' : '发布活动'}}</text>
+    </button>
+  </view>
+
+  <!-- Calendar Modal -->
+  <view class="calendar-modal" wx:if="{{showStartCalendar || showEndCalendar}}">
+    <view class="calendar-mask" bindtap="closeCalendar"></view>
+    <view class="calendar-container">
+      <view class="calendar-header">
+        <view class="calendar-title">
+          选择{{showStartCalendar ? '开始' : '结束'}}时间
+        </view>
+        <view class="calendar-close" bindtap="closeCalendar">
+          <text>×</text>
+        </view>
+      </view>
+      
+      <view class="calendar-content">
+        <view class="calendar-nav">
+          <view class="nav-btn" bindtap="prevMonth">
+            <text class="nav-arrow">‹</text>
+          </view>
+          <view class="month-display">
+            {{calendarData.currentYear}}年{{calendarData.currentMonth}}月
+          </view>
+          <view class="nav-btn" bindtap="nextMonth">
+            <text class="nav-arrow">›</text>
+          </view>
+        </view>
+        
+        <view class="calendar-grid">
+          <view class="weekday" wx:for="{{['日','一','二','三','四','五','六']}}" wx:key="*this">
+            {{item}}
+          </view>
+          
+          <view 
+            wx:for="{{calendarData.calendarDates}}" 
+            wx:key="index"
+            class="calendar-date {{item.isToday ? 'today' : ''}} {{item.isSelected ? 'selected' : ''}} {{item.isOtherMonth ? 'other-month' : ''}}"
+            bindtap="selectCalendarDate"
+            data-date="{{item.fullDate}}"
+          >
+            {{item.day}}
+          </view>
+        </view>
+
+        <view class="calendar-actions">
+          <button class="calendar-btn cancel" bindtap="closeCalendar">取消</button>
+          <button class="calendar-btn confirm" bindtap="confirmCalendarDate">确定</button>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>
