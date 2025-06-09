@@ -58,6 +58,10 @@ Page({
     this.loadUserList();
   },
 
+  onShow: function () {
+    this.loadUserList();
+  },
+
   onUnload: function () {
     // Unsubscribe from user info changes
     app.unsubscribe("userInfo", this.userInfoHandler);

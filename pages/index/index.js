@@ -52,7 +52,9 @@ Page({
     this.initializePage();
     this.checkUserIdModal();
   },
-
+  onShow: function () {
+    this.initializePage();
+  },
   onUnload: function () {
     // Unsubscribe from events
     app.unsubscribe("userInfo", this.userInfoHandler);

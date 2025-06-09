@@ -3,10 +3,11 @@ const app = getApp();
 
 Page({
   data: {
-    currentPath: "discover",
+    currentPath: "",
     showLoginModal: app.globalData.showLoginModal || false,
     userInfo: app.globalData.userInfo || {},
     followedUsers: app.globalData.followedUsers || [],
+    postId: null,
 
     currentPost: null,
     currentPostUser: null,
@@ -35,6 +36,9 @@ Page({
 
   onLoad: function (options) {
     const postId = options.postId || null;
+    this.setData({
+      postId: postId,
+    });
     const app = getApp();
 
     // Subscribe to state changes
@@ -58,7 +62,13 @@ Page({
     if (postId) this.loadPostData(null, postId);
     else this.loadPostData(0);
   },
-
+  onShow: function () {
+    if(this.data.postId) {
+      this.loadPostData(null, this.data.postId);
+    } else {
+      this.loadPostData(0);
+    }
+  },
   onUnload: function () {
     const app = getApp();
     // Unsubscribe from state changes

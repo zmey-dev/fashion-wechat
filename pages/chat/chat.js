@@ -97,6 +97,10 @@ Page({
     this.getFriends();
   },
 
+  onShow: function () {
+    this.getFriends();
+  },
+
   onUnload: function () {
     const app = getApp();
     app.unsubscribe("userInfo", this.userInfoHandler);

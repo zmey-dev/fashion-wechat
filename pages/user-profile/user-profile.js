@@ -4,6 +4,7 @@ const app = getApp();
 Page({
   data: {
     userInfo: app.globalData.userInfo || {},
+    username: "",
     currentUser: null,
     userMediaList: [],
     loading: false,
@@ -41,7 +42,7 @@ Page({
 
   onLoad: function (options) {
     const { username } = options;
-
+    this.setData({ username });
     if (!username) {
       wx.showToast({
         title: this.data.messages.errors.userNotFound,
@@ -66,6 +67,11 @@ Page({
     this.loadUserProfile(username);
   },
 
+  onShow: function () {
+    if (this.data.username) {
+      this.loadUserProfile(this.data.username);
+    }
+  },
   onUnload: function () {
     // Unsubscribe from user info changes
     app.unsubscribe("userInfo", this.userInfoHandler);

@@ -663,8 +663,14 @@ Page({
             phoneOtpCode: "",
           });
 
-          getApp().setState("userInfo", { ...this.data.userInfo, ...updatedUserInfo });
-          wx.setStorageSync("userInfo", { ...this.data.userInfo, ...updatedUserInfo });
+          getApp().setState("userInfo", {
+            ...this.data.userInfo,
+            ...updatedUserInfo,
+          });
+          wx.setStorageSync("userInfo", {
+            ...this.data.userInfo,
+            ...updatedUserInfo,
+          });
 
           wx.showToast({
             title: this.data.messages.success.profileUpdateSuccess,

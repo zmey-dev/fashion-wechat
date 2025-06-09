@@ -110,7 +110,7 @@ Page({
     },
   },
 
-  onLoad: function (options) {
+  onLoad: function () {
     const app = getApp();
     this.userInfoHandler = (userInfo) => {
       this.setData({ userInfo });
@@ -125,7 +125,11 @@ Page({
     this.loadUniversityInfo();
     this.loadTeacherProfile();
   },
-
+  onShow: function () {
+    this.loadStudents();
+    this.loadUniversityInfo();
+    this.loadTeacherProfile();
+  },
   onUnload: function () {
     const app = getApp();
     app.unsubscribe("userInfo", this.userInfoHandler);

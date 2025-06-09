@@ -60,7 +60,9 @@ Page({
 
     this.loadUserList();
   },
-
+  onShow: function () {
+    this.loadUserList();
+  },
   onUnload: function () {
     const app = getApp();
     // Unsubscribe from user info changes
