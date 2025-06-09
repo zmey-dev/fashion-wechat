@@ -125,11 +125,9 @@ Component({
         success(res) {
           const tempFilePath = res.tempFilePaths[0];
           that.uploadCommentImage(tempFilePath);
-        },
-        fail(err) {
-          console.error("Choose image failed:", err);
+        },        fail(err) {
           wx.showToast({
-            title: "Failed to select image",
+            title: "选择图片失败",
             icon: "error",
           });
         },
@@ -139,7 +137,7 @@ Component({
     // Upload comment image
     uploadCommentImage(filePath) {
       wx.showLoading({
-        title: "Uploading...",
+        title: "上传中...",
       });
 
       const formData = {
@@ -159,31 +157,27 @@ Component({
         },
         filePath: filePath,
         name: "file",
-        formData: formData,
-        success: (res) => {
+        formData: formData,        success: (res) => {
           wx.hideLoading();
           const data = JSON.parse(res.data);
           if (data.success) {
             wx.showToast({
-              title: "Comment posted successfully",
+              title: "评论发布成功",
               icon: "success",
             });
             this.triggerEvent("commentsent", {
               comment: data.comment,
             });
-            this.resetCommentInput();
-          } else {
+            this.resetCommentInput();          } else {
             wx.showToast({
-              title: "Failed to post comment",
+              title: "评论发布失败",
               icon: "error",
             });
           }
-        },
-        fail: (err) => {
+        },        fail: (err) => {
           wx.hideLoading();
-          console.error("Upload failed:", err);
           wx.showToast({
-            title: "Upload failed",
+            title: "上传失败",
             icon: "error",
           });
         },
@@ -199,26 +193,20 @@ Component({
       if (isEmpty(authUser)) {
         app.setState("showLoginModal", true);
         return;
-      }
-
-      if (!personalComment.trim()) {
+      }      if (!personalComment.trim()) {
         wx.showToast({
-          title: "Please enter a comment",
+          title: "请输入评论内容",
           icon: "error",
         });
         return;
-      }
-
-      if (isContainSword(personalComment)) {
+      }      if (isContainSword(personalComment)) {
         wx.showToast({
-          title: "Cannot use inappropriate language",
+          title: "不能使用不当言论",
           icon: "error",
         });
         return;
-      }
-
-      wx.showLoading({
-        title: isUpdate ? "Updating..." : "Posting...",
+      }      wx.showLoading({
+        title: isUpdate ? "更新中..." : "发布中...",
       });
 
       const apiUrl = isUpdate
@@ -264,18 +252,15 @@ Component({
             }
 
             this.resetCommentInput();
-          } else {
-            wx.showToast({
-              title: res.data.msg ? res.data.msg : "Failed to post comment",
+          } else {            wx.showToast({
+              title: res.data.msg ? res.data.msg : "评论发布失败",
               icon: "error",
             });
           }
-        },
-        fail: (err) => {
+        },        fail: (err) => {
           wx.hideLoading();
-          console.error("Request failed:", err);
           wx.showToast({
-            title: "Network error",
+            title: "网络错误",
             icon: "error",
           });
         },
@@ -321,11 +306,9 @@ Component({
       if (!loggedUser) {
         this.triggerEvent("loginrequired");
         return;
-      }
-
-      if (loggedUser.id === item.sender_id) {
+      }      if (loggedUser.id === item.sender_id) {
         wx.showToast({
-          title: "Cannot reply to your own comment",
+          title: "不能回复自己的评论",
           icon: "error",
         });
         return;

@@ -382,6 +382,8 @@ App({
         wx.redirectTo({ url: "/pages/contact/contact" });
         this.globalData.currentPath = "contact";
         break;
+      default:
+        break;
     }
     this.globalData.showSidebar = false;
   },
@@ -498,7 +500,7 @@ App({
         return userInfo;
       }
     } catch (e) {
-      // Handle storage error silently
+      // Failed to get user info from storage
     }
     return this.globalData.userInfo;
   },
@@ -593,7 +595,7 @@ App({
       this.getSwearWords();
       this.initializeSocket();
     } catch (e) {
-      // Handle launch error silently
+      // Failed to load app state
     }
   },
 

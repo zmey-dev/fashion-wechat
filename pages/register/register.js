@@ -133,12 +133,10 @@ Page({
               }))
             }))
           }));
-          
-          this.setData({ universities });
+              this.setData({ universities });
         }
       },
       fail: () => {
-        console.error("Failed to load universities");
         // Set default data for testing
         this.setData({
           universities: [

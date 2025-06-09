@@ -1490,7 +1490,7 @@ Page({
           
           // Navigate to login page
           wx.reLaunch({
-            url: '/pages/login/login'
+            url: '/pages/index/index'
           });
         }
       }

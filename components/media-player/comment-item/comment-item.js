@@ -95,22 +95,19 @@ Component({
         sourceType: ["album", "camera"],
         success(res) {
           const tempFilePath = res.tempFilePaths[0];
-          that.uploadCommentImage(tempFilePath);
-        },
+          that.uploadCommentImage(tempFilePath);        },
         fail(err) {
-          console.error("Choose image failed:", err);
           wx.showToast({
-            title: "Failed to select image",
+            title: "选择图片失败",
             icon: "error",
           });
         },
-      });
-    },
+      });    },
 
     // Upload comment image
     uploadCommentImage(filePath) {
       wx.showLoading({
-        title: "Uploading...",
+        title: "上传中...",
       });
 
       wx.uploadFile({
@@ -128,28 +125,24 @@ Component({
         },
         success: (res) => {
           wx.hideLoading();
-          const data = JSON.parse(res.data);
-          if (data.status=="success") {
+          const data = JSON.parse(res.data);          if (data.status=="success") {
             wx.showToast({
-              title: "Image updated successfully",
+              title: "图片更新成功",
               icon: "success",
             });
             this.triggerEvent("imageupload", {
               id: this.properties.item.id,
               comment: data.comment,
-            });
-          } else {
+            });          } else {
             wx.showToast({
-              title: "Upload failed",
+              title: "上传失败",
               icon: "error",
             });
           }
-        },
-        fail: (err) => {
+        },        fail: (err) => {
           wx.hideLoading();
-          console.error("Upload failed:", err);
           wx.showToast({
-            title: "Upload failed",
+            title: "上传失败",
             icon: "error",
           });
         },
@@ -168,12 +161,10 @@ Component({
     // Handle comment delete
     onCommentDelete(e) {
       const { id } = e.currentTarget.dataset;
-      const that = this;
-
-      wx.showModal({
-        title: "Confirm Delete",
-        content: "Are you sure you want to delete this comment?",
-        confirmText: "Delete",
+      const that = this;      wx.showModal({
+        title: "确认删除",
+        content: "您确定要删除这条评论吗？",
+        confirmText: "删除",
         confirmColor: "#ef4444",
         success(res) {
           if (res.confirm) {

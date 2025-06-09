@@ -1,4 +1,4 @@
-// WeChat Socket Manager - Updated with handlers property
+// WeChat Socket Manager - Handles real-time communication
 
 const { isEmpty } = require("../utils/isEmpty");
 
@@ -25,7 +25,6 @@ class WeChatSocketManager {
 
   on(eventType, handler) {
     if (typeof handler !== 'function') {
-      console.error('Handler must be a function');
       return;
     }
     
@@ -57,7 +56,7 @@ class WeChatSocketManager {
         try {
           handler(data);
         } catch (error) {
-          console.error(`Error in ${eventType} handler:`, error);
+          // Handler error occurred
         }
       });
     }
@@ -66,16 +65,14 @@ class WeChatSocketManager {
   connect(userId, token) {
     // Validate input parameters
     if (!userId || !token) {
-      console.error("UserId and token are required for connection");
       wx.showToast({
-        title: "Connection parameters missing",
+        title: "连接参数缺失",
         icon: "error",
       });
       return;
     }
 
     if (this.isConnecting || this.isConnected) {
-      console.log("Already connected or connecting");
       return;
     }
 
@@ -83,11 +80,8 @@ class WeChatSocketManager {
     this.token = token;
     this.isConnecting = true;
 
-    console.log("Connecting to WebSocket server...");
-
     // Set connection timeout
     this.connectionTimeout = setTimeout(() => {
-      console.error("Connection timeout");
       this.isConnecting = false;
       this.handleReconnect();
     }, 10000);
@@ -98,10 +92,9 @@ class WeChatSocketManager {
         "content-type": "application/json",
       },
       success: () => {
-        console.log("WebSocket connection initiated");
+        // WebSocket connection initiated
       },
       fail: (err) => {
-        console.error("WebSocket connection failed:", err);
         this.isConnecting = false;
         this.clearConnectionTimeout();
         this.handleReconnect();
@@ -128,7 +121,6 @@ class WeChatSocketManager {
       this.isConnecting = false;
       this.isReconnecting = false;
       this.reconnectAttempts = 0;
-      console.log("WebSocket connected successfully");
 
       // Join the chat room
       this.joinChat();
@@ -148,16 +140,14 @@ class WeChatSocketManager {
     this.socketTask.onMessage((res) => {
       try {
         const message = JSON.parse(res.data);
-        console.log("Message received:", message);
         this.handleMessage(message);
       } catch (error) {
-        console.error("Error parsing message:", error);
+        // Error parsing message
       }
     });
 
     // Connection error
     this.socketTask.onError((err) => {
-      console.error("WebSocket error:", err);
       this.isConnected = false;
       this.isConnecting = false;
       this.clearConnectionTimeout();
@@ -170,7 +160,6 @@ class WeChatSocketManager {
 
     // Connection closed
     this.socketTask.onClose((res) => {
-      console.log("WebSocket connection closed:", res);
       this.isConnected = false;
       this.isConnecting = false;
       this.clearConnectionTimeout();
@@ -189,8 +178,6 @@ class WeChatSocketManager {
 
   // Join chat room
   joinChat() {
-    console.log("Joining chat room...");
-
     this.sendMessage("join", {
       userId: this.userId,
       token: this.token,
@@ -201,8 +188,6 @@ class WeChatSocketManager {
   // Send message to server with retry mechanism
   sendMessage(eventType, data, retryOnFail = true) {
     if (!this.isConnected || !this.socketTask) {
-      console.log("WebSocket is not connected, queuing message");
-      
       if (retryOnFail) {
         // Queue message for later sending
         this.pendingMessages.push({ eventType, data, timestamp: Date.now() });
@@ -224,11 +209,9 @@ class WeChatSocketManager {
     this.socketTask.send({
       data: JSON.stringify(message),
       success: () => {
-        console.log(`Message sent successfully: ${eventType}`, data);
+        // Message sent successfully
       },
       fail: (err) => {
-        console.error(`Failed to send message: ${eventType}`, err);
-        
         if (retryOnFail) {
           // Queue message for retry
           this.pendingMessages.push({ eventType, data, timestamp: Date.now() });
@@ -242,8 +225,6 @@ class WeChatSocketManager {
   // Process pending messages when connection is restored
   processPendingMessages() {
     if (this.pendingMessages.length === 0) return;
-
-    console.log(`Processing ${this.pendingMessages.length} pending messages`);
     
     // Filter out old messages (older than 5 minutes)
     const fiveMinutesAgo = Date.now() - (5 * 60 * 1000);
@@ -264,107 +245,88 @@ class WeChatSocketManager {
     const data = message.data;
 
     if (!eventType) {
-      console.error("Message missing event/type property:", message);
       return;
     }
 
     switch (eventType) {
       case "connected":
-        console.log("Connected to server:", data);
         this.triggerHandler("connected", data);
         break;
 
       case "join_ack":
-        console.log("Successfully joined chat room");
         this.triggerHandler("join_ack", data);
         break;
 
       case "pong":
-        console.log("Heartbeat pong received");
         this.triggerHandler("pong", data);
         break;
 
       case "keepAliveAck":
-        console.log("Keep alive acknowledged");
         this.triggerHandler("keepAliveAck", data);
         break;
 
       case "user_online":
-        console.log(`User ${data} came online`);
         this.triggerHandler("user_online", data);
         break;
 
       case "user_offline":
-        console.log(`User ${data} went offline`);
         this.triggerHandler("user_offline", data);
         break;
 
       case "new_message":
-        console.log("New message received:", data);
         this.triggerHandler("new_message", data);
         break;
 
       case "read_message":
-        console.log("Message read notification:", data);
         this.triggerHandler("read_message", data);
         break;
 
       case "typing_message":
-        console.log("User typing:", data);
         this.triggerHandler("typing_message", data);
         break;
 
       case "add_friend":
-        console.log("Friend request received:", data);
         this.triggerHandler("add_friend", data);
         break;
 
       case "accept_friend":
-        console.log("Friend request accepted:", data);
         this.triggerHandler("accept_friend", data);
         break;
 
       case "decline_friend":
-        console.log("Friend request declined:", data);
         this.triggerHandler("decline_friend", data);
         break;
 
       case "del_friend":
-        console.log("Friend deleted:", data);
         this.triggerHandler("del_friend", data);
         break;
 
       case "new_comment":
-        console.log("New comment received:", data);
         this.triggerHandler("new_comment", data);
         break;
 
       case "update_swear_words":
-        console.log("Swear words updated:", data);
         this.triggerHandler("update_swear_words", data);
         break;
 
       case "force_disconnect":
-        console.log("Force disconnect received");
         const app = getApp();
         app.logout();
         this.triggerHandler("force_disconnect", data);
         this.disconnect();
         wx.showModal({
-          title: "Connection Notice",
-          content: "Your account has been logged in from another device. This connection will be terminated.",
+          title: "连接通知",
+          content: "您的账户已在其他设备登录，当前连接将被终止。",
           showCancel: false,
-          confirmText: "OK",
+          confirmText: "确定",
         });
         break;
 
       case "error":
-        console.error("Server error:", data);
         this.triggerHandler("error", data);
         break;
 
       default:
-        console.log(`Unknown message type: ${eventType}`, data);
         this.triggerHandler("unknown_message", { eventType, data });
     }
   }
@@ -427,15 +389,14 @@ class WeChatSocketManager {
   handleReconnect() {
     if (this.isReconnecting || this.reconnectAttempts >= this.maxReconnectAttempts) {
       if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-        console.log("Max reconnection attempts reached");
         this.triggerHandler("max_reconnect_attempts", { attempts: this.reconnectAttempts });
         
         wx.showModal({
-          title: "Connection Failed",
-          content: "Unable to connect to the server. Please check your network connection and try again.",
+          title: "连接失败",
+          content: "无法连接到服务器，请检查网络连接后重试。",
           showCancel: true,
-          confirmText: "Retry",
-          cancelText: "Cancel",
+          confirmText: "重试",
+          cancelText: "取消",
           success: (res) => {
             if (res.confirm) {
               this.reconnectAttempts = 0;
@@ -449,8 +410,6 @@ class WeChatSocketManager {
 
     this.isReconnecting = true;
     this.reconnectAttempts++;
-    
-    console.log(`Attempting to reconnect... (${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
     
     this.triggerHandler("reconnecting", { 
       attempt: this.reconnectAttempts, 
@@ -475,12 +434,10 @@ class WeChatSocketManager {
   // Enhanced chat message sending with validation
   sendChatMessage(receiverId, message, messageType = "text") {
     if (!receiverId) {
-      console.error("Receiver ID is required");
       return false;
     }
 
     if (!message || (typeof message === 'string' && !message.trim())) {
-      console.error("Message content is required");
       return false;
     }
 
@@ -498,7 +455,6 @@ class WeChatSocketManager {
   // Send typing indicator with debouncing
   sendTyping(receiverId, isTyping = true) {
     if (!receiverId) {
-      console.error("Receiver ID is required");
       return false;
     }
 
@@ -526,7 +482,6 @@ class WeChatSocketManager {
   // Mark message as read
   markMessageAsRead(receiverId, messageId) {
     if (!receiverId || !messageId) {
-      console.error("Receiver ID and message ID are required");
       return false;
     }
 
@@ -540,7 +495,6 @@ class WeChatSocketManager {
   // Send friend request
   sendFriendRequest(receiverId, message = "") {
     if (!receiverId) {
-      console.error("Receiver ID is required");
       return false;
     }
 
@@ -554,7 +508,6 @@ class WeChatSocketManager {
   // Accept friend request
   acceptFriendRequest(receiverId) {
     if (!receiverId) {
-      console.error("Receiver ID is required");
       return false;
     }
 
@@ -567,7 +520,6 @@ class WeChatSocketManager {
   // Decline friend request
   declineFriendRequest(receiverId) {
     if (!receiverId) {
-      console.error("Receiver ID is required");
       return false;
     }
 
@@ -580,7 +532,6 @@ class WeChatSocketManager {
   // Delete friend
   deleteFriend(receiverId) {
     if (!receiverId) {
-      console.error("Receiver ID is required");
       return false;
     }
 
@@ -593,7 +544,6 @@ class WeChatSocketManager {
   // Send comment
   sendComment(receiverId, comment, isReply = false) {
     if (!receiverId || !comment) {
-      console.error("Receiver ID and comment are required");
       return false;
     }
 
@@ -622,8 +572,6 @@ class WeChatSocketManager {
 
   // Disconnect
   disconnect() {
-    console.log("Disconnecting from WebSocket server...");
-
     this.stopHeartbeat();
     this.stopKeepAlive();
     this.clearConnectionTimeout();
@@ -637,7 +585,7 @@ class WeChatSocketManager {
     if (this.socketTask) {
       this.socketTask.close({
         code: 1000,
-        reason: "User initiated disconnect",
+        reason: "用户断开连接",
       });
     }
 
@@ -651,7 +599,6 @@ class WeChatSocketManager {
 
   // Force reconnect
   forceReconnect() {
-    console.log("Force reconnecting...");
     this.disconnect();
     setTimeout(() => {
       if (this.userId && this.token) {
