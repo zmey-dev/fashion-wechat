@@ -12,7 +12,7 @@
     indicator-active-color="#ffffff"
   >
     <swiper-item wx:for="{{ currentMedia }}" wx:key="id" class="media-item">
-      <view class="media-wrapper">        <!-- Image display -->
+      <view class="media-wrapper">
         <image
           width="100%"
           height="100%"
@@ -24,7 +24,7 @@
           lazy-load="{{ true }}"
           bindload="onImageLoad"
         />
-      </view>      <!-- Interactive dots overlay -->
+      </view>
       <view
         wx:if="{{ calculatedDots && calculatedDots.length > 0 && !isPlaying }}"
         class="dots-overlay"
