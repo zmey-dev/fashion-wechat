@@ -1,0 +1,773 @@
+<app-layout current-page="me">
+  <view class="container">
+    <!-- Page header with tabs -->
+    <view class="header">
+      <view class="tab-container">
+        <view 
+          wx:for="{{tabs}}" 
+          wx:key="index" 
+          data-tab="{{index}}"
+          bindtap="switchTab"
+          class="tab {{currentTab === index ? 'active' : ''}}"
+        >
+          {{item}}
+        </view>
+      </view>    </view>
+
+    <!-- Scroll container for all content below header -->
+    <scroll-view 
+      class="scroll-content" 
+      scroll-y="{{true}}" 
+      enhanced="{{true}}" 
+      show-scrollbar="{{false}}"
+    >
+      <!-- Student Management Tab -->
+      <block wx:if="{{currentTab === 0}}">
+    <block wx:if="{{!selectedStudent}}">
+      <!-- Student List -->
+      <view class="card section-title">
+        <text>我校学生</text>
+      </view>
+      
+      <view class="student-list">
+        <block wx:if="{{students.length > 0}}">
+          <view 
+            wx:for="{{students}}" 
+            wx:key="id" 
+            class="student-item"
+            data-id="{{item.id}}"
+            bindtap="selectStudent"
+          >
+            <view class="student-avatar">
+              <image src="{{item.avatar || '../../images/icons/user.svg'}}" mode="aspectFill"></image>
+            </view>
+            <view class="student-info">
+              <view class="student-name">{{item.name}}</view>
+              <view class="student-detail">{{item.faculty || ''}} {{item.major || ''}}</view>
+            </view>
+            <view class="student-actions">
+              <view 
+                class="block-btn" 
+                catchtap="blockStudent" 
+                data-id="{{item.id}}"
+              >
+                <image src="../../images/icons/trash.svg" mode="aspectFit"></image>
+              </view>
+            </view>
+          </view>
+        </block>
+          <view wx:else class="empty-state">
+          <image src="../../images/icons/empty.svg" mode="aspectFit"></image>
+          <text>{{messages.noStudents}}</text>
+        </view>
+      </view>
+    </block>
+    
+    <block wx:else>
+      <!-- Student Detail View -->
+      <view class="action-bar">
+        <view class="back-btn" bindtap="backToStudentList">
+          <image src="../../images/icons/chevron-left.svg" mode="aspectFit"></image>
+          <text>返回</text>
+        </view>
+        <view class="block-btn" catchtap="blockStudent" data-id="{{selectedStudent.id}}">
+          <image src="../../images/icons/close.svg" mode="aspectFit"></image>
+          <text>屏蔽学生</text>
+        </view>
+      </view>
+      
+      <!-- Student Profile Card -->
+      <view class="student-profile-card">
+        <view class="student-header">
+          <avatar 
+            class="student-avatar-large" 
+            avatar="{{selectedStudent.avatar}}"
+            name="{{selectedStudent.name}}"
+            mode="aspectFill"
+            size="160"
+          ></avatar>
+          <view class="student-name-large">{{selectedStudent.name}}</view>
+          <view class="student-username">@{{selectedStudent.username}}</view>
+        </view>
+        
+        <view class="student-details">
+          <view class="detail-row">
+            <view class="detail-icon">
+              <image src="../../images/icons/graduation-cap.svg" mode="aspectFit"></image>
+            </view>
+            <view class="detail-label">学院:</view>
+            <view class="detail-value">{{selectedStudent.faculty || '未设置'}}</view>
+          </view>
+          
+          <view class="detail-row">
+            <view class="detail-icon">
+              <image src="../../images/icons/book-open.svg" mode="aspectFit"></image>
+            </view>
+            <view class="detail-label">专业:</view>
+            <view class="detail-value">{{selectedStudent.major || '未设置'}}</view>
+          </view>
+          
+          <view class="detail-row">
+            <view class="detail-icon">
+              <image src="../../images/icons/users.svg" mode="aspectFit"></image>
+            </view>
+            <view class="detail-label">班级:</view>
+            <view class="detail-value">{{selectedStudent.class || '未设置'}}</view>
+          </view>
+          
+          <view class="detail-row">
+            <view class="detail-icon">
+              <image src="../../images/icons/document-text.svg" mode="aspectFit"></image>
+            </view>
+            <view class="detail-label">身份证:</view>
+            <view class="detail-value">{{selectedStudent.id_number || '未设置'}}</view>
+          </view>
+          
+          <view class="detail-row">
+            <view class="detail-icon">
+              <image src="../../images/icons/document-text.svg" mode="aspectFit"></image>
+            </view>
+            <view class="detail-label">学号:</view>
+            <view class="detail-value">{{selectedStudent.student_number || '未设置'}}</view>
+          </view>
+          
+          <view class="detail-row">
+            <view class="detail-icon">
+              <image src="../../images/icons/phone.svg" mode="aspectFit"></image>
+            </view>
+            <view class="detail-label">电话:</view>
+            <view class="detail-value">{{selectedStudent.phone || '未设置'}}</view>
+          </view>
+          
+          <view class="detail-row">
+            <view class="detail-icon">
+              <image src="../../images/icons/mail.svg" mode="aspectFit"></image>
+            </view>
+            <view class="detail-label">邮箱:</view>
+            <view class="detail-value">{{selectedStudent.email || '未设置'}}</view>
+          </view>
+          
+          <view class="detail-row">
+            <view class="detail-icon">
+              <image src="../../images/icons/calendar.svg" mode="aspectFit"></image>
+            </view>
+            <view class="detail-label">入学年份:</view>
+            <view class="detail-value">{{selectedStudent.attend_year || '未设置'}}</view>
+          </view>
+        </view>
+      </view>
+      
+      <!-- Student Posts Section -->
+      <view class="card section-title">
+        <text>学生作品</text>
+      </view>
+      
+      <view class="posts-grid">
+        <block wx:if="{{studentPosts.length > 0}}">
+          <view 
+            wx:for="{{studentPosts}}" 
+            wx:key="id" 
+            class="post-card"
+            data-post="{{item}}"
+            data-index="{{index}}"
+            data-id="{{item.id}}"
+            bindtap="viewPost"
+          >
+            <!-- Media Content -->
+            <view class="media-content">
+              <image 
+                wx:if="{{item.type !== 'video'}}"
+                class="post-thumbnail" 
+                src="{{(item.media && item.media[0] && item.media[0].url) ? item.media[0].url : (item.thumbnail || item.cover || '../../images/placeholder.png')}}" 
+                mode="aspectFill"
+                lazy-load="{{true}}"
+              ></image>
+              
+              <image 
+                wx:else
+                class="post-thumbnail" 
+                src="{{(item.media && item.media[0] && item.media[0].preview_url) ? item.media[0].preview_url : (item.thumbnail || item.cover || '../../images/placeholder.png')}}" 
+                mode="aspectFill"
+                lazy-load="{{true}}"
+              ></image>
+              
+              <view wx:if="{{item.type === 'video'}}" class="video-indicator">
+                <image src="../../images/icons/play.svg" class="video-icon" mode="aspectFit"></image>
+              </view>
+              
+              <view wx:if="{{item.media && item.media.length > 1}}" class="multiple-indicator">
+                <image src="../../images/icons/layers.svg" class="multiple-icon" mode="aspectFit"></image>
+              </view>
+            </view>
+            
+            <!-- Post Information -->
+            <view class="post-info">
+              <view class="post-title">{{item.title || '无标题'}}</view>
+              <view class="post-stats">
+                <view class="stat-item">
+                  <image src="../../images/icons/heart.svg" mode="aspectFit"></image>
+                  <text>{{item.likes || 0}}</text>
+                </view>
+                <view class="stat-item">
+                  <image src="../../images/icons/message.svg" mode="aspectFit"></image>
+                  <text>{{(item.comments && item.comments.length) ? item.comments.length : 0}}</text>
+                </view>
+              </view>
+            </view>
+            
+            <!-- Delete Button -->
+            <view class="post-delete" catchtap="deletePost" data-id="{{item.id}}">
+              <image src="../../images/icons/trash.svg" mode="aspectFit"></image>
+            </view>
+          </view>
+        </block>
+        
+        <view wx:if="{{studentPosts.length === 0 && !loading}}" class="empty-state">
+          <image src="../../images/icons/empty.svg" mode="aspectFit"></image>
+          <text>{{messages.noPosts}}</text>
+        </view>
+      </view>
+      
+      <!-- Loading indicator for posts -->
+      <view wx:if="{{loading && studentPosts.length > 0}}" class="loading-indicator">
+        <view class="loading-spinner"></view>
+        <text>加载中...</text>
+      </view>
+    </block>
+  </block>
+
+  <!-- University Management Tab - Redesigned for Mobile -->
+  <block wx:if="{{currentTab === 1}}">
+    <view class="card section-title">
+      <text>学院与专业信息</text>
+    </view>
+    
+    <!-- University Info Card -->
+    <view class="university-info-card">
+      <view class="info-row">
+        <text class="info-label">名称:</text>
+        <text class="info-value">{{university.name || '未设置'}}</text>
+      </view>
+      
+      <view class="info-row">
+        <text class="info-label">联系方式:</text>
+        <text class="info-value">{{university.phoneNumber || '未设置'}}</text>
+      </view>
+      
+      <view class="info-row">
+        <text class="info-label">地址:</text>
+        <text class="info-value">{{university.address || '未设置'}}</text>
+      </view>
+      
+      <view class="info-row">
+        <text class="info-label">合同 ID:</text>
+        <text class="info-value">{{university.contract_id || '未设置'}}</text>
+        <view wx:if="{{university.contractName}}" class="view-contract" bindtap="viewContractImage">
+          <image src="../../images/icons/eye.svg" mode="aspectFit"></image>
+        </view>
+      </view>
+    </view>
+    
+    <!-- Mobile-optimized Faculty Management -->
+    <view class="mobile-faculty-management">
+      <!-- Faculty Section -->
+      <view class="management-section">
+        <view class="section-header">
+          <text class="section-title">学院管理</text>
+          <view class="add-button" bindtap="toggleFacultyInput">
+            <image src="../../images/icons/plus.svg" mode="aspectFit"></image>
+          </view>
+        </view>
+        
+        <!-- Faculty Input (conditionally shown) -->
+        <view wx:if="{{showFacultyInput}}" class="input-section">
+          <view class="input-row">
+            <input 
+              class="mobile-input" 
+              placeholder="输入学院名称..." 
+              value="{{newFacultyInput}}"
+              bindinput="onFacultyInput"
+            />
+            <view class="input-actions">
+              <view class="confirm-btn" bindtap="addFaculty">
+                <image src="../../images/icons/check.svg" mode="aspectFit"></image>
+              </view>
+              <view class="cancel-btn" bindtap="toggleFacultyInput">
+                <image src="../../images/icons/close.svg" mode="aspectFit"></image>
+              </view>
+            </view>
+          </view>
+        </view>
+        
+        <!-- Faculty List -->
+        <view class="faculty-mobile-list">
+          <block wx:if="{{university.faculties && university.faculties.length > 0}}">
+            <view 
+              wx:for="{{university.faculties}}" 
+              wx:key="name" 
+              wx:for-item="faculty"
+              data-faculty="{{faculty.name}}"
+              bindtap="selectFaculty"
+              class="faculty-mobile-item {{activeFaculty === faculty.name ? 'active' : ''}}"
+            >
+              <view class="faculty-main-info">
+                <view class="faculty-name">{{faculty.name}}</view>
+                <view class="faculty-meta">
+                  <view class="major-count">{{faculty.majors.length || 0}} 个专业</view>                  <view wx:if="{{faculty.hasIssues}}" class="warning-badge">
+                    <image src="../../images/icons/info-circle.svg" mode="aspectFit"></image>
+                    <text>需要专业</text>
+                  </view>
+                </view>
+              </view>
+              
+              <view class="faculty-actions">
+                <view class="delete-btn" catchtap="deleteFaculty" data-faculty="{{faculty.name}}">
+                  <image src="../../images/icons/trash.svg" mode="aspectFit"></image>
+                </view>
+              </view>
+            </view>
+          </block>
+            <view wx:else class="empty-message">
+            <image src="../../images/icons/graduation-cap.svg" mode="aspectFit"></image>
+            <text>请添加至少一个学院</text>
+          </view>
+        </view>
+      </view>
+      
+      <!-- Major Section (shown when faculty is selected) -->
+      <view wx:if="{{activeFaculty}}" class="management-section">        <view class="section-header">
+          <text class="section-title">{{activeFaculty}} - 专业管理</text>
+          <view class="add-button" bindtap="toggleMajorInput">
+            <image src="../../images/icons/plus.svg" mode="aspectFit"></image>
+          </view>
+        </view>
+        
+        <!-- Major Input (conditionally shown) -->
+        <view wx:if="{{showMajorInput}}" class="input-section">
+          <view class="input-row">
+            <input 
+              class="mobile-input" 
+              placeholder="输入专业名称..." 
+              value="{{newMajorInput}}"
+              bindinput="onMajorInput"
+            />
+            <view class="input-actions">
+              <view class="confirm-btn" bindtap="addMajor">
+                <image src="../../images/icons/check.svg" mode="aspectFit"></image>
+              </view>
+              <view class="cancel-btn" bindtap="toggleMajorInput">
+                <image src="../../images/icons/close.svg" mode="aspectFit"></image>
+              </view>
+            </view>
+          </view>
+        </view>
+        
+        <!-- Major List -->
+        <view class="major-mobile-list">
+          <block wx:if="{{currentFacultyMajors.length > 0}}">
+            <view 
+              wx:for="{{currentFacultyMajors}}" 
+              wx:key="name"
+              wx:for-item="major"
+              class="major-mobile-item"
+            >
+              <view class="major-name">{{major.name}}</view>
+              <view class="major-actions">
+                <view 
+                  class="delete-btn" 
+                  catchtap="deleteMajor" 
+                  data-faculty="{{activeFaculty}}" 
+                  data-major="{{major.name}}"
+                >
+                  <image src="../../images/icons/close.svg" mode="aspectFit"></image>
+                </view>
+              </view>
+            </view>
+          </block>          <view wx:else class="empty-message">
+            <image src="../../images/icons/book-open.svg" mode="aspectFit"></image>
+            <text>尚未为此学院添加专业</text>
+          </view>
+        </view>
+      </view>
+      
+      <!-- Faculty Selection Prompt -->
+      <view wx:else class="select-faculty-prompt">
+        <image src="../../images/icons/arrow-up.svg" mode="aspectFit"></image>
+        <text>请先选择一个学院来管理专业</text>
+      </view>
+    </view>
+    
+    <!-- Save Button -->
+    <view class="save-section">
+      <button 
+        class="save-button {{loading || hasValidationIssues ? 'disabled' : ''}}" 
+        bindtap="saveUniversityData" 
+        disabled="{{loading || hasValidationIssues}}"
+      >
+        <block wx:if="{{loading}}">
+          <view class="button-spinner"></view>
+          <text>保存中...</text>
+        </block>
+        <block wx:else>
+          <image src="../../images/icons/check.svg" mode="aspectFit"></image>
+          <text>保存</text>
+        </block>
+      </button>
+        <!-- Validation Messages -->
+      <view wx:if="{{hasValidationIssues}}" class="validation-message">
+        <image src="../../images/icons/info-circle.svg" mode="aspectFit"></image>
+        <text>请确保每个学院至少有一个专业</text>
+      </view>
+    </view>
+  </block>
+
+  <!-- Teacher Profile Tab -->
+  <block wx:if="{{currentTab === 2}}">
+    <view class="profile-tab-container">
+      <!-- Profile Header Actions -->
+      <view class="profile-actions">
+        <view class="left-actions">
+          <button 
+            class="profile-action-btn edit-btn" 
+            bindtap="toggleProfileEdit"
+            wx:if="{{!isEditingProfile}}"
+          >
+            <text class="btn-icon">✏️</text>
+            <text class="btn-text">编辑资料</text>
+          </button>
+          
+          <view class="edit-actions" wx:if="{{isEditingProfile}}">
+            <button class="profile-action-btn save-btn" bindtap="saveProfile">
+              <text class="btn-icon">✅</text>
+              <text class="btn-text">保存</text>
+            </button>
+            <button class="profile-action-btn cancel-btn" bindtap="cancelProfileEdit">
+              <text class="btn-icon">❌</text>
+              <text class="btn-text">取消</text>
+            </button>
+          </view>
+        </view>
+        
+        <!-- Hide logout button when editing -->
+        <button 
+          class="profile-action-btn logout-btn" 
+          bindtap="handleLogout"
+          wx:if="{{!isEditingProfile}}"
+        >
+          <text class="btn-icon">🚪</text>
+          <text class="btn-text">退出登录</text>
+        </button>
+      </view>
+
+      <!-- Avatar Section -->
+      <view class="avatar-section">
+        <view class="avatar-container-large" bindtap="selectAvatar">
+          <image 
+            class="avatar-large" 
+            src="{{selectedAvatar || teacherProfile.avatar || '../../images/icons/user.svg'}}" 
+            mode="aspectFill"
+          ></image>
+          <view class="avatar-overlay" wx:if="{{isEditingProfile}}">
+            <text class="avatar-edit-icon">📷</text>
+            <text class="avatar-edit-text">更换头像</text>
+          </view>
+          <view wx:if="{{uploadingAvatar}}" class="upload-loading">
+            <view class="loading-spinner small"></view>
+          </view>
+        </view>
+        <view class="avatar-info">
+          <text class="avatar-name">{{teacherProfile.name || teacherProfile.username}}</text>
+          <text class="avatar-university">{{university.name || '未设置大学'}}</text>
+        </view>
+      </view>
+
+      <!-- Profile Form -->
+      <view class="profile-form">
+        <!-- Basic Information -->
+        <view class="form-section">
+          <view class="section-title">基本信息</view>
+          
+          <!-- Name -->
+          <view class="form-field">
+            <label class="field-label">姓名</label>
+            <div style="display: flex;">
+              <input 
+                class="field-input {{profileErrors.name ? 'error' : ''}}"
+                value="{{teacherProfile.name}}"
+                placeholder="请输入姓名"
+                disabled="{{!isEditingProfile}}"
+                data-field="name"
+                bindinput="onProfileInputChange"
+              />
+            </div>
+            <text class="error-text" wx:if="{{profileErrors.name}}">{{profileErrors.name}}</text>
+          </view>
+
+          <!-- Phone -->
+          <view class="form-field">
+            <label class="field-label">
+              手机号
+              <view class="verification-status" wx:if="{{phoneChanged && !phoneVerified}}">
+                <text class="status-text">需要验证</text>
+              </view>
+            </label>
+            <view class="phone-input">
+              <text class="phone-prefix">+86</text>
+              <input 
+                class="field-input phone-number {{profileErrors.phone ? 'error' : ''}}"
+                value="{{teacherProfile.phone}}"
+                placeholder="请输入手机号"
+                disabled="{{!isEditingProfile}}"
+                data-field="phone"
+                bindinput="onProfileInputChange"
+              />
+              <button 
+                class="verify-btn {{phoneChanged && !phoneVerified && !sendingPhoneCode ? '' : 'disabled'}}"
+                bindtap="sendPhoneVerificationCode"
+                wx:if="{{isEditingProfile}}"
+              >
+                <block wx:if="{{!phoneChanged}}">未修改</block>
+                <block wx:elif="{{phoneVerified}}">已验证</block>
+                <block wx:elif="{{sendingPhoneCode}}">
+                  <view class="loading-spinner small"></view>
+                  <text>发送中</text>
+                </block>
+                <block wx:else>获取验证码</block>
+              </button>
+            </view>
+            
+            <!-- Phone Verification Section -->
+            <view wx:if="{{phoneCodeSent && phoneChanged && !phoneVerified && isEditingProfile}}" class="verification-section">
+              <view class="otp-input-container">
+                <input 
+                  class="otp-input"
+                  placeholder="请输入手机验证码"
+                  value="{{enteredPhoneCode}}"
+                  bindinput="onPhoneOtpInput"
+                />
+                <button class="verify-code-btn" bindtap="verifyPhoneCode">
+                  验证
+                </button>
+              </view>
+            </view>
+            
+            <text class="error-text" wx:if="{{profileErrors.phone}}">{{profileErrors.phone}}</text>
+          </view>
+
+          <!-- Email -->
+          <view class="form-field">
+            <label class="field-label">
+              邮箱
+              <view class="verification-status" wx:if="{{emailChanged && !emailVerified}}">
+                <text class="status-text">需要验证</text>
+              </view>
+            </label>
+            <view class="email-input">
+              <input 
+                class="field-input {{profileErrors.email ? 'error' : ''}}"
+                value="{{teacherProfile.email}}"
+                placeholder="请输入邮箱"
+                disabled="{{!isEditingProfile}}"
+                data-field="email"
+                bindinput="onProfileInputChange"
+              />
+              <button 
+                class="verify-btn {{emailChanged && !emailVerified && !sendingEmailCode ? '' : 'disabled'}}"
+                bindtap="sendEmailVerificationCode"
+                wx:if="{{isEditingProfile}}"
+              >
+                <block wx:if="{{!emailChanged}}">未修改</block>
+                <block wx:elif="{{emailVerified}}">已验证</block>
+                <block wx:elif="{{sendingEmailCode}}">
+                  <view class="loading-spinner small"></view>
+                  <text>发送中</text>
+                </block>
+                <block wx:else>获取验证码</block>
+              </button>
+            </view>
+            
+            <!-- Email Verification Section -->
+            <view wx:if="{{emailCodeSent && emailChanged && !emailVerified && isEditingProfile}}" class="verification-section">
+              <view class="otp-input-container">
+                <input 
+                  class="otp-input"
+                  placeholder="请输入邮箱验证码"
+                  value="{{enteredEmailCode}}"
+                  bindinput="onEmailOtpInput"
+                />
+                <button class="verify-code-btn" bindtap="verifyEmailCode">
+                  验证
+                </button>
+              </view>
+            </view>
+            
+            <text class="error-text" wx:if="{{profileErrors.email}}">{{profileErrors.email}}</text>
+          </view>
+
+          <!-- Gender -->
+          <view class="form-field">
+            <label class="field-label">性别</label>
+            <view class="gender-options">
+              <view 
+                class="gender-option {{teacherProfile.gender === 'male' ? 'selected' : ''}} {{!isEditingProfile ? 'disabled' : ''}}"
+                data-field="gender"
+                data-value="male"
+                bindtap="{{isEditingProfile ? 'onGenderChange' : ''}}"
+              >
+                <text class="gender-icon">♂</text>
+                <text class="gender-text">男</text>
+              </view>
+              <view 
+                class="gender-option {{teacherProfile.gender === 'female' ? 'selected' : ''}} {{!isEditingProfile ? 'disabled' : ''}}"
+                data-field="gender"
+                data-value="female"
+                bindtap="{{isEditingProfile ? 'onGenderChange' : ''}}"
+              >
+                <text class="gender-icon">♀</text>
+                <text class="gender-text">女</text>
+              </view>
+            </view>
+            <text class="error-text" wx:if="{{profileErrors.gender}}">{{profileErrors.gender}}</text>
+          </view>
+        </view>
+
+        <!-- Professional Information -->
+        <view class="form-section">
+          <view class="section-title">职业信息</view>
+          
+          <!-- ID Number -->
+          <view class="form-field">
+            <label class="field-label">身份证号</label>
+            <input 
+              class="field-input {{profileErrors.id_number ? 'error' : ''}}"
+              value="{{teacherProfile.id_number}}"
+              placeholder="请输入身份证号"
+              disabled="{{!isEditingProfile}}"
+              data-field="id_number"
+              bindinput="onProfileInputChange"
+            />
+            <text class="error-text" wx:if="{{profileErrors.id_number}}">{{profileErrors.id_number}}</text>
+          </view>
+
+          <!-- School Position -->
+          <view class="form-field">
+            <label class="field-label">学校职位</label>
+            <input 
+              class="field-input {{profileErrors.school_position ? 'error' : ''}}"
+              value="{{teacherProfile.school_position}}"
+              placeholder="请输入学校职位"
+              disabled="{{!isEditingProfile}}"
+              data-field="school_position"
+              bindinput="onProfileInputChange"
+            />
+            <text class="error-text" wx:if="{{profileErrors.school_position}}">{{profileErrors.school_position}}</text>
+          </view>
+
+          <!-- Credential -->
+          <view class="form-field">
+            <label class="field-label">资格证书</label>
+            <input 
+              class="field-input {{profileErrors.credential ? 'error' : ''}}"
+              value="{{teacherProfile.credential}}"
+              placeholder="请输入资格证书"
+              disabled="{{!isEditingProfile}}"
+              data-field="credential"
+              bindinput="onProfileInputChange"
+            />
+            <text class="error-text" wx:if="{{profileErrors.credential}}">{{profileErrors.credential}}</text>
+          </view>
+
+          <!-- Credential File Upload -->
+          <view class="form-field credential-field">
+            <label class="field-label">资格证书文件</label>
+            
+            <view wx:if="{{teacherProfile.credentialName}}" class="credential-display">
+              <view class="credential-file">
+                <image src="../../images/icons/file.svg" mode="aspectFit" class="file-icon"></image>
+                <text>{{credentialFileName || '证书文件'}}</text>
+              </view>
+              <view class="credential-actions">
+                <view class="view-btn" bindtap="viewCredentialFile">
+                  <image src="../../images/icons/eye.svg" mode="aspectFit"></image>
+                </view>
+                <view wx:if="{{isEditingProfile}}" class="reupload-btn" bindtap="uploadCredential">
+                  <text>重新上传</text>
+                </view>
+              </view>
+            </view>
+            
+            <view wx:else class="credential-upload">
+              <view 
+                wx:if="{{isEditingProfile}}" 
+                class="upload-btn {{uploadingCredential ? 'uploading' : ''}}"
+                bindtap="uploadCredential"
+              >
+                <view wx:if="{{uploadingCredential}}" class="loading-spinner small"></view>
+                <image wx:else src="../../images/icons/upload.svg" mode="aspectFit" class="upload-icon"></image>
+                <text>{{uploadingCredential ? '上传中...' : '上传教师资格证'}}</text>
+              </view>
+              <text wx:else class="form-display">未上传</text>
+            </view>
+            
+            <view class="credential-hint">
+              <text>支持PDF、Word文档或图片格式</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- Profile Status (when not editing) -->
+      <view wx:if="{{!isEditingProfile}}" class="profile-status">
+        <view class="section-title">
+          <text>资料完成度</text>
+        </view>
+        
+        <view class="status-grid">
+          <view class="status-item">
+            <view class="status-icon {{phoneVerified ? 'completed' : 'incomplete'}}">
+              <image src="../../images/icons/{{phoneVerified ? 'check' : 'info-circle'}}.svg" mode="aspectFit"></image>
+            </view>
+            <text class="status-label">手机验证</text>
+          </view>
+          
+          <view class="status-item">
+            <view class="status-icon {{emailVerified ? 'completed' : 'incomplete'}}">
+              <image src="../../images/icons/{{emailVerified ? 'check' : 'info-circle'}}.svg" mode="aspectFit"></image>
+            </view>
+            <text class="status-label">邮箱验证</text>
+          </view>
+          
+          <view class="status-item">
+            <view class="status-icon {{teacherProfile.credentialName ? 'completed' : 'incomplete'}}">
+              <image src="../../images/icons/{{teacherProfile.credentialName ? 'check' : 'info-circle'}}.svg" mode="aspectFit"></image>
+            </view>
+            <text class="status-label">资格证书</text>
+          </view>
+          
+          <view class="status-item">
+            <view class="status-icon {{profileFormValid ? 'completed' : 'incomplete'}}">
+              <image src="../../images/icons/{{profileFormValid ? 'check' : 'info-circle'}}.svg" mode="aspectFit"></image>
+            </view>
+            <text class="status-label">基本信息</text>
+          </view>
+        </view>
+      </view>
+    </view>      </block>
+    </scroll-view>
+    
+    <!-- Image Preview Modal -->
+    <view wx:if="{{showImageModal}}" class="modal-overlay" bindtap="closeImageModal">
+    <view class="modal-content" catchtap>
+      <image src="{{previewImageUrl}}" mode="aspectFit" class="preview-image"></image>
+      <view class="close-modal" bindtap="closeImageModal">
+        <image src="../../images/icons/close.svg" mode="aspectFit"></image>
+      </view>
+    </view>
+  </view>
+  
+  <!-- Loading Overlay -->  <view wx:if="{{loading && currentTab === 1 && !university}}" class="loading-overlay">
+    <view class="loading-spinner large"></view>
+    <text>{{messages.loading}}</text>
+  </view>
+  </view>
+</app-layout>
