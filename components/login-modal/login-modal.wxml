@@ -46,15 +46,15 @@
         </view>
         
         <view class="input-group">
-          <view class="password-wrapper">
-            <input
+          <view class="password-wrapper">            <input
               class="form-input {{passwordError ? 'error' : ''}}"
-              type="{{showPassword ? 'text' : 'password'}}"
+              type="text"
+              password="{{!showPassword}}"
               placeholder="{{messages.formLabels.password}}"
               value="{{password}}"
               bindinput="onPasswordInput"
               disabled="{{loading}}"
-            />            <view class="password-toggle" bindtap="togglePassword" data-action="toggle">
+            /><view class="password-toggle" bindtap="togglePassword" data-action="toggle">
               <text class="toggle-icon">{{showPassword ? '🙈' : '👁'}}</text>
             </view>
           </view>
