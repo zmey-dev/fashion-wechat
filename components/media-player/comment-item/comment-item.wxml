@@ -99,7 +99,7 @@
             <text class="action-text">Reply</text>
           </view>
         </block>
-        <block wx:if="{{loggedUser.id === selectedPost.user_id}}">  
+        <block wx:if="{{loggedUser.id === selectedPost.user_id && item.sender_id !== loggedUser.id}}">  
           <!-- Delete Button -->
           <view 
             class="action-btn delete-btn" 
