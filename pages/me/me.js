@@ -71,21 +71,21 @@ Page({
   onLoad: function (options) {
     const app = getApp();
     this.userInfoHandler = (userInfo) => {
-      this.setData({ 
+      this.setData({
         userInfo,
         profileForm: this.initializeProfileForm(userInfo),
-        selectedAvatar: userInfo?.avatar || ""
+        selectedAvatar: userInfo?.avatar || "",
       });
     };
     app.subscribe("userInfo", this.userInfoHandler);
-    
+
     const userInfo = app.globalData.userInfo || {};
     this.setData({
       userInfo,
       profileForm: this.initializeProfileForm(userInfo),
-      selectedAvatar: userInfo?.avatar || ""
+      selectedAvatar: userInfo?.avatar || "",
     });
-    
+
     this.calculateAge();
     this.loadPosts();
     this.loadUniversityInfo(); // Load university info including faculties
@@ -95,7 +95,7 @@ Page({
     const app = getApp();
     app.unsubscribe("userInfo", this.userInfoHandler);
   },
-  
+
   onReachBottom() {
     if (this.data.hasMore && !this.data.loading && this.data.currentTab !== 4) {
       this.loadMorePosts();
@@ -109,7 +109,7 @@ Page({
       this.setData({
         userInfo,
         profileForm: this.initializeProfileForm(userInfo),
-        selectedAvatar: userInfo?.avatar || ""
+        selectedAvatar: userInfo?.avatar || "",
       });
     } else {
       this.refreshPosts();
@@ -118,12 +118,13 @@ Page({
   },
 
   // Initialize profile form with user data
-  initializeProfileForm: function(userInfo) {
+  initializeProfileForm: function (userInfo) {
     const currentYear = new Date().getFullYear();
     const form = {
-      phone: userInfo?.phone && userInfo.phone.startsWith("+86") 
-        ? userInfo.phone.substring(3) 
-        : userInfo?.phone || "",
+      phone:
+        userInfo?.phone && userInfo.phone.startsWith("+86")
+          ? userInfo.phone.substring(3)
+          : userInfo?.phone || "",
       email: userInfo?.email || "",
       name: userInfo?.name || "",
       gender: userInfo?.gender || "",
@@ -132,7 +133,8 @@ Page({
       faculty: userInfo?.faculty || "",
       major: userInfo?.major || "",
       class: userInfo?.class || "",
-      admissionYear: userInfo?.admission_year || userInfo?.admissionYear || currentYear,
+      admissionYear:
+        userInfo?.admission_year || userInfo?.admissionYear || currentYear,
     };
 
     // Store original values for verification comparison
@@ -144,7 +146,7 @@ Page({
       emailVerified: true, // Start as verified since unchanged
       phoneVerified: true,
       emailOtpCode: "",
-      phoneOtpCode: ""
+      phoneOtpCode: "",
     });
 
     return form;
@@ -153,7 +155,7 @@ Page({
   // Calculate user age
   calculateAge() {
     if (!this.data.userInfo?.birthday) return;
-    
+
     const birthday = new Date(this.data.userInfo.birthday);
     const today = new Date();
     let age = today.getFullYear() - birthday.getFullYear();
@@ -176,14 +178,14 @@ Page({
       currentTab: parseInt(index),
       posts: [],
     });
-    
+
     if (index == 4) {
       // Use globalData.userInfo instead of API call
       const userInfo = getApp().globalData.userInfo || {};
       this.setData({
         userInfo,
         profileForm: this.initializeProfileForm(userInfo),
-        selectedAvatar: userInfo?.avatar || ""
+        selectedAvatar: userInfo?.avatar || "",
       });
     } else {
       this.loadPosts();
@@ -191,7 +193,7 @@ Page({
   },
 
   // Load university information including faculties
-  loadUniversityInfo: function() {
+  loadUniversityInfo: function () {
     wx.request({
       url: `${config.BACKEND_URL}/myuniversity`,
       method: "GET",
@@ -204,9 +206,9 @@ Page({
           const university = res.data.university;
           this.setData({
             university,
-            faculties: university?.faculties || []
+            faculties: university?.faculties || [],
           });
-          
+
           // Update available majors if faculty is already selected
           if (this.data.profileForm.faculty) {
             this.updateAvailableMajors(this.data.profileForm.faculty);
@@ -223,127 +225,127 @@ Page({
               majors: [
                 { name: "计算机科学与技术" },
                 { name: "软件工程" },
-                { name: "网络工程" }
-              ]
+                { name: "网络工程" },
+              ],
             },
             {
-              name: "商学院", 
+              name: "商学院",
               majors: [
                 { name: "工商管理" },
                 { name: "市场营销" },
-                { name: "会计学" }
-              ]
-            }
-          ]
+                { name: "会计学" },
+              ],
+            },
+          ],
         });
       },
     });
   },
 
   // Handle profile form input changes
-  onProfileInputChange: function(e) {
+  onProfileInputChange: function (e) {
     const { field } = e.currentTarget.dataset;
     let value = e.detail.value;
 
     // Handle picker values
-    if (field === 'faculty') {
+    if (field === "faculty") {
       const selectedIndex = parseInt(value);
       if (this.data.faculties[selectedIndex]) {
         value = this.data.faculties[selectedIndex].name;
       }
-    } else if (field === 'major') {
+    } else if (field === "major") {
       const selectedIndex = parseInt(value);
       if (this.data.availableMajors[selectedIndex]) {
         value = this.data.availableMajors[selectedIndex].name;
       }
-    } else if (field === 'admissionYear') {
+    } else if (field === "admissionYear") {
       value = new Date(value).getFullYear();
     }
-    
+
     this.setData({
       [`profileForm.${field}`]: value,
-      [`profileErrors.${field}`]: false
+      [`profileErrors.${field}`]: false,
     });
 
     // Check if email or phone changed
-    if (field === 'email') {
+    if (field === "email") {
       const emailChanged = value !== this.data.originalEmail;
       this.setData({
         emailChanged,
         emailVerified: !emailChanged, // Auto-verify if unchanged
-        emailOtpCode: emailChanged ? "" : this.data.emailOtpCode
+        emailOtpCode: emailChanged ? "" : this.data.emailOtpCode,
       });
-    } else if (field === 'phone') {
+    } else if (field === "phone") {
       const phoneChanged = value !== this.data.originalPhone;
       this.setData({
         phoneChanged,
         phoneVerified: !phoneChanged, // Auto-verify if unchanged
-        phoneOtpCode: phoneChanged ? "" : this.data.phoneOtpCode
+        phoneOtpCode: phoneChanged ? "" : this.data.phoneOtpCode,
       });
     }
 
     // Update available majors when faculty changes
-    if (field === 'faculty') {
+    if (field === "faculty") {
       this.updateAvailableMajors(value);
     }
   },
 
   // Update available majors based on selected faculty
-  updateAvailableMajors: function(facultyName) {
+  updateAvailableMajors: function (facultyName) {
     const selectedFaculty = this.data.faculties.find(
-      faculty => faculty.name === facultyName
+      (faculty) => faculty.name === facultyName
     );
-    
+
     this.setData({
       availableMajors: selectedFaculty ? selectedFaculty.majors || [] : [],
-      [`profileForm.major`]: "" // Reset major when faculty changes
+      [`profileForm.major`]: "", // Reset major when faculty changes
     });
   },
 
   // Handle gender selection
-  onGenderChange: function(e) {
+  onGenderChange: function (e) {
     const gender = e.currentTarget.dataset.gender;
     this.setData({
       [`profileForm.gender`]: gender,
-      [`profileErrors.gender`]: false
+      [`profileErrors.gender`]: false,
     });
   },
 
   // Handle avatar selection
-  selectAvatar: function() {
+  selectAvatar: function () {
     if (!this.data.isEditingProfile) return;
 
     wx.chooseImage({
       count: 1,
-      sizeType: ['compressed'],
-      sourceType: ['album', 'camera'],
+      sizeType: ["compressed"],
+      sourceType: ["album", "camera"],
       success: (res) => {
         const tempFilePath = res.tempFilePaths[0];
         this.setData({
           selectedAvatar: tempFilePath,
-          avatarFile: tempFilePath
+          avatarFile: tempFilePath,
         });
       },
       fail: () => {
         wx.showToast({
           title: "选择图片失败",
-          icon: "none"
+          icon: "none",
         });
-      }
+      },
     });
   },
 
   // Send email verification code
-  sendEmailVerificationCode: function() {
+  sendEmailVerificationCode: function () {
     if (!this.data.emailChanged || !this.data.profileForm.email) return;
-    
+
     wx.showLoading({ title: "发送中..." });
-    
+
     wx.request({
       url: `${config.BACKEND_URL}/verification/send_email_code`,
       method: "POST",
       data: {
-        email: this.data.profileForm.email
+        email: this.data.profileForm.email,
       },
       header: {
         "Content-Type": "application/json",
@@ -353,38 +355,38 @@ Page({
         if (res.statusCode === 200 && res.data.status === "success") {
           wx.showToast({
             title: this.data.messages.success.otpSent,
-            icon: "success"
+            icon: "success",
           });
         } else {
           wx.showToast({
             title: res.data?.msg || this.data.messages.errors.otpSendFailed,
-            icon: "none"
+            icon: "none",
           });
         }
       },
       fail: () => {
         wx.showToast({
           title: this.data.messages.errors.networkError,
-          icon: "none"
+          icon: "none",
         });
       },
       complete: () => {
         wx.hideLoading();
-      }
+      },
     });
   },
 
   // Send phone verification code
-  sendPhoneVerificationCode: function() {
+  sendPhoneVerificationCode: function () {
     if (!this.data.phoneChanged || !this.data.profileForm.phone) return;
-    
+
     wx.showLoading({ title: "发送中..." });
-    
+
     wx.request({
       url: `${config.BACKEND_URL}/verification/send_phone_sms_code`,
       method: "POST",
       data: {
-        phone: "+86" + this.data.profileForm.phone
+        phone: "+86" + this.data.profileForm.phone,
       },
       header: {
         "Content-Type": "application/json",
@@ -394,59 +396,59 @@ Page({
         if (res.statusCode === 200 && res.data.status === "success") {
           wx.showToast({
             title: this.data.messages.success.otpSent,
-            icon: "success"
+            icon: "success",
           });
         } else {
           wx.showToast({
             title: res.data?.msg || this.data.messages.errors.otpSendFailed,
-            icon: "none"
+            icon: "none",
           });
         }
       },
       fail: () => {
         wx.showToast({
           title: this.data.messages.errors.networkError,
-          icon: "none"
+          icon: "none",
         });
       },
       complete: () => {
         wx.hideLoading();
-      }
+      },
     });
   },
 
   // Handle OTP input for email
-  onEmailOtpInput: function(e) {
+  onEmailOtpInput: function (e) {
     this.setData({
-      emailOtpCode: e.detail.value
+      emailOtpCode: e.detail.value,
     });
   },
 
   // Handle OTP input for phone
-  onPhoneOtpInput: function(e) {
+  onPhoneOtpInput: function (e) {
     this.setData({
-      phoneOtpCode: e.detail.value
+      phoneOtpCode: e.detail.value,
     });
   },
 
   // Verify email with OTP code
-  verifyEmailCode: function() {
+  verifyEmailCode: function () {
     if (!this.data.emailOtpCode || !this.data.profileForm.email) {
       wx.showToast({
         title: "请输入验证码",
-        icon: "none"
+        icon: "none",
       });
       return;
     }
-    
+
     wx.showLoading({ title: "验证中..." });
-    
+
     wx.request({
       url: `${config.BACKEND_URL}/verification/verify_email_code`,
       method: "POST",
       data: {
         email: this.data.profileForm.email,
-        code: this.data.emailOtpCode
+        code: this.data.emailOtpCode,
       },
       header: {
         "Content-Type": "application/json",
@@ -454,51 +456,52 @@ Page({
       },
       success: (res) => {
         if (res.statusCode === 200 && res.data.status === "success") {
-          this.setData({ 
+          this.setData({
             emailVerified: true,
-            [`profileErrors.email`]: false
+            [`profileErrors.email`]: false,
           });
           wx.showToast({
             title: this.data.messages.success.verificationSuccess,
-            icon: "success"
+            icon: "success",
           });
         } else {
           wx.showToast({
-            title: res.data?.msg || this.data.messages.errors.verificationFailed,
-            icon: "none"
+            title:
+              res.data?.msg || this.data.messages.errors.verificationFailed,
+            icon: "none",
           });
         }
       },
       fail: () => {
         wx.showToast({
           title: this.data.messages.errors.networkError,
-          icon: "none"
+          icon: "none",
         });
       },
       complete: () => {
         wx.hideLoading();
-      }
+      },
     });
   },
 
   // Verify phone with OTP code
-  verifyPhoneCode: function() {
+  verifyPhoneCode: function () {
     if (!this.data.phoneOtpCode || !this.data.profileForm.phone) {
       wx.showToast({
         title: "请输入验证码",
-        icon: "none"
+        icon: "none",
       });
       return;
     }
-    
+
     wx.showLoading({ title: "验证中..." });
-    
+
     wx.request({
       url: `${config.BACKEND_URL}/verification/verify_phone_sms_code`,
       method: "POST",
       data: {
         phone: "+86" + this.data.profileForm.phone,
-        code: this.data.phoneOtpCode
+        code: this.data.phoneOtpCode,
       },
       header: {
         "Content-Type": "application/json",
@@ -506,43 +509,44 @@ Page({
       },
       success: (res) => {
         if (res.statusCode === 200 && res.data.status === "success") {
-          this.setData({ 
+          this.setData({
             phoneVerified: true,
-            [`profileErrors.phone`]: false
+            [`profileErrors.phone`]: false,
           });
           wx.showToast({
             title: this.data.messages.success.verificationSuccess,
-            icon: "success"
+            icon: "success",
           });
         } else {
           wx.showToast({
-            title: res.data?.msg || this.data.messages.errors.verificationFailed,
-            icon: "none"
+            title:
+              res.data?.msg || this.data.messages.errors.verificationFailed,
+            icon: "none",
           });
         }
       },
       fail: () => {
         wx.showToast({
           title: this.data.messages.errors.networkError,
-          icon: "none"
+          icon: "none",
         });
       },
       complete: () => {
         wx.hideLoading();
-      }
+      },
     });
   },
 
   // Toggle profile editing mode
-  toggleProfileEdit: function() {
+  toggleProfileEdit: function () {
     this.setData({
       isEditingProfile: !this.data.isEditingProfile,
-      profileErrors: {}
+      profileErrors: {},
     });
   },
 
   // Validate profile form
-  validateProfileForm: function() {
+  validateProfileForm: function () {
     const { profileForm } = this.data;
     let errors = {};
 
@@ -576,9 +580,9 @@ Page({
   },
 
   // Save profile changes
-  saveProfile: function() {
+  saveProfile: function () {
     const errors = this.validateProfileForm();
-    
+
     if (Object.keys(errors).length > 0) {
       this.setData({ profileErrors: errors });
       return;
@@ -592,7 +596,7 @@ Page({
     const formData = {
       ...this.data.profileForm,
       phone: "+86" + this.data.profileForm.phone,
-      admission_year: this.data.profileForm.admissionYear
+      admission_year: this.data.profileForm.admissionYear,
     };
 
     // If avatar was changed, handle file upload separately
@@ -604,11 +608,11 @@ Page({
   },
 
   // Upload avatar and update profile
-  uploadAvatarAndUpdateProfile: function(formData) {
+  uploadAvatarAndUpdateProfile: function (formData) {
     wx.uploadFile({
       url: `${config.BACKEND_URL}/user/upload_avatar`,
       filePath: this.data.avatarFile,
-      name: 'avatar',
+      name: "avatar",
       header: {
         Authorization: `Bearer ${getApp().globalData.userInfo?.token}`,
       },
@@ -621,7 +625,7 @@ Page({
           wx.hideLoading();
           wx.showToast({
             title: "头像上传失败",
-            icon: "none"
+            icon: "none",
           });
         }
       },
@@ -629,14 +633,14 @@ Page({
         wx.hideLoading();
         wx.showToast({
           title: "头像上传失败",
-          icon: "none"
+          icon: "none",
         });
-      }
+      },
     });
   },
 
   // Update profile
-  updateProfile: function(formData) {
+  updateProfile: function (formData) {
     wx.request({
       url: `${config.BACKEND_URL}/user/update_user`,
       method: "POST",
@@ -648,26 +652,28 @@ Page({
       success: (res) => {
         if (res.statusCode === 200 && res.data.status === "success") {
           const updatedUserInfo = res.data.user;
-          
+
           this.setData({
-            userInfo: updatedUserInfo,
+            userInfo: { ...this.data.userInfo, ...updatedUserInfo },
             isEditingProfile: false,
             profileErrors: {},
             avatarFile: null,
             selectedAvatar: updatedUserInfo?.avatar || "",
             emailOtpCode: "",
-            phoneOtpCode: ""
+            phoneOtpCode: "",
           });
-          
-          getApp().setState("userInfo", updatedUserInfo);
-          
+
+          getApp().setState("userInfo", { ...this.data.userInfo, ...updatedUserInfo });
+          wx.setStorageSync("userInfo", { ...this.data.userInfo, ...updatedUserInfo });
+
           wx.showToast({
             title: this.data.messages.success.profileUpdateSuccess,
             icon: "success",
           });
         } else {
           wx.showToast({
-            title: res.data?.msg || this.data.messages.errors.profileUpdateFailed,
+            title:
+              res.data?.msg || this.data.messages.errors.profileUpdateFailed,
             icon: "none",
           });
         }
@@ -685,7 +691,7 @@ Page({
   },
 
   // Cancel profile editing
-  cancelProfileEdit: function() {
+  cancelProfileEdit: function () {
     this.setData({
       isEditingProfile: false,
       profileForm: this.initializeProfileForm(this.data.userInfo),
@@ -693,12 +699,12 @@ Page({
       selectedAvatar: this.data.userInfo?.avatar || "",
       avatarFile: null,
       emailOtpCode: "",
-      phoneOtpCode: ""
+      phoneOtpCode: "",
     });
   },
 
   // Handle logout
-  handleLogout: function() {
+  handleLogout: function () {
     wx.showModal({
       title: this.data.messages.confirmations.logoutTitle,
       content: this.data.messages.confirmations.logoutContent,
@@ -711,31 +717,31 @@ Page({
   },
 
   // Perform logout
-  performLogout: function() {
+  performLogout: function () {
     wx.showLoading({
       title: "退出中...",
     });
 
     // Clear local storage
     wx.removeStorageSync("userInfo");
-    
+
     // Clear global data
     getApp().setState("userInfo", null);
-    
+
     // Disconnect socket if exists
     if (getApp().globalData.socketManager) {
       getApp().globalData.socketManager.disconnect();
     }
-    
+
     // Clear this page's data
     this.setData({
       userInfo: {},
       posts: [],
-      profileForm: this.initializeProfileForm({})
+      profileForm: this.initializeProfileForm({}),
     });
 
     wx.hideLoading();
-    
+
     wx.showToast({
       title: this.data.messages.success.logoutSuccess,
       icon: "success",
@@ -744,7 +750,7 @@ Page({
     // Navigate to login or home page after a delay
     setTimeout(() => {
       wx.reLaunch({
-        url: "/pages/index/index"
+        url: "/pages/index/index",
       });
     }, 1500);
   },
@@ -752,7 +758,7 @@ Page({
   // Load posts based on current tab
   async loadPosts() {
     if (this.data.currentTab === 4) return;
-    
+
     this.setData({ loading: true });
 
     try {
@@ -797,14 +803,14 @@ Page({
   // Load more posts for pagination
   async loadMorePosts() {
     if (this.data.currentTab === 4) return;
-    
+
     if (this.data.loading) return;
-    
+
     this.setData({ loading: true });
 
     try {
       const requestData = {
-        scope: "15"
+        scope: "15",
       };
 
       // Add user_id for user posts tab
@@ -819,14 +825,14 @@ Page({
 
       // Add exist_post_ids for pagination
       if (this.data.posts.length > 0) {
-        requestData.exist_post_ids = this.data.posts.map(post => post.id);
+        requestData.exist_post_ids = this.data.posts.map((post) => post.id);
       }
 
       // Convert to query string
       const queryParams = new URLSearchParams();
-      Object.keys(requestData).forEach(key => {
+      Object.keys(requestData).forEach((key) => {
         if (Array.isArray(requestData[key])) {
-          requestData[key].forEach(item => queryParams.append(key, item));
+          requestData[key].forEach((item) => queryParams.append(key, item));
         } else {
           queryParams.append(key, requestData[key]);
         }
