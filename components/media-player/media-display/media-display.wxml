@@ -12,8 +12,7 @@
     indicator-active-color="#ffffff"
   >
     <swiper-item wx:for="{{ currentMedia }}" wx:key="id" class="media-item">
-      <view class="media-wrapper">
-        <!-- Image display -->
+      <view class="media-wrapper">        <!-- Image display -->
         <image
           width="100%"
           height="100%"
@@ -23,22 +22,21 @@
           src="{{ item.url }}"
           mode="aspectFit"
           lazy-load="{{ true }}"
+          bindload="onImageLoad"
         />
-      </view>
-
-      <!-- Interactive dots overlay -->
+      </view>      <!-- Interactive dots overlay -->
       <view
-        wx:if="{{ item.dots && item.dots.length > 0 && !isPlaying }}"
+        wx:if="{{ calculatedDots && calculatedDots.length > 0 && !isPlaying }}"
         class="dots-overlay"
       >
         <view
-          wx:for="{{ item.dots }}"
+          wx:for="{{ calculatedDots }}"
           wx:for-item="dot"
           wx:for-index="dotIndex"
-          wx:key="id"
+          wx:key="index"
           class="interactive-dot {{selectedDot && selectedDot.id === dot.id ? 'active' : ''}}"
-          style="left: {{ dot.x * 100 }}%; top: {{ dot.y * 100 }}%;"
-          data-index="{{ dotIndex }}"
+          style="left: {{dot.leftPercent}}%; top: {{dot.topPercent}}%;"
+          data-index="{{ dot.index }}"
           catchtap="onDotTap"
         >
           <view class="dot-pulse"></view>
