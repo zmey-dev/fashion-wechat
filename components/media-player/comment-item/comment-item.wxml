@@ -43,7 +43,7 @@
     <view class="action-buttons">
       <view class="button-group">
         <!-- Owner Actions -->
-        <block wx:if="{{loggedUser.id === item.sender_id}}">
+        <block wx:if="{{loggedUser.id == item.sender_id}}">
           <!-- Edit Button -->
           <view 
             class="action-btn edit-btn" 
@@ -54,7 +54,15 @@
             <image class="action-icon" src="/images/icons/edit.svg" />
             <text class="action-text">Edit</text>
           </view>
-        </block>        <!-- Non-owner Actions -->
+          <view 
+            class="action-btn delete-btn" 
+            bindtap="onCommentDelete"
+            data-id="{{item.id}}"
+          >
+            <image class="action-icon" src="/images/icons/trash.svg" />
+            <text class="action-text">Delete</text>
+          </view>
+        </block>     
         <block wx:else>
           <!-- Like Button -->
           <view 

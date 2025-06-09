@@ -2,7 +2,8 @@
 <view class="app-layout {{isTeacher ? 'teacher-layout' : ''}}">  <!-- Top Filter Bar -->
   <view class="app-layout-header">
     <scroll-view class="filter-scroll" scroll-x="true" scroll-left="{{filterScrollLeft}}">
-      <view class="filter-tabs {{dynamicTabStyle === 'compact' ? 'compact-mode' : 'expanded-mode'}}">        <view 
+      <view class="filter-tabs {{dynamicTabStyle === 'compact' ? 'compact-mode' : 'expanded-mode'}}">        
+        <view 
           wx:for="{{pages}}" 
           wx:key="key"
           wx:if="{{item.type === 'filter'}}"
@@ -19,9 +20,10 @@
   <!-- Main Content Area -->
   <view class="app-layout-content">
     <slot></slot>
-  </view>  <!-- Bottom Tab Bar - Only show for non-teacher users -->
+  </view>
   <view class="app-layout-footer" wx:if="{{!isTeacher}}">
-    <view class="tab-container">      <view 
+    <view class="tab-container">      
+      <view 
         wx:for="{{pages}}" 
         wx:key="key"
         wx:if="{{item.type === 'tab'}}"
@@ -30,7 +32,8 @@
         bindtap="onPageTap"
       >
         <view class="tab-icon-container">
-          <view class="tab-icon">            <image 
+          <view class="tab-icon">            
+            <image 
               src="{{currentPage === item.key ? item.activeIcon : item.icon}}" 
               mode="aspectFit"
               class="tab-icon-image"
@@ -60,5 +63,6 @@
     wx:if="{{showLoginModal}}"
     bind:close="onLoginModalClose"
     bind:success="onLoginSuccess"
-  ></login-modal>
+  >
+  </login-modal>
 </view>

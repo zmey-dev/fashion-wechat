@@ -44,14 +44,15 @@ Component({
     displayComments: "",
     displayFavorites: "",
     displayShares: "",
-    displayFollowerCount: "",    displayLikeCount: "",    // UI state
+    displayFollowerCount: "",
+    displayLikeCount: "", // UI state
     showDetail: false,
     showReportModal: false,
-    detailPanelState: 'closed', // 'closed', 'half', 'full'
+    detailPanelState: "closed", // 'closed', 'half', 'full'
     tabIndex: 1, // 0: User posts, 1: Comments, 2: Details
 
     // Dots and interactions
-    selectedDot: null,    // System information
+    selectedDot: null, // System information
     windowWidth: 0,
     windowHeight: 0,
     containerWidth: 0,
@@ -67,12 +68,13 @@ Component({
     minSwipeDistance: 50, // Minimum distance for valid swipe
     maxHorizontalThreshold: 100, // Maximum horizontal movement still considered vertical swipe
     maxTransformDistance: 150, // Maximum transform distance for visual feedback
-  },  /**
+  }
+  /**
    * Component lifecycle
-   */
+   */,
   attached() {
     this.initializeComponent();
-    
+
     // Add resize event listener
     this.onScreenResize = () => {
       const systemInfo = wx.getSystemInfoSync();
@@ -82,7 +84,7 @@ Component({
       });
       this.getContainerDimensions();
     };
-    
+
     wx.onWindowResize(this.onScreenResize);
   },
 
@@ -93,7 +95,7 @@ Component({
 
   detached() {
     this.cleanup();
-    
+
     // Remove resize event listener
     if (this.onScreenResize) {
       wx.offWindowResize(this.onScreenResize);
@@ -122,7 +124,8 @@ Component({
   /**
    * Component methods
    */
-  methods: {    /**
+  methods: {
+    /**
      * Initialize component
      */
     initializeComponent() {
@@ -145,14 +148,17 @@ Component({
      */
     getContainerDimensions() {
       const query = this.createSelectorQuery();
-      query.select('.media-player').boundingClientRect((rect) => {
-        if (rect) {
-          this.setData({
-            containerHeight: rect.height,
-            containerWidth: rect.width
-          });
-        }
-      }).exec();
+      query
+        .select(".media-player")
+        .boundingClientRect((rect) => {
+          if (rect) {
+            this.setData({
+              containerHeight: rect.height,
+              containerWidth: rect.width,
+            });
+          }
+        })
+        .exec();
     },
 
     /**
@@ -305,23 +311,24 @@ Component({
     onSlideChange(e) {
       const newIndex = e.detail.current;
       this.setData({ currentSlideIndex: newIndex });
-    },    onDotTap(e) {
+    },
+    onDotTap(e) {
       const { index } = e.detail;
       const { currentMedia, currentSlideIndex } = this.data;
       const media = currentMedia[currentSlideIndex];
 
       if (media && media.dots && media.dots[index]) {
-        console.log('onDotTap called, opening detail panel');
+        console.log("onDotTap called, opening detail panel");
         this.setData({
           selectedDot: media.dots[index],
           tabIndex: 2,
           showDetail: true,
-          detailPanelState: 'half' // Add this line to update detail panel state
+          detailPanelState: "half", // Add this line to update detail panel state
         });
-        
+
         // Pause auto-play when detail panel opens via dot tap
         if (this.data.isPlaying) {
-          console.log('Pausing auto-play as detail panel opened via dot tap');
+          console.log("Pausing auto-play as detail panel opened via dot tap");
           this.pauseAutoPlay();
         }
       }
@@ -470,9 +477,7 @@ Component({
 
             wx.vibrateShort();
             wx.showToast({
-              title: newFavoriteStatus
-                ? "已添加到收藏"
-                : "已从收藏中移除",
+              title: newFavoriteStatus ? "已添加到收藏" : "已从收藏中移除",
               icon: "success",
               duration: 1000,
             });
@@ -599,26 +604,24 @@ Component({
           });
         },
       });
-    },    onToggleDetail() {
-      console.log('onToggleDetail called');
+    },
+    onToggleDetail() {
       if (isEmpty(this.properties.authUser)) {
-        console.log('User not authenticated, showing login modal');
         const app = getApp();
         app.setState("showLoginModal", true);
         return;
       }
-      
+
       const newShowDetail = !this.data.showDetail;
-      console.log('Toggling detail panel:', { current: this.data.showDetail, new: newShowDetail });
-      
-      this.setData({ 
+
+      this.setData({
         showDetail: newShowDetail,
-        detailPanelState: newShowDetail ? 'half' : 'closed'
+        detailPanelState: newShowDetail ? "half" : "closed",
+        tabIndex: 1,
       });
-      
+
       // Pause auto-play when detail panel opens
       if (newShowDetail && this.data.isPlaying) {
-        console.log('Pausing auto-play as detail panel opened');
         this.pauseAutoPlay();
       }
     },
@@ -636,19 +639,20 @@ Component({
     onTabChange(e) {
       const { index } = e.detail;
       this.setData({ tabIndex: parseInt(index) });
-    },    onCloseDetail() {
-      console.log('onCloseDetail called');
+    },
+    onCloseDetail() {
       this.setData({
         showDetail: false,
         selectedDot: null,
-        detailPanelState: 'closed',
+        detailPanelState: "closed",
       });
-      
-      console.log('Detail panel closed, detailPanelState set to: closed');
-      
+
       // Resume auto-play when detail panel closes
-      if (this.data.isContinue && this.data.currentPost.type === 'image' && this.data.mediaLength > 1) {
-        console.log('Resuming auto-play as detail panel was closed');
+      if (
+        this.data.isContinue &&
+        this.data.currentPost.type === "image" &&
+        this.data.mediaLength > 1
+      ) {
         this.resumeAutoPlay();
       }
     },
@@ -733,13 +737,18 @@ Component({
         app.setState("showLoginModal", true);
         return;
       }
-    },
-
-    onCommentSent(e) {
+    },    onCommentSent(e) {
       const { comments } = e.detail;
+      
+      // Handle both single comment and array of comments
+      const newComments = Array.isArray(comments) ? comments : [comments];
+      
+      // Append new comments to existing ones instead of replacing
+      const updatedComments = [...this.data.userComments, ...newComments];
+      
       this.setData({
-        userComments: comments,
-        displayComments: this.formatNumber(comments.length),
+        userComments: updatedComments,
+        displayComments: this.formatNumber(updatedComments.length),
       });
 
       this.triggerEvent("commentSent", e.detail);
@@ -907,7 +916,7 @@ Component({
       const deltaX = Math.abs(touch.pageX - touchStartX);
       const absDeltaY = Math.abs(deltaY);
 
-      this.setData({ currentTouchY: touch.pageY });      // Check if this is a vertical swipe
+      this.setData({ currentTouchY: touch.pageY }); // Check if this is a vertical swipe
       if (absDeltaY > 10 && (absDeltaY > deltaX || deltaX < 30)) {
         this.setData({ isVerticalSwiping: true });
 
@@ -951,7 +960,8 @@ Component({
       });
 
       const deltaY = touch.pageY - touchStartY;
-      const deltaX = Math.abs(touch.pageX - touchStartX);      const absDeltalY = Math.abs(deltaY);
+      const deltaX = Math.abs(touch.pageX - touchStartX);
+      const absDeltalY = Math.abs(deltaY);
 
       // Check if this is a valid vertical swipe
       if (absDeltalY >= minSwipeDistance && deltaX <= maxHorizontalThreshold) {
@@ -980,7 +990,7 @@ Component({
 
     /**
      * Handle vertical swipe up (next post)
-     */    handleVerticalSwipeUp() {
+     */ handleVerticalSwipeUp() {
       // Animate swipe out and trigger next post
       this.animateSwipeOut("up", () => {
         this.moveToNextPost();
@@ -995,9 +1005,10 @@ Component({
       this.animateSwipeOut("down", () => {
         this.moveToPreviousPost();
       });
-    },    /**
+    }
+    /**
      * Animate swipe out effect
-     */
+     */,
     animateSwipeOut(direction, callback) {
       const { containerHeight, windowHeight } = this.data;
       // Use containerHeight if available, fallback to windowHeight
@@ -1018,26 +1029,30 @@ Component({
      */
     animateBackToCenter() {
       this.setData({ verticalTransform: 0 });
-    },    onDetailStateChange(e) {
+    },
+    onDetailStateChange(e) {
       const { state } = e.detail;
-      console.log('Detail panel state changed to:', state);
-      console.log('Previous detailPanelState:', this.data.detailPanelState);
-      
+      console.log("Detail panel state changed to:", state);
+      console.log("Previous detailPanelState:", this.data.detailPanelState);
+
       this.setData({
-        detailPanelState: state
+        detailPanelState: state,
       });
-      
-      console.log('Updated detailPanelState to:', state);
-      
+
+      console.log("Updated detailPanelState to:", state);
+
       // Handle auto-play based on panel state
-      if (state === 'half' || state === 'full') {
+      if (state === "half" || state === "full") {
         if (this.data.isPlaying) {
-          console.log('Pausing auto-play for panel state:', state);
+          console.log("Pausing auto-play for panel state:", state);
           this.pauseAutoPlay();
         }
-      } else if (state === 'closed') {
-        if (this.data.isContinue && this.data.currentPost.type === 'image' && this.data.mediaLength > 1) {
-          console.log('Resuming auto-play as panel closed');
+      } else if (state === "closed") {
+        if (
+          this.data.isContinue &&
+          this.data.currentPost.type === "image" &&
+          this.data.mediaLength > 1
+        ) {
           this.resumeAutoPlay();
         }
       }

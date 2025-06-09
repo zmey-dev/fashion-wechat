@@ -125,7 +125,8 @@ Component({
         success(res) {
           const tempFilePath = res.tempFilePaths[0];
           that.uploadCommentImage(tempFilePath);
-        },        fail(err) {
+        },
+        fail(err) {
           wx.showToast({
             title: "选择图片失败",
             icon: "error",
@@ -157,24 +158,27 @@ Component({
         },
         filePath: filePath,
         name: "file",
-        formData: formData,        success: (res) => {
+        formData: formData,
+        success: (res) => {
           wx.hideLoading();
           const data = JSON.parse(res.data);
-          if (data.success) {
+          if (data.status === "success") {
             wx.showToast({
               title: "评论发布成功",
               icon: "success",
             });
             this.triggerEvent("commentsent", {
-              comment: data.comment,
+              comments: data.comment,
             });
-            this.resetCommentInput();          } else {
+            this.resetCommentInput();
+          } else {
             wx.showToast({
               title: "评论发布失败",
               icon: "error",
             });
           }
-        },        fail: (err) => {
+        },
+        fail: (err) => {
           wx.hideLoading();
           wx.showToast({
             title: "上传失败",
@@ -193,19 +197,22 @@ Component({
       if (isEmpty(authUser)) {
         app.setState("showLoginModal", true);
         return;
-      }      if (!personalComment.trim()) {
+      }
+      if (!personalComment.trim()) {
         wx.showToast({
           title: "请输入评论内容",
           icon: "error",
         });
         return;
-      }      if (isContainSword(personalComment)) {
+      }
+      if (isContainSword(personalComment)) {
         wx.showToast({
           title: "不能使用不当言论",
           icon: "error",
         });
         return;
-      }      wx.showLoading({
+      }
+      wx.showLoading({
         title: isUpdate ? "更新中..." : "发布中...",
       });
 
@@ -252,12 +259,14 @@ Component({
             }
 
             this.resetCommentInput();
-          } else {            wx.showToast({
+          } else {
+            wx.showToast({
               title: res.data.msg ? res.data.msg : "评论发布失败",
               icon: "error",
             });
           }
-        },        fail: (err) => {
+        },
+        fail: (err) => {
           wx.hideLoading();
           wx.showToast({
             title: "网络错误",
@@ -306,7 +315,8 @@ Component({
       if (!loggedUser) {
         this.triggerEvent("loginrequired");
         return;
-      }      if (loggedUser.id === item.sender_id) {
+      }
+      if (loggedUser.id === item.sender_id) {
         wx.showToast({
           title: "不能回复自己的评论",
           icon: "error",

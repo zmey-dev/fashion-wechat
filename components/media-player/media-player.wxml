@@ -66,9 +66,9 @@
       bind:reportmodal="onShowReportModal"
     />
   </view>
-  
-  <detail-panel
+    <detail-panel
     show-detail="{{ showDetail }}"
+    panel-state="{{ detailPanelState }}"
     tab-index="{{ tabIndex }}"
     current-post="{{ currentPost }}"
     current-post-user="{{ currentPostUser }}"
