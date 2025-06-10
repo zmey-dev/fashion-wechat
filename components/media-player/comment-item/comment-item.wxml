@@ -15,7 +15,7 @@
             mode="aspectFill"
           />
         </view>
-        <text class="username">{{item.sender && item.sender.username ? item.sender.username : ''}}</text>
+        <text class="username">@{{item.sender && item.sender.username ? item.sender.username : ''}}</text>
       </navigator>
     </view>
     <text class="timestamp">{{createdTime}}</text>
@@ -51,8 +51,7 @@
             data-item="{{item}}"
             data-index="{{index}}"
           >
-            <image class="action-icon" src="/images/icons/edit.svg" />
-            <text class="action-text">Edit</text>
+            <image class="action-icon" src="/images/icons/edit.svg" />            <text class="action-text">编辑</text>
           </view>
           <view 
             class="action-btn delete-btn" 
@@ -60,7 +59,7 @@
             data-id="{{item.id}}"
           >
             <image class="action-icon" src="/images/icons/trash.svg" />
-            <text class="action-text">Delete</text>
+            <text class="action-text">删除</text>
           </view>
         </block>     
         <block wx:else>
@@ -96,7 +95,7 @@
             data-index="{{index}}"
           >
             <image class="action-icon" src="/images/icons/reply.svg" />
-            <text class="action-text">Reply</text>
+            <text class="action-text">回复</text>
           </view>
         </block>
         <block wx:if="{{loggedUser.id === selectedPost.user_id && item.sender_id !== loggedUser.id}}">  
@@ -107,7 +106,7 @@
             data-id="{{item.id}}"
           >
             <image class="action-icon" src="/images/icons/trash.svg" />
-            <text class="action-text">Delete</text>
+            <text class="action-text">删除</text>
           </view>
         </block>
       </view>

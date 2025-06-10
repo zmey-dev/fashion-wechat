@@ -743,13 +743,20 @@ Component({
       // Handle both single comment and array of comments
       const newComments = Array.isArray(comments) ? comments : [comments];
       
-      // Append new comments to existing ones instead of replacing
-      const updatedComments = [...this.data.userComments, ...newComments];
+      // Check for duplicates by ID before adding
+      const existingIds = new Set(this.data.userComments.map(c => c.id));
+      const uniqueNewComments = newComments.filter(comment => 
+        comment && comment.id && !existingIds.has(comment.id)
+      );
       
-      this.setData({
-        userComments: updatedComments,
-        displayComments: this.formatNumber(updatedComments.length),
-      });
+      if (uniqueNewComments.length > 0) {
+        const updatedComments = [...this.data.userComments, ...uniqueNewComments];
+        
+        this.setData({
+          userComments: updatedComments,
+          displayComments: this.formatNumber(updatedComments.length),
+        });
+      }
 
       this.triggerEvent("commentSent", e.detail);
     },

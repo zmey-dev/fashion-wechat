@@ -22,7 +22,6 @@ Component({
       value: {},
     },
   },
-
   data: {
     personalComment: "",
     commentId: null,
@@ -30,6 +29,7 @@ Component({
     showEmojiPicker: false,
     replyToComment: null,
     rootComments: [],
+    isSending: false,
     emojiList: [
       "😀",
       "😂",
@@ -113,10 +113,10 @@ Component({
         personalComment: this.data.personalComment + emoji,
         showEmojiPicker: false,
       });
-    },
-
-    // Handle image selection
+    },    // Handle image selection
     onChooseImage() {
+      if (this.data.isSending) return;
+      
       const that = this;
       wx.chooseImage({
         count: 1,
@@ -137,6 +137,10 @@ Component({
 
     // Upload comment image
     uploadCommentImage(filePath) {
+      if (this.data.isSending) return;
+      
+      this.setData({ isSending: true });
+      
       wx.showLoading({
         title: "上传中...",
       });
@@ -161,6 +165,8 @@ Component({
         formData: formData,
         success: (res) => {
           wx.hideLoading();
+          this.setData({ isSending: false });
+          
           const data = JSON.parse(res.data);
           if (data.status === "success") {
             wx.showToast({
@@ -180,6 +186,7 @@ Component({
         },
         fail: (err) => {
           wx.hideLoading();
+          this.setData({ isSending: false });
           wx.showToast({
             title: "上传失败",
             icon: "error",
@@ -204,14 +211,18 @@ Component({
           icon: "error",
         });
         return;
-      }
-      if (isContainSword(personalComment)) {
+      }      if (isContainSword(personalComment)) {
         wx.showToast({
           title: "不能使用不当言论",
           icon: "error",
         });
         return;
       }
+
+      // Prevent duplicate sending
+      if (this.data.isSending) return;
+      this.setData({ isSending: true });
+      
       wx.showLoading({
         title: isUpdate ? "更新中..." : "发布中...",
       });
@@ -239,9 +250,10 @@ Component({
           "Content-Type": "application/json",
           Authorization: loggedUser.token ? `Bearer ${loggedUser.token}` : "",
         },
-        data: requestData,
-        success: (res) => {
+        data: requestData,        success: (res) => {
           wx.hideLoading();
+          this.setData({ isSending: false });
+          
           if (res.data.status == "success") {
             wx.showToast({
               title: res.data.msg,
@@ -268,15 +280,14 @@ Component({
         },
         fail: (err) => {
           wx.hideLoading();
+          this.setData({ isSending: false });
           wx.showToast({
             title: "网络错误",
             icon: "error",
           });
         },
       });
-    },
-
-    // Reset comment input
+    },    // Reset comment input
     resetCommentInput() {
       this.setData({
         personalComment: "",
@@ -284,6 +295,7 @@ Component({
         isUpdate: false,
         showEmojiPicker: false,
         replyToComment: null,
+        isSending: false,
       });
     },
 

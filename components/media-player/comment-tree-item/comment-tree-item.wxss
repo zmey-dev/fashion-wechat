@@ -8,42 +8,37 @@
   transition: all 0.3s ease;
 }
 
-/* Depth-based Indentation */
+/* Depth-based Indentation - TikTok style smaller indentation */
 .comment-tree-item[data-depth="0"] {
   margin-left: 0;
 }
 
 .comment-tree-item[data-depth="1"] {
-  margin-left: 40rpx;
+  margin-left: 30rpx;
 }
 
 .comment-tree-item[data-depth="2"] {
-  margin-left: 80rpx;
+  margin-left: 60rpx;
 }
 
 .comment-tree-item[data-depth="3"] {
-  margin-left: 120rpx;
+  margin-left: 90rpx;
 }
 
 .comment-tree-item[data-depth="4"] {
-  margin-left: 160rpx;
+  margin-left: 120rpx;
 }
 
-/* Thread Line for Nested Comments */
+/* Thread Line for Nested Comments - TikTok style thinner line */
 .comment-tree-item[data-depth]:not([data-depth="0"])::before {
   content: '';
   position: absolute;
-  left: -20rpx;
+  left: -15rpx;
   top: 0;
   bottom: 0;
-  width: 2rpx;
-  background: linear-gradient(180deg, 
-    rgba(255, 255, 255, 0.2) 0%, 
-    rgba(255, 255, 255, 0.1) 50%, 
-    rgba(255, 255, 255, 0.05) 100%
-  );
+  width: 1rpx;
+  background: #333;
   border-radius: 1rpx;
-  animation: fadeIn 0.5s ease-out;
 }
 
 /* Comment Item Hover State */

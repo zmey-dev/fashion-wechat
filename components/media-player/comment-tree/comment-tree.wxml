@@ -53,9 +53,7 @@
           mode="aspectFit"
         />
       </view>
-    </view>
-
-    <!-- Comment Input Area -->
+    </view>    <!-- Comment Input Area -->
     <view wx:if="{{authUser.role === 'user'}}" class="comment-input-container">
       <textarea 
         class="comment-textarea {{commentId ? 'has-reply' : ''}}"
@@ -66,16 +64,29 @@
         maxlength="500"
         auto-height
         cursor-spacing="10"
+        disabled="{{isSending}}"
       />
 
       <view class="input-actions">
-        <button class="input-action-btn" bindtap="onChooseImage">
+        <button 
+          class="input-action-btn {{isSending ? 'disabled' : ''}}" 
+          bindtap="onChooseImage"
+          disabled="{{isSending}}"
+        >
           <image class="action-icon" src="/images/icons/image.svg" />
         </button>
-        <button class="input-action-btn" bindtap="onToggleEmoji">
+        <button 
+          class="input-action-btn {{isSending ? 'disabled' : ''}}" 
+          bindtap="onToggleEmoji"
+          disabled="{{isSending}}"
+        >
           <image class="action-icon" src="/images/icons/emoji.svg" />
         </button>
-        <button class="input-action-btn" bindtap="onSendComment">
+        <button 
+          class="input-action-btn send-btn {{isSending ? 'disabled' : ''}}" 
+          bindtap="onSendComment"
+          disabled="{{isSending}}"
+        >
           <image class="action-icon" src="/images/icons/send.svg" />
         </button>
       </view>
