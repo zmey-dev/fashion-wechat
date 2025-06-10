@@ -752,6 +752,49 @@
           </view>
         </view>
       </view>
+      
+      <!-- WeChat Linking Section -->
+      <view wx:if="{{!isEditingProfile}}" class="wechat-section">
+        <view class="section-title">
+          <text>微信绑定</text>
+        </view>
+        <view class="wechat-status">
+          <view class="wechat-info">
+            <view class="wechat-icon">
+              <image src="../../images/icons/wechat.svg" mode="aspectFit"></image>
+            </view>
+            <view class="wechat-details">
+              <view class="wechat-status-text">
+                <text wx:if="{{isWechatLinked}}">已绑定微信账号</text>
+                <text wx:else>未绑定微信账号</text>
+              </view>
+              <view class="wechat-description" wx:if="{{!isWechatLinked}}">
+                <text>绑定微信账号后，可以使用微信快速登录</text>
+              </view>
+            </view>
+          </view>
+          <view class="wechat-action">
+            <button 
+              wx:if="{{!isWechatLinked}}" 
+              class="wechat-btn link-btn"
+              bindtap="linkWechat"
+              disabled="{{wechatLinking}}"
+            >
+              <text wx:if="{{wechatLinking}}">绑定中...</text>
+              <text wx:else>绑定微信</text>
+            </button>
+            <button 
+              wx:else 
+              class="wechat-btn unlink-btn"
+              bindtap="unlinkWechat"
+              disabled="{{wechatLinking}}"
+            >
+              <text wx:if="{{wechatLinking}}">解绑中...</text>
+              <text wx:else>解绑微信</text>
+            </button>
+          </view>
+        </view>
+      </view>
     </view>      </block>
     </scroll-view>
     

@@ -82,7 +82,6 @@ Page({
       }
     }
   },
-
   onLoad: function(options) {
     // Check if already logged in
     const userInfo = getApp().globalData.userInfo;
@@ -91,6 +90,20 @@ Page({
         url: "/pages/index/index"
       });
       return;
+    }
+    
+    // Check if coming from WeChat login
+    if (options.from === 'wechat') {
+      this.setData({
+        fromWeChat: true
+      });
+      
+      // Show WeChat registration message
+      wx.showToast({
+        title: '请完成微信账号注册',
+        icon: 'none',
+        duration: 2000
+      });
     }
     
     this.initializeYears();
@@ -563,7 +576,6 @@ Page({
       formStep: this.data.formStep - 1
     });
   },
-
   // Handle form submission
   handleSubmit: function() {
     if (!this.validateForm()) {
@@ -573,7 +585,155 @@ Page({
     this.setData({ isLoading: true });
 
     const { form } = this.data;
+    const app = getApp();
     
+    // Check if this is WeChat registration
+    const wechatData = app.globalData.wechatRegistrationData;
+    const isWechatRegistration = this.data.fromWeChat && wechatData;
+    
+    if (isWechatRegistration) {
+      this.handleWechatRegistration(form, wechatData);
+    } else {
+      this.handleNormalRegistration(form);
+    }
+  },
+
+  // Handle normal registration
+  handleNormalRegistration: function(form) {
+    // Prepare form data exactly like React version
+    const formData = {
+      name: form.name,
+      username: form.username,
+      email: form.email,
+      phone: form.phone,
+      id_number: form.id_number,
+      password: form.password,
+      password_confirmation: form.password_confirmation,
+      student_number: form.student_number,
+      university_id: form.school?.id,
+      class: form.class,
+      attend_year: form.attend_year,
+      faculty: form.faculty?.name,
+      major: form.major?.name
+    };
+
+    wx.request({
+      url: `${config.BACKEND_URL}/auth/register`,
+      method: "POST",
+      data: formData,
+      header: {
+        "Content-Type": "application/json"
+      },
+      success: (res) => {
+        this.handleRegistrationResponse(res);
+      },
+      fail: () => {
+        this.handleRegistrationError();
+      },
+      complete: () => {
+        this.setData({ isLoading: false });
+      }
+    });
+  },
+
+  // Handle WeChat registration with fresh code
+  handleWechatRegistration: function(form, wechatData) {
+    // Get fresh WeChat code for registration
+    wx.login({
+      success: (loginRes) => {
+        if (loginRes.code) {
+          const formData = {
+            wechat_code: loginRes.code,
+            name: form.name,
+            username: form.username,
+            email: form.email,
+            phone: form.phone,
+            id_number: form.id_number,
+            password: form.password,
+            password_confirmation: form.password_confirmation,
+            student_number: form.student_number,
+            university_id: form.school?.id,
+            class: form.class,
+            attend_year: form.attend_year,
+            faculty: form.faculty?.name,
+            major: form.major?.name
+          };
+
+          wx.request({
+            url: `${config.BACKEND_URL}/auth/wechat-register`,
+            method: "POST",
+            data: formData,
+            header: {
+              "Content-Type": "application/json"
+            },
+            success: (res) => {
+              this.handleRegistrationResponse(res);
+            },
+            fail: () => {
+              this.handleRegistrationError();
+            },
+            complete: () => {
+              this.setData({ isLoading: false });
+            }
+          });
+        } else {
+          this.handleRegistrationError();
+        }
+      },
+      fail: () => {
+        this.handleRegistrationError();
+      }
+    });
+  },
+
+  // Handle registration response
+  handleRegistrationResponse: function(res) {
+    if (res.statusCode === 200 && res.data.status === "success") {
+      // Clear WeChat registration data
+      const app = getApp();
+      if (app.globalData.wechatRegistrationData) {
+        delete app.globalData.wechatRegistrationData;
+      }
+
+      wx.showToast({
+        title: this.data.messages.success.registerSuccess,
+        icon: "success"
+      });
+      
+      setTimeout(() => {
+        wx.navigateBack({
+          delta: 1,
+          success: function(res){
+            // success
+          },
+          fail: function() {
+            // fail
+          },
+          complete: function() {
+            // complete
+          }
+        })
+      }, 1500);
+    } else {
+      wx.showToast({
+        title: res.data?.msg || this.data.messages.errors.registerFailed,
+        icon: "none"
+      });
+      this.setData({ isLoading: false });
+    }
+  },
+
+  // Handle registration error
+  handleRegistrationError: function() {
+    wx.showToast({
+      title: this.data.messages.errors.networkError,
+      icon: "none"
+    });
+    this.setData({ isLoading: false });
+  },
+
+  // Legacy method (kept for compatibility)
+  submitForm: function() {
     // Prepare form data exactly like React version
     const formData = {
       name: form.name,

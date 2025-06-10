@@ -362,9 +362,7 @@
             bindinput="onProfileInputChange"
           />
           <text class="error-text" wx:if="{{profileErrors.class}}">{{profileErrors.class}}</text>
-        </view>
-
-        <!-- Admission Year -->
+        </view>        <!-- Admission Year -->
         <view class="form-field">
           <label class="field-label">入学年份</label>
           <picker 
@@ -379,6 +377,54 @@
               <text>{{profileForm.admissionYear}}年</text>
             </view>
           </picker>
+        </view>
+      </view>
+
+      <!-- WeChat Linking Section -->
+      <view class="form-section">
+        <view class="section-title">微信绑定</view>
+        
+        <view class="form-field">
+          <label class="field-label">微信账号</label>
+          <view class="wechat-status-container">
+            <view class="wechat-status {{isWechatLinked ? 'linked' : 'unlinked'}}">
+              <view class="wechat-status-icon">
+                <text wx:if="{{isWechatLinked}}">✅</text>
+                <text wx:else>❌</text>
+              </view>
+              <view class="wechat-status-text">
+                <text wx:if="{{isWechatLinked}}">已绑定微信</text>
+                <text wx:else>未绑定微信</text>
+              </view>
+            </view>
+            
+            <view class="wechat-actions" wx:if="{{!isEditingProfile}}">
+              <button 
+                wx:if="{{!isWechatLinked}}"
+                class="wechat-link-btn link-btn"
+                bindtap="linkWechat"
+                disabled="{{wechatLinking}}"
+              >
+                <text wx:if="{{!wechatLinking}}">绑定微信</text>
+                <text wx:else>绑定中...</text>
+              </button>
+              
+              <button 
+                wx:if="{{isWechatLinked}}"
+                class="wechat-link-btn unlink-btn"
+                bindtap="unlinkWechat"
+                disabled="{{wechatLinking}}"
+              >
+                <text wx:if="{{!wechatLinking}}">解除绑定</text>
+                <text wx:else>处理中...</text>
+              </button>
+            </view>
+          </view>
+          
+          <view class="wechat-description">
+            <text wx:if="{{!isWechatLinked}}">绑定微信后可使用微信快捷登录</text>
+            <text wx:else>您可以使用微信登录或解除绑定</text>
+          </view>
         </view>
       </view>
     </view>

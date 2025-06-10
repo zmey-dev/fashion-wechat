@@ -167,9 +167,14 @@ Component({
         console.log("Sending code to backend:", loginResult.code);
         const authResult = await this.requestWechatLogin({
           code: loginResult.code,
-        });
-
-        console.log("Backend auth result:", authResult);
+        });        console.log("Backend auth result:", authResult);
+        
+        // Check if registration is required
+        if (authResult.status === 'registration_required') {
+          this.handleRegistrationRequired(authResult);
+          return;
+        }
+        
         this.handleLoginSuccess(authResult);
       } catch (error) {
         console.error("WeChat login error:", error);
@@ -463,7 +468,38 @@ Component({
       wx.redirectTo({
         url: "/pages/index/index",
       });
-    }, // Handle login error
+    }, 
+
+    // Handle registration required for WeChat users
+    handleRegistrationRequired(result) {
+      console.log("WeChat registration required:", result);
+      
+      // Store WeChat data for registration
+      const app = getApp();
+      app.globalData.wechatRegistrationData = {
+        wechat_openid: result.data.wechat_openid,
+        wechat_unionid: result.data.wechat_unionid
+      };
+
+      // Show message and redirect to registration
+      wx.showModal({
+        title: '需要注册',
+        content: result.msg || '该微信账号尚未注册，请先完成注册',
+        showCancel: true,
+        cancelText: '取消',
+        confirmText: '去注册',
+        success: (res) => {
+          if (res.confirm) {
+            this.closeModal();
+            wx.navigateTo({
+              url: '/pages/register/register?from=wechat'
+            });
+          }
+        }
+      });
+    },
+
+    // Handle login error
     handleLoginError(message, fieldType = null) {
       // Set field-specific error instead of showing toast
       if (fieldType === "email") {

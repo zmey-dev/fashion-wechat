@@ -61,15 +61,17 @@ Page({
 
     // Validation states
     profileErrors: {},
-    profileFormValid: false,
-
-    // Original values for comparison
+    profileFormValid: false,    // Original values for comparison
     originalEmail: "",
     originalPhone: "",
 
     // Change tracking
     emailChanged: false,
     phoneChanged: false,
+
+    // WeChat linking state
+    isWechatLinked: false,
+    wechatLinking: false,
 
     // Verification states
     emailCodeSent: false,
@@ -109,11 +111,11 @@ Page({
       },
     },
   },
-
   onLoad: function () {
     const app = getApp();
     this.userInfoHandler = (userInfo) => {
       this.setData({ userInfo });
+      this.checkWechatLinkStatus();
     };
     app.subscribe("userInfo", this.userInfoHandler);
     this.setData({
@@ -124,6 +126,7 @@ Page({
     this.loadStudents();
     this.loadUniversityInfo();
     this.loadTeacherProfile();
+    this.checkWechatLinkStatus(); // Check WeChat link status
   },
   onShow: function () {
     this.loadStudents();
@@ -1610,12 +1613,172 @@ Page({
       this.data.credentialFile
     );
   },
-
   // Clean up profile resources
   cleanupProfileResources: function() {
     // Revoke any blob URLs created for avatar preview
     if (this.data.selectedAvatar && this.data.selectedAvatar.startsWith('blob:')) {
       URL.revokeObjectURL(this.data.selectedAvatar);
     }
+  },
+
+  // WeChat linking functionality
+  async linkWechat() {
+    if (this.data.wechatLinking) return;
+
+    try {
+      this.setData({ wechatLinking: true });
+
+      // Get WeChat login code
+      const loginResult = await this.promiseWrapper(wx.login);
+      if (!loginResult.code) {
+        throw new Error('获取微信授权码失败');
+      }
+
+      // Send link request to backend
+      const response = await this.requestWechatLink(loginResult.code);
+      
+      if (response.status === 'success') {
+        // Update user info with WeChat data
+        const app = getApp();
+        const updatedUserInfo = { ...this.data.userInfo, ...response.user };
+        app.setState("userInfo", updatedUserInfo);
+        wx.setStorageSync('userInfo', updatedUserInfo);
+        
+        this.setData({ 
+          userInfo: updatedUserInfo,
+          isWechatLinked: true 
+        });
+        
+        wx.showToast({
+          title: '微信绑定成功',
+          icon: 'success'
+        });
+      } else {
+        throw new Error(response.msg || '绑定失败');
+      }
+    } catch (error) {
+      console.error('WeChat linking error:', error);
+      wx.showToast({
+        title: error.message || '微信绑定失败',
+        icon: 'none'
+      });
+    } finally {
+      this.setData({ wechatLinking: false });
+    }
+  },
+
+  async unlinkWechat() {
+    try {
+      const result = await this.showConfirmDialog(
+        '解除绑定',
+        '确定要解除微信绑定吗？解除后您将无法使用微信登录。'
+      );
+      
+      if (!result.confirm) return;
+
+      const response = await this.requestWechatUnlink();
+      
+      if (response.status === 'success') {
+        // Update user info
+        const app = getApp();
+        const updatedUserInfo = { 
+          ...this.data.userInfo, 
+          wechat_openid: null,
+          wechat_unionid: null 
+        };
+        app.setState("userInfo", updatedUserInfo);
+        wx.setStorageSync('userInfo', updatedUserInfo);
+        
+        this.setData({ 
+          userInfo: updatedUserInfo,
+          isWechatLinked: false 
+        });
+        
+        wx.showToast({
+          title: '解除绑定成功',
+          icon: 'success'
+        });
+      } else {
+        throw new Error(response.msg || '解除绑定失败');
+      }
+    } catch (error) {
+      console.error('WeChat unlinking error:', error);
+      wx.showToast({
+        title: error.message || '解除绑定失败',
+        icon: 'none'
+      });
+    }
+  },
+
+  // API calls for WeChat linking
+  requestWechatLink(code) {
+    return new Promise((resolve, reject) => {
+      wx.request({
+        url: `${config.BACKEND_URL}/user/link-wechat`,
+        method: 'POST',
+        data: { code },
+        header: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.data.userInfo.token}`
+        },
+        success: (res) => {
+          if (res.statusCode === 200) {
+            resolve(res.data);
+          } else {
+            reject(new Error(res.data?.msg || '请求失败'));
+          }
+        },
+        fail: reject
+      });
+    });
+  },
+
+  requestWechatUnlink() {
+    return new Promise((resolve, reject) => {
+      wx.request({
+        url: `${config.BACKEND_URL}/user/unlink-wechat`,
+        method: 'POST',
+        header: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.data.userInfo.token}`
+        },
+        success: (res) => {
+          if (res.statusCode === 200) {
+            resolve(res.data);
+          } else {
+            reject(new Error(res.data?.msg || '请求失败'));
+          }
+        },
+        fail: reject
+      });
+    });
+  },
+
+  // Utility methods
+  promiseWrapper(fn, options = {}) {
+    return new Promise((resolve, reject) => {
+      fn({
+        ...options,
+        success: resolve,
+        fail: reject
+      });
+    });
+  },
+
+  showConfirmDialog(title, content) {
+    return new Promise((resolve) => {
+      wx.showModal({
+        title,
+        content,
+        success: resolve
+      });
+    });
+  },
+
+  // Check WeChat link status on load
+  checkWechatLinkStatus() {
+    const { userInfo } = this.data;
+    const isLinked = !!(userInfo?.wechat_openid);
+    this.setData({ isWechatLinked: isLinked });
   },
 });
