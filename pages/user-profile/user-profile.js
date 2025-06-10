@@ -1,4 +1,5 @@
-const config = require("../../config.js");
+const { default: config } = require("../../config");
+
 const app = getApp();
 
 Page({
@@ -67,11 +68,6 @@ Page({
     this.loadUserProfile(username);
   },
 
-  onShow: function () {
-    if (this.data.username) {
-      this.loadUserProfile(this.data.username);
-    }
-  },
   onUnload: function () {
     // Unsubscribe from user info changes
     app.unsubscribe("userInfo", this.userInfoHandler);
@@ -84,7 +80,6 @@ Page({
     wx.showLoading({
       title: this.data.messages.loading,
     });
-
     wx.request({
       url: `${config.BACKEND_URL}/profile/get_profile`,
       method: "GET",
@@ -96,6 +91,7 @@ Page({
         Authorization: `Bearer ${getApp().globalData.userInfo.token}`,
       },
       success: (res) => {
+
         if (res.statusCode === 200) {
           // Prepare user data with required properties for UI interactions
           const userWithState = {

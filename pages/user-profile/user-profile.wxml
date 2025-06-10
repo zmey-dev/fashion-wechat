@@ -8,8 +8,8 @@
   <view class="user-profile-container" wx:if="{{currentUser && !error}}">
     <!-- User Profile Information -->
     <view class="user-profile">
-      <avatar class="profile-avatar" avatar="{{currentUser.avatar}}" name="{{currentUser.username}}" size="{{100}}" mode="aspectFill"></avatar>
-      <text class="profile-nickname">{{currentUser.username}}</text>
+      <avatar class="profile-avatar" avatar="{{currentUser.avatar}}" name="{{currentUser.username}}" size="{{120}}" mode="aspectFill"></avatar>
+      <text class="profile-nickname">@{{currentUser.username}}</text>
       <text class="user-followers">粉丝 {{currentUser.followers}}人</text>
     </view>
 

@@ -22,6 +22,7 @@
   display: flex;
   flex-direction: column;
   width: 100%;
+  height: 100%;
   flex: 1;
 }
 
@@ -106,10 +107,9 @@
 }
 
 .media-grid {
-  display: flex;
-  flex-direction: column;
   padding: 10rpx;
-  flex: 1;
+  overflow-y: auto;
+  height: 100%;
 }
 
 .media-item {
