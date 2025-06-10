@@ -1,6 +1,7 @@
 const { default: config } = require("../../config");
 
-Component({  data: {
+Component({
+  data: {
     loginType: "wechat",
     email: "",
     phone: "",
@@ -27,7 +28,8 @@ Component({  data: {
         phone: "手机号码",
         password: "密码",
         verificationCode: "验证码",
-      },      buttons: {
+      },
+      buttons: {
         login: "登录",
         sendCode: "发送验证码",
         resend: "重新发送",
@@ -154,30 +156,20 @@ Component({  data: {
     },    async wechatLogin() {
       try {
         this.setData({ loading: true });
-        
-        // Get login code from WeChat
+
         const loginResult = await this.promiseWrapper(wx.login);
+        
+        console.log("WeChat login result:", loginResult);
         if (!loginResult.code) {
           throw new Error("Failed to get WeChat login code");
         }
 
-        // Get user profile - this will show the authorization dialog
-        const userInfoResult = await this.promiseWrapper(wx.getUserProfile, {
-          desc: "登录以访问个性化功能",
-        });
-
-        if (!userInfoResult.userInfo) {
-          throw new Error("Failed to get user info");
-        }
-
-        // Send login request to backend
+        console.log("Sending code to backend:", loginResult.code);
         const authResult = await this.requestWechatLogin({
           code: loginResult.code,
-          userInfo: userInfoResult.userInfo,
-          signature: userInfoResult.signature,
-          rawData: userInfoResult.rawData,
         });
 
+        console.log("Backend auth result:", authResult);
         this.handleLoginSuccess(authResult);
       } catch (error) {
         console.error("WeChat login error:", error);
@@ -491,7 +483,7 @@ Component({  data: {
           emailError: message, // Fallback to email field for general errors
         });
       }
-    },    // API request wrapper
+    }, // API request wrapper
     requestLogin(data) {
       return new Promise((resolve, reject) => {
         wx.request({
@@ -530,7 +522,9 @@ Component({  data: {
               resolve(res.data);
             } else {
               reject(
-                new Error(res.data.msg || res.data.error || "WeChat login failed")
+                new Error(
+                  res.data.msg || res.data.error || "WeChat login failed"
+                )
               );
             }
           },
