@@ -1,8 +1,7 @@
 const { default: config } = require("../../config");
 
-Component({
-  data: {
-    loginType: "email",
+Component({  data: {
+    loginType: "wechat",
     email: "",
     phone: "",
     password: "",
@@ -28,13 +27,13 @@ Component({
         phone: "手机号码",
         password: "密码",
         verificationCode: "验证码",
-      },
-      buttons: {
+      },      buttons: {
         login: "登录",
         sendCode: "发送验证码",
         resend: "重新发送",
         seconds: "秒",
         register: "立即注册",
+        wechatLogin: "微信登录",
       },
       errors: {
         emailRequired: "请输入邮箱地址",
@@ -152,23 +151,27 @@ Component({
     validatePhone(phone) {
       const phoneRegex = /\d{11}$/;
       return phoneRegex.test(phone);
-    },
-
-    async wechatLogin() {
+    },    async wechatLogin() {
       try {
         this.setData({ loading: true });
+        
+        // Get login code from WeChat
         const loginResult = await this.promiseWrapper(wx.login);
-
         if (!loginResult.code) {
           throw new Error("Failed to get WeChat login code");
         }
 
+        // Get user profile - this will show the authorization dialog
         const userInfoResult = await this.promiseWrapper(wx.getUserProfile, {
           desc: "登录以访问个性化功能",
         });
 
-        const authResult = await this.requestLogin({
-          type: "wechat",
+        if (!userInfoResult.userInfo) {
+          throw new Error("Failed to get user info");
+        }
+
+        // Send login request to backend
+        const authResult = await this.requestWechatLogin({
           code: loginResult.code,
           userInfo: userInfoResult.userInfo,
           signature: userInfoResult.signature,
@@ -177,6 +180,7 @@ Component({
 
         this.handleLoginSuccess(authResult);
       } catch (error) {
+        console.error("WeChat login error:", error);
         this.handleLoginError(
           this.data.messages.errors.wechatLoginFailed,
           "wechat"
@@ -487,9 +491,7 @@ Component({
           emailError: message, // Fallback to email field for general errors
         });
       }
-    },
-
-    // API request wrapper
+    },    // API request wrapper
     requestLogin(data) {
       return new Promise((resolve, reject) => {
         wx.request({
@@ -505,6 +507,30 @@ Component({
             } else {
               reject(
                 new Error(res.data.msg || res.data.error || "Login failed")
+              );
+            }
+          },
+          fail: reject,
+        });
+      });
+    },
+
+    // WeChat login API request
+    requestWechatLogin(data) {
+      return new Promise((resolve, reject) => {
+        wx.request({
+          url: `${config.BACKEND_URL}/auth/wechat-login`,
+          method: "POST",
+          data,
+          header: {
+            "Content-Type": "application/json",
+          },
+          success: (res) => {
+            if (res.statusCode === 200 && res.data.status === "success") {
+              resolve(res.data);
+            } else {
+              reject(
+                new Error(res.data.msg || res.data.error || "WeChat login failed")
               );
             }
           },

@@ -127,6 +127,38 @@
 .wechat-desc {
   font-size: 14px;
   color: #888;
+  margin-bottom: 24px;
+}
+
+.wechat-button {
+  width: 100%;
+  height: 48px;
+  background: linear-gradient(135deg, #07c160, #05a651);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  margin-top: 16px;
+  transition: all 0.3s ease;
+}
+
+.wechat-button:hover {
+  background: linear-gradient(135deg, #06b456, #04954a);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(7, 193, 96, 0.3);
+}
+
+.wechat-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(7, 193, 96, 0.2);
+}
+
+.wechat-button:disabled {
+  background: #666;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 /* Form Inputs */
