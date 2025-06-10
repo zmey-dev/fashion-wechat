@@ -24,7 +24,7 @@ Component({
         phone: "手机登录",
       },
       formLabels: {
-        email: "邮箱地址",
+        email: "邮箱/手机号/小秀号",
         phone: "手机号码",
         password: "密码",
         verificationCode: "验证码",

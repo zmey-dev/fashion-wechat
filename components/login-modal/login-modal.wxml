@@ -20,7 +20,8 @@
         bindtap="switchLoginType"
       >
         <span>{{messages.loginTypes.phone}}</span>
-      </view>    </view>
+      </view>    
+    </view>
 
     <view class="login-forms">
       <view class="form-container {{loginType === 'wechat' ? 'active' : ''}}">
