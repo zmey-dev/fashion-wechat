@@ -1,9 +1,7 @@
 <!--页面/创建媒体/创建媒体.wxml-->
-<app-layout current-page="upload">
+<app-layout current-page="upload" background="#1a1a1a">
   <view class="upload-container">
-  <!-- 主要内容 -->
   <view class="main-content">
-    <!-- 标签导航 -->
     <view class="tab-nav" wx:if="{{activeTab !== 'annotation'}}">
       <view 
         class="tab-item {{activeTab === 'media' ? 'active' : ''}}"

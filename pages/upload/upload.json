@@ -1,3 +1,9 @@
 {
-  "usingComponents": {}
+  "usingComponents": {},
+  "navigationBarTitleText": "作品上传",
+  "navigationStyle": "custom",
+  "backgroundColor": "#1a1a1a",
+  "backgroundTextStyle": "light",
+  "disableScroll": true,
+  "enablePullDownRefresh": false
 }
