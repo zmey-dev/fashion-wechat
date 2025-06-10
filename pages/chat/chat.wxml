@@ -208,16 +208,14 @@
 
     <!-- Message Input -->
     <view class="message-input-container" style="bottom: {{keyboardHeight}}px;">
-      <view class="input-box">
-        <view class="input-actions-left">
-          <view class="input-action-btn" bindtap="toggleEmojiPicker">
+      <view class="input-box">        <view class="input-actions-left">
+          <view class="input-action-btn {{isSending ? 'disabled' : ''}}" bindtap="toggleEmojiPicker">
             {{showEmojiPicker ? '⌨️' : '😊'}}
           </view>
         </view>
-        
-        <input 
-          class="message-input"
-          placeholder="消息"
+          <input 
+          class="message-input {{isSending ? 'disabled' : ''}}"
+          placeholder="{{isSending ? '发送中...' : '消息'}}"
           value="{{inputMessage}}"
           bindinput="onInputChange"
           bindfocus="onInputFocus"
@@ -227,11 +225,13 @@
           bindconfirm="onSendMessage"
           adjust-position="{{false}}"
           hold-keyboard="{{true}}"
-        />
-        
-        <view class="input-actions-right">
-          <view wx:if="{{inputMessage.length > 0}}" class="send-btn" bindtap="onSendMessage">
+          disabled="{{isSending}}"
+        />        <view class="input-actions-right">
+          <view wx:if="{{inputMessage.length > 0 && !isSending}}" class="send-btn" bindtap="onSendMessage">
             <view class="send-icon">➤</view>
+          </view>
+          <view wx:elif="{{isSending}}" class="send-btn disabled">
+            <view class="send-icon">⏳</view>
           </view>
         </view>
       </view>

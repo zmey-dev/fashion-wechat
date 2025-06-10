@@ -609,6 +609,13 @@ page {
   background: rgba(255, 255, 255, 0.1);
 }
 
+/* Disabled styles for input action button */
+.input-action-btn.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+  color: #666;
+}
+
 .message-input {
   flex: 1;
   background: transparent;
@@ -622,6 +629,17 @@ page {
   color: #8e8e93;
 }
 
+/* Disabled styles for message input */
+.message-input.disabled {
+  opacity: 0.6;
+  color: #666;
+  pointer-events: none;
+}
+
+.message-input.disabled::placeholder {
+  color: #444;
+}
+
 .send-btn {
   background: #007aff;
   border-radius: 16px;
@@ -631,6 +649,18 @@ page {
 
 .send-btn:active {
   background: #0056b3;
+}
+
+/* Disabled styles for send button */
+.send-btn.disabled {
+  background: #333 !important;
+  opacity: 0.5;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+.send-btn.disabled .send-icon {
+  color: #666 !important;
 }
 
 .send-icon {

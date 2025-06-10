@@ -2,8 +2,7 @@ const { default: config } = require("../../config");
 const { socketManager } = require("../../services/socket");
 
 // pages/chat/chat.js
-Page({
-  data: {
+Page({  data: {
     userInfo: getApp().globalData.userInfo || {},
     currentView: "list", // 'list' or 'chat'
 
@@ -17,6 +16,7 @@ Page({
     chatMessages: [], 
     inputMessage: "",
     showEmojiPicker: false,
+    isSending: false, // Add sending state
 
     // Context menu
     contextMenu: {
@@ -67,10 +67,11 @@ Page({
       goToProfile: "查看资料",
       noMessages: "没有消息"
     }
-  },
-  
-  // Class properties (not in data)
+  },    // Class properties (not in data)
   typingTimers: {}, // Map of friend ID to their typing timer
+  lastSentMessage: null, // Track last sent message to prevent duplicates
+  lastSentTime: 0, // Track last sent time
+  sendingTimeout: null, // Debounce timer for sending
   
   onLoad: function (options) {
     const app = getApp();
@@ -112,14 +113,19 @@ Page({
     // Clear all timers when page unloads
     this.clearAllTimers();
   },
-  
-  // Clear all timers to prevent memory leaks
+    // Clear all timers to prevent memory leaks
   clearAllTimers() {
     // Clear all typing timers
     Object.values(this.typingTimers).forEach(timer => {
       if (timer) clearTimeout(timer);
     });
     this.typingTimers = {};
+    
+    // Clear sending timeout
+    if (this.sendingTimeout) {
+      clearTimeout(this.sendingTimeout);
+      this.sendingTimeout = null;
+    }
   },
   
   // Setup socket event listeners
@@ -555,10 +561,10 @@ Page({
       friends: updatedFriends,
       filteredFriends: updatedFilteredFriends
     });
-  },
-
-  // Message input handling - follows React's handleInputChange pattern
+  },  // Message input handling - follows React's handleInputChange pattern
   onInputChange(e) {
+    if (this.data.isSending) return; // Prevent input during sending
+    
     const newValue = e.detail.value;
     
     this.setData({
@@ -573,12 +579,25 @@ Page({
         receiver_id: this.data.selectedUser.id
       });
     }
-  },
-  
-  // Send message - similar to React's submitHandler
+  },  // Send message - similar to React's submitHandler
   onSendMessage() {
     const message = this.data.inputMessage.trim();
     if (!message || !this.data.selectedUser) return;
+    
+    // Prevent duplicate sending
+    if (this.data.isSending) return;
+    
+    // Clear any existing sending timeout
+    if (this.sendingTimeout) {
+      clearTimeout(this.sendingTimeout);
+    }
+    
+    // Additional duplicate prevention: check if same message was sent recently
+    const now = Date.now();
+    if (this.lastSentMessage === message && (now - this.lastSentTime) < 2000) {
+      console.log('Preventing duplicate message send');
+      return;
+    }
     
     // Check for swear words (similar to isContainSword in React)
     const app = getApp();
@@ -596,6 +615,19 @@ Page({
       return;
     }
 
+    // Set sending state and record message info immediately
+    this.setData({ isSending: true });
+    this.lastSentMessage = message;
+    this.lastSentTime = now;
+
+    // Use a small debounce to prevent rapid multiple clicks
+    this.sendingTimeout = setTimeout(() => {
+      this.actualSendMessage(message);
+    }, 100);
+  },
+
+  // Actual message sending function
+  actualSendMessage(message) {
     // Send message to server
     const messageData = {
       sender_id: this.data.userInfo.id,
@@ -679,6 +711,11 @@ Page({
           title: this.data.uiTexts.sendFailed,
           icon: "none"
         });
+      },
+      complete: () => {
+        // Reset sending state
+        this.setData({ isSending: false });
+        this.sendingTimeout = null;
       }
     });
   },
@@ -870,8 +907,9 @@ Page({
       }, 100);
     }
   },
-
   onEmojiSelect(e) {
+    if (this.data.isSending) return; // Prevent emoji selection during sending
+    
     const emoji = e.currentTarget.dataset.emoji;
     const currentMessage = this.data.inputMessage;
     
@@ -882,12 +920,15 @@ Page({
   },
 
   toggleEmojiPicker() {
+    if (this.data.isSending) return; // Prevent emoji picker toggle during sending
+    
     this.setData({
       showEmojiPicker: !this.data.showEmojiPicker
     });
   },
-
   onMoreActions() {
+    if (this.data.isSending) return; // Prevent more actions during sending
+    
     wx.showActionSheet({
       itemList: ['拍照', '从相册选择', '位置', '文件'],
       success: (res) => {
@@ -908,8 +949,9 @@ Page({
       }
     });
   },
-
   takePhoto() {
+    if (this.data.isSending) return; // Prevent photo taking during sending
+    
     wx.chooseMedia({
       count: 1,
       mediaType: ['image'],
@@ -922,6 +964,8 @@ Page({
   },
 
   chooseImage() {
+    if (this.data.isSending) return; // Prevent image selection during sending
+    
     wx.chooseMedia({
       count: 1,
       mediaType: ['image'],
@@ -932,8 +976,12 @@ Page({
       }
     });
   },
-
   uploadImage(filePath) {
+    if (this.data.isSending) return; // Prevent upload during sending
+    
+    // Set sending state for image upload
+    this.setData({ isSending: true });
+    
     wx.showLoading({
       title: '上传中...'
     });
@@ -958,12 +1006,15 @@ Page({
           title: '上传失败',
           icon: 'none'
         });
+      },
+      complete: () => {
+        // Reset sending state
+        this.setData({ isSending: false });
       }
     });  },
-
   // Send image message
   sendImageMessage(imageUrl) {
-    if (!this.data.selectedUser) return;
+    if (!this.data.selectedUser || this.data.isSending) return;
     
     const messageData = {
       sender_id: this.data.userInfo.id,
@@ -1007,9 +1058,10 @@ Page({
         }
       }
     });  },
-
   // Share location
   shareLocation() {
+    if (this.data.isSending) return; // Prevent location sharing during sending
+    
     wx.chooseLocation({
       success: (res) => {
         const locationMessage = `位置: ${res.name}\n地址: ${res.address}`;
@@ -1019,6 +1071,8 @@ Page({
 
   // Send location message
   sendLocationMessage(message, latitude, longitude) {
+    if (this.data.isSending) return; // Prevent location message during sending
+    
     const messageData = {
       sender_id: this.data.userInfo.id,
       receiver_id: this.data.selectedUser.id,
@@ -1035,6 +1089,8 @@ Page({
 
   // Choose file
   chooseFile() {
+    if (this.data.isSending) return; // Prevent file selection during sending
+    
     wx.chooseMessageFile({
       count: 1,
       success: (res) => {
@@ -1042,9 +1098,13 @@ Page({
         this.uploadFile(file.path, file.name);
       }
     });  },
-
   // Upload file
   uploadFile(filePath, fileName) {
+    if (this.data.isSending) return; // Prevent file upload during sending
+    
+    // Set sending state for file upload
+    this.setData({ isSending: true });
+    
     wx.showLoading({
       title: '上传中...'
     });
@@ -1072,11 +1132,17 @@ Page({
           title: '上传失败',
           icon: 'none'
         });
+      },
+      complete: () => {
+        // Reset sending state
+        this.setData({ isSending: false });
       }
     });  },
 
   // Send file message
   sendFileMessage(fileUrl, fileName) {
+    if (this.data.isSending) return; // Prevent file message during sending
+    
     const message = `文件: ${fileName}`;
     this.setData({
       inputMessage: message
