@@ -317,7 +317,7 @@ Component({
      * Page navigation handler
      */,
     navigateToPage: function (path) {
-      wx.navigateTo({
+      wx.redirectTo({
         url: path,
         fail: () => {
           // If navigateTo fails, try redirectTo
