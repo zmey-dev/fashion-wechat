@@ -46,11 +46,10 @@ Page({
     // Year picker data
     years: [],
     currentYear: new Date().getFullYear(),
-    
-    // UI messages
+      // UI messages
     messages: {
       loading: "加载中...",
-      stepTitles: ["基本信息", "学生信息", "设置密码"],
+      stepTitles: ["学生信息", "基本信息", "设置密码"],
       placeholders: {
         name: "姓名",
         email: "电子邮箱",
@@ -453,13 +452,29 @@ Page({
       }
     });
   },
-
   // Validation functions following React logic exactly
   validateStep: function() {
     const { form, formStep } = this.data;
     const errors = {};
 
     if (formStep === 1) {
+      // Student info validation
+      if (!form.school) errors.school = "学校名称不能为空";
+      if (!form.student_number) errors.student_number = "学号不能为空";
+      if (!form.class) errors.class = "班级不能为空";
+      if (!form.faculty) errors.faculty = "院系不能为空";
+      if (!form.major) errors.major = "专业不能为空";
+      if (!form.attend_year) {
+        errors.attend_year = "入学年份不能为空";
+      } else if (
+        isNaN(form.attend_year) ||
+        parseInt(form.attend_year) < 1900 ||
+        parseInt(form.attend_year) > new Date().getFullYear()
+      ) {
+        errors.attend_year = "请输入有效的年份";
+      }
+      
+    } else if (formStep === 2) {
       // Basic info validation
       if (!form.name.trim()) errors.name = "姓名不能为空";
       
@@ -478,23 +493,6 @@ Page({
       }
       
       if (!form.id_number.trim()) errors.id_number = "身份证号码不能为空";
-      
-    } else if (formStep === 2) {
-      // Student info validation
-      if (!form.school) errors.school = "学校名称不能为空";
-      if (!form.student_number) errors.student_number = "学号不能为空";
-      if (!form.class) errors.class = "班级不能为空";
-      if (!form.faculty) errors.faculty = "院系不能为空";
-      if (!form.major) errors.major = "专业不能为空";
-      if (!form.attend_year) {
-        errors.attend_year = "入学年份不能为空";
-      } else if (
-        isNaN(form.attend_year) ||
-        parseInt(form.attend_year) < 1900 ||
-        parseInt(form.attend_year) > new Date().getFullYear()
-      ) {
-        errors.attend_year = "请输入有效的年份";
-      }
       
     } else if (formStep === 3) {
       // Password validation

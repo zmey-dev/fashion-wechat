@@ -39,10 +39,110 @@
     <!-- Step Title -->
     <view class="step-title">
       <text>{{messages.stepTitles[formStep - 1]}}</text>
-    </view>
-
-    <!-- Step 1: Basic Information -->
+    </view>    <!-- Step 1: Student Information -->
     <view wx:if="{{formStep === 1}}" class="form-step">
+      <!-- School -->
+      <view class="form-field">
+        <label class="field-label">学校名称</label>
+        <picker 
+          mode="selector"
+          range="{{universities}}"
+          range-key="name"
+          bindchange="onSchoolChange"
+        >
+          <view class="picker-view {{errors.school ? 'error' : ''}}">
+            <text wx:if="{{form.school}}">{{form.school.name}}</text>
+            <text wx:else class="placeholder">{{messages.placeholders.school}}</text>
+          </view>
+        </picker>
+        <text wx:if="{{errors.school}}" class="error-text">{{errors.school}}</text>
+      </view>
+
+      <!-- Student Number -->
+      <view class="form-field">
+        <label class="field-label">学号</label>
+        <input 
+          class="field-input {{errors.student_number ? 'error' : ''}}"
+          value="{{form.student_number}}"
+          placeholder="{{messages.placeholders.student_number}}"
+          data-field="student_number"
+          bindinput="onInputChange"
+        />
+        <text wx:if="{{errors.student_number}}" class="error-text">{{errors.student_number}}</text>
+      </view>
+
+      <!-- Class -->
+      <view class="form-field">
+        <label class="field-label">班级</label>
+        <input 
+          class="field-input {{errors.class ? 'error' : ''}}"
+          value="{{form.class}}"
+          placeholder="{{messages.placeholders.class}}"
+          data-field="class"
+          bindinput="onInputChange"
+        />
+        <text wx:if="{{errors.class}}" class="error-text">{{errors.class}}</text>
+      </view>
+
+      <!-- Admission Year -->
+      <view class="form-field">
+        <label class="field-label">入学年份</label>
+        <picker 
+          mode="selector"
+          range="{{years}}"
+          bindchange="onYearChange"
+        >
+          <view class="picker-view {{errors.attend_year ? 'error' : ''}}">
+            <text>{{form.attend_year}}年</text>
+          </view>
+        </picker>
+        <text wx:if="{{errors.attend_year}}" class="error-text">{{errors.attend_year}}</text>
+      </view>
+
+      <!-- Faculty -->
+      <view class="form-field">
+        <label class="field-label">学院</label>
+        <picker 
+          mode="selector"
+          range="{{availableFaculties}}"
+          range-key="name"
+          disabled="{{!form.school}}"
+          bindchange="onFacultyChange"
+        >
+          <view class="picker-view {{errors.faculty ? 'error' : ''}} {{!form.school ? 'disabled' : ''}}">
+            <text wx:if="{{form.faculty}}">{{form.faculty.name}}</text>
+            <text wx:else class="placeholder">{{messages.placeholders.faculty}}</text>
+          </view>
+        </picker>
+        <text wx:if="{{errors.faculty}}" class="error-text">{{errors.faculty}}</text>
+      </view>
+
+      <!-- Major -->
+      <view class="form-field">
+        <label class="field-label">专业</label>
+        <picker 
+          mode="selector"
+          range="{{availableMajors}}"
+          range-key="name"
+          disabled="{{!form.faculty}}"
+          bindchange="onMajorChange"
+        >
+          <view class="picker-view {{errors.major ? 'error' : ''}} {{!form.faculty ? 'disabled' : ''}}">
+            <text wx:if="{{form.major}}">{{form.major.name}}</text>
+            <text wx:else class="placeholder">{{messages.placeholders.major}}</text>
+          </view>
+        </picker>
+        <text wx:if="{{errors.major}}" class="error-text">{{errors.major}}</text>
+      </view>
+
+      <!-- Step 1 Navigation -->
+      <view class="step-navigation">
+        <button class="nav-btn primary-btn" bindtap="nextStep">
+          下一步
+        </button>
+      </view>
+    </view>    <!-- Step 2: Basic Information -->
+    <view wx:if="{{formStep === 2}}" class="form-step">
       <!-- Name -->
       <view class="form-field">
         <label class="field-label">姓名</label>
@@ -157,110 +257,6 @@
         </view>
         
         <text wx:if="{{errors.email}}" class="error-text">{{errors.email}}</text>
-      </view>
-
-      <!-- Step 1 Navigation -->
-      <view class="step-navigation">
-        <button class="nav-btn primary-btn" bindtap="nextStep">
-          下一步
-        </button>
-      </view>
-    </view>
-
-    <!-- Step 2: Student Information -->
-    <view wx:if="{{formStep === 2}}" class="form-step">
-      <!-- School -->
-      <view class="form-field">
-        <label class="field-label">学校名称</label>
-        <picker 
-          mode="selector"
-          range="{{universities}}"
-          range-key="name"
-          bindchange="onSchoolChange"
-        >
-          <view class="picker-view {{errors.school ? 'error' : ''}}">
-            <text wx:if="{{form.school}}">{{form.school.name}}</text>
-            <text wx:else class="placeholder">{{messages.placeholders.school}}</text>
-          </view>
-        </picker>
-        <text wx:if="{{errors.school}}" class="error-text">{{errors.school}}</text>
-      </view>
-
-      <!-- Student Number -->
-      <view class="form-field">
-        <label class="field-label">学号</label>
-        <input 
-          class="field-input {{errors.student_number ? 'error' : ''}}"
-          value="{{form.student_number}}"
-          placeholder="{{messages.placeholders.student_number}}"
-          data-field="student_number"
-          bindinput="onInputChange"
-        />
-        <text wx:if="{{errors.student_number}}" class="error-text">{{errors.student_number}}</text>
-      </view>
-
-      <!-- Class -->
-      <view class="form-field">
-        <label class="field-label">班级</label>
-        <input 
-          class="field-input {{errors.class ? 'error' : ''}}"
-          value="{{form.class}}"
-          placeholder="{{messages.placeholders.class}}"
-          data-field="class"
-          bindinput="onInputChange"
-        />
-        <text wx:if="{{errors.class}}" class="error-text">{{errors.class}}</text>
-      </view>
-
-      <!-- Admission Year -->
-      <view class="form-field">
-        <label class="field-label">入学年份</label>
-        <picker 
-          mode="selector"
-          range="{{years}}"
-          bindchange="onYearChange"
-        >
-          <view class="picker-view {{errors.attend_year ? 'error' : ''}}">
-            <text>{{form.attend_year}}年</text>
-          </view>
-        </picker>
-        <text wx:if="{{errors.attend_year}}" class="error-text">{{errors.attend_year}}</text>
-      </view>
-
-      <!-- Faculty -->
-      <view class="form-field">
-        <label class="field-label">学院</label>
-        <picker 
-          mode="selector"
-          range="{{availableFaculties}}"
-          range-key="name"
-          disabled="{{!form.school}}"
-          bindchange="onFacultyChange"
-        >
-          <view class="picker-view {{errors.faculty ? 'error' : ''}} {{!form.school ? 'disabled' : ''}}">
-            <text wx:if="{{form.faculty}}">{{form.faculty.name}}</text>
-            <text wx:else class="placeholder">{{messages.placeholders.faculty}}</text>
-          </view>
-        </picker>
-        <text wx:if="{{errors.faculty}}" class="error-text">{{errors.faculty}}</text>
-      </view>
-
-      <!-- Major -->
-      <view class="form-field">
-        <label class="field-label">专业</label>
-        <picker 
-          mode="selector"
-          range="{{availableMajors}}"
-          range-key="name"
-          disabled="{{!form.faculty}}"
-          bindchange="onMajorChange"
-        >
-          <view class="picker-view {{errors.major ? 'error' : ''}} {{!form.faculty ? 'disabled' : ''}}">
-            <text wx:if="{{form.major}}">{{form.major.name}}</text>
-            <text wx:else class="placeholder">{{messages.placeholders.major}}</text>
-          </view>
-        </picker>
-        <text wx:if="{{errors.major}}" class="error-text">{{errors.major}}</text>
       </view>
 
       <!-- Step 2 Navigation -->
