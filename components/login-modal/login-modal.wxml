@@ -36,16 +36,6 @@
           <span class="wechat-text">微信一键登录</span>
           <span class="wechat-desc">安全便捷</span>
           <text class="error-text" wx:if="{{wechatError}}">{{wechatError}}</text>
-          
-          <!-- WeChat Login Button -->
-          <button 
-            class="login-button wechat-button" 
-            bindtap="handleLogin"
-            disabled="{{loading}}"
-          >
-            <text wx:if="{{!loading}}">{{messages.buttons.wechatLogin}}</text>
-            <text wx:else>登录中...</text>
-          </button>
         </view>      
       </view>
 

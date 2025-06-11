@@ -155,10 +155,10 @@ Component({
       return phoneRegex.test(phone);
     },    async wechatLogin() {
       try {
-        this.setData({ loading: true });
+        this.setData({ loading: true, wechatError: "" });
 
         const loginResult = await this.promiseWrapper(wx.login);
-        
+
         console.log("WeChat login result:", loginResult);
         if (!loginResult.code) {
           throw new Error("Failed to get WeChat login code");
@@ -167,21 +167,29 @@ Component({
         console.log("Sending code to backend:", loginResult.code);
         const authResult = await this.requestWechatLogin({
           code: loginResult.code,
-        });        console.log("Backend auth result:", authResult);
-        
+        });
+
         // Check if registration is required
-        if (authResult.status === 'registration_required') {
+        if (authResult.status === "registration_required") {
           this.handleRegistrationRequired(authResult);
           return;
         }
-        
+
         this.handleLoginSuccess(authResult);
       } catch (error) {
         console.error("WeChat login error:", error);
-        this.handleLoginError(
-          this.data.messages.errors.wechatLoginFailed,
-          "wechat"
-        );
+        
+        // Extract more specific error message
+        let errorMessage = this.data.messages.errors.wechatLoginFailed;
+        if (error.message) {
+          if (error.message.includes("invalid code")) {
+            errorMessage = "微信授权码已过期，请重试";
+          } else if (error.message.includes("WeChat")) {
+            errorMessage = error.message;
+          }
+        }
+        
+        this.handleLoginError(errorMessage, "wechat");
       } finally {
         this.setData({ loading: false });
       }
@@ -468,35 +476,43 @@ Component({
       wx.redirectTo({
         url: "/pages/index/index",
       });
-    }, 
-
-    // Handle registration required for WeChat users
+    },    // Handle registration required for WeChat users
     handleRegistrationRequired(result) {
       console.log("WeChat registration required:", result);
-      
+
+      // Show error message immediately in the modal
+      this.setData({ 
+        wechatError: result.msg || "该微信账号尚未注册，请先完成注册"
+      });
+
       // Store WeChat data for registration
       const app = getApp();
       app.globalData.wechatRegistrationData = {
         wechat_openid: result.data.wechat_openid,
-        wechat_unionid: result.data.wechat_unionid
+        wechat_unionid: result.data.wechat_unionid,
       };
 
-      // Show message and redirect to registration
-      wx.showModal({
-        title: '需要注册',
-        content: result.msg || '该微信账号尚未注册，请先完成注册',
-        showCancel: true,
-        cancelText: '取消',
-        confirmText: '去注册',
-        success: (res) => {
-          if (res.confirm) {
-            this.closeModal();
-            wx.navigateTo({
-              url: '/pages/register/register?from=wechat'
-            });
-          }
-        }
-      });
+      // Show message and redirect to registration after a short delay
+      setTimeout(() => {
+        wx.showModal({
+          title: "需要注册",
+          content: result.msg || "该微信账号尚未注册，请先完成注册",
+          showCancel: true,
+          cancelText: "取消",
+          confirmText: "去注册",
+          success: (res) => {
+            if (res.confirm) {
+              this.closeModal();
+              wx.navigateTo({
+                url: "/pages/register/register?from=wechat",
+              });
+            } else {
+              // Clear error when user cancels
+              this.setData({ wechatError: "" });
+            }
+          },
+        });
+      }, 1000);
     },
 
     // Handle login error
@@ -541,9 +557,7 @@ Component({
           fail: reject,
         });
       });
-    },
-
-    // WeChat login API request
+    },    // WeChat login API request
     requestWechatLogin(data) {
       return new Promise((resolve, reject) => {
         wx.request({
@@ -554,8 +568,18 @@ Component({
             "Content-Type": "application/json",
           },
           success: (res) => {
-            if (res.statusCode === 200 && res.data.status === "success") {
-              resolve(res.data);
+            console.log("WeChat login response:", res.data);
+            if (res.statusCode === 200) {
+              // Handle both success and registration_required cases
+              if (res.data.status === "success" || res.data.status === "registration_required") {
+                resolve(res.data);
+              } else {
+                reject(
+                  new Error(
+                    res.data.msg || res.data.error || "WeChat login failed"
+                  )
+                );
+              }
             } else {
               reject(
                 new Error(
