@@ -282,7 +282,6 @@
         <text class="form-label">标题</text>
         <input 
           class="form-input"
-          placeholder="输入标记点标题"
           value="{{editingDot.title}}"
           bindinput="onDotTitleInput"
           maxlength="50"
@@ -292,7 +291,6 @@
         <text class="form-label">描述</text>
         <textarea 
           class="form-textarea"
-          placeholder="输入标记点描述..."
           value="{{editingDot.description}}"
           bindinput="onDotDescInput"
           maxlength="200"
