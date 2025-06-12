@@ -8,7 +8,7 @@ style="{{ currentPost.type === 'image' ? 'margin-bottom: 100rpx;' : '' }}"
       <avatar
         avatar="{{ currentPostUser.avatar }}"
         name="{{ currentPostUser.username }}"
-        size="100"
+        size="80"
       ></avatar>
       <view
         wx:if="{{ currentPostUser.id !== authUser.id }}"
