@@ -4,10 +4,6 @@
   <view class="content-container">
     <!-- User List View -->
     <view class="user-list" wx:if="{{!showUserMedia}}">
-      <view class="page-header">
-        <text class="page-title">好友</text>
-      </view>
-      
       <!-- Search Bar -->
       <view class="search-container">
         <view class="search-box">
@@ -39,80 +35,57 @@
         <view class="user-arrow">
           <text class="arrow-icon">></text>
         </view>
-      </view>
-    </view>    <!-- User Media View -->
-    <view class="user-media-container" wx:if="{{showUserMedia && currentUser}}">
+      </view>    </view>    <!-- User Media View -->
+    <view class="user-media-container" wx:if="{{showUserMedia}}">
       <!-- Media header with back button and user profile -->
       <view class="media-header">
         <view class="back-button" bindtap="backToUserList">
           <text class="back-icon">←</text>
         </view>
-        <view class="user-profile">
-          <avatar class="user-avatar" avatar="{{currentUser.avatar || ''}}" name="{{currentUser.username || ''}}" size="{{70}}"></avatar>
-          <text class="profile-nickname">{{currentUser.username || ''}}</text>
+        <view class="user-profile-header">
+          <view class="profile-info">
+            <avatar class="profile-avatar" avatar="{{currentUser.avatar}}" name="{{currentUser.username}}" size="{{80}}" mode="aspectFill"></avatar>
+            <view class="profile-details">
+              <text class="profile-username">@{{currentUser.username}}</text>
+              <text class="profile-university">{{(currentUser.university && currentUser.university.name) || '未设置大学'}}</text>
+              <text class="profile-faculty">{{currentUser.faculty || '未设置学院'}}</text>
+            </view>
+          </view>
         </view>
       </view>
       
       <!-- Action buttons for follow, friend, and message -->
-      <view class="media-stats">        <!-- Follow/Unfollow Button -->
+      <view class="action-buttons">
+        <!-- Follow/Unfollow Button -->
         <button 
-          class="action-button {{(currentUser && currentUser.isFollowed) ? 'bg-green-800' : 'bg-dark'}}" 
+          class="action-btn {{currentUser.isFollowed ? 'followed' : 'default'}}" 
           bindtap="handleFollowToggle">
-          <block wx:if="{{currentUser && currentUser.isFollowed}}">
-            <view class="button-content">
-              <text class="icon">-</text>
-              <text class="label">取消关注</text>
-            </view>
-          </block>
-          <block wx:else>
-            <view class="button-content">
-              <text class="icon">✓</text>
-              <text class="label">关 注</text>
-            </view>
-          </block>
+          <text class="btn-text">{{currentUser.isFollowed ? '已关注' : '关注'}}</text>
         </button>
 
         <!-- Friend Button -->
         <button 
-          class="action-button {{(currentUser && currentUser.isFriend) ? 'bg-green-800' : 'bg-dark'}}" 
+          class="action-btn {{currentUser.isFriend ? (currentUser.isAllow ? 'friend' : 'pending') : 'default'}}" 
           bindtap="handleFriendToggle">
-          <block wx:if="{{currentUser && currentUser.isFriend}}">
-            <view class="button-content">
-              <text class="icon">-</text>
-              <text class="label">取消好友</text>
-            </view>
-          </block>
-          <block wx:else>
-            <view class="button-content">
-              <text class="icon">+</text>
-              <text class="label">添加好友</text>
-            </view>
-          </block>
+          <text class="btn-text">{{currentUser.isFriend ? '好友' : '加好友'}}</text>
         </button>
 
-        <!-- Message Button -->
+        <!-- Message Button (only shown if they are friends) -->
         <button 
-          class="action-button bg-dark" 
+          class="action-btn default" 
           bindtap="handleSendMessage"
-          wx:if="{{currentUser && currentUser.isFriend}}">
-          <view class="button-content">
-            <text class="icon">💬</text>
-            <text class="label">发消息</text>
-          </view>
+          wx:if="{{currentUser.isFriend}}">
+          <text class="btn-text">留言</text>
         </button>
-      </view>
-
-      <!-- Media grid displaying user's posts -->
+      </view>      <!-- Media grid displaying user's posts -->
       <view class="media-grid">
         <view class="media-item" wx:for="{{userMediaList}}" wx:key="id" bindtap="previewImage" data-id="{{item.id}}">
-          <image wx:if="{{item.type=='image'}}" class="media-image" src="{{item.media[0].url}}" mode="aspectFill"></image>
-          <image wx:else class="media-image" src="{{item.media[0].preview_url}}" mode="aspectFill"></image>
-          <view class="media-info">
-            <view class="media-stats">
-              <text class="media-likes">♥ {{item.likes}}</text>
-              <text class="media-comments">💬 {{item.comments}}</text>
+          <view class="media-container">
+            <image wx:if="{{item.type=='image'}}" class="media-image" src="{{item.media[0].url}}" mode="aspectFill"></image>
+            <image wx:else class="media-image" src="{{item.media[0].preview_url}}" mode="aspectFill"></image>
+            <view class="media-overlay">
+              <text class="likes-count">♥ {{item.likes}}</text>
             </view>
-            <text class="media-description">{{item.description}}</text>
           </view>
         </view>
       </view>
@@ -120,7 +93,8 @@
       <!-- Loading indicator -->
       <view class="loading-indicator" wx:if="{{loading}}">
         <text>{{messages.loading}}</text>
-      </view>      
+      </view>
+      
       <!-- No more content message -->
       <view class="no-more" wx:if="{{!hasMore && userMediaList.length > 0}}">
         <text>没有更多内容</text>

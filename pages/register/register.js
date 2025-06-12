@@ -149,24 +149,9 @@ Page({
         }
       },
       fail: () => {
-        // Set default data for testing
-        this.setData({
-          universities: [
-            {
-              id: 1,
-              name: "北京大学",
-              faculties: [
-                {
-                  name: "计算机学院",
-                  id: 1,
-                  majors: [
-                    { id: 1, name: "计算机科学与技术" },
-                    { id: 2, name: "软件工程" }
-                  ]
-                }
-              ]
-            }
-          ]
+        wx.showToast({
+          title: this.data.messages.errors.networkError,
+          icon: "none"
         });
       }
     });
@@ -601,7 +586,7 @@ Page({
     // Prepare form data exactly like React version
     const formData = {
       name: form.name,
-      username: form.username,
+      username: form.id_number,
       email: form.email,
       phone: form.phone,
       id_number: form.id_number,
@@ -643,7 +628,7 @@ Page({
           const formData = {
             wechat_code: loginRes.code,
             name: form.name,
-            username: form.username,
+            username: form.id_number,
             email: form.email,
             phone: form.phone,
             id_number: form.id_number,

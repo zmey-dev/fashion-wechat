@@ -3,11 +3,6 @@
   <view class="chat-container">
     <!-- Chat List View -->
     <view class="chat-list-view {{currentView === 'list' ? 'active' : 'hidden'}}">
-      <!-- Header -->
-      <view class="list-header">
-        <view class="header-title">聊天</view>
-      </view>
-
     <!-- Search Bar -->
     <view class="search-container">
       <view class="search-box">
@@ -115,7 +110,7 @@
       show-scrollbar="{{false}}"
       scroll-into-view="{{scrollIntoView}}"
       scroll-with-animation="{{true}}"
-      style="bottom: {{keyboardHeight + 80}}px;"
+      style="bottom: {{keyboardHeight}}px;"
     >
       <view class="messages-list">
         <view 
@@ -190,7 +185,7 @@
     </scroll-view>
 
     <!-- Emoji Picker -->
-    <view wx:if="{{showEmojiPicker}}" class="emoji-picker" style="bottom: {{keyboardHeight + 120}}px;">
+    <view wx:if="{{showEmojiPicker}}" class="emoji-picker" style="bottom: {{keyboardHeight + 80}}px;">
       <scroll-view class="emoji-grid" scroll-y enhanced="{{true}}" show-scrollbar="{{false}}">
         <view 
           wx:for="{{emojis}}" 
