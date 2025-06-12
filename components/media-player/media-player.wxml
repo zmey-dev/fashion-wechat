@@ -30,6 +30,7 @@
       is-playing="{{ isPlaying }}"
       show-play-indicator="{{ showPlayIndicator }}"
       selected-dot="{{ selectedDot }}"
+      detailPanelState="{{ detailPanelState }}"
       bind:screentap="onScreenTap"
       bind:slidechange="onSlideChange"
       bind:dottap="onDotTap"

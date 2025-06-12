@@ -3,7 +3,7 @@
 style="{{ currentPost.type === 'image' ? 'margin-bottom: 100rpx;' : '' }}"
 >
   <!-- User Avatar with Follow Badge -->
-  <view class="action-item" bindtap="onUserProfile">
+  <view class="action-item" style="margin-bottom:20rpx" bindtap="onUserProfile">
     <view class="user-avatar">
       <avatar
         avatar="{{ currentPostUser.avatar }}"
@@ -32,7 +32,6 @@ style="{{ currentPost.type === 'image' ? 'margin-bottom: 100rpx;' : '' }}"
       </view>
     </view>
   </view>
-  <text class="username">@{{ currentPostUser.username }}</text>
   <!-- Like button -->
   <view wx:if="{{ authUser.role !== 'teacher' }}" class="action-item" bindtap="handleLike">
     <view class="action-icon {{ currentPost.likes_exists ? 'liked' : '' }}">

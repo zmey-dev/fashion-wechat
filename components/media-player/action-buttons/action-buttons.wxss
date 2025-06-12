@@ -25,14 +25,14 @@
 /* User Avatar Section */
 .user-avatar {
   position: relative;
-  width: 100rpx;
-  height: 100rpx;
+  width: 80rpx;
+  height: 80rpx;
 }
 
 .follow-badge {
   position: absolute;
-  bottom: 10rpx;
-  right: 10rpx;
+  bottom: -20rpx;
+  right: 20rpx;
   width: 40rpx;
   height: 40rpx;
   background: #ff6b6b;
@@ -40,7 +40,6 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  border: 4rpx solid #fff;
   box-shadow: 0 4rpx 12rpx rgba(255, 107, 107, 0.4);
   transition: all 0.3s ease;
   animation: bounceIn 0.5s ease;

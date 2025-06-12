@@ -7,7 +7,14 @@ Component({
     mediaLength: { type: Number, value: 0 },
     isPlaying: { type: Boolean, value: true },
     showPlayIndicator: { type: Boolean, value: false },
-    selectedDot: { type: Object, value: null }
+    selectedDot: { type: Object, value: null },
+    detailPanelState: {
+      type: String,
+      value: 'closed',
+      observer(newVal) {
+        this.getContainerDimensions();
+      }
+    }
   },
 
   data: {
@@ -46,6 +53,8 @@ Component({
      * Calculate actual image size within container (aspectFit mode)
      */
     calculateContainedImageSize(containerWidth, containerHeight, imageWidth, imageHeight) {
+      console.log(containerWidth, containerHeight, imageWidth, imageHeight);
+      
       const containerRatio = containerWidth / containerHeight;
       const imageRatio = imageWidth / imageHeight;
 
@@ -74,6 +83,8 @@ Component({
     getContainerDimensions() {
       const query = this.createSelectorQuery();
       query.select('.media-container').boundingClientRect((rect) => {
+        console.log(rect);
+        
         if (rect) {
           this.setData({
             containerWidth: rect.width,
