@@ -134,7 +134,7 @@
   overflow-y: hidden;
   position: relative;
   padding-top: 120rpx; /* Space for fixed filter bar */
-  padding-bottom: 180rpx; /* Space for fixed tab bar */
+  padding-bottom: 120rpx; /* Space for fixed tab bar */
   overflow: hidden;
 }
 
@@ -152,7 +152,6 @@
   z-index: 1000;
   background-color: #000;
   border-top: 1rpx solid #333;
-  padding-bottom: env(safe-area-inset-bottom);
   width: 100vw;
   max-width: 100%;
   overflow: hidden;

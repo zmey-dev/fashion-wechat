@@ -417,7 +417,7 @@ page {
   right: 0;
   background: #111111;
   padding: 24rpx 32rpx;
-  padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
+  padding-bottom: 24rpx;
   border-top: 1rpx solid #333333;
   z-index: 100;
   box-shadow: 0 -4rpx 32rpx rgba(0, 0, 0, 0.5);
@@ -773,7 +773,7 @@ page {
   
   .bottom-action {
     padding: 20rpx 24rpx;
-    padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+    padding-bottom: 20rpx;
   }
   
   .calendar-content {

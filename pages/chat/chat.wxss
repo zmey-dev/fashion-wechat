@@ -149,42 +149,45 @@ page {
 
 .friend-avatar-container {
   position: relative;
-  width: 50px;
-  height: 50px;
+  width: 70rpx;
+  height: 70rpx;
   margin-right: 12px;
   flex-shrink: 0;
 }
 
 .friend-avatar {
-  width: 50px;
-  height: 50px;
+  width: 70rpx;
+  height: 70rpx;
   border-radius: 25px;
   background: #32323a;
 }
 
 .online-dot {
   position: absolute;
-  bottom: 2px;
-  right: 2px;
-  width: 14px;
-  height: 14px;
+  bottom: -6rpx;
+  right: 0px;
+  width: 20rpx;
+  height: 20rpx;
   background: #30d158;
-  border: 2px solid #0f0f0f;
-  border-radius: 7px;
+  border: 3rpx solid #0f0f0f;
+  border-radius: 100%;
 }
 
 .unread-badge {
   position: absolute;
-  top: -2px;
-  right: -2px;
+  top: -1rpx;
+  right: -16rpx;
   background: #ff3b30;
   color: white;
-  font-size: 12px;
+  font-size: 17rpx;
   font-weight: 600;
-  padding: 2px 6px;
-  border-radius: 10px;
-  min-width: 18px;
+  padding: 6rpx;
+  border-color: white;
+  border-radius: 100%;
+  border-width: 2px;
+  border-style: double;
   text-align: center;
+  min-width: 24rpx;
 }
 
 .friend-content {
@@ -202,13 +205,9 @@ page {
 }
 
 .friend-name {
-  font-size: 17px;
-  font-weight: 600;
-  color: white;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  flex: 1;
+  font-size: 32rpx;
+  font-weight: 500;
+  color: #fff;
 }
 
 .timestamp {
@@ -293,9 +292,6 @@ page {
 }
 
 .back-btn {
-  padding: 8px;
-  margin-right: 8px;
-  border-radius: 20px;
   transition: background-color 0.15s ease;
 }
 
@@ -304,21 +300,22 @@ page {
 }
 
 .back-icon {
-  font-size: 24px;
+  width: 48rpx;
+  height: 48rpx;
   color: #007aff;
   font-weight: bold;
 }
 
 .user-avatar-container {
   position: relative;
-  width: 50px;
-  height: 50px;
+  width: 70rpx;
+  height: 70rpx;
   margin-right: 12px;
 }
 
 .user-avatar {
-  width: 40px;
-  height: 40px;
+  width: 70rpx;
+  height: 70rpx;
   border-radius: 20px;
   background: #32323a;
 }
@@ -329,14 +326,14 @@ page {
 }
 
 .user-name {
-  font-size: 17px;
+  font-size: 32rpx;
   font-weight: 600;
   color: white;
   margin-bottom: 2px;
 }
 
 .user-status {
-  font-size: 13px;
+  font-size: 24rpx;
   color: #8e8e93;
 }
 
@@ -435,8 +432,8 @@ page {
 }
 
 .message-avatar {
-  width: 35px;
-  height: 35px;
+  width: 70rpx;
+  height: 70rpx;
   border-radius: 17.5px;
   background: #32323a;
 }
@@ -508,8 +505,8 @@ page {
 }
 
 .typing-avatar {
-  width: 35px;
-  height: 35px;
+  width: 70rpx;
+  height: 70rpx;
   border-radius: 17.5px;
   background: #32323a;
 }

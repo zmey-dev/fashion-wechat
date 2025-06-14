@@ -33,7 +33,7 @@
             class="friend-avatar" 
             avatar="{{item.avatar}}"
             name="{{item.username}}"
-            size="{{80}}"
+            size="{{70}}"
             mode="aspectFill"
           />
           <!-- Online status indicator -->
@@ -72,15 +72,15 @@
     <!-- Chat Header -->
     <view class="chat-header">
       <view class="header-left">
-        <view class="back-btn" bindtap="onBackToList">
-          <view class="back-icon">‹</view>
-        </view>
+        <div class="back-btn" bindtap="onBackToList">
+          <image class="back-icon" src="/images/icons/back.svg"></image>
+        </div>
         <view class="user-avatar-container">
           <avatar 
             class="user-avatar" 
             avatar="{{selectedUser.avatar}}"
             name="{{selectedUser.username}}"
-            size="{{80}}"
+            size="{{70}}"
             mode="aspectFill"
           />
           <view wx:if="{{selectedUser.status === 'online'}}" class="online-dot"></view>
