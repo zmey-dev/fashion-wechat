@@ -48,11 +48,16 @@ Component({
         name: "比赛",
         path: "/pages/event/event",
         type: "filter",
-      },
-      {
+      },      {
         key: "contact",
         name: "联系我们",
         path: "/pages/contact/contact",
+        type: "filter",
+      },
+      {
+        key: "profile",
+        name: "资料",
+        path: "/pages/profile/profile",
         type: "filter",
       },
       // Tab pages (bottom navigation)
@@ -122,11 +127,16 @@ Component({
         name: "比赛",
         path: "/pages/event/event",
         type: "filter",
-      },
-      {
+      },      {
         key: "contact",
         name: "联系我们",
         path: "/pages/contact/contact",
+        type: "filter",
+      },
+      {
+        key: "profile",
+        name: "资料",
+        path: "/pages/profile/profile",
         type: "filter",
       },
       {
@@ -258,14 +268,13 @@ Component({
 
       // Find page configuration
       const pageConfig = this.data.pages.find((item) => item.key === page);
-      if (!pageConfig) return;
-
-      // Pages that require login authentication (except discover)
+      if (!pageConfig) return;      // Pages that require login authentication (except discover)
       const needLoginPages = [
         "recommend",
         "follow",
         "event",
         "contact",
+        "profile",
         "chat",
         "notification",
         "friend",

@@ -1,16 +1,8 @@
 const { default: config } = require("../../config");
 
-Page({  data: {
+Page({
+  data: {
     userInfo: getApp().globalData.userInfo || {},
-    posts: [],
-    loading: false,
-    hasMore: true,
-    currentTab: 0,
-    tabs: ["作品", "喜欢", "收藏", "历史"], // 资료 탭 제거
-    age: 0,
-    // WeChat linking state
-    isWechatLinked: false,
-    wechatLinking: false,
     // Profile form data
     profileForm: {
       phone: "",
@@ -44,24 +36,23 @@ Page({  data: {
     // OTP codes for verification
     emailOtpCode: "",
     phoneOtpCode: "",
+    // WeChat linking state
+    isWechatLinked: false,
+    wechatLinking: false,
     // Chinese messages for UI text
     messages: {
       loading: "加载中...",
       errors: {
-        loadFailed: "加载失败",
         networkError: "网络错误",
         profileUpdateFailed: "资料更新失败",
         verificationFailed: "验证失败",
         otpSendFailed: "验证码发送失败",
       },
       confirmations: {
-        deleteTitle: "删除确认",
-        deleteContent: "您确定要删除这个帖子吗？",
         logoutTitle: "退出登录",
         logoutContent: "您确定要退出登录吗？",
       },
       success: {
-        deleteSuccess: "删除成功",
         profileUpdateSuccess: "资料更新成功",
         logoutSuccess: "退出成功",
         otpSent: "验证码已发送",
@@ -69,6 +60,7 @@ Page({  data: {
       },
     },
   },
+
   onLoad: function (options) {
     const app = getApp();
     this.userInfoHandler = (userInfo) => {
@@ -88,25 +80,13 @@ Page({  data: {
       selectedAvatar: userInfo?.avatar || "",
     });
 
-    this.calculateAge();
-    this.loadPosts();
-    this.loadUniversityInfo(); // Load university info including faculties
-    this.checkWechatLinkStatus(); // Check WeChat link status
+    this.loadUniversityInfo();
+    this.checkWechatLinkStatus();
   },
 
   onUnload: function () {
     const app = getApp();
     app.unsubscribe("userInfo", this.userInfoHandler);
-  },
-  onReachBottom() {
-    if (this.data.hasMore && !this.data.loading) {
-      this.loadMorePosts();
-    }
-  },
-  onPullDownRefresh() {
-    // Load posts for all tabs since profile tab is removed
-    this.refreshPosts();
-    wx.stopPullDownRefresh();
   },
 
   // Initialize profile form with user data
@@ -135,43 +115,13 @@ Page({  data: {
       originalPhone: form.phone,
       emailChanged: false,
       phoneChanged: false,
-      emailVerified: true, // Start as verified since unchanged
+      emailVerified: true,
       phoneVerified: true,
       emailOtpCode: "",
       phoneOtpCode: "",
     });
 
     return form;
-  },
-
-  // Calculate user age
-  calculateAge() {
-    if (!this.data.userInfo?.birthday) return;
-
-    const birthday = new Date(this.data.userInfo.birthday);
-    const today = new Date();
-    let age = today.getFullYear() - birthday.getFullYear();
-    const hasHadBirthdayThisYear =
-      today.getMonth() > birthday.getMonth() ||
-      (today.getMonth() === birthday.getMonth() &&
-        today.getDate() >= birthday.getDate());
-
-    if (!hasHadBirthdayThisYear) {
-      age -= 1;
-    }
-
-    this.setData({ age });
-  },
-  // Handle tab change
-  onTabChange(e) {
-    const index = e.currentTarget.dataset.index;
-    this.setData({
-      currentTab: parseInt(index),
-      posts: [],
-    });
-
-    // Load posts for all tabs since profile tab is removed
-    this.loadPosts();
   },
 
   // Load university information including faculties
@@ -191,7 +141,6 @@ Page({  data: {
             faculties: university?.faculties || [],
           });
 
-          // Update available majors if faculty is already selected
           if (this.data.profileForm.faculty) {
             this.updateAvailableMajors(this.data.profileForm.faculty);
           }
@@ -199,27 +148,6 @@ Page({  data: {
       },
       fail: () => {
         console.error("Failed to load university info");
-        // Set some default data for testing
-        this.setData({
-          faculties: [
-            {
-              name: "计算机学院",
-              majors: [
-                { name: "计算机科学与技术" },
-                { name: "软件工程" },
-                { name: "网络工程" },
-              ],
-            },
-            {
-              name: "商学院",
-              majors: [
-                { name: "工商管理" },
-                { name: "市场营销" },
-                { name: "会计学" },
-              ],
-            },
-          ],
-        });
       },
     });
   },
@@ -254,14 +182,14 @@ Page({  data: {
       const emailChanged = value !== this.data.originalEmail;
       this.setData({
         emailChanged,
-        emailVerified: !emailChanged, // Auto-verify if unchanged
+        emailVerified: !emailChanged,
         emailOtpCode: emailChanged ? "" : this.data.emailOtpCode,
       });
     } else if (field === "phone") {
       const phoneChanged = value !== this.data.originalPhone;
       this.setData({
         phoneChanged,
-        phoneVerified: !phoneChanged, // Auto-verify if unchanged
+        phoneVerified: !phoneChanged,
         phoneOtpCode: phoneChanged ? "" : this.data.phoneOtpCode,
       });
     }
@@ -280,7 +208,7 @@ Page({  data: {
 
     this.setData({
       availableMajors: selectedFaculty ? selectedFaculty.majors || [] : [],
-      [`profileForm.major`]: "", // Reset major when faculty changes
+      [`profileForm.major`]: "",
     });
   },
 
@@ -313,208 +241,6 @@ Page({  data: {
           title: "选择图片失败",
           icon: "none",
         });
-      },
-    });
-  },
-
-  // Send email verification code
-  sendEmailVerificationCode: function () {
-    if (!this.data.emailChanged || !this.data.profileForm.email) return;
-
-    wx.showLoading({ title: "发送中..." });
-
-    wx.request({
-      url: `${config.BACKEND_URL}/verification/send_email_code`,
-      method: "POST",
-      data: {
-        email: this.data.profileForm.email,
-      },
-      header: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${getApp().globalData.userInfo?.token}`,
-      },
-      success: (res) => {
-        if (res.statusCode === 200 && res.data.status === "success") {
-          wx.showToast({
-            title: this.data.messages.success.otpSent,
-            icon: "success",
-          });
-        } else {
-          wx.showToast({
-            title: res.data?.msg || this.data.messages.errors.otpSendFailed,
-            icon: "none",
-          });
-        }
-      },
-      fail: () => {
-        wx.showToast({
-          title: this.data.messages.errors.networkError,
-          icon: "none",
-        });
-      },
-      complete: () => {
-        wx.hideLoading();
-      },
-    });
-  },
-
-  // Send phone verification code
-  sendPhoneVerificationCode: function () {
-    if (!this.data.phoneChanged || !this.data.profileForm.phone) return;
-
-    wx.showLoading({ title: "发送中..." });
-
-    wx.request({
-      url: `${config.BACKEND_URL}/verification/send_phone_sms_code`,
-      method: "POST",
-      data: {
-        phone: "+86" + this.data.profileForm.phone,
-      },
-      header: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${getApp().globalData.userInfo?.token}`,
-      },
-      success: (res) => {
-        if (res.statusCode === 200 && res.data.status === "success") {
-          wx.showToast({
-            title: this.data.messages.success.otpSent,
-            icon: "success",
-          });
-        } else {
-          wx.showToast({
-            title: res.data?.msg || this.data.messages.errors.otpSendFailed,
-            icon: "none",
-          });
-        }
-      },
-      fail: () => {
-        wx.showToast({
-          title: this.data.messages.errors.networkError,
-          icon: "none",
-        });
-      },
-      complete: () => {
-        wx.hideLoading();
-      },
-    });
-  },
-
-  // Handle OTP input for email
-  onEmailOtpInput: function (e) {
-    this.setData({
-      emailOtpCode: e.detail.value,
-    });
-  },
-
-  // Handle OTP input for phone
-  onPhoneOtpInput: function (e) {
-    this.setData({
-      phoneOtpCode: e.detail.value,
-    });
-  },
-
-  // Verify email with OTP code
-  verifyEmailCode: function () {
-    if (!this.data.emailOtpCode || !this.data.profileForm.email) {
-      wx.showToast({
-        title: "请输入验证码",
-        icon: "none",
-      });
-      return;
-    }
-
-    wx.showLoading({ title: "验证中..." });
-
-    wx.request({
-      url: `${config.BACKEND_URL}/verification/verify_email_code`,
-      method: "POST",
-      data: {
-        email: this.data.profileForm.email,
-        code: this.data.emailOtpCode,
-      },
-      header: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${getApp().globalData.userInfo?.token}`,
-      },
-      success: (res) => {
-        if (res.statusCode === 200 && res.data.status === "success") {
-          this.setData({
-            emailVerified: true,
-            [`profileErrors.email`]: false,
-          });
-          wx.showToast({
-            title: this.data.messages.success.verificationSuccess,
-            icon: "success",
-          });
-        } else {
-          wx.showToast({
-            title:
-              res.data?.msg || this.data.messages.errors.verificationFailed,
-            icon: "none",
-          });
-        }
-      },
-      fail: () => {
-        wx.showToast({
-          title: this.data.messages.errors.networkError,
-          icon: "none",
-        });
-      },
-      complete: () => {
-        wx.hideLoading();
-      },
-    });
-  },
-
-  // Verify phone with OTP code
-  verifyPhoneCode: function () {
-    if (!this.data.phoneOtpCode || !this.data.profileForm.phone) {
-      wx.showToast({
-        title: "请输入验证码",
-        icon: "none",
-      });
-      return;
-    }
-
-    wx.showLoading({ title: "验证中..." });
-
-    wx.request({
-      url: `${config.BACKEND_URL}/verification/verify_phone_sms_code`,
-      method: "POST",
-      data: {
-        phone: "+86" + this.data.profileForm.phone,
-        code: this.data.phoneOtpCode,
-      },
-      header: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${getApp().globalData.userInfo?.token}`,
-      },
-      success: (res) => {
-        if (res.statusCode === 200 && res.data.status === "success") {
-          this.setData({
-            phoneVerified: true,
-            [`profileErrors.phone`]: false,
-          });
-          wx.showToast({
-            title: this.data.messages.success.verificationSuccess,
-            icon: "success",
-          });
-        } else {
-          wx.showToast({
-            title:
-              res.data?.msg || this.data.messages.errors.verificationFailed,
-            icon: "none",
-          });
-        }
-      },
-      fail: () => {
-        wx.showToast({
-          title: this.data.messages.errors.networkError,
-          icon: "none",
-        });
-      },
-      complete: () => {
-        wx.hideLoading();
       },
     });
   },
@@ -721,13 +447,6 @@ Page({  data: {
       getApp().globalData.socketManager.disconnect();
     }
 
-    // Clear this page's data
-    this.setData({
-      userInfo: {},
-      posts: [],
-      profileForm: this.initializeProfileForm({}),
-    });
-
     wx.hideLoading();
 
     wx.showToast({
@@ -742,187 +461,206 @@ Page({  data: {
       });
     }, 1500);
   },
-  // Load posts based on current tab
-  async loadPosts() {
-    this.setData({ loading: true });
 
-    try {
-      wx.request({
-        url: `${config.BACKEND_URL}/post/get_posts?scope=15&${
-          this.data.currentTab == 0 && "user_id="
-        }${this.data.currentTab == 0 ? this.data.userInfo?.id : ""}&isLike=${
-          this.data.currentTab == 1
-        }&isFavorite=${this.data.currentTab == 2}&isHistory=${
-          this.data.currentTab == 3
-        }`,
-        header: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${getApp().globalData.userInfo?.token}`,
-        },
-        method: "GET",
-        success: (res) => {
-          if (res.data && res.data.status === "success") {
-            this.setData({
-              posts: this.data.posts.concat(res.data.posts),
-              loading: false,
-              hasMore: res.data.has_more || false,
-            });
-          } else {
-            this.setData({ hasMore: false, loading: false });
-          }
-        },
-        fail: () => {
-          this.setData({ loading: false });
+  // Send email verification code
+  sendEmailVerificationCode: function () {
+    if (!this.data.emailChanged || !this.data.profileForm.email) return;
+
+    wx.showLoading({ title: "发送中..." });
+
+    wx.request({
+      url: `${config.BACKEND_URL}/verification/send_email_code`,
+      method: "POST",
+      data: {
+        email: this.data.profileForm.email,
+      },
+      header: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getApp().globalData.userInfo?.token}`,
+      },
+      success: (res) => {
+        if (res.statusCode === 200 && res.data.status === "success") {
           wx.showToast({
-            title: this.data.messages.errors.loadFailed,
+            title: this.data.messages.success.otpSent,
+            icon: "success",
+          });
+        } else {
+          wx.showToast({
+            title: res.data?.msg || this.data.messages.errors.otpSendFailed,
             icon: "none",
           });
-        },
-      });
-    } catch (error) {
-      console.error("Failed to load posts:", error);
-      this.setData({ loading: false });
-    }
-  },
-  // Load more posts for pagination
-  async loadMorePosts() {
-    if (this.data.loading) return;
-
-    this.setData({ loading: true });
-
-    try {
-      const requestData = {
-        scope: "15",
-      };
-
-      // Add user_id for user posts tab
-      if (this.data.currentTab == 0) {
-        requestData.user_id = this.data.userInfo?.id;
-      }
-
-      // Add filter parameters
-      requestData.isLike = this.data.currentTab == 1;
-      requestData.isFavorite = this.data.currentTab == 2;
-      requestData.isHistory = this.data.currentTab == 3;
-
-      // Add exist_post_ids for pagination
-      if (this.data.posts.length > 0) {
-        requestData.exist_post_ids = this.data.posts.map((post) => post.id);
-      }
-
-      // Convert to query string
-      const queryParams = new URLSearchParams();
-      Object.keys(requestData).forEach((key) => {
-        if (Array.isArray(requestData[key])) {
-          requestData[key].forEach((item) => queryParams.append(key, item));
-        } else {
-          queryParams.append(key, requestData[key]);
         }
-      });
-
-      wx.request({
-        url: `${config.BACKEND_URL}/post/get_posts?${queryParams.toString()}`,
-        header: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${getApp().globalData.userInfo?.token}`,
-        },
-        method: "GET",
-        success: (res) => {
-          if (res.data && res.data.status === "success") {
-            this.setData({
-              posts: this.data.posts.concat(res.data.posts || []),
-              loading: false,
-              hasMore: res.data.has_more || false,
-            });
-          } else {
-            this.setData({ hasMore: false, loading: false });
-          }
-        },
-        fail: () => {
-          this.setData({ loading: false });
-        },
-      });
-    } catch (error) {
-      this.setData({ loading: false });
-    }
-  },
-
-  // Refresh posts
-  async refreshPosts() {
-    this.setData({ posts: [] });
-    await this.loadPosts();
-    wx.stopPullDownRefresh();
-  },
-
-  // Handle delete post confirmation
-  onDeletePost(e) {
-    const postId = e.currentTarget.dataset.id;
-
-    wx.showModal({
-      title: this.data.messages.confirmations.deleteTitle,
-      content: this.data.messages.confirmations.deleteContent,
-      success: (res) => {
-        if (res.confirm) {
-          this.deletePost(postId);
-        }
+      },
+      fail: () => {
+        wx.showToast({
+          title: this.data.messages.errors.networkError,
+          icon: "none",
+        });
+      },
+      complete: () => {
+        wx.hideLoading();
       },
     });
   },
 
-  // Delete post
-  deletePost(postId) {
-    try {
-      wx.request({
-        url: `${config.BACKEND_URL}/post/delete_my_post?id=${postId}`,
-        header: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${getApp().globalData.userInfo?.token}`,
-        },
-        method: "DELETE",
-        success: (res) => {
-          if (res.data && res.data.status === "success") {
-            const posts = this.data.posts.filter((post) => post.id !== postId);
-            this.setData({ posts });
+  // Send phone verification code
+  sendPhoneVerificationCode: function () {
+    if (!this.data.phoneChanged || !this.data.profileForm.phone) return;
 
-            wx.showToast({
-              title: this.data.messages.success.deleteSuccess,
-              icon: "success",
-            });
-          } else {
-            if (res.data.msg)
-              wx.showToast({
-                title: res.data.msg,
-                icon: "error",
-              });
-          }
-        },
-        fail: () => {
+    wx.showLoading({ title: "发送中..." });
+
+    wx.request({
+      url: `${config.BACKEND_URL}/verification/send_phone_sms_code`,
+      method: "POST",
+      data: {
+        phone: "+86" + this.data.profileForm.phone,
+      },
+      header: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getApp().globalData.userInfo?.token}`,
+      },
+      success: (res) => {
+        if (res.statusCode === 200 && res.data.status === "success") {
           wx.showToast({
-            title: this.data.messages.errors.loadFailed,
+            title: this.data.messages.success.otpSent,
+            icon: "success",
+          });
+        } else {
+          wx.showToast({
+            title: res.data?.msg || this.data.messages.errors.otpSendFailed,
             icon: "none",
           });
-        },
-      });
-    } catch (error) {
-      console.error("Error deleting post:", error);
-      wx.showToast({
-        title: this.data.messages.errors.loadFailed,
-        icon: "none",
-      });
-    }
-  },
-
-  // Scroll to top
-  scrollToTop() {
-    wx.pageScrollTo({
-      scrollTop: 0,
-      duration: 300,
+        }
+      },
+      fail: () => {
+        wx.showToast({
+          title: this.data.messages.errors.networkError,
+          icon: "none",
+        });
+      },
+      complete: () => {
+        wx.hideLoading();
+      },
     });
   },
-  onPostTap: function (e) {
-    const postId = e.currentTarget.dataset.id;
-    wx.navigateTo({
-      url: `/pages/post-detail/post-detail?postId=${postId}`,
+
+  // Handle OTP input for email
+  onEmailOtpInput: function (e) {
+    this.setData({
+      emailOtpCode: e.detail.value,
+    });
+  },
+
+  // Handle OTP input for phone
+  onPhoneOtpInput: function (e) {
+    this.setData({
+      phoneOtpCode: e.detail.value,
+    });
+  },
+
+  // Verify email with OTP code
+  verifyEmailCode: function () {
+    if (!this.data.emailOtpCode || !this.data.profileForm.email) {
+      wx.showToast({
+        title: "请输入验证码",
+        icon: "none",
+      });
+      return;
+    }
+
+    wx.showLoading({ title: "验证中..." });
+
+    wx.request({
+      url: `${config.BACKEND_URL}/verification/verify_email_code`,
+      method: "POST",
+      data: {
+        email: this.data.profileForm.email,
+        code: this.data.emailOtpCode,
+      },
+      header: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getApp().globalData.userInfo?.token}`,
+      },
+      success: (res) => {
+        if (res.statusCode === 200 && res.data.status === "success") {
+          this.setData({
+            emailVerified: true,
+            [`profileErrors.email`]: false,
+          });
+          wx.showToast({
+            title: this.data.messages.success.verificationSuccess,
+            icon: "success",
+          });
+        } else {
+          wx.showToast({
+            title:
+              res.data?.msg || this.data.messages.errors.verificationFailed,
+            icon: "none",
+          });
+        }
+      },
+      fail: () => {
+        wx.showToast({
+          title: this.data.messages.errors.networkError,
+          icon: "none",
+        });
+      },
+      complete: () => {
+        wx.hideLoading();
+      },
+    });
+  },
+
+  // Verify phone with OTP code
+  verifyPhoneCode: function () {
+    if (!this.data.phoneOtpCode || !this.data.profileForm.phone) {
+      wx.showToast({
+        title: "请输入验证码",
+        icon: "none",
+      });
+      return;
+    }
+
+    wx.showLoading({ title: "验证中..." });
+
+    wx.request({
+      url: `${config.BACKEND_URL}/verification/verify_phone_sms_code`,
+      method: "POST",
+      data: {
+        phone: "+86" + this.data.profileForm.phone,
+        code: this.data.phoneOtpCode,
+      },
+      header: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getApp().globalData.userInfo?.token}`,
+      },
+      success: (res) => {
+        if (res.statusCode === 200 && res.data.status === "success") {
+          this.setData({
+            phoneVerified: true,
+            [`profileErrors.phone`]: false,
+          });
+          wx.showToast({
+            title: this.data.messages.success.verificationSuccess,
+            icon: "success",
+          });
+        } else {
+          wx.showToast({
+            title:
+              res.data?.msg || this.data.messages.errors.verificationFailed,
+            icon: "none",
+          });
+        }
+      },
+      fail: () => {
+        wx.showToast({
+          title: this.data.messages.errors.networkError,
+          icon: "none",
+        });
+      },
+      complete: () => {
+        wx.hideLoading();
+      },
     });
   },
 
@@ -933,17 +671,14 @@ Page({  data: {
     try {
       this.setData({ wechatLinking: true });
 
-      // Get WeChat login code
       const loginResult = await this.promiseWrapper(wx.login);
       if (!loginResult.code) {
         throw new Error('获取微信授权码失败');
       }
 
-      // Send link request to backend
       const response = await this.requestWechatLink(loginResult.code);
       
       if (response.status === 'success') {
-        // Update user info with WeChat data
         const app = getApp();
         const updatedUserInfo = { ...this.data.userInfo, ...response.user };
         app.setUserInfo(updatedUserInfo);
@@ -983,7 +718,6 @@ Page({  data: {
       const response = await this.requestWechatUnlink();
       
       if (response.status === 'success') {
-        // Update user info
         const app = getApp();
         const updatedUserInfo = { 
           ...this.data.userInfo, 

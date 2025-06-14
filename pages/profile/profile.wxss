@@ -1,0 +1,837 @@
+.profile-container {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
+  overflow-y: auto;
+  padding-bottom: 40rpx;
+}
+
+/* Profile Header Bar - Enhanced Professional Design */
+.profile-header-bar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  backdrop-filter: blur(20rpx);
+  border-bottom: 1rpx solid rgba(255, 50, 50, 0.15);
+  padding: 30rpx 40rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.1);
+  background: rgba(15, 15, 15, 0.95);
+}
+
+.action-buttons-container {
+  display: flex;
+  justify-content: center;
+  gap: 24rpx;
+  align-items: center;
+}
+
+.action-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  min-width: 160rpx;
+  height: 80rpx;
+  padding: 0 32rpx;
+  border-radius: 16rpx;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 30rpx;
+  font-weight: 600;
+  border: none;
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Professional Shine Effect */
+.action-button::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s;
+}
+
+.action-button:active::before {
+  left: 100%;
+}
+
+/* Button Icons - Larger and cleaner */
+.button-icon {
+  font-size: 32rpx;
+  line-height: 1;
+  font-weight: normal;
+}
+
+.button-label {
+  font-size: 30rpx;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.8rpx;
+}
+
+/* Edit Button - Enhanced Professional Blue */
+.edit-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 6rpx 20rpx rgba(102, 126, 234, 0.4);
+}
+
+.edit-button:active {
+  background: linear-gradient(135deg, #5a6fd8, #6a4190);
+  transform: scale(0.98) translateY(2rpx);
+  box-shadow: 0 4rpx 15rpx rgba(102, 126, 234, 0.5);
+}
+
+/* Save Button - Enhanced Professional Green */
+.save-button {
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  color: white;
+  box-shadow: 0 6rpx 20rpx rgba(17, 153, 142, 0.4);
+}
+
+.save-button:active {
+  background: linear-gradient(135deg, #0f877c, #32d672);
+  transform: scale(0.98) translateY(2rpx);
+  box-shadow: 0 4rpx 15rpx rgba(17, 153, 142, 0.5);
+}
+
+/* Cancel Button - Enhanced Professional Gray */
+.cancel-button {
+  background: linear-gradient(135deg, #434343 0%, #000000 100%);
+  color: white;
+  box-shadow: 0 6rpx 20rpx rgba(67, 67, 67, 0.4);
+}
+
+.cancel-button:active {
+  background: linear-gradient(135deg, #3a3a3a, #1a1a1a);
+  transform: scale(0.98) translateY(2rpx);
+  box-shadow: 0 4rpx 15rpx rgba(67, 67, 67, 0.5);
+}
+
+/* Logout Button - Enhanced Professional Orange */
+.logout-button {
+  background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+  color: white;
+  box-shadow: 0 6rpx 20rpx rgba(255, 65, 108, 0.4);
+}
+
+.logout-button:active {
+  background: linear-gradient(135deg, #e6395f, #e6421f);
+  transform: scale(0.98) translateY(2rpx);
+  box-shadow: 0 4rpx 15rpx rgba(255, 65, 108, 0.5);
+}
+
+/* Responsive Design for Header Bar */
+@media screen and (max-width: 600rpx) {
+  .profile-header-bar {
+    padding: 24rpx 32rpx;
+  }
+
+  .action-buttons-container {
+    gap: 20rpx;
+  }
+
+  .action-button {
+    min-width: 140rpx;
+    height: 72rpx;
+    padding: 0 28rpx;
+    gap: 10rpx;
+  }
+
+  .button-icon {
+    font-size: 28rpx;
+  }
+
+  .button-label {
+    font-size: 28rpx;
+  }
+}
+
+@media screen and (max-width: 400rpx) {
+  .profile-header-bar {
+    padding: 20rpx 24rpx;
+  }
+
+  .action-buttons-container {
+    gap: 16rpx;
+  }
+
+  .action-button {
+    min-width: 120rpx;
+    height: 64rpx;
+    padding: 0 24rpx;
+    gap: 8rpx;
+  }
+
+  .button-icon {
+    font-size: 26rpx;
+  }
+
+  .button-label {
+    font-size: 26rpx;
+  }
+
+  .avatar-section-horizontal {
+    padding: 30rpx;
+    margin: 16rpx;
+  }
+
+  .avatar-container-horizontal {
+    width: 100rpx;
+    height: 100rpx;
+    margin-right: 24rpx;
+  }
+
+  .user-name-horizontal {
+    font-size: 36rpx;
+  }
+
+  .user-university-horizontal {
+    font-size: 24rpx;
+  }
+}
+
+/* Avatar Section - Horizontal Layout */
+.avatar-section-horizontal {
+  display: flex;
+  align-items: center;
+  padding: 40rpx 40rpx 30rpx;
+  background: rgba(30, 30, 30, 0.6);
+  backdrop-filter: blur(20rpx);
+  margin: 20rpx;
+  border-radius: 24rpx;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.avatar-section-horizontal::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2rpx;
+  background: linear-gradient(90deg, transparent, #ff3232, transparent);
+}
+
+.avatar-container-horizontal {
+  position: relative;
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 60rpx;
+  overflow: hidden;
+  border: 3rpx solid rgba(255, 50, 50, 0.3);
+  box-shadow: 0 6rpx 24rpx rgba(255, 50, 50, 0.2);
+  transition: all 0.3s ease;
+  margin-right: 30rpx;
+  flex-shrink: 0;
+}
+
+.avatar-medium {
+  width: 100%;
+  height: 100%;
+}
+
+.avatar-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.avatar-container-horizontal:active .avatar-overlay {
+  opacity: 1;
+}
+
+.avatar-edit-icon {
+  font-size: 32rpx;
+}
+
+.user-info-horizontal {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-left: 10rpx;
+}
+
+.user-name-horizontal {
+  font-size: 42rpx;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 12rpx;
+  letter-spacing: 1rpx;
+}
+
+.user-university-horizontal {
+  font-size: 28rpx;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 0.5rpx;
+}
+
+/* Profile Form Container */
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: 20rpx;
+}
+
+.form-section {
+  background: rgba(30, 30, 30, 0.8);
+  backdrop-filter: blur(20rpx);
+  margin: 0 20rpx 30rpx 20rpx;
+  border-radius: 24rpx;
+  padding: 40rpx 30rpx;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.4);
+  position: relative;
+  overflow: hidden;
+}
+
+.form-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2rpx;
+  background: linear-gradient(90deg, transparent, #ff3232, transparent);
+}
+
+.section-title {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 40rpx;
+  padding-bottom: 20rpx;
+  border-bottom: 1px solid rgba(255, 50, 50, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  letter-spacing: 1rpx;
+}
+
+.section-title::before {
+  content: "";
+  width: 8rpx;
+  height: 36rpx;
+  background: linear-gradient(135deg, #ff3232, #ff6b6b);
+  border-radius: 4rpx;
+}
+
+/* Form Field Styles */
+.form-field {
+  margin-bottom: 40rpx;
+  position: relative;
+}
+
+.form-field:last-child {
+  margin-bottom: 0;
+}
+
+.field-label {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #e2e8f0;
+  margin-bottom: 16rpx;
+  letter-spacing: 0.5rpx;
+}
+
+.field-div {
+  width: 100%;
+  padding: 12rpx 10rpx;
+  background: rgba(20, 20, 20, 0.8);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16rpx;
+  color: #fff;
+  font-size: 30rpx;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10rpx);
+  display: flex;
+}
+
+.field-input {
+  width: 100%;
+  height: 70rpx;
+  padding: 10rpx 20rpx;
+  background: rgba(20, 20, 20, 0.8);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16rpx;
+  color: #fff;
+  font-size: 30rpx;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10rpx);
+}
+
+.field-input:focus {
+  border-color: #ff3232;
+  background: rgba(25, 25, 25, 0.9);
+  transform: translateY(-2rpx);
+  box-shadow: 0 4rpx 20rpx rgba(255, 50, 50, 0.2);
+}
+
+.field-input.error {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.05);
+  animation: shake 0.5s ease-in-out;
+}
+
+.field-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Input Wrapper Styles */
+.input-wrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+/* WeChat Linking Styles */
+.wechat-status-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.wechat-status {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 20rpx;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12rpx;
+  border: 2rpx solid rgba(255, 255, 255, 0.1);
+}
+
+.wechat-status.linked {
+  background: rgba(7, 193, 96, 0.1);
+  border-color: rgba(7, 193, 96, 0.3);
+}
+
+.wechat-status.unlinked {
+  background: rgba(255, 50, 50, 0.1);
+  border-color: rgba(255, 50, 50, 0.3);
+}
+
+.wechat-status-icon {
+  font-size: 32rpx;
+}
+
+.wechat-status-text {
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #e2e8f0;
+}
+
+.wechat-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.wechat-link-btn {
+  padding: 20rpx 40rpx;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+  border: none;
+  transition: all 0.3s ease;
+  min-width: 180rpx;
+  text-align: center;
+}
+
+.wechat-link-btn.link-btn {
+  background: linear-gradient(135deg, #07c160, #05a651);
+  color: white;
+  box-shadow: 0 4rpx 12rpx rgba(7, 193, 96, 0.3);
+}
+
+.wechat-link-btn.link-btn:active {
+  background: linear-gradient(135deg, #06b456, #04954a);
+  transform: scale(0.95);
+}
+
+.wechat-link-btn.unlink-btn {
+  background: linear-gradient(135deg, #ff4757, #ff6b7a);
+  color: white;
+  box-shadow: 0 4rpx 12rpx rgba(255, 71, 87, 0.3);
+}
+
+.wechat-link-btn.unlink-btn:active {
+  background: linear-gradient(135deg, #e84055, #ff5b6d);
+  transform: scale(0.95);
+}
+
+.wechat-link-btn:disabled {
+  opacity: 0.6;
+  transform: none;
+  cursor: not-allowed;
+}
+
+.wechat-description {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+  margin-top: 10rpx;
+}
+
+/* Phone and Email Input with Verification */
+.phone-input {
+  width:100%;
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.phone-prefix {
+  background: rgba(255, 50, 50, 0.1);
+  color: #ff3232;
+  padding: 24rpx 20rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16rpx;
+  backdrop-filter: blur(10rpx);
+}
+
+.phone-number {
+  flex: 1;
+}
+
+.verification-status {
+  display: inline-block;
+  margin-left: 10rpx;
+  padding: 4rpx 12rpx;
+  background: rgba(255, 193, 7, 0.2);
+  border-radius: 12rpx;
+  font-size: 20rpx;
+  color: #ffc107;
+}
+
+.status-text {
+  font-size: 20rpx;
+}
+
+/* Gender Selection */
+.gender-options {
+  display: flex;
+  gap: 20rpx;
+  justify-content: center;
+}
+
+.gender-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  padding: 24rpx 32rpx;
+  background: rgba(20, 20, 20, 0.8);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50rpx;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10rpx);
+  flex: 1;
+  min-height: 80rpx;
+}
+
+.gender-option:active {
+  transform: scale(0.96);
+}
+
+.gender-option.selected {
+  border-color: #ff3232;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 50, 50, 0.2),
+    rgba(255, 107, 107, 0.1)
+  );
+  box-shadow: 0 4rpx 20rpx rgba(255, 50, 50, 0.3);
+  transform: translateY(-2rpx);
+}
+
+.gender-option.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.gender-icon {
+  font-size: 36rpx;
+  transition: all 0.3s ease;
+}
+
+.gender-option.selected .gender-icon {
+  color: #ff3232;
+  filter: drop-shadow(0 2rpx 8rpx rgba(255, 50, 50, 0.5));
+}
+
+.gender-text {
+  font-size: 28rpx;
+  color: #e2e8f0;
+  font-weight: 600;
+  letter-spacing: 1rpx;
+}
+
+/* Picker Styling */
+.picker-view {
+  padding: 10rpx 20rpx;
+  background: rgba(20, 20, 20, 0.8);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16rpx;
+  color: #fff;
+  font-size: 30rpx;
+  min-height: 72rpx;
+  display: flex;
+  align-items: center;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10rpx);
+  position: relative;
+}
+
+.picker-view::after {
+  content: "▼";
+  position: absolute;
+  right: 20rpx;
+  color: #ff3232;
+  font-size: 24rpx;
+  pointer-events: none;
+}
+
+.picker-view:active {
+  border-color: #ff3232;
+  background: rgba(25, 25, 25, 0.9);
+  transform: translateY(-2rpx);
+}
+
+.picker-view.error {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.05);
+  animation: shake 0.5s ease-in-out;
+}
+
+.placeholder {
+  color: #64748b;
+  font-style: italic;
+}
+
+/* Error Text */
+.error-text {
+  font-size: 24rpx;
+  color: #ef4444;
+  margin-top: 12rpx;
+  display: block;
+  font-weight: 500;
+  letter-spacing: 0.5rpx;
+  padding-left: 8rpx;
+}
+
+/* Verification Section Styles */
+.verification-section {
+  margin-top: 16rpx;
+  padding: 20rpx;
+  background: rgba(15, 15, 15, 0.8);
+  border-radius: 12rpx;
+  border: 1px solid rgba(255, 50, 50, 0.2);
+}
+
+.send-code-btn {
+  width: 100%;
+  padding: 16rpx 20rpx;
+  margin-bottom: 16rpx;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 12rpx;
+  font-size: 24rpx;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  text-align: center;
+  backdrop-filter: blur(10rpx);
+  box-shadow: 0 4rpx 12rpx rgba(102, 126, 234, 0.3);
+}
+
+.send-code-btn:active {
+  transform: scale(0.96) translateY(2rpx);
+  opacity: 0.9;
+}
+
+.otp-input-container {
+  display: flex;
+  gap: 12rpx;
+  align-items: stretch;
+}
+
+.otp-input-container .input-wrapper {
+  flex: 1;
+}
+
+.otp-input {
+  width: 100%;
+  height: 40rpx;
+  padding: 10rpx 20rpx;
+  background: rgba(20, 20, 20, 0.8);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16rpx;
+  color: #fff;
+  font-size: 30rpx;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10rpx);
+}
+
+.otp-input:focus {
+  border-color: #ff3232;
+  background: rgba(35, 35, 35, 0.9);
+  box-shadow: 0 2rpx 10rpx rgba(255, 50, 50, 0.2);
+}
+
+.verify-code-btn {
+  padding: 16rpx 24rpx;
+  min-width: 100rpx;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  border: none;
+  border-radius: 12rpx;
+  font-size: 24rpx;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  text-align: center;
+  backdrop-filter: blur(10rpx);
+  box-shadow: 0 4rpx 12rpx rgba(16, 185, 129, 0.3);
+}
+
+.verify-code-btn:active {
+  transform: scale(0.96);
+  background: linear-gradient(135deg, #059669, #047857);
+}
+
+/* Animations */
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5rpx);
+  }
+  75% {
+    transform: translateX(5rpx);
+  }
+}
+
+/* Responsive Design */
+@media screen and (max-width: 600rpx) {
+  .profile-actions {
+    flex-wrap: wrap;
+    gap: 12rpx;
+    padding: 20rpx;
+    min-height: auto;
+  }
+
+  .left-actions {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .edit-actions {
+    width: 100%;
+    justify-content: center;
+    gap: 16rpx;
+  }
+
+  .profile-action-btn {
+    flex: 1;
+    justify-content: center;
+    min-width: 100rpx;
+    padding: 16rpx 20rpx;
+    font-size: 22rpx;
+  }
+
+  .logout-btn {
+    margin-left: 0;
+    width: 100%;
+    margin-top: 12rpx;
+  }
+
+  .form-section {
+    margin: 0 16rpx 24rpx 16rpx;
+    padding: 32rpx 24rpx;
+    border-radius: 20rpx;
+  }
+
+  .gender-options {
+    flex-direction: column;
+    gap: 16rpx;
+  }
+
+  .phone-input {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+/* Additional Responsive Design for Horizontal Avatar Layout */
+@media screen and (max-width: 600rpx) {
+  .avatar-section-horizontal {
+    padding: 32rpx 24rpx;
+    margin: 16rpx;
+    border-radius: 20rpx;
+  }
+
+  .avatar-container-horizontal {
+    width: 100rpx;
+    height: 100rpx;
+    margin-right: 24rpx;
+  }
+
+  .user-name-horizontal {
+    font-size: 36rpx;
+    margin-bottom: 10rpx;
+  }
+
+  .user-university-horizontal {
+    font-size: 24rpx;
+  }
+}
+
+@media screen and (max-width: 480rpx) {
+  .avatar-section-horizontal {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 28rpx 20rpx;
+  }
+
+  .avatar-container-horizontal {
+    margin-right: 0;
+    margin-bottom: 20rpx;
+  }
+
+  .user-info-horizontal {
+    padding-left: 0;
+    text-align: center;
+  }
+}

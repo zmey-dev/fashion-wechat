@@ -1,0 +1,322 @@
+<!-- Profile Page -->
+<app-layout current-page="profile">  <view class="profile-container">
+    <!-- Profile Header Actions -->
+    <view class="profile-header-bar">
+      <!-- Edit Mode: Show Save and Cancel buttons -->
+      <view class="action-buttons-container" wx:if="{{isEditingProfile}}">
+        <view class="action-button save-button" bindtap="saveProfile">
+          <text class="button-icon">✓</text>
+          <text class="button-label">保存</text>
+        </view>
+        <view class="action-button cancel-button" bindtap="cancelProfileEdit">
+          <text class="button-icon">✕</text>
+          <text class="button-label">取消</text>
+        </view>
+      </view>
+      
+      <!-- View Mode: Show Edit and Logout buttons -->
+      <view class="action-buttons-container" wx:else>
+        <view class="action-button edit-button" bindtap="toggleProfileEdit">
+          <text class="button-icon">✏</text>
+          <text class="button-label">编辑</text>
+        </view>
+        <view class="action-button logout-button" bindtap="handleLogout">
+          <text class="button-icon">↗</text>
+          <text class="button-label">退出</text>
+        </view>
+      </view>
+    </view>    <!-- Avatar Section - Horizontal Layout -->
+    <view class="avatar-section-horizontal">
+      <view class="avatar-container-horizontal" bindtap="selectAvatar">
+        <avatar class="avatar-medium" avatar="{{selectedAvatar || userInfo.avatar}}" name="{{userInfo.username}}" size="120" mode="aspectFill" />
+        <view class="avatar-overlay" wx:if="{{isEditingProfile}}">
+          <text class="avatar-edit-icon">📷</text>
+        </view>
+      </view>
+      <view class="user-info-horizontal">
+        <text class="user-name-horizontal">{{userInfo.name || userInfo.username}}</text>
+        <text class="user-university-horizontal">{{university.name || '未设置大学'}}</text>
+      </view>
+    </view>
+
+    <!-- Profile Form -->
+    <view class="profile-form">
+      <!-- Basic Information -->
+      <view class="form-section">
+        <view class="section-title">基本信息</view>
+          <!-- Name -->
+        <view class="form-field">
+          <label class="field-label">姓名</label>
+          <view class="input-wrapper">
+            <input 
+              class="field-input {{profileErrors.name ? 'error' : ''}}"
+              value="{{profileForm.name}}"
+              placeholder="请输入姓名"
+              disabled="{{!isEditingProfile}}"
+              data-field="name"
+              bindinput="onProfileInputChange"
+            />
+          </view>
+          <text class="error-text" wx:if="{{profileErrors.name}}">{{profileErrors.name}}</text>
+        </view>        <!-- Phone -->
+        <view class="form-field">
+          <label class="field-label">
+            手机号
+            <view class="verification-status" wx:if="{{phoneChanged && !phoneVerified}}">
+              <text class="status-text">需要验证</text>
+            </view>
+          </label>
+          <view class="input-wrapper">
+            <view class="phone-input">
+              <text class="phone-prefix">+86</text>
+              <input 
+                class="field-input phone-number {{profileErrors.phone ? 'error' : ''}}"
+                value="{{profileForm.phone}}"
+                placeholder="请输入手机号"
+                disabled="{{!isEditingProfile}}"
+                data-field="phone"
+                bindinput="onProfileInputChange"
+              />
+            </view>
+          </view>
+          
+          <!-- Phone Verification Section -->
+          <view wx:if="{{phoneChanged && !phoneVerified && isEditingProfile}}" class="verification-section">
+            <view class="profile-action-btn send-code-btn" bindtap="sendPhoneVerificationCode">
+              <text class="btn-text">发送验证码</text>
+            </view>
+            <view class="otp-input-container">
+              <view class="input-wrapper">
+                <input 
+                  class="otp-input"
+                  placeholder="请输入手机验证码"
+                  value="{{phoneOtpCode}}"
+                  bindinput="onPhoneOtpInput"
+                />
+              </view>
+              <view class="profile-action-btn verify-code-btn" bindtap="verifyPhoneCode">
+                <text class="btn-text">验证</text>
+              </view>
+            </view>
+          </view>
+          
+          <text class="error-text" wx:if="{{profileErrors.phone}}">{{profileErrors.phone}}</text>
+        </view>        <!-- Email -->
+        <view class="form-field">
+          <label class="field-label">
+            邮箱
+            <view class="verification-status" wx:if="{{emailChanged && !emailVerified}}">
+              <text class="status-text">需要验证</text>
+            </view>
+          </label>
+          <view class="input-wrapper">
+            <input 
+              class="field-input {{profileErrors.email ? 'error' : ''}}"
+              value="{{profileForm.email}}"
+              placeholder="请输入邮箱"
+              disabled="{{!isEditingProfile}}"
+              data-field="email"
+              bindinput="onProfileInputChange"
+            />
+          </view>
+          
+          <!-- Email Verification Section -->
+          <view wx:if="{{emailChanged && !emailVerified && isEditingProfile}}" class="verification-section">
+            <view class="profile-action-btn send-code-btn" bindtap="sendEmailVerificationCode">
+              <text class="btn-text">发送验证码</text>
+            </view>
+            <view class="otp-input-container">
+              <view class="input-wrapper">
+                <input 
+                  class="otp-input"
+                  placeholder="请输入邮箱验证码"
+                  value="{{emailOtpCode}}"
+                  bindinput="onEmailOtpInput"
+                />
+              </view>
+              <view class="profile-action-btn verify-code-btn" bindtap="verifyEmailCode">
+                <text class="btn-text">验证</text>
+              </view>
+            </view>
+          </view>
+          
+          <text class="error-text" wx:if="{{profileErrors.email}}">{{profileErrors.email}}</text>
+        </view>
+
+        <!-- Gender -->
+        <view class="form-field">
+          <label class="field-label">性别</label>
+          <view class="gender-options">
+            <view 
+              class="gender-option {{profileForm.gender === 'male' ? 'selected' : ''}} {{!isEditingProfile ? 'disabled' : ''}}"
+              data-gender="male"
+              bindtap="{{isEditingProfile ? 'onGenderChange' : ''}}"
+            >
+              <text class="gender-icon">♂</text>
+              <text class="gender-text">男</text>
+            </view>
+            <view 
+              class="gender-option {{profileForm.gender === 'female' ? 'selected' : ''}} {{!isEditingProfile ? 'disabled' : ''}}"
+              data-gender="female"
+              bindtap="{{isEditingProfile ? 'onGenderChange' : ''}}"
+            >
+              <text class="gender-icon">♀</text>
+              <text class="gender-text">女</text>
+            </view>
+          </view>
+          <text class="error-text" wx:if="{{profileErrors.gender}}">{{profileErrors.gender}}</text>
+        </view>
+      </view>
+
+      <!-- Academic Information -->
+      <view class="form-section">
+        <view class="section-title">学术信息</view>
+          <!-- ID Number -->
+        <view class="form-field">
+          <label class="field-label">身份证号</label>
+          <view class="input-wrapper">
+            <input 
+              class="field-input {{profileErrors.id_number ? 'error' : ''}}"
+              value="{{profileForm.id_number}}"
+              placeholder="请输入身份证号"
+              disabled="{{!isEditingProfile}}"
+              data-field="id_number"
+              bindinput="onProfileInputChange"
+            />
+          </view>
+          <text class="error-text" wx:if="{{profileErrors.id_number}}">{{profileErrors.id_number}}</text>
+        </view>
+
+        <!-- Student Number -->
+        <view class="form-field">
+          <label class="field-label">学号</label>
+          <view class="input-wrapper">
+            <input 
+              class="field-input {{profileErrors.student_number ? 'error' : ''}}"
+              value="{{profileForm.student_number}}"
+              placeholder="请输入学号"
+              disabled="{{!isEditingProfile}}"
+              data-field="student_number"
+              bindinput="onProfileInputChange"
+            />
+          </view>
+          <text class="error-text" wx:if="{{profileErrors.student_number}}">{{profileErrors.student_number}}</text>
+        </view>
+
+        <!-- Faculty -->
+        <view class="form-field">
+          <label class="field-label">学院</label>
+          <picker 
+            mode="selector"
+            range="{{faculties}}"
+            range-key="name"
+            disabled="{{!isEditingProfile}}"
+            data-field="faculty"
+            bindchange="onProfileInputChange"
+          >
+            <view class="picker-view {{profileErrors.faculty ? 'error' : ''}}">
+              <text wx:if="{{profileForm.faculty}}">{{profileForm.faculty}}</text>
+              <text wx:else class="placeholder">请选择学院</text>
+            </view>
+          </picker>
+          <text class="error-text" wx:if="{{profileErrors.faculty}}">{{profileErrors.faculty}}</text>
+        </view>
+
+        <!-- Major -->
+        <view class="form-field">
+          <label class="field-label">专业</label>
+          <picker 
+            mode="selector"
+            range="{{availableMajors}}"
+            range-key="name"
+            disabled="{{!isEditingProfile || !profileForm.faculty}}"
+            data-field="major"
+            bindchange="onProfileInputChange"
+          >
+            <view class="picker-view {{profileErrors.major ? 'error' : ''}}">
+              <text wx:if="{{profileForm.major}}">{{profileForm.major}}</text>
+              <text wx:else class="placeholder">请选择专业</text>
+            </view>
+          </picker>
+          <text class="error-text" wx:if="{{profileErrors.major}}">{{profileErrors.major}}</text>
+        </view>        <!-- Class -->
+        <view class="form-field">
+          <label class="field-label">班级</label>
+          <view class="input-wrapper">
+            <input 
+              class="field-input {{profileErrors.class ? 'error' : ''}}"
+              value="{{profileForm.class}}"
+              placeholder="请输入班级"
+              disabled="{{!isEditingProfile}}"
+              data-field="class"
+              bindinput="onProfileInputChange"
+            />
+          </view>
+          <text class="error-text" wx:if="{{profileErrors.class}}">{{profileErrors.class}}</text>
+        </view>
+
+        <!-- Admission Year -->
+        <view class="form-field">
+          <label class="field-label">入学年份</label>
+          <picker 
+            mode="date"
+            fields="year"
+            value="{{profileForm.admissionYear}}"
+            disabled="{{!isEditingProfile}}"
+            data-field="admissionYear"
+            bindchange="onProfileInputChange"
+          >
+            <view class="picker-view">
+              <text>{{profileForm.admissionYear}}年</text>
+            </view>
+          </picker>
+        </view>
+      </view>
+
+      <!-- WeChat Linking Section -->
+      <view class="form-section">
+        <view class="section-title">微信绑定</view>
+        
+        <view class="form-field">
+          <label class="field-label">微信账号</label>
+          <view class="wechat-status-container">
+            <view class="wechat-status {{isWechatLinked ? 'linked' : 'unlinked'}}">
+              <view class="wechat-status-icon">
+                <text wx:if="{{isWechatLinked}}">✅</text>
+                <text wx:else>❌</text>
+              </view>
+              <view class="wechat-status-text">
+                <text wx:if="{{isWechatLinked}}">已绑定微信</text>
+                <text wx:else>未绑定微信</text>
+              </view>
+            </view>
+              <view class="wechat-actions" wx:if="{{!isEditingProfile}}">
+              <view 
+                wx:if="{{!isWechatLinked}}"
+                class="profile-action-btn wechat-link-btn link-btn"
+                bindtap="linkWechat"
+              >
+                <text class="btn-text" wx:if="{{!wechatLinking}}">绑定微信</text>
+                <text class="btn-text" wx:else>绑定中...</text>
+              </view>
+              
+              <view 
+                wx:if="{{isWechatLinked}}"
+                class="profile-action-btn wechat-link-btn unlink-btn"
+                bindtap="unlinkWechat"
+              >
+                <text class="btn-text" wx:if="{{!wechatLinking}}">解除绑定</text>
+                <text class="btn-text" wx:else>处理中...</text>
+              </view>
+            </view>
+          </view>
+          
+          <view class="wechat-description">
+            <text wx:if="{{!isWechatLinked}}">绑定微信后可使用微信快捷登录</text>
+            <text wx:else>您可以使用微信登录或解除绑定</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</app-layout>

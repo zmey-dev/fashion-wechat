@@ -568,7 +568,6 @@ App({
 
     this.globalData.userInfo = null;
     await wx.setStorageSync("userInfo", null);
-    await this.cleanupSocketListeners();
 
     if (this.globalData.socketManager) {
       this.globalData.socketManager.disconnect();
@@ -577,7 +576,7 @@ App({
     // Cleanup unread message socket listeners
     this.cleanupUnreadMessageSocketListeners();
 
-    wx.redirectTo({ url: "/pages/login/login" });
+    wx.redirectTo({ url: "/pages/index/index" });
   },
 
   onLaunch() {

@@ -118,12 +118,7 @@
           wx:key="id"
           id="msg-{{index}}"
           class="message-wrapper {{item.sender_id === 'me' ? 'sent' : 'received'}}"
-        >
-          <!-- Date separator -->
-          <view wx:if="{{index === 0 || shouldShowDateSeparator(item, chatMessages[index-1])}}" class="date-separator">
-            <view class="date-text">{{formatDate(item.updated_at)}}</view>
-          </view>
-          
+        > 
           <!-- Message content -->
           <view class="message-group">
             <!-- Avatar for received messages -->

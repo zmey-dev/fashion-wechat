@@ -6,19 +6,7 @@
       <view class="avatar-container">
         <avatar class="avatar" avatar="{{userInfo.avatar}}" name="{{userInfo.username}}" size="120" mode="aspectFill" />
       </view>
-      
-      <view class="user-details">
-        <view class="username-section">
-          <text class="username">{{userInfo.username}}</text>
-          <view class="user-meta">
-            <text class="phone">(手机: {{userInfo.phone}},</text>
-            <view class="gender-age">
-              <text class="gender-icon">{{userInfo.gender === 'male' ? '♂' : '♀'}}</text>
-            </view>
-            )
-          </view>
-        </view>
-        
+        <view class="user-details">
         <view class="stats-container">
           <view class="stat-item">
             <text class="stat-number">{{userInfo.likes_count || 0}}</text>

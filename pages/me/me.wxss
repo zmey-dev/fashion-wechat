@@ -22,11 +22,11 @@
 /* Profile Header Styles */
 .profile-header {
   margin-bottom: 40rpx;
-  padding: 40rpx 0;
   border-bottom: 1px solid rgba(255, 50, 50, 0.15);
 }
 
 .profile-info {
+  padding: 0rpx 40rpx;
   display: flex;
   align-items: flex-start;
 }
