@@ -1,6 +1,6 @@
 <!-- components/action-buttons/action-buttons.wxml -->
 <view class="action-buttons"
-style="{{ currentPost.type === 'image' ? 'margin-bottom: 100rpx;' : '' }}"
+style="{{ currentPost.type === 'image' ? 'margin-bottom: 50rpx;' : '' }}"
 >
   <!-- User Avatar with Follow Badge -->
   <view class="action-item" style="margin-bottom:20rpx" bindtap="onUserProfile">

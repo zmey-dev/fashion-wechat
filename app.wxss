@@ -155,10 +155,6 @@ page {
   align-items: center;
 }
 
-.user-info {
-  max-width: 70%;
-}
-
 .username {
   font-size: 24rpx;
   color: #ffffff;

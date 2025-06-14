@@ -33,7 +33,7 @@
           <text class="user-followers">粉丝 {{item.followers}}人</text>
         </view>
         <view class="user-arrow">
-          <text class="arrow-icon">></text>
+          <image class="back-icon" src="/images/icons/chevron-right.svg"></image>
         </view>
       </view>
     </view>
@@ -43,7 +43,7 @@
       <!-- Media header with back button and user profile -->
       <view class="media-header">
         <view class="back-button" bindtap="backToUserList">
-          <text class="back-icon">←</text>
+          <image class="back-icon" src="/images/icons/back.svg"></image>
         </view>
         <view class="user-profile-header">
           <view class="profile-info">

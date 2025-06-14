@@ -4,7 +4,7 @@
 .detail-panel {
   position: fixed;
   box-sizing: border-box;
-  padding-bottom: 180rpx;
+  padding-bottom: 120rpx;
   bottom: -60%;
   left: 0;
   width: 100%;
