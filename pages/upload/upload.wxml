@@ -49,7 +49,7 @@
                 catchtap="removeFile"
               >
                 <text class="iconfont icon-delete"></text>
-              </view
+              </view>
               <view class="dot-indicator" wx:if="{{imageDots[index] && imageDots[index].length > 0}}">
                 <text class="dot-count">{{imageDots[index].length}}</text>
               </view>
