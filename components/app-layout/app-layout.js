@@ -73,8 +73,8 @@ Component({
       {
         key: "upload",
         name: "发布",
-        icon: "/images/icons/upload.png",
-        activeIcon: "/images/icons/upload-active.png",
+        icon: "/images/icons/circle-plus.svg",
+        activeIcon: "/images/icons/circle-plus.svg",
         path: "/pages/upload/upload",
         isSpecial: true,
         type: "tab",
