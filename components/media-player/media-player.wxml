@@ -20,8 +20,7 @@
     <view 
     class="media-content {{ isVerticalSwiping ? 'swiping' : '' }} {{ detailPanelState === 'half' ? 'detail-open' : '' }} {{ detailPanelState === 'full' ? 'detail-full' : '' }}"
     style="transform: translateY({{ verticalTransform }}px);"
-  >
-    <!-- Media Display Component -->
+  >    <!-- Media Display Component -->
     <media-display
       current-post="{{ currentPost }}"
       current-media="{{ currentMedia }}"
@@ -36,7 +35,8 @@
       bind:dottap="onDotTap"
       bind:previousslide="moveToPreviousSlide"
       bind:nextslide="moveToNextSlide"
-    />    <!-- Media Controls Component -->
+      bind:videoended="onVideoEnded"
+    />
     <media-controls
       wx:if="{{ currentPost.type === 'image' }}"
       class="media-controls {{ detailPanelState !== 'closed' ? 'hidden' : '' }}"
@@ -48,7 +48,7 @@
       bind:playpause="onPlayPause"
       bind:continuetoggle="onContinueToggle"
       bind:progresstap="onProgressTap"
-    />    <!-- Action Buttons Component -->
+    />
     <action-buttons
       class="action-buttons {{ detailPanelState !== 'closed' ? 'hidden' : '' }}"
       current-post="{{ currentPost }}"
@@ -58,6 +58,7 @@
       display-comments="{{ displayComments }}"
       display-favorites="{{ displayFavorites }}"
       display-shares="{{ displayShares }}"
+      is-continue="{{ isContinue }}"
       bind:userprofile="onUserProfile"
       bind:like="handleLike"
       bind:favorite="handleFavorite"
@@ -65,6 +66,7 @@
       bind:follow="handleFollow"
       bind:toggleDetail="onToggleDetail"
       bind:reportmodal="onShowReportModal"
+      bind:continuetoggle="onContinueToggle"
     />
   </view>
     <detail-panel

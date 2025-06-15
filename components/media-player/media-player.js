@@ -371,11 +371,30 @@ Component({
 
     onContinueToggle(e) {
       this.setData({ isContinue: e.detail.value });
-    },
-
-    onProgressTap(e) {
+    },    onProgressTap(e) {
       const { index } = e.detail;
       this.setData({ currentSlideIndex: index });
+    },    // Video ended event handler
+    onVideoEnded() {
+      const { isContinue } = this.data;
+      if (isContinue) {
+        this.moveToNextPost();
+      } else {
+        // Restart current video from beginning and auto-play
+        const mediaDisplayComponent = this.selectComponent('media-display');
+        if (mediaDisplayComponent && mediaDisplayComponent.restartVideo) {
+          mediaDisplayComponent.restartVideo();
+          this.setData({ isPlaying: true });
+        } else {
+          // Fallback method
+          this.setData({ 
+            isPlaying: false 
+          });
+          setTimeout(() => {
+            this.setData({ isPlaying: true });
+          }, 100);
+        }
+      }
     },
 
     // Action Buttons Events

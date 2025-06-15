@@ -181,6 +181,58 @@
   transform: scale(1.1);
 }
 
+/* Continue Toggle Styles */
+.continue-toggle-item {
+  margin-top: 20rpx;
+}
+
+.continue-control {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8rpx;
+}
+
+/* Toggle Switch */
+.toggle-switch {
+  width: 44rpx;
+  height: 24rpx;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 12rpx;
+  position: relative;
+  transition: all 0.3s ease;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.3);
+}
+
+.toggle-switch.active {
+  background: linear-gradient(90deg, #ff6b6b, #ff8e53);
+}
+
+.toggle-slider {
+  width: 20rpx;
+  height: 20rpx;
+  background: #fff;
+  border-radius: 50%;
+  position: absolute;
+  top: 2rpx;
+  left: 2rpx;
+  transition: all 0.3s ease;
+  box-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.2);
+}
+
+.toggle-switch.active .toggle-slider {
+  transform: translateX(20rpx);
+}
+
+.action-label {
+  color: #fff;
+  font-size: 20rpx;
+  text-align: center;
+  text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.8);
+  font-weight: 500;
+  margin-top: 8rpx;
+}
+
 /* Animations */
 @keyframes heartBeat {
   0% {

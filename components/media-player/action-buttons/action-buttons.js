@@ -1,6 +1,5 @@
 // components/action-buttons/action-buttons.js
-Component({
-  properties: {
+Component({  properties: {
     currentPost: { type: Object, value: {} },
     currentPostUser: { type: Object, value: {} },
     authUser: { type: Object, value: null },
@@ -9,6 +8,7 @@ Component({
     displayComments: { type: String, value: "0" },
     displayFavorites: { type: String, value: "0" },
     displayShares: { type: String, value: "0" },
+    isContinue: { type: Boolean, value: true }
   },
 
   methods: {
@@ -34,10 +34,13 @@ Component({
 
     onToggleDetail() {
       this.triggerEvent("toggleDetail");
+    },    onShowReportModal() {
+      this.triggerEvent("reportmodal");
     },
 
-    onShowReportModal() {
-      this.triggerEvent("reportmodal");
+    onContinueToggle() {
+      const newValue = !this.properties.isContinue;
+      this.triggerEvent('continuetoggle', { value: newValue });
     },
   },
 });

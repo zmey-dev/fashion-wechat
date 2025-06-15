@@ -874,6 +874,47 @@
   background: linear-gradient(135deg, #059669, #047857);
 }
 
+/* Profile Button Styles */
+.profile-button-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 20rpx;
+}
+
+.profile-redirect-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12rpx 16rpx;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12rpx;
+  border: none;
+  min-width: 80rpx;
+  transition: all 0.3s ease;
+  box-shadow: 0 4rpx 12rpx rgba(102, 126, 234, 0.3);
+}
+
+.profile-redirect-btn:active {
+  transform: scale(0.95);
+  background: linear-gradient(135deg, #5a6fd8, #6a4190);
+  box-shadow: 0 2rpx 8rpx rgba(102, 126, 234, 0.4);
+}
+
+.profile-btn-icon {
+  font-size: 24rpx;
+  color: white;
+  margin-bottom: 4rpx;
+}
+
+.profile-btn-text {
+  font-size: 20rpx;
+  color: white;
+  font-weight: 600;
+  letter-spacing: 0.5rpx;
+}
+
 /* Responsive Design for Small Screens */
 @media screen and (max-width: 600rpx) {
   .profile-actions {
@@ -914,6 +955,23 @@
   .verify-btn {
     margin-top: 12rpx;
   }
+  
+  .profile-button-container {
+    margin-left: 12rpx;
+  }
+  
+  .profile-redirect-btn {
+    padding: 10rpx 12rpx;
+    min-width: 70rpx;
+  }
+  
+  .profile-btn-icon {
+    font-size: 20rpx;
+  }
+  
+  .profile-btn-text {
+    font-size: 18rpx;
+  }
 }
 
 /* Ultra Small Screens */
@@ -936,5 +994,23 @@
   .field-input, .phone-prefix, .picker-view {
     padding: 18rpx 14rpx;
     font-size: 26rpx;
+  }
+  
+  .profile-button-container {
+    margin-left: 8rpx;
+  }
+  
+  .profile-redirect-btn {
+    padding: 8rpx 10rpx;
+    min-width: 60rpx;
+  }
+  
+  .profile-btn-icon {
+    font-size: 18rpx;
+    margin-bottom: 2rpx;
+  }
+  
+  .profile-btn-text {
+    font-size: 16rpx;
   }
 }

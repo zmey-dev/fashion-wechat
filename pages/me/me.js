@@ -161,8 +161,7 @@ Page({  data: {
     }
 
     this.setData({ age });
-  },
-  // Handle tab change
+  },  // Handle tab change
   onTabChange(e) {
     const index = e.currentTarget.dataset.index;
     this.setData({
@@ -172,6 +171,21 @@ Page({  data: {
 
     // Load posts for all tabs since profile tab is removed
     this.loadPosts();
+  },
+
+  // Navigate to Profile Page
+  navigateToProfile: function() {
+    wx.navigateTo({
+      url: '/pages/profile/profile',
+      fail: (error) => {
+        console.error('Failed to navigate to profile page:', error);
+        wx.showToast({
+          title: '页面跳转失败',
+          icon: 'none',
+          duration: 2000
+        });
+      }
+    });
   },
 
   // Load university information including faculties
@@ -1083,5 +1097,20 @@ Page({  data: {
     const { userInfo } = this.data;
     const isLinked = !!(userInfo?.wechat_openid);
     this.setData({ isWechatLinked: isLinked });
+  },
+
+  // Navigate to Profile Page
+  navigateToProfile: function() {
+    wx.navigateTo({
+      url: '/pages/profile/profile',
+      fail: (error) => {
+        console.error('Failed to navigate to profile page:', error);
+        wx.showToast({
+          title: '页面跳转失败',
+          icon: 'none',
+          duration: 2000
+        });
+      }
+    });
   },
 });

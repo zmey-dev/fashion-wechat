@@ -1,6 +1,5 @@
 <app-layout current-page="me">
-  <view class="me-container">
-  <!-- User Profile Header -->
+  <view class="me-container">  <!-- User Profile Header -->
   <view class="profile-header">
     <view class="profile-info">
       <view class="avatar-container">
@@ -23,6 +22,12 @@
           <view class="stat-item">
             <text class="stat-number">{{userInfo.followers_count || 0}}</text>
             <text class="stat-label">粉丝</text>
+          </view>
+          <view class="profile-button-container">
+            <div class="profile-redirect-btn" bindtap="navigateToProfile">
+              <text class="profile-btn-icon">👤</text>
+              <text class="profile-btn-text">资料</text>
+            </div>
           </view>
         </view>
       </view>

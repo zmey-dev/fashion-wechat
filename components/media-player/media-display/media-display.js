@@ -201,10 +201,23 @@ Component({
     
     onVideoPlay() {
       console.log('Video started playing');
+    },    onVideoPause() {
+      console.log('Video paused');
+    },    onVideoEnded() {
+      console.log('Video ended');
+      this.triggerEvent('videoended');
     },
 
-    onVideoPause() {
-      console.log('Video paused');
+    // Restart video from beginning with auto-play
+    restartVideo() {
+      const videoContext = wx.createVideoContext('media-video', this);
+      if (videoContext) {
+        console.log('Restarting video with auto-play');
+        videoContext.seek(0);
+        setTimeout(() => {
+          videoContext.play();
+        }, 100);
+      }
     },
 
     onVideoError(e) {

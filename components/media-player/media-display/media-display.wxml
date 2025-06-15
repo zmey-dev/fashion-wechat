@@ -47,10 +47,10 @@ bindtap="onScreenTap"
         </view>
       </view>
     </swiper-item>
-  </swiper>
-  <!-- Video display -->
+  </swiper>  <!-- Video display -->
   <video
     wx:else
+    id="media-video"
     class="media-video"
     src="{{ currentMedia[0].url }}"
     poster="{{ currentMedia[0].preview_url }}"
@@ -60,10 +60,11 @@ bindtap="onScreenTap"
     enable-progress-gesture="{{ true }}"
     show-play-btn="{{ true }}"
     autoplay="{{ isPlaying }}"
-    loop="{{ true }}"
+    loop="{{ false }}"
     catch:tap="onVideoTap"
     bindplay="onVideoPlay"
     bindpause="onVideoPause"
+    bindended="onVideoEnded"
     binderror="onVideoError"
   >
   </video>

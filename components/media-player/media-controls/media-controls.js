@@ -5,21 +5,21 @@ Component({
     currentMedia: { type: Array, value: [] },
     currentSlideIndex: { type: Number, value: 0 },
     isPlaying: { type: Boolean, value: true },
-    isContinue: { type: Boolean, value: true }
+    isContinue: { type: Boolean, value: true },
   },
 
   methods: {
     onPlayPause() {
-      this.triggerEvent('playpause');
+      this.triggerEvent("playpause");
     },
-
-    onContinueToggle(e) {
-      this.triggerEvent('continuetoggle', { value: e.detail.value });
+    onContinueToggle() {
+      const newValue = !this.properties.isContinue;
+      this.triggerEvent("continuetoggle", { value: newValue });
     },
 
     onProgressTap(e) {
       const { index } = e.currentTarget.dataset;
-      this.triggerEvent('progresstap', { index });
-    }
-  }
+      this.triggerEvent("progresstap", { index });
+    },
+  },
 });

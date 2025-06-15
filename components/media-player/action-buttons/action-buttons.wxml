@@ -1,6 +1,5 @@
 <!-- components/action-buttons/action-buttons.wxml -->
 <view class="action-buttons"
-style="{{ currentPost.type === 'image' ? 'margin-bottom: 50rpx;' : '' }}"
 >
   <!-- User Avatar with Follow Badge -->
   <view class="action-item" style="margin-bottom:20rpx" bindtap="onUserProfile">
@@ -102,7 +101,6 @@ style="{{ currentPost.type === 'image' ? 'margin-bottom: 50rpx;' : '' }}"
     </view>
     <text class="action-count">{{ displayShares }}</text>
   </view>
-
   <!-- Report button -->
   <view class="action-item" bindtap="onShowReportModal">
     <view class="action-icon">
@@ -114,5 +112,15 @@ style="{{ currentPost.type === 'image' ? 'margin-bottom: 50rpx;' : '' }}"
         ></image>
       </view>
     </view>
+  </view>
+
+  <!-- Continue toggle -->
+  <view class="action-item continue-toggle-item" bindtap="onContinueToggle">
+    <view class="continue-control">
+      <view class="toggle-switch {{ isContinue ? 'active' : '' }}">
+        <view class="toggle-slider"></view>
+      </view>
+    </view>
+    <text class="action-label">自动播放</text>
   </view>
 </view>

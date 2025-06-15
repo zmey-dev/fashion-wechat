@@ -55,13 +55,6 @@ Component({
         type: "filter",
       },
       {
-        key: "profile",
-        name: "资料",
-        path: "/pages/profile/profile",
-        type: "filter",
-      },
-      // Tab pages (bottom navigation)
-      {
         key: "chat",
         name: "对话",
         icon: "/images/icons/message.png",
@@ -131,12 +124,6 @@ Component({
         key: "contact",
         name: "联系我们",
         path: "/pages/contact/contact",
-        type: "filter",
-      },
-      {
-        key: "profile",
-        name: "资料",
-        path: "/pages/profile/profile",
         type: "filter",
       },
       {

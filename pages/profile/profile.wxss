@@ -205,6 +205,7 @@
 .avatar-section-horizontal {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   padding: 40rpx 40rpx 30rpx;
   background: rgba(30, 30, 30, 0.6);
   backdrop-filter: blur(20rpx);
@@ -498,7 +499,7 @@
 
 /* Phone and Email Input with Verification */
 .phone-input {
-  width:100%;
+  width: 100%;
   display: flex;
   align-items: center;
   gap: 12rpx;
@@ -545,7 +546,6 @@
   align-items: center;
   justify-content: center;
   gap: 12rpx;
-  padding: 24rpx 32rpx;
   background: rgba(20, 20, 20, 0.8);
   border: 2px solid rgba(255, 255, 255, 0.1);
   border-radius: 50rpx;
@@ -728,6 +728,11 @@
   background: linear-gradient(135deg, #059669, #047857);
 }
 
+.image-icon {
+  width:40rpx;
+  height:40rpx;
+}
+
 /* Animations */
 @keyframes shake {
   0%,
@@ -833,5 +838,113 @@
   .user-info-horizontal {
     padding-left: 0;
     text-align: center;
+  }
+}
+
+/* Avatar Right Buttons */
+.avatar-right-buttons {
+  display: flex;
+  align-items: center;
+  margin-left: 20rpx;
+}
+
+.avatar-right-buttons .action-buttons-container {
+  display: flex;
+  gap: 12rpx;
+}
+
+.avatar-right-buttons .action-button {
+  min-width: 120rpx;
+  height: 60rpx;
+  padding: 0 20rpx;
+  font-size: 24rpx;
+}
+
+/* WeChat Status Row Layout */
+.wechat-status-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+
+.wechat-actions-inline {
+  display: flex;
+  align-items: center;
+}
+
+.wechat-actions-inline .action-button {
+  min-width: 100rpx;
+  height: 50rpx;
+  padding: 0 16rpx;
+  font-size: 22rpx;
+  border-radius: 8rpx;
+}
+
+/* Logout Section */
+.logout-section {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 30rpx;
+  margin-top: 20rpx;
+}
+
+.logout-button-container {
+  display: flex;
+  justify-content: center;
+}
+
+.logout-button-container .action-button {
+  min-width: 200rpx;
+}
+
+/* Responsive Design for New Layout */
+@media screen and (max-width: 600rpx) {
+  .avatar-section-horizontal {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .avatar-right-buttons {
+    margin-left: 0;
+    margin-top: 20rpx;
+  }
+
+  .avatar-right-buttons .action-button {
+    min-width: 100rpx;
+    height: 50rpx;
+    font-size: 20rpx;
+  }
+
+  .wechat-status-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12rpx;
+  }
+
+  .wechat-actions-inline {
+    justify-content: center;
+  }
+}
+
+@media screen and (max-width: 400rpx) {
+  .avatar-right-buttons .action-button {
+    min-width: 80rpx;
+    height: 44rpx;
+    font-size: 18rpx;
+    gap: 4rpx;
+  }
+
+  .wechat-actions-inline .action-button {
+    min-width: 80rpx;
+    height: 40rpx;
+    font-size: 18rpx;
+  }
+
+  .logout-button-container .action-button {
+    min-width: 160rpx;
+    height: 50rpx;
+    font-size: 22rpx;
   }
 }

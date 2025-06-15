@@ -1,31 +1,6 @@
 <!-- Profile Page -->
-<app-layout current-page="profile">  <view class="profile-container">
-    <!-- Profile Header Actions -->
-    <view class="profile-header-bar">
-      <!-- Edit Mode: Show Save and Cancel buttons -->
-      <view class="action-buttons-container" wx:if="{{isEditingProfile}}">
-        <view class="action-button save-button" bindtap="saveProfile">
-          <text class="button-icon">✓</text>
-          <text class="button-label">保存</text>
-        </view>
-        <view class="action-button cancel-button" bindtap="cancelProfileEdit">
-          <text class="button-icon">✕</text>
-          <text class="button-label">取消</text>
-        </view>
-      </view>
-      
-      <!-- View Mode: Show Edit and Logout buttons -->
-      <view class="action-buttons-container" wx:else>
-        <view class="action-button edit-button" bindtap="toggleProfileEdit">
-          <text class="button-icon">✏</text>
-          <text class="button-label">编辑</text>
-        </view>
-        <view class="action-button logout-button" bindtap="handleLogout">
-          <text class="button-icon">↗</text>
-          <text class="button-label">退出</text>
-        </view>
-      </view>
-    </view>    <!-- Avatar Section - Horizontal Layout -->
+<app-layout current-page="profile">
+  <view class="profile-container"><!-- Avatar Section - Horizontal Layout with Edit/Cancel Buttons -->
     <view class="avatar-section-horizontal">
       <view class="avatar-container-horizontal" bindtap="selectAvatar">
         <avatar class="avatar-medium" avatar="{{selectedAvatar || userInfo.avatar}}" name="{{userInfo.username}}" size="120" mode="aspectFill" />
@@ -36,6 +11,29 @@
       <view class="user-info-horizontal">
         <text class="user-name-horizontal">{{userInfo.name || userInfo.username}}</text>
         <text class="user-university-horizontal">{{university.name || '未设置大学'}}</text>
+      </view>
+      
+      <!-- Edit/Cancel Buttons moved here -->
+      <view class="avatar-right-buttons">
+        <!-- Edit Mode: Show Save and Cancel buttons -->
+        <view class="action-buttons-container" wx:if="{{isEditingProfile}}">
+          <view class="action-button save-button" bindtap="saveProfile">
+            <text class="button-icon">✓</text>
+            <text class="button-label">保存</text>
+          </view>
+          <view class="action-button cancel-button" bindtap="cancelProfileEdit">
+            <text class="button-icon">✕</text>
+            <text class="button-label">取消</text>
+          </view>
+        </view>
+        
+        <!-- View Mode: Show Edit button only -->
+        <view class="action-buttons-container" wx:else>
+          <view class="action-button edit-button" bindtap="toggleProfileEdit">
+            <image class="image-icon" src="/images/icons/edit.svg"></image>
+            <text class="button-label">编辑</text>
+          </view>
+        </view>
       </view>
     </view>
 
@@ -271,42 +269,44 @@
             </view>
           </picker>
         </view>
-      </view>
-
-      <!-- WeChat Linking Section -->
+      </view>      <!-- WeChat Linking Section -->
       <view class="form-section">
         <view class="section-title">微信绑定</view>
         
         <view class="form-field">
           <label class="field-label">微信账号</label>
           <view class="wechat-status-container">
-            <view class="wechat-status {{isWechatLinked ? 'linked' : 'unlinked'}}">
-              <view class="wechat-status-icon">
-                <text wx:if="{{isWechatLinked}}">✅</text>
-                <text wx:else>❌</text>
-              </view>
-              <view class="wechat-status-text">
-                <text wx:if="{{isWechatLinked}}">已绑定微信</text>
-                <text wx:else>未绑定微信</text>
-              </view>
-            </view>
-              <view class="wechat-actions" wx:if="{{!isEditingProfile}}">
-              <view 
-                wx:if="{{!isWechatLinked}}"
-                class="profile-action-btn wechat-link-btn link-btn"
-                bindtap="linkWechat"
-              >
-                <text class="btn-text" wx:if="{{!wechatLinking}}">绑定微信</text>
-                <text class="btn-text" wx:else>绑定中...</text>
+            <view class="wechat-status-row">
+              <view class="wechat-status {{isWechatLinked ? 'linked' : 'unlinked'}}">
+                <view class="wechat-status-icon">
+                  <text wx:if="{{isWechatLinked}}">✅</text>
+                  <text wx:else>❌</text>
+                </view>
+                <view class="wechat-status-text">
+                  <text wx:if="{{isWechatLinked}}">已绑定微信</text>
+                  <text wx:else>未绑定微信</text>
+                </view>
               </view>
               
-              <view 
-                wx:if="{{isWechatLinked}}"
-                class="profile-action-btn wechat-link-btn unlink-btn"
-                bindtap="unlinkWechat"
-              >
-                <text class="btn-text" wx:if="{{!wechatLinking}}">解除绑定</text>
-                <text class="btn-text" wx:else>处理中...</text>
+              <!-- WeChat Action Button moved next to status -->
+              <view class="wechat-actions-inline">
+                <view 
+                  wx:if="{{!isWechatLinked}}"
+                  class="action-button wechat-link-btn link-btn"
+                  bindtap="linkWechat"
+                >
+                  <text class="button-label" wx:if="{{!wechatLinking}}">绑定</text>
+                  <text class="button-label" wx:else>绑定中</text>
+                </view>
+                
+                <view 
+                  wx:if="{{isWechatLinked}}"
+                  class="action-button wechat-link-btn unlink-btn"
+                  bindtap="unlinkWechat"
+                >
+                  <text class="button-label" wx:if="{{!wechatLinking}}">解除</text>
+                  <text class="button-label" wx:else>处理中</text>
+                </view>
               </view>
             </view>
           </view>
@@ -314,6 +314,16 @@
           <view class="wechat-description">
             <text wx:if="{{!isWechatLinked}}">绑定微信后可使用微信快捷登录</text>
             <text wx:else>您可以使用微信登录或解除绑定</text>
+          </view>
+        </view>
+        
+        <!-- Logout Button moved here -->
+        <view class="form-field logout-section">
+          <view class="logout-button-container">
+            <view class="action-button logout-button" bindtap="handleLogout">
+              <image class="image-icon" src="/images/icons/logout.svg"></image>
+              <text class="button-label">退出登录</text>
+            </view>
           </view>
         </view>
       </view>
