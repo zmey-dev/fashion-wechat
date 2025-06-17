@@ -65,9 +65,8 @@
         <view class="section-header">
           <image class="section-icon" src="/images/icons/document-text.svg"></image>
           <text class="section-title">活动说明</text>
-        </view>
-        <view class="description-content">
-          <text class="description-text">{{event.description}}</text>
+        </view>        <view class="description-content">
+          <rich-text class="description-html" nodes="{{event.description}}"></rich-text>
         </view>
       </view>
 

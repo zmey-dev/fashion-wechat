@@ -109,13 +109,17 @@ Page({
             pastEvents: pastEvents,
             loading: false,
             error: null,
-          });
-
-          // Initialize selected event
+          });          // Initialize selected event
           if (activeEvents.length > 0) {
+            // Process HTML content for the first event
+            const processedEvent = {
+              ...activeEvents[0],
+              description: this.processHtmlContent(activeEvents[0].description)
+            };
+            
             this.setData({
               currentEventIndex: 0,
-              selectedEvent: activeEvents[0],
+              selectedEvent: processedEvent,
             });
 
             console.log("Selected event:", activeEvents[0]);
@@ -159,15 +163,19 @@ Page({
     });
   }, // Handle swiper change
   onSwiperChange(e) {
-    const currentIndex = e.detail.current;
-
-    // Verify the index is valid
+    const currentIndex = e.detail.current;    // Verify the index is valid
     if (currentIndex >= 0 && currentIndex < this.data.events.length) {
       const selectedEvent = this.data.events[currentIndex];
+      
+      // Process HTML content for rich-text display
+      const processedEvent = {
+        ...selectedEvent,
+        description: this.processHtmlContent(selectedEvent.description)
+      };
 
       this.setData({
         currentEventIndex: currentIndex,
-        selectedEvent: selectedEvent,
+        selectedEvent: processedEvent,
       });
 
       console.log("Swiper changed to event:", selectedEvent?.title);
@@ -177,15 +185,19 @@ Page({
     }
   }, // Handle event card selection
   onEventSelect(e) {
-    const index = e.currentTarget.dataset.index;
-
-    // Verify the index is valid
+    const index = e.currentTarget.dataset.index;    // Verify the index is valid
     if (index >= 0 && index < this.data.events.length) {
       const selectedEvent = this.data.events[index];
+      
+      // Process HTML content for rich-text display
+      const processedEvent = {
+        ...selectedEvent,
+        description: this.processHtmlContent(selectedEvent.description)
+      };
 
       this.setData({
         currentEventIndex: index,
-        selectedEvent: selectedEvent,
+        selectedEvent: processedEvent,
       });
 
       console.log("Event selected:", selectedEvent?.title);
@@ -545,5 +557,68 @@ Page({
     };
 
     return `${formatTime(start)} - ${formatTime(end)}`;
+  },
+
+  // Process HTML content for rich-text component
+  processHtmlContent(htmlString) {
+    if (!htmlString) return '';
+    
+    // Add inline styles to common HTML elements for rich-text component
+    let processedHtml = htmlString;
+    
+    // Style headings
+    processedHtml = processedHtml.replace(
+      /<h([1-6])([^>]*)>/g, 
+      '<h$1$2 style="color: #ff6b6b; font-weight: 700; margin: 24rpx 0 16rpx 0;">'
+    );
+    
+    // Style paragraphs
+    processedHtml = processedHtml.replace(
+      /<p([^>]*)>/g, 
+      '<p$1 style="margin: 0 0 16rpx 0; line-height: 1.6; color: #2d1810;">'
+    );
+    
+    // Style strong/bold text
+    processedHtml = processedHtml.replace(
+      /<(strong|b)([^>]*)>/g, 
+      '<$1$2 style="color: #ff4757; font-weight: 700;">'
+    );
+    
+    // Style emphasis/italic text
+    processedHtml = processedHtml.replace(
+      /<(em|i)([^>]*)>/g, 
+      '<$1$2 style="color: #ff9f43; font-style: italic;">'
+    );
+    
+    // Style links
+    processedHtml = processedHtml.replace(
+      /<a([^>]*)>/g, 
+      '<a$1 style="color: #ff6b6b; text-decoration: underline;">'
+    );
+    
+    // Style blockquotes
+    processedHtml = processedHtml.replace(
+      /<blockquote([^>]*)>/g, 
+      '<blockquote$1 style="background: rgba(255, 107, 107, 0.1); border-left: 4rpx solid #ff6b6b; margin: 16rpx 0; padding: 16rpx 24rpx; border-radius: 8rpx;">'
+    );
+    
+    // Style code
+    processedHtml = processedHtml.replace(
+      /<code([^>]*)>/g, 
+      '<code$1 style="background: rgba(255, 159, 67, 0.2); color: #8B4513; padding: 4rpx 8rpx; border-radius: 4rpx; font-family: monospace;">'
+    );
+    
+    // Style lists
+    processedHtml = processedHtml.replace(
+      /<(ul|ol)([^>]*)>/g, 
+      '<$1$2 style="margin: 16rpx 0; padding-left: 32rpx; color: #2d1810;">'
+    );
+    
+    processedHtml = processedHtml.replace(
+      /<li([^>]*)>/g, 
+      '<li$1 style="margin: 8rpx 0; line-height: 1.5;">'
+    );
+    
+    return processedHtml;
   },
 });

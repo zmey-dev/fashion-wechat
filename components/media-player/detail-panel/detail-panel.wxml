@@ -28,7 +28,7 @@
         data-index="0"
         bindtap="onTabChange"
       >
-        <text>{{ currentPostUser.username || 'User' }}的帖子</text>
+        <text>{{ currentPostUser.username || 'User' }}的作品</text>
       </view>
       <view
         class="tab-item {{ tabIndex === 1 ? 'active' : '' }}"

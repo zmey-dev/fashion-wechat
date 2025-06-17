@@ -25,13 +25,13 @@
       </view>
 
       <view class="featured-showcase">
-        <!-- Main Event Display -->        <view class="showcase-main">
-          <swiper 
+        <!-- Main Event Display -->        <view class="showcase-main">          <swiper 
             wx:if="{{events.length > 0}}"
             class="event-swiper" 
             indicator-dots="false"
             circular="true"
-            autoplay="false"
+            autoplay="{{!showRulesModal}}"
+            interval="{{showRulesModal ? 999999 : 5000}}"
             current="{{currentEventIndex}}"
             bindchange="onSwiperChange">
             <swiper-item wx:for="{{events}}" wx:key="id">
@@ -228,9 +228,8 @@
                 <image src="/images/icons/document-text.svg" mode="aspectFit"></image>
               </view>
               <text class="section-title">活动说明</text>
-            </view>
-            <view class="description-content">
-              <text class="description-text">{{selectedEvent.description}}</text>
+            </view>            <view class="description-content">
+              <rich-text class="description-html" nodes="{{selectedEvent.description}}"></rich-text>
             </view>
           </view>
 

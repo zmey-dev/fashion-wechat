@@ -54,13 +54,11 @@
         />
       </view>
     </view>    <!-- Comment Input Area -->
-    <view wx:if="{{authUser.role === 'user'}}" class="comment-input-container">
-      <textarea 
+    <view wx:if="{{authUser.role === 'user'}}" class="comment-input-container">      <textarea 
         class="comment-textarea {{commentId ? 'has-reply' : ''}}"
         placeholder="请输入评论内容"
         value="{{personalComment}}"
         bindinput="onCommentInput"
-        bindconfirm="onSendComment"
         maxlength="500"
         auto-height
         cursor-spacing="10"

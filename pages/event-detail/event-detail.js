@@ -112,17 +112,23 @@ Page({
           console.log("Event data loaded successfully:", res.data.events);
           console.log("Event ID:", this.data.eventId);
           
-          
-          const event = res.data.events.find(e => e.id == this.data.eventId);
+            const event = res.data.events.find(e => e.id == this.data.eventId);
           if (!event) {
             this.showToast("活动不存在或已被删除");
             wx.navigateBack();
             return;
           }
+          
+          // Process HTML content for rich-text display
+          const processedEvent = {
+            ...event,
+            description: this.processHtmlContent(event.description)
+          };
+          
           const canJoin = this.checkCanJoinEvent(event);
           
           this.setData({
-            event: event,
+            event: processedEvent,
             canJoinEvent: canJoin
           });
         } else {
@@ -312,5 +318,68 @@ Page({
       icon: 'none',
       duration: 2000
     });
-  }
+  },
+
+  // Process HTML content for rich-text component
+  processHtmlContent(htmlString) {
+    if (!htmlString) return '';
+    
+    // Add inline styles to common HTML elements for rich-text component
+    let processedHtml = htmlString;
+    
+    // Style headings
+    processedHtml = processedHtml.replace(
+      /<h([1-6])([^>]*)>/g, 
+      '<h$1$2 style="color: #ff6b6b; font-weight: 700; margin: 24rpx 0 16rpx 0;">'
+    );
+    
+    // Style paragraphs
+    processedHtml = processedHtml.replace(
+      /<p([^>]*)>/g, 
+      '<p$1 style="margin: 0 0 16rpx 0; line-height: 1.6; color: #2d1810;">'
+    );
+    
+    // Style strong/bold text
+    processedHtml = processedHtml.replace(
+      /<(strong|b)([^>]*)>/g, 
+      '<$1$2 style="color: #ff4757; font-weight: 700;">'
+    );
+    
+    // Style emphasis/italic text
+    processedHtml = processedHtml.replace(
+      /<(em|i)([^>]*)>/g, 
+      '<$1$2 style="color: #ff9f43; font-style: italic;">'
+    );
+    
+    // Style links
+    processedHtml = processedHtml.replace(
+      /<a([^>]*)>/g, 
+      '<a$1 style="color: #ff6b6b; text-decoration: underline;">'
+    );
+    
+    // Style blockquotes
+    processedHtml = processedHtml.replace(
+      /<blockquote([^>]*)>/g, 
+      '<blockquote$1 style="background: rgba(255, 107, 107, 0.1); border-left: 4rpx solid #ff6b6b; margin: 16rpx 0; padding: 16rpx 24rpx; border-radius: 8rpx;">'
+    );
+    
+    // Style code
+    processedHtml = processedHtml.replace(
+      /<code([^>]*)>/g, 
+      '<code$1 style="background: rgba(255, 159, 67, 0.2); color: #8B4513; padding: 4rpx 8rpx; border-radius: 4rpx; font-family: monospace;">'
+    );
+    
+    // Style lists
+    processedHtml = processedHtml.replace(
+      /<(ul|ol)([^>]*)>/g, 
+      '<$1$2 style="margin: 16rpx 0; padding-left: 32rpx; color: #2d1810;">'
+    );
+    
+    processedHtml = processedHtml.replace(
+      /<li([^>]*)>/g, 
+      '<li$1 style="margin: 8rpx 0; line-height: 1.5;">'
+    );
+    
+    return processedHtml;
+  },
 });
