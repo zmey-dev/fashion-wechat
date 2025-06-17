@@ -1,4 +1,5 @@
-<view class="comment-tree-item" style="margin-left: {{depth * 40}}rpx;">
+<!-- comment-tree-item-child.wxml -->
+<view class="comment-tree-item-child">
   <!-- Main Comment -->
   <comment-item 
     wx:if="{{comment}}"
@@ -14,20 +15,51 @@
     bind:imageupload="onImageUploadHandle"
   />
 
-  <!-- Reply Toggle Button -->
-  <view wx:if="{{hasReplies}}" class="reply-toggle-container">
-    <button 
-      class="reply-toggle-btn" 
+  <!-- TikTok Style Nested Reply Toggle -->
+  <view wx:if="{{hasReplies}}" class="tiktok-nested-toggle">
+    <view class="nested-connection-line"></view>
+    <view 
+      class="tiktok-nested-btn" 
       bindtap="onToggleReplies"
     >
+      <text class="nested-toggle-text">
+        {{isExpanded ? '收起' : ''}}{{replies.length}}条回复
+      </text>
       <image 
-        class="toggle-icon" 
+        class="nested-toggle-arrow" 
         src="{{isExpanded ? '/images/icons/chevron-up.svg' : '/images/icons/chevron-down.svg'}}" 
       />
-      <span class="toggle-text">
-        {{isExpanded ? '隐藏回复' : '查看回复'}} ({{replies.length}})
-      </span>
-    </button>
+    </view>
+  </view>
+
+  <!-- Nested Replies Container -->
+  <view 
+    wx:if="{{hasReplies && isExpanded}}" 
+    class="tiktok-nested-replies"
+  >
+    <!-- Deeper Connection Line -->
+    <view class="deep-connection-line"></view>
+    
+    <!-- Nested Reply Items -->
+    <view class="nested-replies-list">
+      <comment-tree-item-child 
+        wx:for="{{replies}}" 
+        wx:key="id"
+        comment="{{item}}"
+        all-comments="{{allComments}}"
+        logged-user="{{loggedUser}}"
+        selected-post="{{selectedPost}}"
+        depth="{{depth + 1}}"
+        bind:like="onLikeHandle"
+        bind:edit="onEditHandle"
+        bind:reply="onReplyHandle"
+        bind:delete="onDeleteHandle"
+        bind:imagepreview="onImagePreviewHandle"
+        bind:imageupload="onImageUploadHandle"
+      />
+    </view>
+  </view>
+</view>
     <view class="reply-toggle-line"></view>
   </view>
 

@@ -1,8 +1,7 @@
 /* comment-item.wxss */
 .comment-container {
   width: 100%;
-  margin-bottom: 20rpx;
-  padding: 16rpx 0;
+  padding:0;
 }
 .comment-header {
   display: flex;
