@@ -56,32 +56,6 @@
         bind:delete="onDeleteHandle"
         bind:imagepreview="onImagePreviewHandle"
         bind:imageupload="onImageUploadHandle"
-      />
-    </view>
-  </view>
-</view>
-    <view class="reply-toggle-line"></view>
-  </view>
-
-  <!-- Nested Replies -->
-  <view 
-    wx:if="{{hasReplies && isExpanded}}" 
-    class="replies-container {{isExpanded ? 'expanded' : 'collapsed'}}"
-  >
-    <comment-tree-item 
-      wx:for="{{replies}}" 
-      wx:key="id"
-      comment="{{item}}"
-      all-comments="{{allComments}}"
-      logged-user="{{loggedUser}}"
-      selected-post="{{selectedPost}}"
-      depth="{{depth + 1}}"
-      bind:like="onLikeHandle"
-      bind:edit="onEditHandle"
-      bind:reply="onReplyHandle"
-      bind:delete="onDeleteHandle"
-      bind:imagepreview="onImagePreviewHandle"
-      bind:imageupload="onImageUploadHandle"
-    />
+      />    </view>
   </view>
 </view>
