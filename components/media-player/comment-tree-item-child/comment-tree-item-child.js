@@ -1,4 +1,3 @@
-// comment-tree-item-child.js
 Component({
   properties: {
     comment: {

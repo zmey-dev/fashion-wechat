@@ -1,5 +1,6 @@
 // components/detail-panel/detail-panel.js
-Component({  properties: {
+Component({
+  properties: {
     showDetail: { type: Boolean, value: false },
     panelState: { type: String, value: "closed" }, // Receive panelState from parent
     tabIndex: { type: Number, value: 1 },
@@ -35,11 +36,8 @@ Component({  properties: {
   ready() {
     // Update container dimensions after component is fully rendered
     this.getContainerDimensions();
-  },  observers: {
-    panelState: function (state) {
-      console.log("detail-panel panelState observer:", state);
-      // Panel state is now controlled by parent, no need to set local state
-    },
+  },
+  observers: {
     showDetail: function (show) {
       console.log(
         "detail-panel showDetail observer:",
@@ -51,10 +49,8 @@ Component({  properties: {
       // Only trigger state change events, don't manage state locally
       if (show && this.properties.panelState === "closed") {
         this.triggerEvent("statechange", { state: "half" });
-        console.log("detail-panel triggered statechange to half via observer");
       } else if (!show && this.properties.panelState !== "closed") {
         this.triggerEvent("statechange", { state: "closed" });
-        console.log("detail-panel triggered statechange to closed via observer");
       }
     },
   },
@@ -63,7 +59,8 @@ Component({  properties: {
     onTabChange(e) {
       const { index } = e.currentTarget.dataset;
       this.triggerEvent("tabchange", { index });
-    },    onCloseDetail() {
+    },
+    onCloseDetail() {
       // Don't set local state, just trigger event for parent to handle
       this.triggerEvent("closedetail");
     },
@@ -85,7 +82,8 @@ Component({  properties: {
         startTime: Date.now(),
         translateY: 0,
       });
-    },    onTouchMove(e) {
+    },
+    onTouchMove(e) {
       if (!this.data.isDragging) return;
 
       const touch = e.touches[0];
@@ -125,16 +123,12 @@ Component({  properties: {
         currentY: touch.clientY,
         translateY: newTranslateY,
       });
-    },    onTouchEnd(e) {
+    },
+    onTouchEnd(e) {
       if (!this.data.isDragging) return;
 
-      const {
-        startY,
-        currentY,
-        startTime,
-        containerHeight,
-        windowHeight,
-      } = this.data;
+      const { startY, currentY, startTime, containerHeight, windowHeight } =
+        this.data;
       const { panelState } = this.properties; // Use property instead of data
       const deltaY = currentY - startY;
       const deltaTime = Date.now() - startTime;
@@ -204,7 +198,8 @@ Component({  properties: {
 
     onCommentLike(e) {
       this.triggerEvent("commentlike", e.detail);
-    },    onCommentSent(e) {
+    },
+    onCommentSent(e) {
       // Just trigger event, parent handles state management
       this.triggerEvent("commentsent", e.detail);
     },

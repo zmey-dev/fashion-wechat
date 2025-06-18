@@ -12,7 +12,7 @@
   flex: 1;
   box-sizing: border-box;
   overflow-y: auto;
-  padding: 16rpx 20rpx 160rpx 20rpx;
+  padding: 16rpx 20rpx 120rpx 20rpx;
   background-color: #1a1a1a;
 }
 

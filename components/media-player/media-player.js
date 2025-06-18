@@ -1058,8 +1058,6 @@ Component({
     },
     onDetailStateChange(e) {
       const { state } = e.detail;
-      console.log("Detail panel state changed to:", state);
-      console.log("Previous detailPanelState:", this.data.detailPanelState);
 
       this.setData({
         detailPanelState: state,

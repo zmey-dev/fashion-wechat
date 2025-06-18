@@ -1,5 +1,5 @@
-<!-- comment-tree-item-child.wxml -->
-<view class="comment-tree-item-child">
+<!-- comment-tree-item.wxml -->
+<view class="comment-tree-item">
   <!-- Main Comment -->
   <comment-item 
     wx:if="{{comment}}"
@@ -15,18 +15,18 @@
     bind:imageupload="onImageUploadHandle"
   />
 
-  <!-- TikTok Style Nested Reply Toggle -->
-  <view wx:if="{{hasReplies}}" class="tiktok-nested-toggle">
-    <view class="nested-connection-line"></view>
+  <!-- Reply Toggle Button - TikTok Style -->
+  <view wx:if="{{hasReplies}}" class="tiktok-reply-toggle">
+    <view class="reply-connection-line"></view>
     <view 
-      class="tiktok-nested-btn" 
+      class="tiktok-toggle-btn" 
       bindtap="onToggleReplies"
     >
-      <text class="nested-toggle-text">
+      <text class="toggle-text">
         {{isExpanded ? '收起' : ''}}{{replies.length}}条回复
       </text>
       <image 
-        class="nested-toggle-arrow" 
+        class="toggle-arrow" 
         src="{{isExpanded ? '/images/icons/chevron-up.svg' : '/images/icons/chevron-down.svg'}}" 
       />
     </view>
@@ -35,14 +35,14 @@
   <!-- Nested Replies Container -->
   <view 
     wx:if="{{hasReplies && isExpanded}}" 
-    class="tiktok-nested-replies"
+    class="tiktok-replies-container"
   >
-    <!-- Deeper Connection Line -->
-    <view class="deep-connection-line"></view>
+    <!-- Connection Line for Replies -->
+    <view class="replies-connection-line"></view>
     
-    <!-- Nested Reply Items -->
-    <view class="nested-replies-list">
-      <comment-tree-item-child 
+    <!-- Reply Items -->
+    <view class="replies-list">
+      <comment-tree-item 
         wx:for="{{replies}}" 
         wx:key="id"
         comment="{{item}}"
@@ -56,6 +56,7 @@
         bind:delete="onDeleteHandle"
         bind:imagepreview="onImagePreviewHandle"
         bind:imageupload="onImageUploadHandle"
-      />    </view>
+      />
+    </view>
   </view>
 </view>

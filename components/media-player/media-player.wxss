@@ -31,22 +31,51 @@
 
 /* Responsive layout when detail panel is open */
 .media-content.detail-open {
-  height: 40% !important;
+  height: 25% !important;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  overflow: hidden;
+  position: relative;
+}
+
+/* Specific states for different panel sizes */
+.media-content.detail-half {
+  height: 25% !important;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  overflow: hidden;
+  position: relative;
+}
+
+.media-content.detail-full {
+  height: 0% !important;
+  opacity: 0;
   transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   overflow: hidden;
   position: relative;
 }
 
 /* Ensure media display fits properly in reduced space */
-.media-content.detail-open .media-display {
+.media-content.detail-open .media-display,
+.media-content.detail-half .media-display {
   height: 100%;
   width: 100%;
   transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
+.media-content.detail-full .media-display {
+  height: 0%;
+  width: 100%;
+  opacity: 0;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
 /* Adjust swiper container in detail panel open state */
-.media-content.detail-open .media-display swiper {
+.media-content.detail-open .media-display swiper,
+.media-content.detail-half .media-display swiper {
   height: 100% !important;
+}
+
+.media-content.detail-full .media-display swiper {
+  height: 0% !important;
 }
 
 .media-content.detail-open .media-display swiper-item {

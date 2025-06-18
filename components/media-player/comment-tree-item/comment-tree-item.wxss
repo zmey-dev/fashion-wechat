@@ -11,8 +11,6 @@
 .tiktok-reply-toggle {
   position: relative;
   margin-left: 96rpx; /* Align with comment content */
-  margin-top: 16rpx;
-  margin-bottom: 16rpx;
 }
 
 .reply-connection-line {

@@ -24,23 +24,22 @@
         <text class="section-subtitle">发现精彩机会</text>
       </view>
 
-      <view class="featured-showcase">
-        <!-- Main Event Display -->        <view class="showcase-main">          <swiper 
+      <view class="featured-showcase">        <!-- Main Event Display -->        <view class="showcase-main">          <swiper 
             wx:if="{{events.length > 0}}"
             class="event-swiper" 
             indicator-dots="false"
             circular="true"
             autoplay="{{!showRulesModal}}"
-            interval="{{showRulesModal ? 999999 : 5000}}"
+            interval="{{showRulesModal ? 999999 : 50000}}"
             current="{{currentEventIndex}}"
-            bindchange="onSwiperChange">
-            <swiper-item wx:for="{{events}}" wx:key="id">
+            bindchange="onSwiperChange">            <swiper-item wx:for="{{events}}" wx:key="id">
               <view class="event-slide">
+                <!-- Full poster image without overlay -->
                 <view class="slide-image-container">
                   <image class="slide-image" src="{{item.poster_image}}" mode="aspectFill"></image>
-                  <view class="image-overlay"></view>
                 </view>
                 
+                <!-- Event information moved below the image -->
                 <view class="slide-content">
                   <view class="event-meta">
                     <view class="meta-item">
@@ -67,7 +66,9 @@
                       <text class="stat-number" wx:else>∞</text>
                       <text class="stat-label">剩余名额</text>
                     </view>
-                  </view>                    <!-- Teacher action buttons -->
+                  </view>
+
+                  <!-- Teacher action buttons -->
                   <view wx:if="{{isTeacher}}" class="teacher-actions">
                     <button wx:if="{{selectedEvent.user.id === userInfo.id}}" class="teacher-btn edit-btn" bindtap="onUpdateEvent">
                       <view class="btn-icon">
@@ -88,15 +89,31 @@
                       <text class="btn-text">参与活动</text>
                     </button>
                   </view>
-                    <!-- Student action button -->
+
+                  <!-- Student action button -->
                   <button wx:else class="cta-button" bindtap="onParticipate">
                     <text class="cta-text">查看详情</text>
                     <view class="cta-arrow"></view>
                   </button>
                 </view>
               </view>
-            </swiper-item>
-          </swiper>
+            </swiper-item>          </swiper>
+          
+          <!-- No Events Fallback -->
+          <view wx:else class="no-events-fallback" style="text-align: center; padding: 100rpx 40rpx;">
+            <text style="font-size: 32rpx; color: #666; display: block; margin-bottom: 20rpx;">暂无活动</text>
+            <text style="font-size: 24rpx; color: #999;">请稍后再来查看</text>
+          </view>
+          
+          <!-- Debug Information -->
+          <view class="debug-info" style="background: #f0f0f0; padding: 20rpx; margin: 20rpx; border-radius: 10rpx;">
+            <text style="color: #333; font-size: 24rpx;">Debug: Events count: {{events.length}}</text>
+            <text style="color: #333; font-size: 24rpx; display: block;">Loading: {{loading}}</text>
+            <text style="color: #333; font-size: 24rpx; display: block;">Error: {{error}}</text>
+            <view wx:if="{{events.length > 0}}" style="margin-top: 10rpx;">
+              <text style="color: #333; font-size: 20rpx;">First event: {{events[0].title}}</text>
+            </view>
+          </view>
         </view>
 
         <!-- Event Navigation -->

@@ -16,11 +16,10 @@
     postId="{{ currentPost.id }}"
     bind:close="onCloseReportModal"
     bind:submit="onSubmitReport"
-  />
-    <view 
-    class="media-content {{ isVerticalSwiping ? 'swiping' : '' }} {{ detailPanelState === 'half' ? 'detail-open' : '' }} {{ detailPanelState === 'full' ? 'detail-full' : '' }}"
+  />    <view 
+    class="media-content {{ isVerticalSwiping ? 'swiping' : '' }} {{ detailPanelState === 'half' ? 'detail-half' : '' }} {{ detailPanelState === 'full' ? 'detail-full' : '' }}"
     style="transform: translateY({{ verticalTransform }}px);"
-  >    <!-- Media Display Component -->
+  ><!-- Media Display Component -->
     <media-display
       current-post="{{ currentPost }}"
       current-media="{{ currentMedia }}"

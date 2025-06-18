@@ -10,23 +10,6 @@
       <text class="stat-item">关注者: {{ displayFollowerCount }}</text>
       <text class="stat-item">点赞: {{ displayLikeCount }}</text>
     </view>
-
-    <view
-      wx:if="{{ currentPostUser.id && authUser && currentPostUser.id !== authUser.id }}"
-      class="follow-button {{currentPostUser.is_followed ? 'followed' : ''}}"
-      bindtap="handleFollow"
-    >
-      <view class="svg-icon follow-btn-svg">
-        <image
-          src="{{currentPostUser.is_followed? '/images/icons/minus.svg': '/images/icons/plus.svg'}}"
-          class="svg-icon"
-          mode="aspectFit"
-        ></image>
-      </view>
-      <text>{{
-        currentPostUser.is_followed ? "取消关注" : "关注"
-      }}</text>
-    </view>
   </view>
 
   <scroll-view class="posts-grid" scroll-y="{{ true }}">
