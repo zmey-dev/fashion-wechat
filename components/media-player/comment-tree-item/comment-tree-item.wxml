@@ -15,23 +15,6 @@
     bind:imageupload="onImageUploadHandle"
   />
 
-  <!-- Reply Toggle Button - TikTok Style -->
-  <view wx:if="{{hasReplies}}" class="tiktok-reply-toggle">
-    <view class="reply-connection-line"></view>
-    <view 
-      class="tiktok-toggle-btn" 
-      bindtap="onToggleReplies"
-    >
-      <text class="toggle-text">
-        {{isExpanded ? '收起' : ''}}{{replies.length}}条回复
-      </text>
-      <image 
-        class="toggle-arrow" 
-        src="{{isExpanded ? '/images/icons/chevron-up.svg' : '/images/icons/chevron-down.svg'}}" 
-      />
-    </view>
-  </view>
-
   <!-- Nested Replies Container -->
   <view 
     wx:if="{{hasReplies && isExpanded}}" 
@@ -56,6 +39,23 @@
         bind:delete="onDeleteHandle"
         bind:imagepreview="onImagePreviewHandle"
         bind:imageupload="onImageUploadHandle"
+      />
+    </view>
+  </view>
+
+  <!-- Reply Toggle Button - TikTok Style -->
+  <view wx:if="{{hasReplies}}" class="tiktok-reply-toggle">
+    <view class="reply-connection-line"></view>
+    <view 
+      class="tiktok-toggle-btn" 
+      bindtap="onToggleReplies"
+    >
+      <text class="toggle-text">
+        {{isExpanded ? '收起' : ''}}{{replies.length}}条回复
+      </text>
+      <image 
+        class="toggle-arrow" 
+        src="{{isExpanded ? '/images/icons/chevron-up.svg' : '/images/icons/chevron-down.svg'}}" 
       />
     </view>
   </view>

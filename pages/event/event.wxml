@@ -41,33 +41,6 @@
                 
                 <!-- Event information moved below the image -->
                 <view class="slide-content">
-                  <view class="event-meta">
-                    <view class="meta-item">
-                      <view class="meta-icon calendar-icon"></view>
-                      <text class="meta-text">{{item.start_date}} - {{item.end_date}}</text>
-                    </view>
-                    <view class="meta-item">
-                      <view class="meta-icon location-icon"></view>
-                      <text class="meta-text">{{item.user.university.name}}</text>
-                    </view>
-                  </view>
-                  
-                  <text class="event-title">{{item.title}}</text>
-                  
-                  <view class="event-stats">
-                    <view class="stat-item">
-                      <text class="stat-number" wx:if="{{item.allow_limit}}">{{item.students_count}}/{{item.limit}}</text>
-                      <text class="stat-number" wx:else>{{item.students_count}}</text>
-                      <text class="stat-label">参与者</text>
-                    </view>
-                    <view class="stat-divider"></view>
-                    <view class="stat-item">
-                      <text class="stat-number" wx:if="{{item.allow_limit}}">{{item.limit - item.students_count}}</text>
-                      <text class="stat-number" wx:else>∞</text>
-                      <text class="stat-label">剩余名额</text>
-                    </view>
-                  </view>
-
                   <!-- Teacher action buttons -->
                   <view wx:if="{{isTeacher}}" class="teacher-actions">
                     <button wx:if="{{selectedEvent.user.id === userInfo.id}}" class="teacher-btn edit-btn" bindtap="onUpdateEvent">
@@ -103,16 +76,6 @@
           <view wx:else class="no-events-fallback" style="text-align: center; padding: 100rpx 40rpx;">
             <text style="font-size: 32rpx; color: #666; display: block; margin-bottom: 20rpx;">暂无活动</text>
             <text style="font-size: 24rpx; color: #999;">请稍后再来查看</text>
-          </view>
-          
-          <!-- Debug Information -->
-          <view class="debug-info" style="background: #f0f0f0; padding: 20rpx; margin: 20rpx; border-radius: 10rpx;">
-            <text style="color: #333; font-size: 24rpx;">Debug: Events count: {{events.length}}</text>
-            <text style="color: #333; font-size: 24rpx; display: block;">Loading: {{loading}}</text>
-            <text style="color: #333; font-size: 24rpx; display: block;">Error: {{error}}</text>
-            <view wx:if="{{events.length > 0}}" style="margin-top: 10rpx;">
-              <text style="color: #333; font-size: 20rpx;">First event: {{events[0].title}}</text>
-            </view>
           </view>
         </view>
 
@@ -204,35 +167,21 @@
             <image class="close-icon" src="/images/icons/X.svg" mode="aspectFit"></image>
           </div>
         </view>
-        
-        <!-- Modal Body -->
+          <!-- Modal Body -->
         <view class="modal-body">
-          <!-- Event Preview Card -->
-          <view class="event-preview-card">
-            <view class="preview-image-container">
-              <image class="preview-image" src="{{selectedEvent.poster_image}}" mode="aspectFill"></image>
-              <view class="image-gradient"></view>
+          <!-- Event Information Section -->
+          <view class="event-info-section">
+            <view class="section-header">
+              <view class="section-icon">
+                <image src="/images/icons/info-circle.svg" mode="aspectFit"></image>
+              </view>
+              <text class="section-title">活动信息</text>
             </view>
-            <view class="preview-content">
-              <text class="preview-title">{{selectedEvent.title}}</text>
-              <view class="preview-meta">
-                <view class="meta-row">
-                  <view class="meta-icon">
-                    <image src="/images/icons/calendar.svg" mode="aspectFit"></image>
-                  </view>
-                  <text class="meta-text">{{selectedEvent.start_date}} - {{selectedEvent.end_date}}</text>
-                </view>
-                <view class="meta-row">
-                  <view class="meta-icon">
-                    <image src="/images/icons/location.svg" mode="aspectFit"></image>
-                  </view>
-                  <text class="meta-text">{{selectedEvent.user.university.name}}</text>
-                </view>
-                <view class="meta-row" wx:if="{{selectedEvent.allow_limit}}">
-                  <view class="meta-icon">
-                    <image src="/images/icons/users.svg" mode="aspectFit"></image>
-                  </view>
-                  <text class="meta-text">限{{selectedEvent.limit}}人 · 已报名{{selectedEvent.students_count}}人</text>
+            <view class="event-info-content">
+              <view class="event-info-card">
+                <view class="info-image-container">
+                  <image class="info-image" src="{{selectedEvent.poster_image}}" mode="aspectFill"></image>
+                  <view class="image-gradient"></view>
                 </view>
               </view>
             </view>
@@ -245,17 +194,38 @@
                 <image src="/images/icons/document-text.svg" mode="aspectFit"></image>
               </view>
               <text class="section-title">活动说明</text>
-            </view>            <view class="description-content">
-              <rich-text class="description-html" nodes="{{selectedEvent.description}}"></rich-text>
+            </view>            
+            <view class="description-content">
+              <view class="info-content">
+                  <text class="info-title">{{selectedEvent.title}}</text>
+                  <view class="info-meta">
+                    <view class="meta-row">
+                      <view class="meta-icon">
+                        <image src="/images/icons/calendar.svg" mode="aspectFit" class="image-icon"></image>
+                      </view>
+                      <text class="meta-text">{{selectedEvent.start_date}} - {{selectedEvent.end_date}}</text>
+                    </view>
+                    <view class="meta-row">
+                      <view class="meta-icon">
+                        <image src="/images/icons/location.svg" mode="aspectFit" class="image-icon"></image>
+                      </view>
+                      <text class="meta-text">{{selectedEvent.user.university.name}}</text>
+                    </view>
+                    <view class="meta-row" wx:if="{{selectedEvent.allow_limit}}">
+                      <view class="meta-icon">
+                        <image src="/images/icons/users.svg" mode="aspectFit" class="image-icon"></image>
+                      </view>
+                      <text class="meta-text">限{{selectedEvent.limit}}人 · 已报名{{selectedEvent.students_count}}人</text>
+                    </view>
+                  </view>
+                <rich-text class="description-html" nodes="{{selectedEvent.description}}"></rich-text>
+                </view>
             </view>
           </view>
 
           <!-- Rules Section -->
           <view class="rules-section">
             <view class="section-header">
-              <view class="section-icon">
-                <image src="/images/icons/check-circle.svg" mode="aspectFit"></image>
-              </view>
               <text class="section-title">参与规则</text>
             </view>
             <view class="rules-list">
@@ -282,7 +252,7 @@
           <view class="contact-section">
             <view class="section-header">
               <view class="section-icon">
-                <image src="/images/icons/phone.svg" mode="aspectFit"></image>
+                <image src="/images/icons/phone.svg" mode="aspectFit" class="image-icon"></image>
               </view>
               <text class="section-title">联系方式</text>
             </view>
@@ -317,7 +287,7 @@
           <!-- Show for teachers - view details button -->
           <button wx:elif="{{isTeacher && selectedEvent.user.id !== userInfo.id}}" class="modal-btn primary" bindtap="onTeacherParticipate">
             <view class="btn-content">
-              <image class="btn-icon" src="/images/icons/users.svg" mode="aspectFit"></image>
+              <image class="btn-icon" src="/images/icons/users.svg" mode="aspectFit" class="image-icon"></image>
               <text>{{messages.actions.teacherJoin}}</text>
             </view>
           </button>
@@ -325,7 +295,7 @@
           <view wx:elif="{{isTeacher && selectedEvent.user.id === userInfo.id}}" class="teacher-modal-actions">
             <button class="modal-btn primary" bindtap="onAgreeRules">
               <view class="btn-content">
-                <image class="btn-icon" src="/images/icons/eye.svg" mode="aspectFit"></image>
+                <image class="btn-icon" src="/images/icons/eye.svg" mode="aspectFit" class="image-icon"></image>
                 <text>{{messages.actions.viewDetails}}</text>
               </view>
             </button>
