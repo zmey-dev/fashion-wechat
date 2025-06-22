@@ -39,8 +39,8 @@
     "ignoreUploadUnusedFiles": false
   },
   "compileType": "miniprogram",
-  "libVersion": "2.25.3",
-  "appid": "touristappid",
+  "libVersion": "3.8.9",
+  "appid": "wx5247084ab8d78608",
   "projectname": "fashion-show-platform",
   "condition": {
     "search": {
