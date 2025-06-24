@@ -1,0 +1,15 @@
+{
+  "name": "fashion-wechat-miniprogram",
+  "version": "1.0.0",
+  "description": "Fashion social platform WeChat Mini Program",
+  "main": "app.js",
+  "scripts": {
+    "build:npm": "miniprogram-npm"
+  },
+  "dependencies": {
+    "crypto-js": "^4.2.0"
+  },
+  "author": "",
+  "license": "MIT",
+  "keywords": []
+}

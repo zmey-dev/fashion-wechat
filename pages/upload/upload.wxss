@@ -268,6 +268,85 @@
   flex: 1;
 }
 
+.upload-info {
+  font-size: 20rpx;
+  color: #ff4757;
+  margin-left: 8rpx;
+}
+
+.upload-info.success {
+  color: #2ed573;
+}
+
+/* Upload status indicators */
+.upload-status {
+  position: absolute;
+  bottom: 12rpx;
+  right: 12rpx;
+  width: 36rpx;
+  height: 36rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  backdrop-filter: blur(4rpx);
+}
+
+.status-icon {
+  font-size: 20rpx;
+  font-weight: 600;
+}
+
+.status-icon.success {
+  color: #2ed573;
+  background: rgba(46, 213, 115, 0.2);
+  border-radius: 50%;
+  width: 32rpx;
+  height: 32rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-icon.error {
+  color: #ff4757;
+  background: rgba(255, 71, 87, 0.2);
+  border-radius: 50%;
+  width: 32rpx;
+  height: 32rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-icon.uploading {
+  color: #00d4ff;
+  background: rgba(0, 212, 255, 0.2);
+  border-radius: 50%;
+  width: 32rpx;
+  height: 32rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: pulse 1.5s infinite;
+}
+
+/* File item states */
+.file-item.uploaded {
+  border: 2rpx solid rgba(46, 213, 115, 0.3);
+}
+
+.file-item.upload-error {
+  border: 2rpx solid rgba(255, 71, 87, 0.3);
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
 /* Upload Button */
 .upload-btn {
   aspect-ratio: 1;

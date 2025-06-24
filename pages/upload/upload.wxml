@@ -36,7 +36,7 @@
           </view>
           <view class="file-grid">
             <view 
-              class="file-item {{imageDots[index] && imageDots[index].length > 0 ? 'has-dots' : ''}}"
+              class="file-item {{imageDots[index] && imageDots[index].length > 0 ? 'has-dots' : ''}} {{item.uploaded ? 'uploaded' : ''}} {{item.uploadError ? 'upload-error' : ''}}"
               wx:for="{{files}}"
               wx:key="index"
               data-index="{{index}}"
@@ -50,6 +50,18 @@
               >
                 <text class="iconfont icon-delete"></text>
               </view>
+              
+              <!-- Upload status indicators -->
+              <view class="upload-status" wx:if="{{item.uploaded}}">
+                <text class="status-icon success">✓</text>
+              </view>
+              <view class="upload-status" wx:elif="{{item.uploadError}}">
+                <text class="status-icon error">✗</text>
+              </view>
+              <view class="upload-status" wx:elif="{{item.uploading && !item.backgroundUpload}}">
+                <text class="status-icon uploading">⏳</text>
+              </view>
+              
               <view class="dot-indicator" wx:if="{{imageDots[index] && imageDots[index].length > 0}}">
                 <text class="dot-count">{{imageDots[index].length}}</text>
               </view>
@@ -70,6 +82,8 @@
               <view class="file-info">
                 <text class="file-type">{{isImage(item) ? '📷' : '🎬'}}</text>
                 <text class="file-name">{{item.name || '媒体文件'}}</text>
+                <text class="upload-info" wx:if="{{item.uploadError}}">上传失败</text>
+                <text class="upload-info success" wx:elif="{{item.uploaded}}">已上传</text>
               </view>
             </view>
 
@@ -297,4 +311,10 @@
       </view>
     </view>
   </view>
+  
+  <!-- Hidden canvas for blur image generation -->
+  <canvas 
+    canvas-id="blurCanvas" 
+    style="position: fixed; top: -1000px; left: -1000px; width: 200px; height: 200px; opacity: 0; pointer-events: none;"
+  ></canvas>
 </app-layout>

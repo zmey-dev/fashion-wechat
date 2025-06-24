@@ -1,4 +1,5 @@
-const { default: config } = require("../../config");
+const config = require("../../config");
+const ucloudUpload = require("../../services/ucloudUpload");
 
 Page({
   data: {
@@ -27,6 +28,8 @@ Page({
     imageLoading: false,
     activeTab: "media", // 'media' or 'form'
     showInstructions: true,
+    isSubmitting: false,
+    uploadingFiles: [],
 
     // Update mode
     isUpdateMode: false,
@@ -235,22 +238,34 @@ Page({
       success: (res) => {
         this.setData({ imageLoading: true });
 
-        const newFiles = res.tempFiles.map((file) => ({
+        const newFiles = res.tempFiles.map((file, index) => ({
           url: file.tempFilePath,
           size: file.size,
           type: "image",
           file: file,
+          uploading: true, // Start uploading immediately
+          uploaded: false,
+          uploadProgress: 0,
+          uploadResult: null,
+          backgroundUpload: true, // Enable background upload
+          fileIndex: files.length + index
         }));
 
         this.setData({
           files: [...files, ...newFiles],
           imageLoading: false,
+          uploadingFiles: [...this.data.uploadingFiles, ...newFiles.map(f => f.fileIndex)]
         });
 
         wx.showToast({
           title: `${this.data.messages.success.filesAdded} ${newFiles.length} 个文件`,
           icon: "success",
         });
+        
+        // Start background upload sequentially
+        this.startSequentialUploads(newFiles, files.length);
+        
+        console.log('Files added and upload started:', newFiles.length);
       },
       fail: () => {
         this.setData({ imageLoading: false });
@@ -276,21 +291,34 @@ Page({
       success: (res) => {
         const videoFile = res.tempFiles[0];
 
+        const newFile = {
+          url: videoFile.tempFilePath,
+          size: videoFile.size,
+          type: "video",
+          file: videoFile,
+          uploading: true, // Start uploading immediately
+          uploaded: false,
+          uploadProgress: 0,
+          uploadResult: null,
+          backgroundUpload: true,
+          fileIndex: 0
+        };
+        
         this.setData({
-          files: [
-            {
-              url: videoFile.tempFilePath,
-              size: videoFile.size,
-              type: "video",
-              file: videoFile,
-            },
-          ],
+          files: [newFile],
+          uploadingFiles: [0]
         });
 
         wx.showToast({
           title: this.data.messages.success.videoAdded,
           icon: "success",
         });
+        
+        // Start background upload sequentially for video
+        console.log('Starting sequential upload for video file');
+        this.startSequentialUploads([newFile], 0);
+        
+        console.log('Video file added and upload started');
       },
     });
   },
@@ -568,8 +596,18 @@ Page({
           return;
         }
 
+        const newAudio = {
+          ...audioFile,
+          uploading: true,
+          uploaded: false,
+          uploadProgress: 0,
+          uploadResult: null,
+          backgroundUpload: true,
+          file: audioFile // Ensure we have the file reference
+        };
+        
         this.setData({
-          audio: audioFile,
+          audio: newAudio,
           audioName: audioFile.name || "音频文件",
         });
 
@@ -577,6 +615,9 @@ Page({
           title: this.data.messages.success.audioSelected,
           icon: "success",
         });
+        
+        // Start background upload for audio
+        this.uploadAudioInBackground(newAudio);
       },
       fail: (err) => {
         console.error("Failed to choose audio file:", err);
@@ -673,6 +714,74 @@ Page({
   async submitForm() {
     if (!this.validateForm()) return;
 
+    // Check if files are still uploading
+    const hasUploadingFiles = this.data.files.some(file => file.uploading);
+    const audioUploading = this.data.audio && this.data.audio.uploading;
+    const hasFailedFiles = this.data.files.some(file => file.uploadError);
+    const audioFailed = this.data.audio && this.data.audio.uploadError;
+
+    if (hasUploadingFiles || audioUploading) {
+      this.setData({ isSubmitting: true });
+      wx.showLoading({
+        title: '等待文件上传完成...',
+        mask: true
+      });
+
+      // Wait for all uploads to complete
+      await this.waitForUploadsToComplete();
+      
+      wx.hideLoading();
+      this.setData({ isSubmitting: false });
+    }
+    
+    // Check for failed uploads and retry
+    if (hasFailedFiles || audioFailed) {
+      wx.showLoading({
+        title: '重试失败的上传...',
+        mask: true
+      });
+      
+      // Retry failed file uploads
+      const failedFileIndexes = [];
+      this.data.files.forEach((file, index) => {
+        if (file.uploadError) {
+          failedFileIndexes.push(index);
+          // Reset file state and retry
+          file.uploadError = null;
+          file.uploading = true;
+          file.uploadProgress = 0;
+          this.uploadFileInBackground(file, index);
+        }
+      });
+      
+      // Retry failed audio upload
+      if (audioFailed) {
+        const audio = this.data.audio;
+        audio.uploadError = null;
+        audio.uploading = true;
+        audio.uploadProgress = 0;
+        this.setData({ audio });
+        this.uploadAudioInBackground(audio);
+      }
+      
+      // Wait for retries to complete
+      await this.waitForUploadsToComplete();
+      wx.hideLoading();
+      
+      // Final check for failures
+      const stillFailedFiles = this.data.files.some(file => file.uploadError);
+      const audioStillFailed = this.data.audio && this.data.audio.uploadError;
+      
+      if (stillFailedFiles || audioStillFailed) {
+        wx.showToast({
+          title: '文件上传失败，请检查网络连接后重试',
+          icon: 'none',
+          duration: 3000
+        });
+        return;
+      }
+    }
+
     this.setData({ loading: true });
 
     try {
@@ -748,9 +857,45 @@ Page({
       try {
         wx.showLoading({ title: this.data.messages.loading, mask: true });
 
+        // Prepare file URLs
+        const fileUrls = [];
+        const blurUrls = [];
+        const thumbnailUrls = [];
+        
+        formData.files.forEach(file => {
+          if (file.uploadResult) {
+            // Image files
+            if (file.uploadResult.uploadUrl) {
+              fileUrls.push(file.uploadResult.uploadUrl);
+              if (file.uploadResult.blurUrl) {
+                blurUrls.push(file.uploadResult.blurUrl);
+              }
+            }
+            // Video files
+            else if (file.uploadResult.videoUrl) {
+              fileUrls.push(file.uploadResult.videoUrl);
+              if (file.uploadResult.thumbnailUrl) {
+                thumbnailUrls.push(file.uploadResult.thumbnailUrl);
+              }
+            }
+          } else if (file.url && !file.file) {
+            // Existing files (in update mode)
+            fileUrls.push(file.url);
+          }
+        });
+
+        // Get audio URL
         let audioUrl = null;
         if (formData.audio) {
-          audioUrl = await this.uploadAudioFile(formData.audio);
+          if (formData.audio.uploadResult && formData.audio.uploadResult.audioUrl) {
+            audioUrl = formData.audio.uploadResult.audioUrl;
+          } else if (formData.audio.url && !formData.audio.file) {
+            audioUrl = formData.audio.url;
+          } else if (formData.audio.file) {
+            // Upload audio if not already uploaded
+            const audioResult = await ucloudUpload.uploadAudio(formData.audio.path || formData.audio.tempFilePath);
+            audioUrl = audioResult.audioUrl;
+          }
         }
 
         wx.request({
@@ -761,6 +906,9 @@ Page({
             content: formData.content,
             allowDownload: formData.allowDownload,
             type: formData.type,
+            filenames: JSON.stringify(fileUrls),
+            blur_urls: JSON.stringify(blurUrls),
+            thumbnail_urls: JSON.stringify(thumbnailUrls),
             image_dots: JSON.stringify(formData.imageDots),
             audio_url: audioUrl,
             event_id: formData.eventId || null,
@@ -769,22 +917,11 @@ Page({
             "Content-Type": "application/json",
             Authorization: `Bearer ${getApp().globalData.userInfo.token}`,
           },
-          success: async (res) => {
+          success: (res) => {
+            wx.hideLoading();
             if (res.statusCode === 200 && res.data.status === "success") {
-              const filesWithDots = formData.files.map((file, index) => {
-                const dots = formData.imageDots[index.toString()] || [];
-                return {
-                  ...file,
-                  dots: dots,
-                  post_id: res.data.post_id,
-                };
-              });
-
-              await this.uploadAllFiles(filesWithDots);
-              wx.hideLoading();
-              resolve(res.data); // Add this to properly resolve the promise
+              resolve(res.data);
             } else {
-              wx.hideLoading(); // Add this to hide loading when request fails
               reject(new Error(res.data.msg || this.data.messages.errors.createFailed));
             }
           },
@@ -894,33 +1031,56 @@ Page({
       try {
         wx.showLoading({ title: this.data.messages.updating, mask: true });
 
-        const newFiles = formData.files.filter((file) => !file.isExisting);
-        const uploadedNewFiles = await this.uploadAllFiles(newFiles);
+        // Prepare all file URLs
+        const fileUrls = [];
+        const blurUrls = [];
+        const thumbnailUrls = [];
+        
+        formData.files.forEach(file => {
+          if (file.uploadResult) {
+            // Newly uploaded files
+            if (file.uploadResult.uploadUrl) {
+              fileUrls.push(file.uploadResult.uploadUrl);
+              if (file.uploadResult.blurUrl) {
+                blurUrls.push(file.uploadResult.blurUrl);
+              }
+            } else if (file.uploadResult.videoUrl) {
+              fileUrls.push(file.uploadResult.videoUrl);
+              if (file.uploadResult.thumbnailUrl) {
+                thumbnailUrls.push(file.uploadResult.thumbnailUrl);
+              }
+            }
+          } else if (file.isExisting && file.url) {
+            // Existing files
+            fileUrls.push(file.url);
+          }
+        });
 
-        const existingFiles = formData.files
-          .filter((file) => file.isExisting)
-          .map((file) => file.url);
-
-        const allFiles = [...existingFiles, ...uploadedNewFiles];
-
+        // Get audio URL
         let audioUrl = null;
         if (formData.audio) {
-          if (formData.audio.isExisting) {
+          if (formData.audio.uploadResult && formData.audio.uploadResult.audioUrl) {
+            audioUrl = formData.audio.uploadResult.audioUrl;
+          } else if (formData.audio.isExisting && formData.audio.url) {
             audioUrl = formData.audio.url;
-          } else {
-            audioUrl = await this.uploadAudioFile(formData.audio);
+          } else if (formData.audio.file) {
+            // Upload audio if needed
+            const audioResult = await ucloudUpload.uploadAudio(formData.audio.path || formData.audio.tempFilePath);
+            audioUrl = audioResult.audioUrl;
           }
         }
 
         wx.request({
-          url: `${getApp().globalData.apiBase}/posts/${formData.mediaId}`,
+          url: `${config.BACKEND_URL}/posts/${formData.mediaId}`,
           method: "PUT",
           data: {
             title: formData.title,
             content: formData.content,
             allow_download: formData.allowDownload,
             type: formData.type,
-            filenames: JSON.stringify(allFiles),
+            filenames: JSON.stringify(fileUrls),
+            blur_urls: JSON.stringify(blurUrls),
+            thumbnail_urls: JSON.stringify(thumbnailUrls),
             image_dots: JSON.stringify(formData.imageDots),
             audio_url: audioUrl,
             deleted_files: formData.deletedFiles || [],
@@ -955,4 +1115,235 @@ Page({
   },
 
   handlePreventClose(e) {},
+  
+  // Background upload functions
+  async uploadFileInBackground(file, fileIndex) {
+    console.log('Starting background upload for file:', file, 'at index:', fileIndex);
+    let retryCount = 0;
+    const maxRetries = 2;
+    
+    const attemptUpload = async () => {
+      try {
+        console.log('Attempting upload, retry count:', retryCount);
+        
+        // Prepare file object for upload service with proper name handling
+        const tempFilePath = file.file ? file.file.tempFilePath : file.url;
+        let fileName = file.file ? file.file.name : null;
+        
+        // If no name available, generate one from path
+        if (!fileName && tempFilePath) {
+          fileName = tempFilePath.split('/').pop();
+        }
+        
+        // If still no name, generate a default based on type
+        if (!fileName) {
+          const timestamp = Date.now();
+          const extension = file.type === 'image' ? 'jpg' : file.type === 'video' ? 'mp4' : 'mp3';
+          fileName = `file_${timestamp}.${extension}`;
+        }
+        
+        const fileForUpload = {
+          tempFilePath: tempFilePath,
+          name: fileName,
+          size: file.file ? file.file.size : file.size || 0,
+          type: file.type
+        };
+        
+        console.log('Prepared file for upload:', fileForUpload);
+        
+        const uploadResult = await ucloudUpload.uploadMedia(
+          fileForUpload,
+          (progress) => {
+            // Update progress internally but don't show in UI for background uploads
+            console.log('Upload progress:', progress, '%');
+            const files = this.data.files;
+            if (files[fileIndex]) {
+              files[fileIndex].uploadProgress = progress;
+              this.setData({ files });
+            }
+          }
+        );
+        
+        console.log('Upload successful:', uploadResult);
+        
+        // Update file status
+        const files = this.data.files;
+        if (files[fileIndex]) {
+          files[fileIndex].uploading = false;
+          files[fileIndex].uploaded = true;
+          files[fileIndex].uploadResult = uploadResult;
+          
+          // Remove from uploading list
+          const uploadingFiles = this.data.uploadingFiles.filter(idx => idx !== fileIndex);
+          this.setData({ files, uploadingFiles });
+          
+          console.log(`File ${fileIndex} upload completed successfully`);
+        }
+      } catch (error) {
+        console.error(`Upload failed for file ${fileIndex} (attempt ${retryCount + 1}):`, error);
+        
+        if (retryCount < maxRetries) {
+          retryCount++;
+          console.log(`Retrying upload for file ${fileIndex}...`);
+          await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
+          
+          // Reset upload state for retry
+          const files = this.data.files;
+          if (files[fileIndex]) {
+            files[fileIndex].uploadProgress = 0;
+            files[fileIndex].uploadError = null;
+            this.setData({ files });
+          }
+          
+          return attemptUpload();
+        } else {
+          // Mark as failed after all retries
+          const files = this.data.files;
+          if (files[fileIndex]) {
+            files[fileIndex].uploading = false;
+            files[fileIndex].uploadError = error.message || '上传失败';
+            
+            const uploadingFiles = this.data.uploadingFiles.filter(idx => idx !== fileIndex);
+            this.setData({ files, uploadingFiles });
+            
+            console.error(`File ${fileIndex} upload failed permanently:`, error.message);
+          }
+        }
+      }
+    };
+    
+    await attemptUpload();
+  },
+  
+  // Wait for all uploads to complete
+  async waitForUploadsToComplete() {
+    return new Promise((resolve) => {
+      const checkInterval = setInterval(() => {
+        const hasUploadingFiles = this.data.files.some(file => file.uploading);
+        const audioUploading = this.data.audio && this.data.audio.uploading;
+        
+        if (!hasUploadingFiles && !audioUploading) {
+          clearInterval(checkInterval);
+          resolve();
+        }
+      }, 100);
+    });
+  },
+  
+  // Upload audio in background
+  async uploadAudioInBackground(audioFile) {
+    let retryCount = 0;
+    const maxRetries = 2;
+    
+    const attemptUpload = async () => {
+      try {
+        console.log('Starting audio upload attempt:', retryCount + 1);
+        
+        // Prepare audio file for upload with proper name handling
+        const tempFilePath = audioFile.path || audioFile.tempFilePath;
+        let fileName = audioFile.name;
+        
+        // If no name available, generate one from path
+        if (!fileName && tempFilePath) {
+          fileName = tempFilePath.split('/').pop();
+        }
+        
+        // If still no name, generate a default
+        if (!fileName) {
+          const timestamp = Date.now();
+          fileName = `audio_${timestamp}.mp3`;
+        }
+        
+        const audioForUpload = {
+          tempFilePath: tempFilePath,
+          name: fileName,
+          size: audioFile.size || 0,
+          type: 'audio'
+        };
+        
+        console.log('Prepared audio for upload:', audioForUpload);
+        
+        const uploadResult = await ucloudUpload.uploadMedia(
+          audioForUpload,
+          (progress) => {
+            // Update progress internally but don't show in UI for background uploads
+            console.log('Audio upload progress:', progress, '%');
+            const audio = this.data.audio;
+            if (audio) {
+              audio.uploadProgress = progress;
+              this.setData({ audio });
+            }
+          }
+        );
+        
+        console.log('Audio upload successful:', uploadResult);
+        
+        // Update audio status
+        const audio = this.data.audio;
+        if (audio) {
+          audio.uploading = false;
+          audio.uploaded = true;
+          audio.uploadResult = uploadResult;
+          this.setData({ audio });
+          
+          console.log('Audio upload completed successfully');
+        }
+      } catch (error) {
+        console.error(`Audio upload failed (attempt ${retryCount + 1}):`, error);
+        
+        if (retryCount < maxRetries) {
+          retryCount++;
+          console.log(`Retrying audio upload...`);
+          await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
+          
+          // Reset audio state for retry
+          const audio = this.data.audio;
+          if (audio) {
+            audio.uploadProgress = 0;
+            audio.uploadError = null;
+            this.setData({ audio });
+          }
+          
+          return attemptUpload();
+        } else {
+          // Mark as failed after all retries
+          const audio = this.data.audio;
+          if (audio) {
+            audio.uploading = false;
+            audio.uploadError = error.message || '上传失败';
+            this.setData({ audio });
+            
+            console.error('Audio upload failed permanently:', error.message);
+          }
+        }
+      }
+    };
+    
+    await attemptUpload();
+  },
+  
+  // Sequential upload manager to prevent connection limit issues
+  async startSequentialUploads(files, startIndex) {
+    console.log(`Starting sequential uploads for ${files.length} files`);
+    
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const fileIndex = startIndex + i;
+      
+      console.log(`Uploading file ${i + 1}/${files.length} at index ${fileIndex}`);
+      
+      // Wait a bit before starting each upload to ensure connections are properly closed
+      if (i > 0) {
+        console.log('Waiting 1000ms before next upload...');
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+      
+      // Upload the file and wait for it to complete before moving to next
+      await this.uploadFileInBackground(file, fileIndex);
+      
+      console.log(`File ${i + 1}/${files.length} upload process completed`);
+    }
+    
+    console.log('All files upload process completed');
+  },
 });
