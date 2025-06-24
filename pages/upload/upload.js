@@ -713,402 +713,361 @@ Page({
 
   // Submit form
   async submitForm() {
-    if (!this.validateForm()) return;
+    // Validate form fields
+    const { title, content, files } = this.data;
+    
+    if (!title || !title.trim()) {
+      wx.showToast({
+        title: "请输入标题 (不能只有空格)",
+        icon: "none",
+      });
+      return;
+    }
 
-    // Check if files are still uploading
-    const hasUploadingFiles = this.data.files.some(file => file.uploading);
+    if (!content || !content.trim()) {
+      wx.showToast({
+        title: "请输入内容 (不能只有空格)",
+        icon: "none",
+      });
+      return;
+    }
+
+    if (!files || files.length === 0) {
+      wx.showToast({
+        title: "请上传图片或视频",
+        icon: "none",
+      });
+      return;
+    }
+
+    // Check if any files are still uploading
+    const uploadingFiles = this.data.files.filter(file => file.uploading);
     const audioUploading = this.data.audio && this.data.audio.uploading;
-    const hasFailedFiles = this.data.files.some(file => file.uploadError);
-    const audioFailed = this.data.audio && this.data.audio.uploadError;
 
-    if (hasUploadingFiles || audioUploading) {
-      this.setData({ isSubmitting: true });
+    if (uploadingFiles.length > 0 || audioUploading) {
+      // Show full screen loading overlay
+      this.setData({ isSubmitting: true, loading: true });
       wx.showLoading({
         title: '等待文件上传完成...',
         mask: true
       });
 
-      // Wait for all uploads to complete
-      await this.waitForUploadsToComplete();
-      
+      // Wait for all file uploads to complete
+      if (uploadingFiles.length > 0) {
+        try {
+          while (this.data.files.some(file => file.uploading)) {
+            console.log(`Waiting for file uploads... (${this.data.files.filter(file => file.uploading).length} still uploading)`);
+            await new Promise(resolve => setTimeout(resolve, 100));
+          }
+          console.log('All file uploads completed');
+        } catch (error) {
+          wx.hideLoading();
+          this.setData({ isSubmitting: false, loading: false });
+          wx.showToast({
+            title: "文件上传过程中发生错误，请重试",
+            icon: "none",
+          });
+          return;
+        }
+      }
+
+      // Wait for audio upload to complete
+      if (audioUploading) {
+        console.log('Waiting for audio upload to complete...');
+        try {
+          while (this.data.audio && this.data.audio.uploading) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+          }
+          console.log('Audio upload completed');
+        } catch (error) {
+          wx.hideLoading();
+          this.setData({ isSubmitting: false, loading: false });
+          wx.showToast({
+            title: "音频上传过程中发生错误，请重试",
+            icon: "none",
+          });
+          return;
+        }
+      }
+
       wx.hideLoading();
-      this.setData({ isSubmitting: false });
+      // Keep loading state active for the actual submission
     }
-    
-    // Check for failed uploads and retry
-    if (hasFailedFiles || audioFailed) {
+
+    // Check for upload errors and retry failed uploads
+    const failedFiles = this.data.files.filter(file => file.uploadError);
+    const audioFailed = this.data.audio && this.data.audio.uploadError;
+
+    // Retry failed uploads before final submission
+    if (failedFiles.length > 0) {
+      console.log(`Retrying ${failedFiles.length} failed file uploads...`);
+      try {
+        this.setData({ loading: true });
+        wx.showLoading({
+          title: '重试失败的上传...',
+          mask: true
+        });
+
+        // Reset error states and retry uploads
+        const updatedFiles = this.data.files.map((file, index) => {
+          if (file.uploadError) {
+            // Start retry for this file
+            this.uploadFileInBackground(file, index);
+            return {
+              ...file,
+              uploadError: null,
+              uploading: true,
+              uploadProgress: 0
+            };
+          }
+          return file;
+        });
+        this.setData({ files: updatedFiles });
+
+        // Wait for retries to complete
+        while (this.data.files.some(file => file.uploading)) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+        
+        wx.hideLoading();
+      } catch (error) {
+        console.error("Failed to retry file uploads:", error);
+        wx.hideLoading();
+      }
+    }
+
+    if (audioFailed) {
+      console.log("Retrying failed audio upload...");
+      try {
+        const updatedAudio = {
+          ...this.data.audio,
+          uploadError: null,
+          uploading: true,
+          uploadProgress: 0
+        };
+        this.setData({ audio: updatedAudio });
+        this.uploadAudioInBackground(updatedAudio);
+
+        // Wait for audio retry to complete
+        while (this.data.audio && this.data.audio.uploading) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+      } catch (error) {
+        console.error("Audio retry failed:", error);
+      }
+    }
+
+    // Final check for upload errors after retry
+    const stillFailedFiles = this.data.files.filter(file => file.uploadError);
+    const audioStillFailed = this.data.audio && this.data.audio.uploadError;
+
+    if (stillFailedFiles.length > 0 || audioStillFailed) {
+      this.setData({ loading: false });
+      wx.showToast({
+        title: "文件上传失败，请检查网络连接后重试",
+        icon: "none",
+        duration: 3000
+      });
+      return;
+    }
+
+    // All uploads successful, proceed with form submission
+    try {
+      this.setData({ loading: true });
       wx.showLoading({
-        title: '重试失败的上传...',
+        title: this.data.isUpdateMode ? this.data.messages.updating : this.data.messages.loading,
         mask: true
       });
-      
-      // Retry failed file uploads
-      const failedFileIndexes = [];
-      this.data.files.forEach((file, index) => {
-        if (file.uploadError) {
-          failedFileIndexes.push(index);
-          // Reset file state and retry
-          file.uploadError = null;
-          file.uploading = true;
-          file.uploadProgress = 0;
-          this.uploadFileInBackground(file, index);
+
+      // Prepare file URLs exactly like web version
+      const fileUrls = [];
+      const previewFileUrls = [];
+
+      this.data.files.forEach((fileItem) => {
+        let fileUrl = null;
+        let previewUrl = null;
+
+        if (fileItem.uploaded && fileItem.uploadResult) {
+          // For images (use uploadUrl and blurUrl)
+          if (fileItem.uploadResult.uploadUrl && fileItem.uploadResult.blurUrl) {
+            fileUrl = fileItem.uploadResult.uploadUrl;
+            previewUrl = fileItem.uploadResult.blurUrl;
+          }
+          // For videos
+          else if (fileItem.uploadResult.videoUrl && fileItem.uploadResult.thumbnailUrl) {
+            fileUrl = fileItem.uploadResult.videoUrl;
+            previewUrl = fileItem.uploadResult.thumbnailUrl;
+          }
+          // For any other type of result that might have just a single URL
+          else {
+            fileUrl = fileItem.uploadResult.url || fileItem.uploadResult.fileUrl || fileItem.uploadResult.videoUrl || fileItem.uploadResult.uploadUrl || fileItem.url;
+            previewUrl = fileUrl;
+          }
+        } else if (fileItem.url && !fileItem.file) {
+          // Existing file (edit mode)
+          fileUrl = fileItem.url;
+          previewUrl = fileItem.url;
+        }
+
+        if (fileUrl) {
+          fileUrls.push(fileUrl);
+          previewFileUrls.push(previewUrl);
         }
       });
-      
-      // Retry failed audio upload
-      if (audioFailed) {
-        const audio = this.data.audio;
-        audio.uploadError = null;
-        audio.uploading = true;
-        audio.uploadProgress = 0;
-        this.setData({ audio });
-        this.uploadAudioInBackground(audio);
-      }
-      
-      // Wait for retries to complete
-      await this.waitForUploadsToComplete();
-      wx.hideLoading();
-      
-      // Final check for failures
-      const stillFailedFiles = this.data.files.some(file => file.uploadError);
-      const audioStillFailed = this.data.audio && this.data.audio.uploadError;
-      
-      if (stillFailedFiles || audioStillFailed) {
+
+      // Format full URLs with domain and add them to formData
+      const formattedFileUrls = fileUrls.map((url) => {
+        // Check if the URL already has the domain
+        if (url.startsWith("http")) {
+          return url;
+        }
+        // Add domain if needed
+        return `https://xiaoshow.cn-wlcb.ufileos.com/${url}`;
+      });
+
+      const formattedPreviewUrls = previewFileUrls.map((url) => {
+        if (url.startsWith("http")) {
+          return url;
+        }
+        return `https://xiaoshow.cn-wlcb.ufileos.com/${url}`;
+      });
+
+      if (formattedFileUrls.length === 0) {
+        wx.hideLoading();
+        this.setData({ loading: false });
         wx.showToast({
-          title: '文件上传失败，请检查网络连接后重试',
-          icon: 'none',
-          duration: 3000
+          title: "没有可提交的文件URL，请重新上传文件",
+          icon: "none",
         });
         return;
       }
-    }
 
-    this.setData({ loading: true });
+      // Prepare request data exactly like web version FormData structure
+      const requestData = {
+        title: title.trim(),
+        content: content.trim(),
+        user_id: getApp().globalData.userInfo.id,
+        allowDownload: this.data.allowDownload,
+        type: this.isImage(files[0]) ? "image" : "video",
+        profile_link: ''
+      };
 
-    try {
-      const formData = this.prepareFormData();
-
-      if (this.data.isUpdateMode) {
-        await this.updatePost(formData);
-      } else {
-        await this.createPost(formData);
-      }
-
-      wx.showToast({
-        title: this.data.isUpdateMode
-          ? this.data.messages.success.updateSuccess
-          : this.data.messages.success.createSuccess,
-        icon: "success",
+      // Add file URLs as individual array elements (simulating FormData array structure)
+      formattedFileUrls.forEach((url, index) => {
+        requestData[`file_urls[${index}]`] = url;
       });
 
-      setTimeout(() => {
-        wx.navigateBack();
-      }, 1500);
+      formattedPreviewUrls.forEach((url, index) => {
+        requestData[`preview_file_urls[${index}]`] = url;
+      });
+
+      // Handle image dots - send grouped by image index as backend expects
+      if (Object.keys(this.data.imageDots).length > 0) {
+        Object.keys(this.data.imageDots).forEach((imageIndex) => {
+          const dotsForImage = this.data.imageDots[imageIndex];
+
+          dotsForImage.forEach((dot, dotIndex) => {
+            requestData[`dots[${imageIndex}][${dotIndex}][x]`] = dot.x.toString();
+            requestData[`dots[${imageIndex}][${dotIndex}][y]`] = dot.y.toString();
+            requestData[`dots[${imageIndex}][${dotIndex}][title]`] = dot.title || "";
+            requestData[`dots[${imageIndex}][${dotIndex}][description]`] = dot.description || "";
+          });
+        });
+      }
+
+      // Handle audio - convert to audio_url if needed
+      if (this.data.audio) {
+        let audioUrl = null;
+
+        // If it's an object with uploadResult containing audioUrl
+        if (this.data.audio.uploadResult && this.data.audio.uploadResult.audioUrl) {
+          audioUrl = this.data.audio.uploadResult.audioUrl;
+        }
+        // If it's an object with url property (already uploaded)
+        else if (this.data.audio.url && !this.data.audio.file) {
+          audioUrl = this.data.audio.url;
+        }
+
+        if (audioUrl) {
+          // Make sure the URL has the full domain
+          if (!audioUrl.startsWith("http")) {
+            audioUrl = `https://xiaoshow.cn-wlcb.ufileos.com/${audioUrl}`;
+          }
+          requestData.audio_url = audioUrl;
+        }
+      }
+
+      // Event ID if present
+      if (this.data.eventId && this.data.mediaCreateType === "event") {
+        requestData.event_id = this.data.eventId;
+      }
+
+      // For update mode, add additional fields
+      if (this.data.isUpdateMode) {
+        requestData.post_id = this.data.mediaId;
+        
+        // Add deleted files if any
+        if (this.data.deletedFiles && this.data.deletedFiles.length > 0) {
+          this.data.deletedFiles.forEach((filename, index) => {
+            requestData[`deletedFilenames[${index}]`] = filename;
+          });
+        }
+      }
+
+      // Submit to backend using the same endpoint as web version
+      wx.request({
+        url: `${config.BACKEND_URL}/post/create`,
+        method: "POST",
+        data: requestData,
+        header: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getApp().globalData.userInfo.token}`,
+        },
+        success: (res) => {
+          wx.hideLoading();
+          if (res.statusCode === 200 && res.data.status === "success") {
+            wx.showToast({
+              title: this.data.isUpdateMode
+                ? this.data.messages.success.updateSuccess
+                : this.data.messages.success.createSuccess,
+              icon: "success",
+            });
+
+            setTimeout(() => {
+              wx.navigateBack();
+            }, 1500);
+          } else {
+            wx.showToast({
+              title: res.data.msg || this.data.messages.errors.operationFailed,
+              icon: "none",
+            });
+          }
+        },
+        fail: (error) => {
+          wx.hideLoading();
+          console.error("Form submission error:", error);
+          wx.showToast({
+            title: this.data.messages.errors.requestFailed,
+            icon: "none",
+          });
+        },
+        complete: () => {
+          this.setData({ loading: false, isSubmitting: false });
+        }
+      });
     } catch (error) {
+      wx.hideLoading();
       console.error("Form submission error:", error);
       wx.showToast({
         title: this.data.messages.errors.operationFailed,
         icon: "none",
       });
-    } finally {
-      this.setData({ loading: false }); // Ensure loading state is reset
+      this.setData({ loading: false, isSubmitting: false });
     }
   },
 
-  // Prepare form data for submission
-  prepareFormData() {
-    const {
-      title,
-      content,
-      files,
-      audio,
-      allowDownload,
-      imageDots,
-      eventId,
-      mediaCreateType,
-      mediaId,
-      deletedFiles,
-    } = this.data;
 
-    const formData = {
-      title: title.trim(),
-      content: content.trim(),
-      allowDownload,
-      type: this.isImage(files[0]) ? "image" : "video",
-      files,
-      imageDots,
-      audio,
-    };
 
-    if (eventId) {
-      formData.eventId = eventId;
-    }
-
-    if (this.data.isUpdateMode) {
-      formData.mediaId = mediaId;
-      formData.deletedFiles = deletedFiles;
-    }
-
-    return formData;
-  },
-
-  // Create new post
-  createPost(formData) {
-    return new Promise(async (resolve, reject) => {
-      try {
-        wx.showLoading({ title: this.data.messages.loading, mask: true });
-
-        // Prepare file URLs
-        const fileUrls = [];
-        const blurUrls = [];
-        const thumbnailUrls = [];
-        
-        formData.files.forEach(file => {
-          if (file.uploadResult) {
-            // Image files
-            if (file.uploadResult.uploadUrl) {
-              fileUrls.push(file.uploadResult.uploadUrl);
-              if (file.uploadResult.blurUrl) {
-                blurUrls.push(file.uploadResult.blurUrl);
-              }
-            }
-            // Video files
-            else if (file.uploadResult.videoUrl) {
-              fileUrls.push(file.uploadResult.videoUrl);
-              if (file.uploadResult.thumbnailUrl) {
-                thumbnailUrls.push(file.uploadResult.thumbnailUrl);
-              }
-            }
-          } else if (file.url && !file.file) {
-            // Existing files (in update mode)
-            fileUrls.push(file.url);
-          }
-        });
-
-        // Get audio URL
-        let audioUrl = null;
-        if (formData.audio) {
-          if (formData.audio.uploadResult && formData.audio.uploadResult.audioUrl) {
-            audioUrl = formData.audio.uploadResult.audioUrl;
-          } else if (formData.audio.url && !formData.audio.file) {
-            audioUrl = formData.audio.url;
-          } else if (formData.audio.file) {
-            // Upload audio if not already uploaded
-            const audioResult = await ucloudUpload.uploadAudio(formData.audio.path || formData.audio.tempFilePath);
-            audioUrl = audioResult.audioUrl;
-          }
-        }
-
-        wx.request({
-          url: `${config.BACKEND_URL}/post/create`,
-          method: "POST",
-          data: {
-            title: formData.title,
-            content: formData.content,
-            allowDownload: formData.allowDownload,
-            type: formData.type,
-            filenames: JSON.stringify(fileUrls),
-            blur_urls: JSON.stringify(blurUrls),
-            thumbnail_urls: JSON.stringify(thumbnailUrls),
-            image_dots: JSON.stringify(formData.imageDots),
-            audio_url: audioUrl,
-            event_id: formData.eventId || null,
-          },
-          header: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${getApp().globalData.userInfo.token}`,
-          },
-          success: (res) => {
-            wx.hideLoading();
-            if (res.statusCode === 200 && res.data.status === "success") {
-              resolve(res.data);
-            } else {
-              reject(new Error(res.data.msg || this.data.messages.errors.createFailed));
-            }
-          },
-          fail: (err) => {
-            wx.hideLoading();
-            console.error("Request failed:", err);
-            reject(new Error(`${this.data.messages.errors.requestFailed}: ${err.errMsg}`));
-          },
-        });
-      } catch (error) {
-        wx.hideLoading();
-        console.error("Error in createPost:", error);
-        reject(error);
-      }
-    });
-  },
-
-  uploadAllFiles(files) {
-    if (!files.length) return Promise.resolve([]);
-
-    return Promise.all(
-      files.map((file, index) => {
-        if (file.isExisting) {
-          return Promise.resolve(file.media_id || file.url);
-        }
-        return this.uploadSingleFile(file);
-      })
-    );
-  },
-
-  uploadSingleFile(file) {
-    return new Promise((resolve, reject) => {
-      const formData = {
-        type: file.type || "image",
-        post_id: file.post_id || null,
-      };
-
-      if (file.dots && file.dots.length > 0) {
-        formData.dots = JSON.stringify(file.dots);
-      } else {
-        formData.dots = JSON.stringify([]);
-      }
-
-      wx.uploadFile({
-        url: `${config.BACKEND_URL}/post/upload_media`,
-        filePath: file.url,
-        name: "file",
-        formData: formData,
-        header: {
-          Authorization: `Bearer ${getApp().globalData.userInfo.token}`,
-        },
-        success: (res) => {
-          try {
-            console.log("Upload response:", res.data);
-            const data = JSON.parse(res.data);
-            if (data.status === "success") {
-              resolve(data.media_id);
-            } else {
-              console.error("Media upload failed:", data.msg);
-              reject(new Error(data.msg || this.data.messages.errors.uploadFailed));
-            }
-          } catch (error) {
-            console.error("Failed to parse upload response:", error);
-            reject(new Error(this.data.messages.errors.parseFailed));
-          }
-        },
-        fail: (err) => {
-          console.error("Upload request failed:", err);
-          wx.hideLoading();
-          reject(new Error(`${this.data.messages.errors.requestFailed}: ${err.errMsg}`));
-        },
-      });
-    });
-  },
-
-  uploadAudioFile(audioFile) {
-    return new Promise((resolve, reject) => {
-      wx.uploadFile({
-        url: `${config.BACKEND_URL}/post/upload_audio`,
-        filePath: audioFile.path || audioFile.tempFilePath,
-        name: "audio",
-        header: {
-          Authorization: `Bearer ${getApp().globalData.userInfo.token}`,
-        },
-        success: (res) => {
-          try {
-            const data = JSON.parse(res.data);
-            if (data.status === "success") {
-              resolve(data.audio_url);
-            } else {
-              reject(new Error(data.msg || this.data.messages.errors.uploadFailed));
-            }
-          } catch (error) {
-            reject(new Error(this.data.messages.errors.parseFailed));
-          }
-        },
-        fail: (err) => {
-          reject(new Error(`${this.data.messages.errors.requestFailed}: ${err.errMsg}`));
-        },
-      });
-    });
-  },
-
-  // Update existing post
-  updatePost(formData) {
-    return new Promise(async (resolve, reject) => {
-      try {
-        wx.showLoading({ title: this.data.messages.updating, mask: true });
-
-        // Prepare all file URLs
-        const fileUrls = [];
-        const blurUrls = [];
-        const thumbnailUrls = [];
-        
-        formData.files.forEach(file => {
-          if (file.uploadResult) {
-            // Newly uploaded files
-            if (file.uploadResult.uploadUrl) {
-              fileUrls.push(file.uploadResult.uploadUrl);
-              if (file.uploadResult.blurUrl) {
-                blurUrls.push(file.uploadResult.blurUrl);
-              }
-            } else if (file.uploadResult.videoUrl) {
-              fileUrls.push(file.uploadResult.videoUrl);
-              if (file.uploadResult.thumbnailUrl) {
-                thumbnailUrls.push(file.uploadResult.thumbnailUrl);
-              }
-            }
-          } else if (file.isExisting && file.url) {
-            // Existing files
-            fileUrls.push(file.url);
-          }
-        });
-
-        // Get audio URL
-        let audioUrl = null;
-        if (formData.audio) {
-          if (formData.audio.uploadResult && formData.audio.uploadResult.audioUrl) {
-            audioUrl = formData.audio.uploadResult.audioUrl;
-          } else if (formData.audio.isExisting && formData.audio.url) {
-            audioUrl = formData.audio.url;
-          } else if (formData.audio.file) {
-            // Upload audio if needed
-            const audioResult = await ucloudUpload.uploadAudio(formData.audio.path || formData.audio.tempFilePath);
-            audioUrl = audioResult.audioUrl;
-          }
-        }
-
-        wx.request({
-          url: `${config.BACKEND_URL}/posts/${formData.mediaId}`,
-          method: "PUT",
-          data: {
-            title: formData.title,
-            content: formData.content,
-            allow_download: formData.allowDownload,
-            type: formData.type,
-            filenames: JSON.stringify(fileUrls),
-            blur_urls: JSON.stringify(blurUrls),
-            thumbnail_urls: JSON.stringify(thumbnailUrls),
-            image_dots: JSON.stringify(formData.imageDots),
-            audio_url: audioUrl,
-            deleted_files: formData.deletedFiles || [],
-          },
-          header: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${getApp().globalData.userInfo.token}`,
-          },
-          success: (res) => {
-            wx.hideLoading();
-            if (res.statusCode === 200 && res.data.status === "success") {
-              resolve(res.data);
-            } else {
-              reject(new Error(res.data.message || this.data.messages.errors.updateFailed));
-            }
-          },
-          fail: (err) => {
-            wx.hideLoading();
-            reject(new Error(`${this.data.messages.errors.requestFailed}: ${err.errMsg}`));
-          },
-        });
-      } catch (error) {
-        wx.hideLoading();
-        reject(error);
-      }
-    });
-  },
 
   // Close modal/page
   onClose() {

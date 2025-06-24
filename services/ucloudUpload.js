@@ -105,17 +105,7 @@ const generateImageFileNames = (originalName, uploadFolder = 'uploads', blurFold
 };
 
 // Calculate UCloud signature according to documentation
-const calculateSignature = (method, publicKey, privateKey, md5, contentType, date, bucketName, fileName) => {
-  console.log('Signature calculation inputs:');
-  console.log('- method:', method);
-  console.log('- publicKey:', publicKey);
-  console.log('- privateKey length:', privateKey ? privateKey.length : 'null');
-  console.log('- md5:', md5);
-  console.log('- contentType:', contentType);
-  console.log('- date:', date);
-  console.log('- bucketName:', bucketName);
-  console.log('- fileName:', fileName);
-  
+const calculateSignature = (method, publicKey, privateKey, md5, contentType, date, bucketName, fileName) => {  
   const CanonicalizedResource = `/${bucketName}/${fileName}`;
   const StringToSign = method + "\n" 
                      + md5 + "\n" 
@@ -563,7 +553,7 @@ const uploadFileToUCloud = async (filePath, fileName, onProgress) => {
           
           // Generate UCloud signature for PUT method
           const authorization = calculateSignature('PUT', US3_CONFIG.accessKey, US3_CONFIG.secretKey, '', contentType, '', US3_CONFIG.bucket, fileName);
-          const uploadUrl = `https://${US3_CONFIG.bucket}.${US3_CONFIG.host}/${fileName}`;
+          const uploadUrl = `https://${US3_CONFIG.host}/${fileName}`;
           
           console.log('Upload URL:', uploadUrl);
           console.log('Authorization:', authorization);
@@ -584,7 +574,7 @@ const uploadFileToUCloud = async (filePath, fileName, onProgress) => {
               releaseGlobalUploadLock();
               console.log('UCloud upload response:', res);
               if (res.statusCode >= 200 && res.statusCode < 300) {
-                const finalUrl = `https://${US3_CONFIG.bucket}.${US3_CONFIG.host}/${fileName}`;
+                const finalUrl = `https://${US3_CONFIG.host}/${fileName}`;
                 resolve({
                   url: finalUrl,
                   size: fileSize,
