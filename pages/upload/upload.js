@@ -1,4 +1,4 @@
-const config = require("../../config");
+const { default: config } = require("../../config");
 const ucloudUpload = require("../../services/ucloudUpload");
 
 Page({
@@ -235,6 +235,7 @@ Page({
       count: Math.min(remainingSlots, 9),
       mediaType: ["image"],
       sourceType: [sourceType],
+      sizeType: ['compressed'], // 압축된 이미지만 선택
       success: (res) => {
         this.setData({ imageLoading: true });
 

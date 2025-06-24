@@ -135,97 +135,260 @@ const calculateSignature = (method, publicKey, privateKey, md5, contentType, dat
   return Authorization;
 };
 
-// Compress image using WeChat API with higher compression
+// Compress image using Canvas for better control
 const compressImage = async (filePath, options = {}) => {
   console.log('compressImage called with:', filePath, options);
   
   return new Promise((resolve) => {
     if (!filePath) {
       console.error('File path is required for image compression');
-      resolve(filePath); // Return original as fallback
+      resolve(filePath);
       return;
     }
     
-    console.log('Getting image info for compression...');
-    // Get image info to calculate compression
-    wx.getImageInfo({
+    // First try direct compression
+    const quality = Math.floor((options.quality || 0.5) * 100); // Use 50% quality for more compression
+    console.log('Trying direct compression with quality:', quality);
+    
+    wx.compressImage({
       src: filePath,
-      success: async (imageInfo) => {
-        console.log('Image info retrieved:', imageInfo);
-        try {
-          // Calculate if we need to resize
-          const maxSize = options.maxWidthOrHeight || 1920;
-          const needsResize = imageInfo.width > maxSize || imageInfo.height > maxSize;
-          
-          if (needsResize) {
-            // Create canvas for resizing
-            const canvas = wx.createCanvasContext('compressCanvas');
-            const ratio = Math.min(maxSize / imageInfo.width, maxSize / imageInfo.height);
-            const newWidth = imageInfo.width * ratio;
-            const newHeight = imageInfo.height * ratio;
+      quality: quality,
+      success: (res) => {
+        console.log('Direct compression successful');
+        
+        // Check compressed file size
+        wx.getFileInfo({
+          filePath: res.tempFilePath,
+          success: (info) => {
+            console.log('Compressed file size:', info.size, 'bytes (', (info.size / 1024 / 1024).toFixed(2), 'MB)');
             
-            canvas.drawImage(filePath, 0, 0, newWidth, newHeight);
-            
-            canvas.draw(false, () => {
-              wx.canvasToTempFilePath({
-                canvasId: 'compressCanvas',
-                fileType: 'jpg',
-                quality: options.quality || 0.7,
-                success: (res) => {
-                  // Further compress if needed
-                  wx.compressImage({
-                    src: res.tempFilePath,
-                    quality: Math.floor((options.quality || 0.7) * 100),
-                    success: (compressRes) => {
-                      resolve(compressRes.tempFilePath);
-                    },
-                    fail: () => {
-                      resolve(res.tempFilePath);
-                    }
-                  });
-                },
-                fail: (error) => {
-                  console.error('Canvas compression failed:', error);
-                  // Fallback to simple compression
-                  wx.compressImage({
-                    src: filePath,
-                    quality: Math.floor((options.quality || 0.7) * 100),
-                    success: (res) => {
-                      resolve(res.tempFilePath);
-                    },
-                    fail: () => {
-                      resolve(filePath);
-                    }
-                  });
-                }
-              });
-            });
-          } else {
-            // Just compress without resizing
-            wx.compressImage({
-              src: filePath,
-              quality: Math.floor((options.quality || 0.7) * 100),
-              success: (res) => {
-                resolve(res.tempFilePath);
-              },
-              fail: (error) => {
-                console.error('Image compression failed:', error);
-                resolve(filePath);
-              }
-            });
+            // If still too large, try canvas compression
+            if (info.size > 2 * 1024 * 1024) { // If larger than 2MB
+              console.log('File still too large, trying canvas compression...');
+              compressWithCanvas(filePath, options, resolve);
+            } else {
+              resolve(res.tempFilePath);
+            }
+          },
+          fail: () => {
+            console.log('Could not get file info, using compressed file anyway');
+            resolve(res.tempFilePath);
           }
-        } catch (error) {
-          console.error('Compression processing failed:', error);
-          resolve(filePath);
-        }
+        });
       },
       fail: (error) => {
-        console.error('Get image info failed:', error);
-        // Fallback to simple compression
+        console.error('Direct compression failed:', error);
+        console.log('Trying canvas compression as fallback...');
+        compressWithCanvas(filePath, options, resolve);
+      }
+    });
+  });
+};
+
+// Helper function for canvas compression
+const compressWithCanvas = (filePath, options, resolve) => {
+  console.log('Starting canvas compression...');
+  
+  wx.getImageInfo({
+    src: filePath,
+    success: (imageInfo) => {
+      console.log('Image info for canvas:', imageInfo);
+      
+      // Calculate new dimensions
+      const maxSize = options.maxWidthOrHeight || 1920;
+      let newWidth = imageInfo.width;
+      let newHeight = imageInfo.height;
+      
+      if (imageInfo.width > maxSize || imageInfo.height > maxSize) {
+        const ratio = Math.min(maxSize / imageInfo.width, maxSize / imageInfo.height);
+        newWidth = Math.floor(imageInfo.width * ratio);
+        newHeight = Math.floor(imageInfo.height * ratio);
+      }
+      
+      console.log(`Canvas dimensions: ${newWidth}x${newHeight}`);
+      
+      // Use the pre-existing canvas
+      const ctx = wx.createCanvasContext('compressCanvas');
+      
+      // Clear canvas
+      ctx.clearRect(0, 0, newWidth, newHeight);
+      
+      // Draw image
+      ctx.drawImage(filePath, 0, 0, newWidth, newHeight);
+      
+      // Draw and export
+      ctx.draw(false, () => {
+        setTimeout(() => { // Add delay to ensure draw is complete
+          wx.canvasToTempFilePath({
+            canvasId: 'compressCanvas',
+            x: 0,
+            y: 0,
+            width: newWidth,
+            height: newHeight,
+            destWidth: newWidth,
+            destHeight: newHeight,
+            fileType: 'jpg',
+            quality: options.quality || 0.5,
+            success: (res) => {
+              console.log('Canvas export successful');
+              
+              // Verify the result
+              wx.getFileInfo({
+                filePath: res.tempFilePath,
+                success: (info) => {
+                  console.log('Canvas compressed size:', info.size, 'bytes (', (info.size / 1024 / 1024).toFixed(2), 'MB)');
+                  resolve(res.tempFilePath);
+                },
+                fail: () => {
+                  resolve(res.tempFilePath);
+                }
+              });
+            },
+            fail: (error) => {
+              console.error('Canvas export failed:', error);
+              console.log('Using original file as last resort');
+              resolve(filePath);
+            }
+          });
+        }, 100);
+      });
+    },
+    fail: (error) => {
+      console.error('Failed to get image info for canvas:', error);
+      console.log('Using original file');
+      resolve(filePath);
+    }
+  });
+};
+
+// Create blur image using canvas API with stronger blur effect
+const createBlurImage = async (filePath) => {
+  return new Promise((resolve) => {
+    if (!filePath) {
+      console.error('File path is required for blur image creation');
+      resolve(filePath);
+      return;
+    }
+    
+    console.log('Creating blur image from:', filePath);
+    
+    // Get image info first
+    wx.getImageInfo({
+      src: filePath,
+      success: (imageInfo) => {
+        console.log('Blur image info:', imageInfo);
+        
+        // Use very small size for blur effect (much smaller than before)
+        const maxSize = 50; // Very small for extreme blur
+        const ratio = Math.min(maxSize / imageInfo.width, maxSize / imageInfo.height);
+        const canvasWidth = Math.floor(imageInfo.width * ratio);
+        const canvasHeight = Math.floor(imageInfo.height * ratio);
+        
+        console.log(`Blur canvas size: ${canvasWidth}x${canvasHeight}`);
+        
+        // Create canvas context
+        const ctx = wx.createCanvasContext('blurCanvas');
+        
+        // Clear canvas first
+        ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+        
+        // Set canvas size
+        ctx.fillStyle = 'black';
+        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+        
+        // Draw base image very small
+        ctx.drawImage(filePath, 0, 0, canvasWidth, canvasHeight);
+        
+        // Apply multiple blur passes with increasing offsets
+        ctx.globalAlpha = 0.5;
+        
+        // First pass - small blur
+        for (let i = 0; i < 3; i++) {
+          ctx.drawImage(filePath, -1, -1, canvasWidth + 2, canvasHeight + 2);
+          ctx.drawImage(filePath, 1, -1, canvasWidth + 2, canvasHeight + 2);
+          ctx.drawImage(filePath, -1, 1, canvasWidth + 2, canvasHeight + 2);
+          ctx.drawImage(filePath, 1, 1, canvasWidth + 2, canvasHeight + 2);
+        }
+        
+        // Second pass - medium blur
+        ctx.globalAlpha = 0.3;
+        for (let i = 0; i < 5; i++) {
+          const offset = i + 2;
+          ctx.drawImage(filePath, -offset, -offset, canvasWidth + offset*2, canvasHeight + offset*2);
+          ctx.drawImage(filePath, offset, -offset, canvasWidth + offset*2, canvasHeight + offset*2);
+          ctx.drawImage(filePath, -offset, offset, canvasWidth + offset*2, canvasHeight + offset*2);
+          ctx.drawImage(filePath, offset, offset, canvasWidth + offset*2, canvasHeight + offset*2);
+        }
+        
+        // Third pass - large blur
+        ctx.globalAlpha = 0.2;
+        for (let i = 0; i < 8; i++) {
+          const offset = i * 2 + 5;
+          ctx.drawImage(filePath, -offset, 0, canvasWidth + offset*2, canvasHeight);
+          ctx.drawImage(filePath, offset, 0, canvasWidth + offset*2, canvasHeight);
+          ctx.drawImage(filePath, 0, -offset, canvasWidth, canvasHeight + offset*2);
+          ctx.drawImage(filePath, 0, offset, canvasWidth, canvasHeight + offset*2);
+        }
+        
+        // Draw canvas
+        ctx.draw(false, () => {
+          setTimeout(() => {
+            // Export with very low quality
+            wx.canvasToTempFilePath({
+              canvasId: 'blurCanvas',
+              x: 0,
+              y: 0,
+              width: canvasWidth,
+              height: canvasHeight,
+              destWidth: canvasWidth * 2, // Scale up slightly for better effect
+              destHeight: canvasHeight * 2,
+              fileType: 'jpg',
+              quality: 0.05, // Extremely low quality for maximum blur effect
+              success: (res) => {
+                console.log('Blur image created successfully:', res.tempFilePath);
+                
+                // Apply additional compression for even smaller file
+                wx.compressImage({
+                  src: res.tempFilePath,
+                  quality: 5, // 5% quality
+                  success: (compressRes) => {
+                    console.log('Blur image double compressed');
+                    resolve(compressRes.tempFilePath);
+                  },
+                  fail: () => {
+                    console.log('Double compression failed, using single blur');
+                    resolve(res.tempFilePath);
+                  }
+                });
+              },
+              fail: (error) => {
+                console.error('Canvas blur export failed:', error);
+                // Fallback to extreme compression
+                wx.compressImage({
+                  src: filePath,
+                  quality: 5, // 5% quality
+                  success: (compressRes) => {
+                    console.log('Fallback blur compression successful');
+                    resolve(compressRes.tempFilePath);
+                  },
+                  fail: () => {
+                    console.log('All blur attempts failed');
+                    resolve(filePath);
+                  }
+                });
+              }
+            });
+          }, 100);
+        });
+      },
+      fail: (error) => {
+        console.error('Failed to get image info for blur:', error);
+        // Fallback to extreme compression
         wx.compressImage({
           src: filePath,
-          quality: Math.floor((options.quality || 0.7) * 100),
+          quality: 5,
           success: (res) => {
+            console.log('Direct blur compression successful');
             resolve(res.tempFilePath);
           },
           fail: () => {
@@ -237,107 +400,8 @@ const compressImage = async (filePath, options = {}) => {
   });
 };
 
-// Create blur image using canvas API with Gaussian blur effect
-const createBlurImage = async (filePath) => {
-  return new Promise((resolve) => {
-    if (!filePath) {
-      console.error('File path is required for blur image creation');
-      resolve(filePath); // Return original as fallback
-      return;
-    }
-    
-    // Get image info first
-    wx.getImageInfo({
-      src: filePath,
-      success: (imageInfo) => {
-        try {
-          // Create canvas to apply blur effect
-          const canvas = wx.createCanvasContext('blurCanvas');
-          
-          // Calculate canvas size for blur effect (smaller for performance)
-          const maxSize = 200;
-          const ratio = Math.min(maxSize / imageInfo.width, maxSize / imageInfo.height);
-          const canvasWidth = imageInfo.width * ratio;
-          const canvasHeight = imageInfo.height * ratio;
-          
-          // Draw image to canvas
-          canvas.drawImage(filePath, 0, 0, canvasWidth, canvasHeight);
-          
-          // Apply strong blur effect for background use
-          // Multiple passes with different offsets for stronger blur
-          for (let i = 0; i < 10; i++) {
-            canvas.globalAlpha = 0.15;
-            // Apply blur in multiple directions with larger offsets
-            canvas.drawImage(filePath, -2, -2, canvasWidth + 4, canvasHeight + 4);
-            canvas.drawImage(filePath, 2, -2, canvasWidth + 4, canvasHeight + 4);
-            canvas.drawImage(filePath, -2, 2, canvasWidth + 4, canvasHeight + 4);
-            canvas.drawImage(filePath, 2, 2, canvasWidth + 4, canvasHeight + 4);
-            canvas.drawImage(filePath, -3, 0, canvasWidth + 6, canvasHeight);
-            canvas.drawImage(filePath, 3, 0, canvasWidth + 6, canvasHeight);
-            canvas.drawImage(filePath, 0, -3, canvasWidth, canvasHeight + 6);
-            canvas.drawImage(filePath, 0, 3, canvasWidth, canvasHeight + 6);
-          }
-          
-          canvas.draw(false, () => {
-            // Export canvas to temporary file
-            wx.canvasToTempFilePath({
-              canvasId: 'blurCanvas',
-              fileType: 'jpg',
-              quality: 0.1,  // Very low quality for blur background
-              success: (res) => {
-                resolve(res.tempFilePath);
-              },
-              fail: (error) => {
-                console.warn('Canvas blur failed, using compression fallback:', error);
-                // Fallback to simple compression
-                wx.compressImage({
-                  src: filePath,
-                  quality: 10,
-                  success: (compressRes) => {
-                    resolve(compressRes.tempFilePath);
-                  },
-                  fail: () => {
-                    resolve(filePath); // Ultimate fallback
-                  }
-                });
-              }
-            });
-          });
-        } catch (error) {
-          console.error('Canvas setup failed:', error);
-          // Fallback to simple compression
-          wx.compressImage({
-            src: filePath,
-            quality: 10,
-            success: (compressRes) => {
-              resolve(compressRes.tempFilePath);
-            },
-            fail: () => {
-              resolve(filePath); // Ultimate fallback
-            }
-          });
-        }
-      },
-      fail: (error) => {
-        console.error('Get image info failed for blur:', error);
-        // Fallback to simple compression
-        wx.compressImage({
-          src: filePath,
-          quality: 10,
-          success: (res) => {
-            resolve(res.tempFilePath);
-          },
-          fail: () => {
-            resolve(filePath); // Ultimate fallback
-          }
-        });
-      }
-    });
-  });
-};
 
-
-// Generate video thumbnail using canvas
+// Generate video thumbnail using video context
 const generateVideoThumbnail = async (videoPath) => {
   return new Promise((resolve) => {
     if (!videoPath) {
@@ -346,31 +410,89 @@ const generateVideoThumbnail = async (videoPath) => {
       return;
     }
     
-    // Get video info
+    console.log('Generating thumbnail for video:', videoPath);
+    
+    // Get video info first
     wx.getVideoInfo({
       src: videoPath,
-      success: () => {
-        // Create a temporary video context for thumbnail extraction
-        // Since WeChat doesn't provide direct video frame capture,
-        // we'll create a simple compressed version as thumbnail
-        wx.compressVideo({
-          src: videoPath,
-          quality: 'low',
-          bitrate: 200,
-          fps: 10,
-          resolution: 0.3,
-          success: (res) => {
-            // Use the first frame simulation by creating a very short video
-            resolve(res.tempFilePath);
-          },
-          fail: (error) => {
-            console.warn('Video compression for thumbnail failed:', error);
-            resolve(null); // No thumbnail
-          }
+      success: (videoInfo) => {
+        console.log('Video info:', videoInfo);
+        
+        // WeChat doesn't directly support frame capture, so we'll use canvas approach
+        // Create a temporary video element and draw it to canvas
+        const canvasId = 'thumbnailCanvas';
+        const ctx = wx.createCanvasContext(canvasId);
+        
+        // Calculate thumbnail dimensions (16:9 aspect ratio)
+        const maxWidth = 320;
+        const maxHeight = 180;
+        let width = videoInfo.width;
+        let height = videoInfo.height;
+        
+        if (width > maxWidth || height > maxHeight) {
+          const ratio = Math.min(maxWidth / width, maxHeight / height);
+          width = Math.floor(width * ratio);
+          height = Math.floor(height * ratio);
+        }
+        
+        console.log(`Thumbnail dimensions: ${width}x${height}`);
+        
+        // Since we can't directly capture video frames in WeChat Mini Program,
+        // we'll create a placeholder thumbnail with video info
+        ctx.setFillStyle('#000000');
+        ctx.fillRect(0, 0, width, height);
+        
+        // Add play button icon
+        ctx.setFillStyle('#FFFFFF');
+        ctx.setGlobalAlpha(0.8);
+        const centerX = width / 2;
+        const centerY = height / 2;
+        const buttonSize = Math.min(width, height) * 0.2;
+        
+        // Draw play triangle
+        ctx.beginPath();
+        ctx.moveTo(centerX - buttonSize/2, centerY - buttonSize/2);
+        ctx.lineTo(centerX - buttonSize/2, centerY + buttonSize/2);
+        ctx.lineTo(centerX + buttonSize/2, centerY);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Add duration text
+        ctx.setFillStyle('#FFFFFF');
+        ctx.setFontSize(12);
+        ctx.setGlobalAlpha(1);
+        const duration = Math.floor(videoInfo.duration);
+        const minutes = Math.floor(duration / 60);
+        const seconds = duration % 60;
+        const durationText = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        ctx.fillText(durationText, 10, height - 10);
+        
+        ctx.draw(false, () => {
+          setTimeout(() => {
+            wx.canvasToTempFilePath({
+              canvasId: canvasId,
+              x: 0,
+              y: 0,
+              width: width,
+              height: height,
+              destWidth: width,
+              destHeight: height,
+              fileType: 'jpg',
+              quality: 0.8,
+              success: (res) => {
+                console.log('Thumbnail created successfully:', res.tempFilePath);
+                resolve(res.tempFilePath);
+              },
+              fail: (error) => {
+                console.error('Failed to create thumbnail:', error);
+                resolve(null);
+              }
+            });
+          }, 100);
         });
       },
       fail: (error) => {
-        console.error('Get video info failed:', error);
+        console.error('Failed to get video info:', error);
         resolve(null);
       }
     });
@@ -545,7 +667,7 @@ const uploadImage = async (filePath, onProgress = null, uploadFolder = 'uploads'
     console.log('Generated file names:', fileNames);
     
     let uploadedCount = 0;
-    const totalUploads = 2;
+    const totalUploads = 2; // compressed + blur
     
     const progressCallback = (percent) => {
       if (onProgress) {
@@ -554,21 +676,18 @@ const uploadImage = async (filePath, onProgress = null, uploadFolder = 'uploads'
       }
     };
     
-    // For testing, skip compression temporarily
-    console.log('Testing direct upload without compression first...');
-    const compressedPath = filePath; // Use original for now
+    // Compress image before upload
+    console.log('Starting image compression...');
+    const compressedPath = await compressImage(filePath, {
+      quality: 0.5,  // 50% quality for better compression
+      maxWidthOrHeight: 1920
+    });
+    console.log('Image compression complete, path:', compressedPath);
     
-    // TODO: Re-enable compression after upload works
-    // console.log('Starting image compression...');
-    // const compressedPath = await compressImage(filePath, {
-    //   maxWidthOrHeight: 1920,
-    //   quality: 0.7  // 70% quality for better compression
-    // });
-    // console.log('Image compressed successfully:', compressedPath);
-    
-    // console.log('Starting blur image creation...');
-    // const blurPath = await createBlurImage(filePath);
-    // console.log('Blur image created successfully:', blurPath);
+    // Create blur image
+    console.log('Starting blur image creation...');
+    const blurPath = await createBlurImage(filePath);
+    console.log('Blur image created successfully:', blurPath);
     
     // Upload compressed version
     console.log('Starting upload of compressed image with name:', fileNames.upload);
@@ -588,20 +707,17 @@ const uploadImage = async (filePath, onProgress = null, uploadFolder = 'uploads'
       throw uploadError;
     }
     
-    // Skip blur upload for now to reduce connection count
-    console.log('Skipping blur upload to reduce connections');
-    blurResult = { url: uploadResult.url, size: 0, fileName: fileNames.blur }; // Use same URL temporarily
-    
-    // TODO: Re-enable blur upload after fixing connection issues
-    // console.log('Starting upload of blur image with name:', fileNames.blur);
-    // try {
-    //   blurResult = await uploadToUCloud(blurPath, fileNames.blur, progressCallback);
-    //   uploadedCount++;
-    //   console.log('Blur image uploaded successfully:', blurResult);
-    // } catch (blurError) {
-    //   console.error('Blur image upload failed:', blurError);
-    //   throw blurError;
-    // }
+    // Upload blur image
+    console.log('Starting upload of blur image with name:', fileNames.blur);
+    try {
+      blurResult = await uploadToUCloud(blurPath, fileNames.blur, progressCallback);
+      uploadedCount++;
+      console.log('Blur image uploaded successfully:', blurResult);
+    } catch (blurError) {
+      console.error('Blur image upload failed:', blurError);
+      // Use compressed image URL as fallback
+      blurResult = { url: uploadResult.url, size: 0, fileName: fileNames.blur };
+    }
     
     return {
       uploadUrl: uploadResult.url,
@@ -645,19 +761,28 @@ const uploadVideo = async (filePath, onProgress = null, videoFolder = 'videos', 
     
     // Generate and upload thumbnail
     let thumbnailUrl = null;
+    console.log('Generating video thumbnail...');
     try {
       const thumbnailPath = await generateVideoThumbnail(filePath);
       if (thumbnailPath) {
         const thumbnailName = `${thumbnailFolder}/${fileName.split('/').pop().replace(/\.[^.]+$/, '_thumb.jpg')}`;
         console.log('Starting upload of video thumbnail with name:', thumbnailName);
-        const thumbnailResult = await uploadToUCloud(thumbnailPath, thumbnailName);
+        const thumbnailResult = await uploadToUCloud(thumbnailPath, thumbnailName, progressCallback);
         thumbnailUrl = thumbnailResult.url;
-        console.log('Video thumbnail uploaded successfully');
+        uploadedCount++;
+        console.log('Video thumbnail uploaded successfully:', thumbnailUrl);
+        
+        // Add delay between uploads
+        console.log('Waiting 1000ms before uploading video...');
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      } else {
+        console.log('No thumbnail generated, skipping thumbnail upload');
+        uploadedCount++;
       }
     } catch (error) {
       console.error('Thumbnail generation/upload failed:', error);
+      uploadedCount++;
     }
-    uploadedCount++;
     
     // Upload video
     console.log('Starting upload of video with name:', fileName);
