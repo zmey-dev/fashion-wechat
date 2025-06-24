@@ -45,10 +45,9 @@
               <view 
                 class="remove-btn" 
                 data-index="{{index}}"
-                bindtap="removeFile"
                 catchtap="removeFile"
               >
-                <text class="iconfont icon-delete"></text>
+                <text class="iconfont icon-delete">✗</text>
               </view>
               
               <!-- Upload status indicators -->

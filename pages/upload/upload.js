@@ -942,37 +942,26 @@ Page({
         return;
       }
 
-      // Prepare request data exactly like web version FormData structure
+      // Prepare request data for JSON (not FormData like web version)
       const requestData = {
         title: title.trim(),
         content: content.trim(),
         user_id: getApp().globalData.userInfo.id,
         allowDownload: this.data.allowDownload,
         type: this.isImage(files[0]) ? "image" : "video",
-        profile_link: ''
+        profile_link: '',
+        file_urls: formattedFileUrls,  // Send as actual array
+        preview_file_urls: formattedPreviewUrls  // Send as actual array
       };
 
-      // Add file URLs as individual array elements (simulating FormData array structure)
-      formattedFileUrls.forEach((url, index) => {
-        requestData[`file_urls[${index}]`] = url;
-      });
-
-      formattedPreviewUrls.forEach((url, index) => {
-        requestData[`preview_file_urls[${index}]`] = url;
-      });
-
-      // Handle image dots - send grouped by image index as backend expects
+      // Handle image dots - send as array format that backend expects
       if (Object.keys(this.data.imageDots).length > 0) {
+        const dotsArray = [];
         Object.keys(this.data.imageDots).forEach((imageIndex) => {
           const dotsForImage = this.data.imageDots[imageIndex];
-
-          dotsForImage.forEach((dot, dotIndex) => {
-            requestData[`dots[${imageIndex}][${dotIndex}][x]`] = dot.x.toString();
-            requestData[`dots[${imageIndex}][${dotIndex}][y]`] = dot.y.toString();
-            requestData[`dots[${imageIndex}][${dotIndex}][title]`] = dot.title || "";
-            requestData[`dots[${imageIndex}][${dotIndex}][description]`] = dot.description || "";
-          });
+          dotsArray[parseInt(imageIndex)] = dotsForImage;
         });
+        requestData.dots = dotsArray;
       }
 
       // Handle audio - convert to audio_url if needed
@@ -1006,13 +995,15 @@ Page({
       if (this.data.isUpdateMode) {
         requestData.post_id = this.data.mediaId;
         
-        // Add deleted files if any
+        // Add deleted files if any (send as actual array)
         if (this.data.deletedFiles && this.data.deletedFiles.length > 0) {
-          this.data.deletedFiles.forEach((filename, index) => {
-            requestData[`deletedFilenames[${index}]`] = filename;
-          });
+          requestData.deletedFilenames = this.data.deletedFiles;
         }
       }
+
+      // Debug: Log the request data to see what we're sending
+      console.log('Request data being sent to backend:', requestData);
+      console.log('Request data keys:', Object.keys(requestData));
 
       // Submit to backend using the same endpoint as web version
       wx.request({
