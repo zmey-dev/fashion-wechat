@@ -390,102 +390,214 @@ const createBlurImage = async (filePath) => {
   });
 };
 
-
-// Generate video thumbnail using video context
-const generateVideoThumbnail = async (videoPath) => {
+// UPDATED: Generate video thumbnail with wx.chooseMedia support
+const generateVideoThumbnail = async (videoPath, providedThumbnailPath = null) => {
   return new Promise((resolve) => {
+    // First priority: Use provided thumbnail from wx.chooseMedia
+    if (providedThumbnailPath) {
+      console.log('Using provided thumbnail from wx.chooseMedia:', providedThumbnailPath);
+      // Verify the thumbnail file exists and is valid
+      wx.getFileInfo({
+        filePath: providedThumbnailPath,
+        success: (fileInfo) => {
+          console.log('Provided thumbnail verified, size:', fileInfo.size);
+          if (fileInfo.size > 0) {
+            resolve(providedThumbnailPath);
+          } else {
+            console.warn('Provided thumbnail is empty, generating fallback');
+            generateFallbackThumbnail(videoPath, resolve);
+          }
+        },
+        fail: (error) => {
+          console.error('Provided thumbnail verification failed:', error);
+          generateFallbackThumbnail(videoPath, resolve);
+        }
+      });
+      return;
+    }
+    
     if (!videoPath) {
       console.error('Video path is required for thumbnail generation');
       resolve(null);
       return;
     }
     
-    console.log('Generating thumbnail for video:', videoPath);
-    
-    // Get video info first
-    wx.getVideoInfo({
-      src: videoPath,
-      success: (videoInfo) => {
-        console.log('Video info:', videoInfo);
-        
-        // WeChat doesn't directly support frame capture, so we'll use canvas approach
-        // Create a temporary video element and draw it to canvas
-        const canvasId = 'thumbnailCanvas';
-        const ctx = wx.createCanvasContext(canvasId);
-        
-        // Calculate thumbnail dimensions (16:9 aspect ratio)
-        const maxWidth = 320;
-        const maxHeight = 180;
-        let width = videoInfo.width;
-        let height = videoInfo.height;
-        
-        if (width > maxWidth || height > maxHeight) {
-          const ratio = Math.min(maxWidth / width, maxHeight / height);
-          width = Math.floor(width * ratio);
-          height = Math.floor(height * ratio);
+    console.log('No provided thumbnail, generating fallback for video:', videoPath);
+    generateFallbackThumbnail(videoPath, resolve);
+  });
+};
+
+// Generate fallback thumbnail when wx.chooseMedia doesn't provide one
+const generateFallbackThumbnail = (videoPath, resolve) => {
+  console.log('Generating fallback thumbnail for video:', videoPath);
+  
+  // Try to get video info and create placeholder thumbnail
+  wx.getVideoInfo({
+    src: videoPath,
+    success: (videoInfo) => {
+      console.log('Video info for fallback thumbnail:', videoInfo);
+      createPlaceholderThumbnail(videoInfo, resolve);
+    },
+    fail: (error) => {
+      console.error('Failed to get video info for fallback:', error);
+      // Create basic placeholder without video info
+      createBasicPlaceholderThumbnail(resolve);
+    }
+  });
+};
+
+// Create placeholder thumbnail with video information
+const createPlaceholderThumbnail = (videoInfo, resolve) => {
+  const canvasId = 'thumbnailCanvas';
+  const ctx = wx.createCanvasContext(canvasId);
+  
+  // Calculate thumbnail dimensions (16:9 aspect ratio)
+  const maxWidth = 320;
+  const maxHeight = 180;
+  let width = videoInfo.width || maxWidth;
+  let height = videoInfo.height || maxHeight;
+  
+  if (width > maxWidth || height > maxHeight) {
+    const ratio = Math.min(maxWidth / width, maxHeight / height);
+    width = Math.floor(width * ratio);
+    height = Math.floor(height * ratio);
+  }
+  
+  console.log(`Placeholder thumbnail dimensions: ${width}x${height}`);
+  
+  // Create gradient background based on video info
+  const gradient = ctx.createLinearGradient(0, 0, width, height);
+  const hue = (videoInfo.size || 0) % 360;
+  gradient.addColorStop(0, `hsl(${hue}, 60%, 25%)`);
+  gradient.addColorStop(0.5, `hsl(${(hue + 60) % 360}, 50%, 20%)`);
+  gradient.addColorStop(1, `hsl(${(hue + 120) % 360}, 60%, 25%)`);
+  
+  ctx.setFillStyle(gradient);
+  ctx.fillRect(0, 0, width, height);
+  
+  // Add play button icon
+  ctx.setFillStyle('#FFFFFF');
+  ctx.setGlobalAlpha(0.9);
+  const centerX = width / 2;
+  const centerY = height / 2;
+  const buttonSize = Math.min(width, height) * 0.15;
+  
+  // Draw circular background for play button
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, buttonSize * 1.5, 0, 2 * Math.PI);
+  ctx.setFillStyle('rgba(255, 255, 255, 0.2)');
+  ctx.fill();
+  
+  // Draw play triangle
+  ctx.setFillStyle('#FFFFFF');
+  ctx.beginPath();
+  ctx.moveTo(centerX - buttonSize/2, centerY - buttonSize/2);
+  ctx.lineTo(centerX - buttonSize/2, centerY + buttonSize/2);
+  ctx.lineTo(centerX + buttonSize/2, centerY);
+  ctx.closePath();
+  ctx.fill();
+  
+  // Add duration text if available
+  if (videoInfo.duration) {
+    ctx.setFillStyle('rgba(0, 0, 0, 0.7)');
+    ctx.fillRect(width - 50, height - 20, 45, 15);
+    ctx.setFillStyle('#FFFFFF');
+    ctx.setFontSize(10);
+    ctx.setGlobalAlpha(1);
+    const duration = Math.floor(videoInfo.duration);
+    const minutes = Math.floor(duration / 60);
+    const seconds = duration % 60;
+    const durationText = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    ctx.fillText(durationText, width - 47, height - 8);
+  }
+  
+  // Add "VIDEO" label
+  ctx.setFillStyle('rgba(0, 150, 255, 0.8)');
+  ctx.fillRect(5, 5, 35, 15);
+  ctx.setFillStyle('#FFFFFF');
+  ctx.setFontSize(8);
+  ctx.fillText('VIDEO', 8, 15);
+  
+  ctx.draw(false, () => {
+    setTimeout(() => {
+      wx.canvasToTempFilePath({
+        canvasId: canvasId,
+        x: 0,
+        y: 0,
+        width: width,
+        height: height,
+        destWidth: width,
+        destHeight: height,
+        fileType: 'jpg',
+        quality: 0.8,
+        success: (res) => {
+          console.log('Placeholder thumbnail created successfully:', res.tempFilePath);
+          resolve(res.tempFilePath);
+        },
+        fail: (error) => {
+          console.error('Failed to create placeholder thumbnail:', error);
+          resolve(null);
         }
-        
-        console.log(`Thumbnail dimensions: ${width}x${height}`);
-        
-        // Since we can't directly capture video frames in WeChat Mini Program,
-        // we'll create a placeholder thumbnail with video info
-        ctx.setFillStyle('#000000');
-        ctx.fillRect(0, 0, width, height);
-        
-        // Add play button icon
-        ctx.setFillStyle('#FFFFFF');
-        ctx.setGlobalAlpha(0.8);
-        const centerX = width / 2;
-        const centerY = height / 2;
-        const buttonSize = Math.min(width, height) * 0.2;
-        
-        // Draw play triangle
-        ctx.beginPath();
-        ctx.moveTo(centerX - buttonSize/2, centerY - buttonSize/2);
-        ctx.lineTo(centerX - buttonSize/2, centerY + buttonSize/2);
-        ctx.lineTo(centerX + buttonSize/2, centerY);
-        ctx.closePath();
-        ctx.fill();
-        
-        // Add duration text
-        ctx.setFillStyle('#FFFFFF');
-        ctx.setFontSize(12);
-        ctx.setGlobalAlpha(1);
-        const duration = Math.floor(videoInfo.duration);
-        const minutes = Math.floor(duration / 60);
-        const seconds = duration % 60;
-        const durationText = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-        ctx.fillText(durationText, 10, height - 10);
-        
-        ctx.draw(false, () => {
-          setTimeout(() => {
-            wx.canvasToTempFilePath({
-              canvasId: canvasId,
-              x: 0,
-              y: 0,
-              width: width,
-              height: height,
-              destWidth: width,
-              destHeight: height,
-              fileType: 'jpg',
-              quality: 0.8,
-              success: (res) => {
-                console.log('Thumbnail created successfully:', res.tempFilePath);
-                resolve(res.tempFilePath);
-              },
-              fail: (error) => {
-                console.error('Failed to create thumbnail:', error);
-                resolve(null);
-              }
-            });
-          }, 100);
-        });
-      },
-      fail: (error) => {
-        console.error('Failed to get video info:', error);
-        resolve(null);
-      }
-    });
+      });
+    }, 200);
+  });
+};
+
+// Create basic placeholder thumbnail without video info
+const createBasicPlaceholderThumbnail = (resolve) => {
+  const canvasId = 'thumbnailCanvas';
+  const ctx = wx.createCanvasContext(canvasId);
+  const width = 320;
+  const height = 180;
+  
+  // Simple gradient background
+  const gradient = ctx.createLinearGradient(0, 0, width, height);
+  gradient.addColorStop(0, '#2d2d2d');
+  gradient.addColorStop(1, '#1a1a1a');
+  
+  ctx.setFillStyle(gradient);
+  ctx.fillRect(0, 0, width, height);
+  
+  // Play button
+  const centerX = width / 2;
+  const centerY = height / 2;
+  
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, 25, 0, 2 * Math.PI);
+  ctx.setFillStyle('rgba(255, 255, 255, 0.9)');
+  ctx.fill();
+  
+  ctx.setFillStyle('#333333');
+  ctx.beginPath();
+  ctx.moveTo(centerX - 10, centerY - 12);
+  ctx.lineTo(centerX - 10, centerY + 12);
+  ctx.lineTo(centerX + 15, centerY);
+  ctx.closePath();
+  ctx.fill();
+  
+  // Add "VIDEO" label
+  ctx.setFillStyle('rgba(0, 150, 255, 0.8)');
+  ctx.fillRect(5, 5, 35, 15);
+  ctx.setFillStyle('#FFFFFF');
+  ctx.setFontSize(8);
+  ctx.fillText('VIDEO', 8, 15);
+  
+  ctx.draw(false, () => {
+    setTimeout(() => {
+      wx.canvasToTempFilePath({
+        canvasId: canvasId,
+        fileType: 'jpg',
+        quality: 0.8,
+        success: (res) => {
+          console.log('Basic placeholder thumbnail created');
+          resolve(res.tempFilePath);
+        },
+        fail: (error) => {
+          console.error('Failed to create basic placeholder:', error);
+          resolve(null);
+        }
+      });
+    }, 200);
   });
 };
 
@@ -625,7 +737,6 @@ const uploadFileToUCloud = async (filePath, fileName, onProgress) => {
   });
 };
 
-
 // Get content type from file extension
 const getContentType = (fileName) => {
   const ext = fileName.split('.').pop().toLowerCase();
@@ -727,7 +838,8 @@ const uploadImage = async (filePath, onProgress = null, uploadFolder = 'uploads'
   }
 };
 
-const uploadVideo = async (filePath, onProgress = null, videoFolder = 'videos', thumbnailFolder = 'thumbnails') => {
+// UPDATED: Video upload with better thumbnail handling
+const uploadVideo = async (filePath, onProgress = null, videoFolder = 'videos', thumbnailFolder = 'thumbnails', providedThumbnailPath = null) => {
   try {
     if (!filePath) {
       throw new Error('File path is required for video upload');
@@ -742,35 +854,98 @@ const uploadVideo = async (filePath, onProgress = null, videoFolder = 'videos', 
     let uploadedCount = 0;
     const progressCallback = (percent) => {
       if (onProgress) {
-        // If we have thumbnail, it's 2 uploads, otherwise 1
-        const totalUploads = 2; // Always assume we'll try thumbnail
+        const totalUploads = 2; // video + thumbnail
         const totalProgress = Math.round(((uploadedCount * 100) + percent) / totalUploads);
         onProgress(totalProgress);
       }
     };
     
-    // Generate and upload thumbnail
+    // Process and upload thumbnail
     let thumbnailUrl = null;
-    console.log('Generating video thumbnail...');
+    console.log('Processing video thumbnail...');
+    console.log('Provided thumbnail path:', providedThumbnailPath);
+    
     try {
-      const thumbnailPath = await generateVideoThumbnail(filePath);
-      if (thumbnailPath) {
-        const thumbnailName = `${thumbnailFolder}/${fileName.split('/').pop().replace(/\.[^.]+$/, '_thumb.jpg')}`;
-        console.log('Starting upload of video thumbnail with name:', thumbnailName);
-        const thumbnailResult = await uploadToUCloud(thumbnailPath, thumbnailName, progressCallback);
-        thumbnailUrl = thumbnailResult.url;
-        uploadedCount++;
-        console.log('Video thumbnail uploaded successfully:', thumbnailUrl);
+      // Check if we have a real thumbnail from wx.chooseMedia
+      if (providedThumbnailPath) {
+        console.log('Processing real thumbnail from wx.chooseMedia');
         
-        // Add delay between uploads
-        console.log('Waiting 1000ms before uploading video...');
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Verify thumbnail file exists and is valid
+        try {
+          const thumbFileInfo = await new Promise((resolve, reject) => {
+            wx.getFileInfo({
+              filePath: providedThumbnailPath,
+              success: resolve,
+              fail: reject
+            });
+          });
+          
+          console.log('Real thumbnail file info:', thumbFileInfo);
+          
+          if (thumbFileInfo.size > 0) {
+            const thumbnailName = `${thumbnailFolder}/${fileName.split('/').pop().replace(/\.[^.]+$/, '_thumb.jpg')}`;
+            console.log('Uploading real thumbnail with name:', thumbnailName);
+            
+            // Optimize the real thumbnail before upload
+            let optimizedThumbnailPath = providedThumbnailPath;
+            
+            try {
+              console.log('Optimizing real thumbnail...');
+              optimizedThumbnailPath = await compressImage(providedThumbnailPath, {
+                quality: 0.85, // Higher quality for real thumbnails
+                maxWidthOrHeight: 1920
+              });
+              console.log('Real thumbnail optimized successfully');
+            } catch (optimizationError) {
+              console.warn('Thumbnail optimization failed, using original:', optimizationError);
+              optimizedThumbnailPath = providedThumbnailPath;
+            }
+            
+            // Upload the real thumbnail
+            const thumbnailResult = await uploadToUCloud(optimizedThumbnailPath, thumbnailName, progressCallback);
+            thumbnailUrl = thumbnailResult.url;
+            uploadedCount++;
+            console.log('Real thumbnail uploaded successfully:', thumbnailUrl);
+            
+            // Add delay between uploads
+            console.log('Waiting 1000ms before uploading video...');
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          } else {
+            console.warn('Real thumbnail file is empty, generating fallback');
+            throw new Error('Empty thumbnail file');
+          }
+        } catch (thumbError) {
+          console.error('Real thumbnail processing failed:', thumbError);
+          // Fall back to generating a placeholder
+          console.log('Falling back to placeholder thumbnail');
+          const fallbackThumbnail = await generateVideoThumbnail(filePath, null);
+          if (fallbackThumbnail) {
+            const thumbnailName = `${thumbnailFolder}/${fileName.split('/').pop().replace(/\.[^.]+$/, '_thumb.jpg')}`;
+            const thumbnailResult = await uploadToUCloud(fallbackThumbnail, thumbnailName, progressCallback);
+            thumbnailUrl = thumbnailResult.url;
+            console.log('Fallback thumbnail uploaded:', thumbnailUrl);
+          }
+          uploadedCount++;
+        }
       } else {
-        console.log('No thumbnail generated, skipping thumbnail upload');
+        console.log('No real thumbnail provided, generating placeholder');
+        // Generate fallback thumbnail
+        const fallbackThumbnail = await generateVideoThumbnail(filePath, null);
+        if (fallbackThumbnail) {
+          const thumbnailName = `${thumbnailFolder}/${fileName.split('/').pop().replace(/\.[^.]+$/, '_thumb.jpg')}`;
+          console.log('Uploading fallback thumbnail with name:', thumbnailName);
+          const thumbnailResult = await uploadToUCloud(fallbackThumbnail, thumbnailName, progressCallback);
+          thumbnailUrl = thumbnailResult.url;
+          console.log('Fallback thumbnail uploaded successfully:', thumbnailUrl);
+          
+          // Add delay between uploads
+          console.log('Waiting 1000ms before uploading video...');
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
         uploadedCount++;
       }
     } catch (error) {
-      console.error('Thumbnail generation/upload failed:', error);
+      console.error('Thumbnail processing/upload failed:', error);
       uploadedCount++;
     }
     
@@ -786,11 +961,12 @@ const uploadVideo = async (filePath, onProgress = null, videoFolder = 'videos', 
       fileName: fileName,
       originalName: originalName,
       videoSize: result.size,
-      thumbnailSize: thumbnailUrl ? 0 : 0, // We don't have thumbnail size info
+      thumbnailSize: thumbnailUrl ? 0 : 0,
       folders: {
         video: videoFolder,
         thumbnail: thumbnailFolder
-      }
+      },
+      hasRealThumbnail: !!providedThumbnailPath && !!thumbnailUrl
     };
   } catch (error) {
     console.error('Video upload failed:', error);
@@ -828,6 +1004,7 @@ const uploadAudio = async (filePath, onProgress = null, audioFolder = 'audios') 
   }
 };
 
+// UPDATED: uploadMedia with wx.chooseMedia thumbnail support
 const uploadMedia = async (file, onProgress = null, folders = {}) => {
   console.log('uploadMedia called with file:', file);
   
@@ -841,6 +1018,9 @@ const uploadMedia = async (file, onProgress = null, folders = {}) => {
     throw new Error('File path is required');
   }
   
+  // Extract thumbnail path if available (from wx.chooseMedia)
+  const thumbnailPath = file.thumbTempFilePath || null;
+  
   // Generate safe file name with proper fallbacks
   let fileName = file.name || file.tempFilePath?.split('/').pop() || file.path?.split('/').pop() || file.url?.split('/').pop();
   if (!fileName || typeof fileName !== 'string') {
@@ -852,6 +1032,7 @@ const uploadMedia = async (file, onProgress = null, folders = {}) => {
   
   console.log('File path:', filePath);
   console.log('File name:', fileName);
+  console.log('Thumbnail path:', thumbnailPath);
   
   // File type detection with better validation
   const isImage = /\.(jpg|jpeg|png|gif|bmp|heic|webp)$/i.test(fileName);
@@ -892,7 +1073,8 @@ const uploadMedia = async (file, onProgress = null, folders = {}) => {
     if (finalIsImage) {
       result = await uploadImage(filePath, onProgress, folderConfig.upload, folderConfig.blur);
     } else if (finalIsVideo) {
-      result = await uploadVideo(filePath, onProgress, folderConfig.video, folderConfig.thumbnail);
+      // Pass thumbnail path to video upload function
+      result = await uploadVideo(filePath, onProgress, folderConfig.video, folderConfig.thumbnail, thumbnailPath);
     } else if (finalIsAudio) {
       result = await uploadAudio(filePath, onProgress, folderConfig.audio);
     } else {

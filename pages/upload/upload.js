@@ -235,7 +235,7 @@ Page({
       count: Math.min(remainingSlots, 9),
       mediaType: ["image"],
       sourceType: [sourceType],
-      sizeType: ['compressed'], // 압축된 이미지만 선택
+      sizeType: ["compressed"], // 압축된 이미지만 선택
       success: (res) => {
         this.setData({ imageLoading: true });
 
@@ -249,24 +249,27 @@ Page({
           uploadProgress: 0,
           uploadResult: null,
           backgroundUpload: true, // Enable background upload
-          fileIndex: files.length + index
+          fileIndex: files.length + index,
         }));
 
         this.setData({
           files: [...files, ...newFiles],
           imageLoading: false,
-          uploadingFiles: [...this.data.uploadingFiles, ...newFiles.map(f => f.fileIndex)]
+          uploadingFiles: [
+            ...this.data.uploadingFiles,
+            ...newFiles.map((f) => f.fileIndex),
+          ],
         });
 
         wx.showToast({
           title: `${this.data.messages.success.filesAdded} ${newFiles.length} 个文件`,
           icon: "success",
         });
-        
+
         // Start background upload sequentially
         this.startSequentialUploads(newFiles, files.length);
-        
-        console.log('Files added and upload started:', newFiles.length);
+
+        console.log("Files added and upload started:", newFiles.length);
       },
       fail: () => {
         this.setData({ imageLoading: false });
@@ -289,37 +292,98 @@ Page({
     wx.chooseMedia({
       count: 1,
       mediaType: ["video"],
+      sourceType: ["album", "camera"], // 앨범과 카메라 둘 다 허용
       success: (res) => {
         const videoFile = res.tempFiles[0];
+
+        console.log("Video file selected:", videoFile);
+        console.log("Video file keys:", Object.keys(videoFile));
+        console.log("Thumb temp file path:", videoFile.thumbTempFilePath);
+        console.log("Video duration:", videoFile.duration);
+        console.log("Video size:", videoFile.size);
+
+        // wx.chooseMedia에서 제공하는 실제 썸네일 확인
+        let thumbnailPath = null;
+
+        // thumbTempFilePath가 존재하는지 확인
+        if (videoFile.thumbTempFilePath) {
+          thumbnailPath = videoFile.thumbTempFilePath;
+          console.log(
+            "Found thumbnail path from wx.chooseMedia:",
+            thumbnailPath
+          );
+
+          // 썸네일 파일이 실제로 존재하는지 확인
+          wx.getFileInfo({
+            filePath: thumbnailPath,
+            success: (fileInfo) => {
+              console.log(
+                "Thumbnail file verified - size:",
+                fileInfo.size,
+                "bytes"
+              );
+              if (fileInfo.size === 0) {
+                console.warn("Thumbnail file is empty");
+                thumbnailPath = null;
+              }
+            },
+            fail: (error) => {
+              console.error("Thumbnail file verification failed:", error);
+              thumbnailPath = null;
+            },
+          });
+        } else {
+          console.warn("No thumbTempFilePath provided by wx.chooseMedia");
+        }
 
         const newFile = {
           url: videoFile.tempFilePath,
           size: videoFile.size,
           type: "video",
           file: videoFile,
-          uploading: true, // Start uploading immediately
+          thumbnail: thumbnailPath, // 실제 썸네일 경로 저장
+          duration: videoFile.duration || 0,
+          uploading: true,
           uploaded: false,
           uploadProgress: 0,
           uploadResult: null,
           backgroundUpload: true,
-          fileIndex: 0
+          fileIndex: 0,
         };
-        
+
         this.setData({
           files: [newFile],
-          uploadingFiles: [0]
+          uploadingFiles: [0],
         });
 
         wx.showToast({
           title: this.data.messages.success.videoAdded,
           icon: "success",
         });
-        
-        // Start background upload sequentially for video
-        console.log('Starting sequential upload for video file');
+
+        // 썸네일 정보가 있는지 로그로 확인
+        if (thumbnailPath) {
+          console.log("Video added with thumbnail successfully");
+        } else {
+          console.log(
+            "Video added without thumbnail - will generate placeholder"
+          );
+        }
+
+        // Start background upload with thumbnail
+        console.log(
+          "Starting sequential upload for video file with thumbnail support"
+        );
         this.startSequentialUploads([newFile], 0);
-        
-        console.log('Video file added and upload started');
+
+        console.log("Video file added and upload started");
+      },
+      fail: (error) => {
+        console.error("Video selection failed:", error);
+        wx.showToast({
+          title: "비디오 선택 실패",
+          icon: "error",
+        });
       },
     });
   },
@@ -604,9 +668,9 @@ Page({
           uploadProgress: 0,
           uploadResult: null,
           backgroundUpload: true,
-          file: audioFile // Ensure we have the file reference
+          file: audioFile, // Ensure we have the file reference
         };
-        
+
         this.setData({
           audio: newAudio,
           audioName: audioFile.name || "音频文件",
@@ -616,7 +680,7 @@ Page({
           title: this.data.messages.success.audioSelected,
           icon: "success",
         });
-        
+
         // Start background upload for audio
         this.uploadAudioInBackground(newAudio);
       },
@@ -715,7 +779,7 @@ Page({
   async submitForm() {
     // Validate form fields
     const { title, content, files } = this.data;
-    
+
     if (!title || !title.trim()) {
       wx.showToast({
         title: "请输入标题 (不能只有空格)",
@@ -741,25 +805,29 @@ Page({
     }
 
     // Check if any files are still uploading
-    const uploadingFiles = this.data.files.filter(file => file.uploading);
+    const uploadingFiles = this.data.files.filter((file) => file.uploading);
     const audioUploading = this.data.audio && this.data.audio.uploading;
 
     if (uploadingFiles.length > 0 || audioUploading) {
       // Show full screen loading overlay
       this.setData({ isSubmitting: true, loading: true });
       wx.showLoading({
-        title: '等待文件上传完成...',
-        mask: true
+        title: "等待文件上传完成...",
+        mask: true,
       });
 
       // Wait for all file uploads to complete
       if (uploadingFiles.length > 0) {
         try {
-          while (this.data.files.some(file => file.uploading)) {
-            console.log(`Waiting for file uploads... (${this.data.files.filter(file => file.uploading).length} still uploading)`);
-            await new Promise(resolve => setTimeout(resolve, 100));
+          while (this.data.files.some((file) => file.uploading)) {
+            console.log(
+              `Waiting for file uploads... (${
+                this.data.files.filter((file) => file.uploading).length
+              } still uploading)`
+            );
+            await new Promise((resolve) => setTimeout(resolve, 100));
           }
-          console.log('All file uploads completed');
+          console.log("All file uploads completed");
         } catch (error) {
           wx.hideLoading();
           this.setData({ isSubmitting: false, loading: false });
@@ -773,12 +841,12 @@ Page({
 
       // Wait for audio upload to complete
       if (audioUploading) {
-        console.log('Waiting for audio upload to complete...');
+        console.log("Waiting for audio upload to complete...");
         try {
           while (this.data.audio && this.data.audio.uploading) {
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await new Promise((resolve) => setTimeout(resolve, 100));
           }
-          console.log('Audio upload completed');
+          console.log("Audio upload completed");
         } catch (error) {
           wx.hideLoading();
           this.setData({ isSubmitting: false, loading: false });
@@ -795,7 +863,7 @@ Page({
     }
 
     // Check for upload errors and retry failed uploads
-    const failedFiles = this.data.files.filter(file => file.uploadError);
+    const failedFiles = this.data.files.filter((file) => file.uploadError);
     const audioFailed = this.data.audio && this.data.audio.uploadError;
 
     // Retry failed uploads before final submission
@@ -804,8 +872,8 @@ Page({
       try {
         this.setData({ loading: true });
         wx.showLoading({
-          title: '重试失败的上传...',
-          mask: true
+          title: "重试失败的上传...",
+          mask: true,
         });
 
         // Reset error states and retry uploads
@@ -817,7 +885,7 @@ Page({
               ...file,
               uploadError: null,
               uploading: true,
-              uploadProgress: 0
+              uploadProgress: 0,
             };
           }
           return file;
@@ -825,10 +893,10 @@ Page({
         this.setData({ files: updatedFiles });
 
         // Wait for retries to complete
-        while (this.data.files.some(file => file.uploading)) {
-          await new Promise(resolve => setTimeout(resolve, 100));
+        while (this.data.files.some((file) => file.uploading)) {
+          await new Promise((resolve) => setTimeout(resolve, 100));
         }
-        
+
         wx.hideLoading();
       } catch (error) {
         console.error("Failed to retry file uploads:", error);
@@ -843,14 +911,14 @@ Page({
           ...this.data.audio,
           uploadError: null,
           uploading: true,
-          uploadProgress: 0
+          uploadProgress: 0,
         };
         this.setData({ audio: updatedAudio });
         this.uploadAudioInBackground(updatedAudio);
 
         // Wait for audio retry to complete
         while (this.data.audio && this.data.audio.uploading) {
-          await new Promise(resolve => setTimeout(resolve, 100));
+          await new Promise((resolve) => setTimeout(resolve, 100));
         }
       } catch (error) {
         console.error("Audio retry failed:", error);
@@ -858,7 +926,7 @@ Page({
     }
 
     // Final check for upload errors after retry
-    const stillFailedFiles = this.data.files.filter(file => file.uploadError);
+    const stillFailedFiles = this.data.files.filter((file) => file.uploadError);
     const audioStillFailed = this.data.audio && this.data.audio.uploadError;
 
     if (stillFailedFiles.length > 0 || audioStillFailed) {
@@ -866,7 +934,7 @@ Page({
       wx.showToast({
         title: "文件上传失败，请检查网络连接后重试",
         icon: "none",
-        duration: 3000
+        duration: 3000,
       });
       return;
     }
@@ -875,8 +943,10 @@ Page({
     try {
       this.setData({ loading: true });
       wx.showLoading({
-        title: this.data.isUpdateMode ? this.data.messages.updating : this.data.messages.loading,
-        mask: true
+        title: this.data.isUpdateMode
+          ? this.data.messages.updating
+          : this.data.messages.loading,
+        mask: true,
       });
 
       // Prepare file URLs exactly like web version
@@ -889,18 +959,29 @@ Page({
 
         if (fileItem.uploaded && fileItem.uploadResult) {
           // For images (use uploadUrl and blurUrl)
-          if (fileItem.uploadResult.uploadUrl && fileItem.uploadResult.blurUrl) {
+          if (
+            fileItem.uploadResult.uploadUrl &&
+            fileItem.uploadResult.blurUrl
+          ) {
             fileUrl = fileItem.uploadResult.uploadUrl;
             previewUrl = fileItem.uploadResult.blurUrl;
           }
           // For videos
-          else if (fileItem.uploadResult.videoUrl && fileItem.uploadResult.thumbnailUrl) {
+          else if (
+            fileItem.uploadResult.videoUrl &&
+            fileItem.uploadResult.thumbnailUrl
+          ) {
             fileUrl = fileItem.uploadResult.videoUrl;
             previewUrl = fileItem.uploadResult.thumbnailUrl;
           }
           // For any other type of result that might have just a single URL
           else {
-            fileUrl = fileItem.uploadResult.url || fileItem.uploadResult.fileUrl || fileItem.uploadResult.videoUrl || fileItem.uploadResult.uploadUrl || fileItem.url;
+            fileUrl =
+              fileItem.uploadResult.url ||
+              fileItem.uploadResult.fileUrl ||
+              fileItem.uploadResult.videoUrl ||
+              fileItem.uploadResult.uploadUrl ||
+              fileItem.url;
             previewUrl = fileUrl;
           }
         } else if (fileItem.url && !fileItem.file) {
@@ -949,9 +1030,9 @@ Page({
         user_id: getApp().globalData.userInfo.id,
         allowDownload: this.data.allowDownload,
         type: this.isImage(files[0]) ? "image" : "video",
-        profile_link: '',
-        file_urls: formattedFileUrls,  // Send as actual array
-        preview_file_urls: formattedPreviewUrls  // Send as actual array
+        profile_link: "",
+        file_urls: formattedFileUrls, // Send as actual array
+        preview_file_urls: formattedPreviewUrls, // Send as actual array
       };
 
       // Handle image dots - send as array format that backend expects
@@ -969,7 +1050,10 @@ Page({
         let audioUrl = null;
 
         // If it's an object with uploadResult containing audioUrl
-        if (this.data.audio.uploadResult && this.data.audio.uploadResult.audioUrl) {
+        if (
+          this.data.audio.uploadResult &&
+          this.data.audio.uploadResult.audioUrl
+        ) {
           audioUrl = this.data.audio.uploadResult.audioUrl;
         }
         // If it's an object with url property (already uploaded)
@@ -994,7 +1078,7 @@ Page({
       // For update mode, add additional fields
       if (this.data.isUpdateMode) {
         requestData.post_id = this.data.mediaId;
-        
+
         // Add deleted files if any (send as actual array)
         if (this.data.deletedFiles && this.data.deletedFiles.length > 0) {
           requestData.deletedFilenames = this.data.deletedFiles;
@@ -1002,8 +1086,8 @@ Page({
       }
 
       // Debug: Log the request data to see what we're sending
-      console.log('Request data being sent to backend:', requestData);
-      console.log('Request data keys:', Object.keys(requestData));
+      console.log("Request data being sent to backend:", requestData);
+      console.log("Request data keys:", Object.keys(requestData));
 
       // Submit to backend using the same endpoint as web version
       wx.request({
@@ -1044,7 +1128,7 @@ Page({
         },
         complete: () => {
           this.setData({ loading: false, isSubmitting: false });
-        }
+        },
       });
     } catch (error) {
       wx.hideLoading();
@@ -1057,56 +1141,89 @@ Page({
     }
   },
 
-
-
-
   // Close modal/page
   onClose() {
     wx.navigateBack();
   },
 
   handlePreventClose(e) {},
-  
+
   // Background upload functions
   async uploadFileInBackground(file, fileIndex) {
-    console.log('Starting background upload for file:', file, 'at index:', fileIndex);
+    console.log(
+      "Starting background upload for file:",
+      file,
+      "at index:",
+      fileIndex
+    );
     let retryCount = 0;
     const maxRetries = 2;
-    
+
     const attemptUpload = async () => {
       try {
-        console.log('Attempting upload, retry count:', retryCount);
-        
+        console.log("Attempting upload, retry count:", retryCount);
+
         // Prepare file object for upload service with proper name handling
         const tempFilePath = file.file ? file.file.tempFilePath : file.url;
+        const thumbnailPath =
+          file.thumbnail || (file.file ? file.file.thumbTempFilePath : null);
+
         let fileName = file.file ? file.file.name : null;
-        
+
         // If no name available, generate one from path
         if (!fileName && tempFilePath) {
-          fileName = tempFilePath.split('/').pop();
+          fileName = tempFilePath.split("/").pop();
         }
-        
+
         // If still no name, generate a default based on type
         if (!fileName) {
           const timestamp = Date.now();
-          const extension = file.type === 'image' ? 'jpg' : file.type === 'video' ? 'mp4' : 'mp3';
+          const extension =
+            file.type === "image"
+              ? "jpg"
+              : file.type === "video"
+              ? "mp4"
+              : "mp3";
           fileName = `file_${timestamp}.${extension}`;
         }
-        
+
         const fileForUpload = {
           tempFilePath: tempFilePath,
+          thumbTempFilePath: thumbnailPath, // 실제 썸네일 경로 전달
           name: fileName,
           size: file.file ? file.file.size : file.size || 0,
-          type: file.type
+          type: file.type,
+          duration: file.duration || (file.file ? file.file.duration : 0),
         };
-        
-        console.log('Prepared file for upload:', fileForUpload);
-        
+
+        console.log("Prepared file for upload:", fileForUpload);
+        console.log("Real thumbnail path available:", !!thumbnailPath);
+
+        // 썸네일이 있는 경우 추가 검증
+        if (thumbnailPath && file.type === "video") {
+          try {
+            const thumbInfo = await new Promise((resolve, reject) => {
+              wx.getFileInfo({
+                filePath: thumbnailPath,
+                success: resolve,
+                fail: reject,
+              });
+            });
+            console.log(
+              "Thumbnail validation - size:",
+              thumbInfo.size,
+              "bytes"
+            );
+          } catch (thumbError) {
+            console.warn("Thumbnail validation failed:", thumbError);
+          }
+        }
+
         const uploadResult = await ucloudUpload.uploadMedia(
           fileForUpload,
           (progress) => {
             // Update progress internally but don't show in UI for background uploads
-            console.log('Upload progress:', progress, '%');
+            console.log("Upload progress:", progress, "%");
             const files = this.data.files;
             if (files[fileIndex]) {
               files[fileIndex].uploadProgress = progress;
@@ -1114,30 +1231,42 @@ Page({
             }
           }
         );
-        
-        console.log('Upload successful:', uploadResult);
-        
+
+        console.log("Upload successful:", uploadResult);
+
         // Update file status
         const files = this.data.files;
         if (files[fileIndex]) {
           files[fileIndex].uploading = false;
           files[fileIndex].uploaded = true;
           files[fileIndex].uploadResult = uploadResult;
-          
+
           // Remove from uploading list
-          const uploadingFiles = this.data.uploadingFiles.filter(idx => idx !== fileIndex);
+          const uploadingFiles = this.data.uploadingFiles.filter(
+            (idx) => idx !== fileIndex
+          );
           this.setData({ files, uploadingFiles });
-          
+
           console.log(`File ${fileIndex} upload completed successfully`);
+          if (uploadResult.thumbnailUrl) {
+            console.log(
+              `Thumbnail uploaded successfully: ${uploadResult.thumbnailUrl}`
+            );
+          }
         }
       } catch (error) {
-        console.error(`Upload failed for file ${fileIndex} (attempt ${retryCount + 1}):`, error);
-        
+        console.error(
+          `Upload failed for file ${fileIndex} (attempt ${retryCount + 1}):`,
+          error
+        );
+
         if (retryCount < maxRetries) {
           retryCount++;
           console.log(`Retrying upload for file ${fileIndex}...`);
-          await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
-          
+          await new Promise((resolve) =>
+            setTimeout(resolve, 1000 * retryCount)
+          );
+
           // Reset upload state for retry
           const files = this.data.files;
           if (files[fileIndex]) {
@@ -1145,34 +1274,41 @@ Page({
             files[fileIndex].uploadError = null;
             this.setData({ files });
           }
-          
+
           return attemptUpload();
         } else {
           // Mark as failed after all retries
           const files = this.data.files;
           if (files[fileIndex]) {
             files[fileIndex].uploading = false;
-            files[fileIndex].uploadError = error.message || '上传失败';
-            
-            const uploadingFiles = this.data.uploadingFiles.filter(idx => idx !== fileIndex);
+            files[fileIndex].uploadError = error.message || "上传失败";
+
+            const uploadingFiles = this.data.uploadingFiles.filter(
+              (idx) => idx !== fileIndex
+            );
             this.setData({ files, uploadingFiles });
-            
-            console.error(`File ${fileIndex} upload failed permanently:`, error.message);
+
+            console.error(
+              `File ${fileIndex} upload failed permanently:`,
+              error.message
+            );
           }
         }
       }
     };
-    
+
     await attemptUpload();
   },
-  
+
   // Wait for all uploads to complete
   async waitForUploadsToComplete() {
     return new Promise((resolve) => {
       const checkInterval = setInterval(() => {
-        const hasUploadingFiles = this.data.files.some(file => file.uploading);
+        const hasUploadingFiles = this.data.files.some(
+          (file) => file.uploading
+        );
         const audioUploading = this.data.audio && this.data.audio.uploading;
-        
+
         if (!hasUploadingFiles && !audioUploading) {
           clearInterval(checkInterval);
           resolve();
@@ -1180,45 +1316,45 @@ Page({
       }, 100);
     });
   },
-  
+
   // Upload audio in background
   async uploadAudioInBackground(audioFile) {
     let retryCount = 0;
     const maxRetries = 2;
-    
+
     const attemptUpload = async () => {
       try {
-        console.log('Starting audio upload attempt:', retryCount + 1);
-        
+        console.log("Starting audio upload attempt:", retryCount + 1);
+
         // Prepare audio file for upload with proper name handling
         const tempFilePath = audioFile.path || audioFile.tempFilePath;
         let fileName = audioFile.name;
-        
+
         // If no name available, generate one from path
         if (!fileName && tempFilePath) {
-          fileName = tempFilePath.split('/').pop();
+          fileName = tempFilePath.split("/").pop();
         }
-        
+
         // If still no name, generate a default
         if (!fileName) {
           const timestamp = Date.now();
           fileName = `audio_${timestamp}.mp3`;
         }
-        
+
         const audioForUpload = {
           tempFilePath: tempFilePath,
           name: fileName,
           size: audioFile.size || 0,
-          type: 'audio'
+          type: "audio",
         };
-        
-        console.log('Prepared audio for upload:', audioForUpload);
-        
+
+        console.log("Prepared audio for upload:", audioForUpload);
+
         const uploadResult = await ucloudUpload.uploadMedia(
           audioForUpload,
           (progress) => {
             // Update progress internally but don't show in UI for background uploads
-            console.log('Audio upload progress:', progress, '%');
+            console.log("Audio upload progress:", progress, "%");
             const audio = this.data.audio;
             if (audio) {
               audio.uploadProgress = progress;
@@ -1226,9 +1362,9 @@ Page({
             }
           }
         );
-        
-        console.log('Audio upload successful:', uploadResult);
-        
+
+        console.log("Audio upload successful:", uploadResult);
+
         // Update audio status
         const audio = this.data.audio;
         if (audio) {
@@ -1236,17 +1372,22 @@ Page({
           audio.uploaded = true;
           audio.uploadResult = uploadResult;
           this.setData({ audio });
-          
-          console.log('Audio upload completed successfully');
+
+          console.log("Audio upload completed successfully");
         }
       } catch (error) {
-        console.error(`Audio upload failed (attempt ${retryCount + 1}):`, error);
-        
+        console.error(
+          `Audio upload failed (attempt ${retryCount + 1}):`,
+          error
+        );
+
         if (retryCount < maxRetries) {
           retryCount++;
           console.log(`Retrying audio upload...`);
-          await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
-          
+          await new Promise((resolve) =>
+            setTimeout(resolve, 1000 * retryCount)
+          );
+
           // Reset audio state for retry
           const audio = this.data.audio;
           if (audio) {
@@ -1254,47 +1395,49 @@ Page({
             audio.uploadError = null;
             this.setData({ audio });
           }
-          
+
           return attemptUpload();
         } else {
           // Mark as failed after all retries
           const audio = this.data.audio;
           if (audio) {
             audio.uploading = false;
-            audio.uploadError = error.message || '上传失败';
+            audio.uploadError = error.message || "上传失败";
             this.setData({ audio });
-            
-            console.error('Audio upload failed permanently:', error.message);
+
+            console.error("Audio upload failed permanently:", error.message);
           }
         }
       }
     };
-    
+
     await attemptUpload();
   },
-  
+
   // Sequential upload manager to prevent connection limit issues
   async startSequentialUploads(files, startIndex) {
     console.log(`Starting sequential uploads for ${files.length} files`);
-    
+
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const fileIndex = startIndex + i;
-      
-      console.log(`Uploading file ${i + 1}/${files.length} at index ${fileIndex}`);
-      
+
+      console.log(
+        `Uploading file ${i + 1}/${files.length} at index ${fileIndex}`
+      );
+
       // Wait a bit before starting each upload to ensure connections are properly closed
       if (i > 0) {
-        console.log('Waiting 1000ms before next upload...');
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        console.log("Waiting 1000ms before next upload...");
+        await new Promise((resolve) => setTimeout(resolve, 1000));
       }
-      
+
       // Upload the file and wait for it to complete before moving to next
       await this.uploadFileInBackground(file, fileIndex);
-      
+
       console.log(`File ${i + 1}/${files.length} upload process completed`);
     }
-    
-    console.log('All files upload process completed');
+
+    console.log("All files upload process completed");
   },
 });

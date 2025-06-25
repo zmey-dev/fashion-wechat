@@ -328,4 +328,16 @@
     canvas-id="thumbnailCanvas" 
     style="position: fixed; top: -1000px; left: -1000px; width: 320px; height: 180px; opacity: 0; pointer-events: none;"
   ></canvas>
+  <video 
+  wx:if="{{thumbnailCapture && thumbnailCapture.showVideo}}"
+  id="{{thumbnailCapture.videoId}}"
+  src="{{thumbnailCapture.videoSrc}}"
+  style="position: fixed; top: -1000px; left: -1000px; width: {{thumbnailCapture.videoWidth}}px; height: {{thumbnailCapture.videoHeight}}px; opacity: 0; pointer-events: none;"
+  muted="{{true}}"
+  autoplay="{{false}}"
+  controls="{{false}}"
+  show-play-btn="{{false}}"
+  show-center-play-btn="{{false}}"
+  show-fullscreen-btn="{{false}}"
+  ></video>
 </app-layout>
