@@ -1,11 +1,11 @@
 // config.js
 export default {
-  BACKEND_URL: "https://backend.xiaoshow.com/api",
-  ASSETS_URL: "https://backend.xiaoshow.com/",
+  BACKEND_URL: "http://45.61.161.125:9000/api",
+  ASSETS_URL: "http://45.61.161.125/",
   APP_PUSHER_APP_KEY: "4f414fc95d80c0477d1a",
   APP_PUSHER_APP_CLUSTER: "us3",
-  PROFILE_LINK: "https://xiaoshow.com/",
-  SOCKET_SERVER_URL: "https://backend.xiaoshow.com",
+  PROFILE_LINK: "http://45.61.161.125/",
+  SOCKET_SERVER_URL: "http://45.61.161.125:9000",
   
   // UCloud configuration
   UCLOUD_REGION: "cn-wlcb",

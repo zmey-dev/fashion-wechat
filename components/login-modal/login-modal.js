@@ -20,8 +20,8 @@ Component({
     messages: {
       loginTypes: {
         wechat: "微信登录",
-        email: "邮箱登录",
-        phone: "手机登录",
+        email: "密码登录",
+        phone: "验证码登录",
       },
       formLabels: {
         email: "邮箱/手机号/小秀号",
