@@ -235,7 +235,7 @@ Page({
       count: Math.min(remainingSlots, 9),
       mediaType: ["image"],
       sourceType: [sourceType],
-      sizeType: ["compressed"], // 압축된 이미지만 선택
+      sizeType: ["compressed"],
       success: (res) => {
         this.setData({ imageLoading: true });
 
@@ -292,7 +292,7 @@ Page({
     wx.chooseMedia({
       count: 1,
       mediaType: ["video"],
-      sourceType: ["album", "camera"], // 앨범과 카메라 둘 다 허용
+      sourceType: ["album", "camera"], 
       success: (res) => {
         const videoFile = res.tempFiles[0];
 
@@ -302,10 +302,8 @@ Page({
         console.log("Video duration:", videoFile.duration);
         console.log("Video size:", videoFile.size);
 
-        // wx.chooseMedia에서 제공하는 실제 썸네일 확인
         let thumbnailPath = null;
 
-        // thumbTempFilePath가 존재하는지 확인
         if (videoFile.thumbTempFilePath) {
           thumbnailPath = videoFile.thumbTempFilePath;
           console.log(
@@ -313,7 +311,6 @@ Page({
             thumbnailPath
           );
 
-          // 썸네일 파일이 실제로 존재하는지 확인
           wx.getFileInfo({
             filePath: thumbnailPath,
             success: (fileInfo) => {
@@ -341,7 +338,7 @@ Page({
           size: videoFile.size,
           type: "video",
           file: videoFile,
-          thumbnail: thumbnailPath, // 실제 썸네일 경로 저장
+          thumbnail: thumbnailPath,
           duration: videoFile.duration || 0,
           uploading: true,
           uploaded: false,
@@ -361,7 +358,6 @@ Page({
           icon: "success",
         });
 
-        // 썸네일 정보가 있는지 로그로 확인
         if (thumbnailPath) {
           console.log("Video added with thumbnail successfully");
         } else {
@@ -381,7 +377,7 @@ Page({
       fail: (error) => {
         console.error("Video selection failed:", error);
         wx.showToast({
-          title: "비디오 선택 실패",
+          title: "failed to select video",
           icon: "error",
         });
       },
@@ -1189,7 +1185,7 @@ Page({
 
         const fileForUpload = {
           tempFilePath: tempFilePath,
-          thumbTempFilePath: thumbnailPath, // 실제 썸네일 경로 전달
+          thumbTempFilePath: thumbnailPath, 
           name: fileName,
           size: file.file ? file.file.size : file.size || 0,
           type: file.type,
@@ -1199,7 +1195,6 @@ Page({
         console.log("Prepared file for upload:", fileForUpload);
         console.log("Real thumbnail path available:", !!thumbnailPath);
 
-        // 썸네일이 있는 경우 추가 검증
         if (thumbnailPath && file.type === "video") {
           try {
             const thumbInfo = await new Promise((resolve, reject) => {
