@@ -1,11 +1,11 @@
 // config.js
 export default {
-  BACKEND_URL: "http://45.61.161.125:9000/api",
-  ASSETS_URL: "http://45.61.161.125/",
+  BACKEND_URL: "https://backend.xueshow.com/api",
+  ASSETS_URL: "http://www.xueshow.com/",
   APP_PUSHER_APP_KEY: "4f414fc95d80c0477d1a",
   APP_PUSHER_APP_CLUSTER: "us3",
-  PROFILE_LINK: "http://45.61.161.125/",
-  SOCKET_SERVER_URL: "http://45.61.161.125:9000",
+  PROFILE_LINK: "http://backend.xueshow.com/",
+  SOCKET_SERVER_URL: "http://backend.xueshow.com",
   
   // UCloud configuration
   UCLOUD_REGION: "cn-wlcb",
