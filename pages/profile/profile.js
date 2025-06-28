@@ -1,4 +1,5 @@
 const { default: config } = require("../../config");
+const ucloudUpload = require("../../services/ucloudUpload");
 
 Page({
   data: {
@@ -26,6 +27,13 @@ Page({
     // Avatar handling
     selectedAvatar: "",
     avatarFile: null,
+    
+    // Avatar upload states
+    avatarUploading: false,
+    avatarUploadProgress: 0,
+    avatarUploaded: false,
+    avatarUploadError: null,
+    avatarUploadUrl: null,
     // Verification states - original values for comparison
     originalEmail: "",
     originalPhone: "",
@@ -221,24 +229,47 @@ Page({
     });
   },
 
-  // Handle avatar selection
+  // Handle avatar selection with background upload
   selectAvatar: function () {
     if (!this.data.isEditingProfile) return;
 
-    wx.chooseImage({
+    wx.chooseMedia({
       count: 1,
-      sizeType: ["compressed"],
+      mediaType: ["image"],
       sourceType: ["album", "camera"],
+      sizeType: ["compressed"],
       success: (res) => {
-        const tempFilePath = res.tempFilePaths[0];
+        const tempFile = res.tempFiles[0];
+        
+        // Check file size (max 5MB)
+        if (tempFile.size > 5 * 1024 * 1024) {
+          wx.showToast({
+            title: "图片不能超过5MB",
+            icon: "none",
+          });
+          return;
+        }
+        
         this.setData({
-          selectedAvatar: tempFilePath,
-          avatarFile: tempFilePath,
+          selectedAvatar: tempFile.tempFilePath,
+          avatarFile: tempFile,
+          avatarUploading: true,
+          avatarUploadProgress: 0,
+          avatarUploaded: false,
+          avatarUploadError: null,
+          avatarUploadUrl: null,
         });
+        
+        // Start background upload immediately
+        this.uploadAvatarInBackground(tempFile);
       },
-      fail: () => {
+      fail: (err) => {
+        console.error("选择图片失败:", err);
+        if (err.errMsg.includes("cancel")) {
+          return;
+        }
         wx.showToast({
-          title: "选择图片失败",
+          title: "图片选择失败",
           icon: "none",
         });
       },
@@ -296,6 +327,33 @@ Page({
       return;
     }
 
+    // Check if avatar is still uploading
+    if (this.data.avatarUploading) {
+      wx.showLoading({
+        title: "等待头像上传完成...",
+        mask: true,
+      });
+      
+      // Wait for upload to complete
+      this.waitForAvatarUpload().then(() => {
+        wx.hideLoading();
+        if (this.data.avatarUploadUrl) {
+          this.saveProfileWithAvatar();
+        } else {
+          wx.showToast({
+            title: "头像上传失败，请重试",
+            icon: "none",
+            duration: 2000,
+          });
+        }
+      });
+    } else {
+      this.saveProfileWithAvatar();
+    }
+  },
+  
+  // Save profile with avatar URL
+  saveProfileWithAvatar: function () {
     wx.showLoading({
       title: "保存中...",
     });
@@ -306,44 +364,94 @@ Page({
       phone: "+86" + this.data.profileForm.phone,
       admission_year: this.data.profileForm.admissionYear,
     };
-
-    // If avatar was changed, handle file upload separately
-    if (this.data.avatarFile) {
-      this.uploadAvatarAndUpdateProfile(formData);
-    } else {
-      this.updateProfile(formData);
+    
+    // Add avatar URL if uploaded
+    if (this.data.avatarUploadUrl) {
+      formData.avatar_url = this.data.avatarUploadUrl;
     }
+
+    this.updateProfile(formData);
   },
 
-  // Upload avatar and update profile
-  uploadAvatarAndUpdateProfile: function (formData) {
-    wx.uploadFile({
-      url: `${config.BACKEND_URL}/user/upload_avatar`,
-      filePath: this.data.avatarFile,
-      name: "avatar",
-      header: {
-        Authorization: `Bearer ${getApp().globalData.userInfo?.token}`,
-      },
-      success: (res) => {
-        const data = JSON.parse(res.data);
-        if (data.status === "success") {
-          formData.avatar_url = data.avatar_url;
-          this.updateProfile(formData);
-        } else {
-          wx.hideLoading();
-          wx.showToast({
-            title: "头像上传失败",
-            icon: "none",
-          });
-        }
-      },
-      fail: () => {
-        wx.hideLoading();
-        wx.showToast({
-          title: "头像上传失败",
-          icon: "none",
+  // Background upload avatar to UCloud
+  async uploadAvatarInBackground(tempFile) {
+    console.log("Starting background avatar upload:", tempFile);
+    
+    try {
+      // Progress callback
+      const progressCallback = (progress) => {
+        this.setData({
+          avatarUploadProgress: progress
         });
-      },
+      };
+      
+      // Use uploadImageSimple for direct upload without blur
+      console.log("Uploading avatar image...");
+      const uploadResult = await ucloudUpload.uploadImageSimple(
+        tempFile.tempFilePath,
+        progressCallback,
+        'avatars'  // upload folder
+      );
+      
+      console.log("Avatar upload result:", uploadResult);
+      
+      if (uploadResult && uploadResult.url) {
+        this.setData({
+          avatarUploading: false,
+          avatarUploaded: true,
+          avatarUploadUrl: uploadResult.url,
+          avatarUploadError: null
+        });
+        
+        wx.showToast({
+          title: "头像上传成功",
+          icon: "success",
+          duration: 1500
+        });
+      } else {
+        throw new Error("上传结果无效");
+      }
+    } catch (error) {
+      console.error("Avatar upload failed:", error);
+      
+      this.setData({
+        avatarUploading: false,
+        avatarUploaded: false,
+        avatarUploadUrl: null,
+        avatarUploadError: error.message || "上传失败"
+      });
+      
+      wx.showToast({
+        title: "头像上传失败",
+        icon: "none",
+        duration: 2000
+      });
+    }
+  },
+  
+  // Wait for avatar upload to complete
+  waitForAvatarUpload() {
+    return new Promise((resolve) => {
+      const checkInterval = 100;
+      const maxWaitTime = 30000; // 30 seconds
+      let waitTime = 0;
+      
+      const check = () => {
+        if (this.data.avatarUploaded || this.data.avatarUploadError) {
+          resolve();
+        } else if (waitTime >= maxWaitTime) {
+          this.setData({
+            avatarUploading: false,
+            avatarUploadError: "上传超时"
+          });
+          resolve();
+        } else {
+          waitTime += checkInterval;
+          setTimeout(check, checkInterval);
+        }
+      };
+      
+      check();
     });
   },
 

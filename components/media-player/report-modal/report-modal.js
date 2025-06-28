@@ -1,4 +1,5 @@
 const { default: config } = require("../../../config");
+const ucloudUpload = require("../../../services/ucloudUpload");
 
 // components/report-modal/report-modal.js
 Component({
@@ -32,15 +33,22 @@ Component({
       { title: "危害人身安全", value: "危害人身安全", icon: "🚨" },
       { title: "未成年相关", value: "未成年相关", icon: "👶" },
       { title: "侵犯权益", value: "侵犯权益", icon: "⚖️" },
-      { title: "其他", value: "其他", icon: "📝" },    ],
+      { title: "其他", value: "其他", icon: "📝" },
+    ],
 
     // Form data
     selectedReason: "",
     description: "",
-    images: [],    maxImages: 4,
+    images: [],
+    maxImages: 4,
 
     // UI state
-    isSubmitting: false,},
+    isSubmitting: false,
+    
+    // Upload states
+    uploadingImages: [],
+    imageUploadProgress: {},
+    imageUploadErrors: {},},
 
   /**
    * Component methods list
@@ -83,6 +91,8 @@ Component({
           const newImages = res.tempFiles.map((file) => ({
             tempFilePath: file.tempFilePath,
             size: file.size,
+            uploaded: false,
+            uploadResult: null
           }));
 
           this.setData({
@@ -90,9 +100,11 @@ Component({
           });
 
           this.addHapticFeedback("light");
+          
+          // Start background upload immediately
+          this.startBackgroundUploads(res.tempFiles);
         },
         fail: (err) => {
-          console.error("选择图片失败:", err);
           wx.showToast({
             title: "选择图片失败",
             icon: "none",
@@ -126,6 +138,8 @@ Component({
           images[index] = {
             tempFilePath: res.tempFiles[0].tempFilePath,
             size: res.tempFiles[0].size,
+            uploaded: false,
+            uploadResult: null
           };
 
           this.setData({
@@ -133,9 +147,11 @@ Component({
           });
 
           this.addHapticFeedback("light");
+          
+          // Start background upload for replaced image
+          this.startBackgroundUploads([res.tempFiles[0]], index);
         },
         fail: (err) => {
-          console.error("替换图片失败:", err);
         },
       });    },
 
@@ -175,41 +191,42 @@ Component({
           image_urls: []
         };
 
-        // Handle image upload
+        // Handle image URLs from already uploaded images
         if (images && images.length > 0) {
-          // Wrap all image uploads as Promise array
-          const uploadPromises = images.map((image) => {
-            if (!image.tempFilePath) return Promise.resolve(null);
+          const imageUrls = [];
+          
+          for (let i = 0; i < images.length; i++) {
+            const image = images[i];
             
-            return new Promise((resolve, reject) => {
-              wx.uploadFile({
-                url: config.BACKEND_URL + "/report/upload_media",
-                filePath: image.tempFilePath,
-                name: "file",
-                header: {
-                  "content-type": "multipart/form-data",
-                  Authorization: "Bearer " + getApp().globalData.userInfo.token,
-                },
-                success: (res) => {
-                  try {
-                    const data = JSON.parse(res.data);
-                    if (data.status === "success") {
-                      resolve(data.url);
-                    } else {
-                      reject(new Error(data.message || "图片上传失败"));
-                    }
-                  } catch (error) {
-                    reject(new Error("解析上传响应失败"));
-                  }
-                },
-                fail: (err) => {
-                  reject(new Error("图片上传请求失败:" + err.errMsg));
-                }
+            if (image.uploaded && image.uploadResult && image.uploadResult.url) {
+              // Use already uploaded URL
+              imageUrls.push(image.uploadResult.url);
+            } else if (image.tempFilePath) {
+              // Need to upload now (fallback)
+              wx.showLoading({
+                title: `上传图片 ${i + 1}/${images.length}...`,
+                mask: true,
               });
-            });
-          });          // Wait for all image uploads to complete
-          const uploadedUrls = await Promise.all(uploadPromises);
-          formData.image_urls = uploadedUrls.filter(url => url !== null);
+              
+              try {
+                const uploadResult = await ucloudUpload.uploadImageSimple(
+                  image.tempFilePath,
+                  null,
+                  'report_images'
+                );
+                
+                if (uploadResult && uploadResult.url) {
+                  imageUrls.push(uploadResult.url);
+                } else {
+                  throw new Error("上传失败");
+                }
+              } catch (error) {
+                throw new Error(`图片${i + 1}上传失败: ${error.message}`);
+              }
+            }
+          }
+          
+          formData.image_urls = imageUrls;
         }
 
         // After all images uploaded, submit report
@@ -241,7 +258,6 @@ Component({
         }
       } catch (error) {
         wx.hideLoading();
-        console.error("提交举报错误:", error);
 
         const errorMessage = error.message || "网络错误，请重试";
         wx.showToast({
@@ -337,6 +353,81 @@ Component({
         wx.vibrateShort({
           type: type, // light, medium, heavy
         });
+      }
+    },
+    
+    // Start background uploads immediately after image selection
+    async startBackgroundUploads(tempFiles, replaceIndex = null) {
+      for (let i = 0; i < tempFiles.length; i++) {
+        const file = tempFiles[i];
+        const uploadId = `${Date.now()}_${i}`;
+        
+        // Add to uploading list
+        this.setData({
+          uploadingImages: [...this.data.uploadingImages, uploadId],
+          [`imageUploadProgress.${uploadId}`]: 0
+        });
+        
+        try {
+          // Progress callback
+          const progressCallback = (progress) => {
+            this.setData({
+              [`imageUploadProgress.${uploadId}`]: progress
+            });
+          };
+          
+          // Upload using UCloud
+          const uploadResult = await ucloudUpload.uploadImageSimple(
+            file.tempFilePath,
+            progressCallback,
+            'report_images'
+          );
+          
+          if (uploadResult && uploadResult.url) {
+            // Update the corresponding image with upload result
+            const images = [...this.data.images];
+            if (replaceIndex !== null) {
+              // For replaced images
+              images[replaceIndex].uploadResult = uploadResult;
+              images[replaceIndex].uploaded = true;
+            } else {
+              // For new images
+              const imageIndex = images.findIndex(img => img.tempFilePath === file.tempFilePath);
+              if (imageIndex !== -1) {
+                images[imageIndex].uploadResult = uploadResult;
+                images[imageIndex].uploaded = true;
+              }
+            }
+            
+            // Remove from uploading list
+            const updatedUploading = this.data.uploadingImages.filter(id => id !== uploadId);
+            this.setData({ 
+              images: images,
+              uploadingImages: updatedUploading 
+            });
+          } else {
+            throw new Error("上传结果无效");
+          }
+          
+          // Add delay between uploads
+          if (i < tempFiles.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
+        } catch (error) {
+          // Remove from uploading list and add error
+          const updatedUploading = this.data.uploadingImages.filter(id => id !== uploadId);
+          this.setData({
+            uploadingImages: updatedUploading,
+            [`imageUploadErrors.${uploadId}`]: error.message || "上传失败"
+          });
+          
+          // Show error toast
+          wx.showToast({
+            title: `图片 ${i + 1} 上传失败`,
+            icon: 'none',
+            duration: 2000
+          });
+        }
       }
     },  },
 

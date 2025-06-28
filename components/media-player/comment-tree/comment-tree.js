@@ -1,6 +1,7 @@
 const { default: config } = require("../../../config");
 const { isContainSword } = require("../../../utils/isContainSword");
 const { isEmpty } = require("../../../utils/isEmpty");
+const ucloudUpload = require("../../../services/ucloudUpload");
 
 // comment-tree.js
 Component({
@@ -118,13 +119,13 @@ Component({
       if (this.data.isSending) return;
       
       const that = this;
-      wx.chooseImage({
+      wx.chooseMedia({
         count: 1,
-        sizeType: ["compressed"],
+        mediaType: ["image"],
         sourceType: ["album", "camera"],
         success(res) {
-          const tempFilePath = res.tempFilePaths[0];
-          that.uploadCommentImage(tempFilePath);
+          const tempFile = res.tempFiles[0];
+          that.uploadCommentImage(tempFile.tempFilePath);
         },
         fail(err) {
           wx.showToast({
@@ -136,63 +137,92 @@ Component({
     },
 
     // Upload comment image
-    uploadCommentImage(filePath) {
+    async uploadCommentImage(filePath) {
       if (this.data.isSending) return;
       
       this.setData({ isSending: true });
       
       wx.showLoading({
-        title: "上传中...",
+        title: "处理中...",
       });
 
-      const formData = {
-        parent_id: this.data.commentId || null,
-        post_id: this.properties.selectedPost.id,
-        sender_id: this.properties.loggedUser.id,
-      };
-
-      wx.uploadFile({
-        url: `${config.BACKEND_URL}/post/send_comment`,
-        method: "POST",
-        header: {
-          "Content-Type": "multipart/form-data",
-          Authorization: this.properties.loggedUser.token
-            ? `Bearer ${this.properties.loggedUser.token}`
-            : "",
-        },
-        filePath: filePath,
-        name: "file",
-        formData: formData,
-        success: (res) => {
-          wx.hideLoading();
-          this.setData({ isSending: false });
-          
-          const data = JSON.parse(res.data);
-          if (data.status === "success") {
+      try {
+        // First compress and upload image to UCloud
+        const progressCallback = (progress) => {
+          // Update loading text with progress if needed
+        };
+        
+        const uploadResult = await ucloudUpload.uploadImageSimple(
+          filePath,
+          progressCallback,
+          'comment_images'
+        );
+        
+        if (!uploadResult || !uploadResult.url) {
+          throw new Error("图片上传失败");
+        }
+        
+        // Change loading text
+        wx.showLoading({
+          title: "发布中...",
+        });
+        
+        // Then send comment with image URL to backend
+        const requestData = {
+          parent_id: this.data.commentId || null,
+          post_id: this.properties.selectedPost.id,
+          sender_id: this.properties.loggedUser.id,
+          content: "[图片]",
+          image_url: uploadResult.url
+        };
+        
+        wx.request({
+          url: `${config.BACKEND_URL}/post/send_comment`,
+          method: "POST",
+          header: {
+            "Content-Type": "application/json",
+            Authorization: this.properties.loggedUser.token
+              ? `Bearer ${this.properties.loggedUser.token}`
+              : "",
+          },
+          data: requestData,
+          success: (res) => {
+            wx.hideLoading();
+            this.setData({ isSending: false });
+            
+            if (res.data.status === "success") {
+              wx.showToast({
+                title: "评论发布成功",
+                icon: "success",
+              });
+              this.triggerEvent("commentsent", {
+                comments: res.data.comment,
+              });
+              this.resetCommentInput();
+            } else {
+              wx.showToast({
+                title: res.data.msg || "评论发布失败",
+                icon: "error",
+              });
+            }
+          },
+          fail: (err) => {
+            wx.hideLoading();
+            this.setData({ isSending: false });
             wx.showToast({
-              title: "评论发布成功",
-              icon: "success",
-            });
-            this.triggerEvent("commentsent", {
-              comments: data.comment,
-            });
-            this.resetCommentInput();
-          } else {
-            wx.showToast({
-              title: "评论发布失败",
+              title: "网络错误",
               icon: "error",
             });
-          }
-        },
-        fail: (err) => {
-          wx.hideLoading();
-          this.setData({ isSending: false });
-          wx.showToast({
-            title: "上传失败",
-            icon: "error",
-          });
-        },
-      });
+          },
+        });
+      } catch (error) {
+        wx.hideLoading();
+        this.setData({ isSending: false });
+        wx.showToast({
+          title: error.message || "上传失败",
+          icon: "error",
+        });
+      }
     },
 
     // Send comment

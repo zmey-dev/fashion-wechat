@@ -1,4 +1,5 @@
 const { default: config } = require("../../config");
+const ucloudUpload = require("../../services/ucloudUpload");
 
 Page({
   data: {
@@ -86,6 +87,19 @@ Page({
     // Upload states
     uploadingAvatar: false,
     uploadingCredential: false,
+    
+    // Background upload states
+    avatarUploading: false,
+    avatarUploadProgress: 0,
+    avatarUploaded: false,
+    avatarUploadError: null,
+    avatarUploadUrl: null,
+    
+    credentialUploading: false,
+    credentialUploadProgress: 0,
+    credentialUploaded: false,
+    credentialUploadError: null,
+    credentialUploadUrl: null,
 
     // Messages for user feedback
     messages: {
@@ -1217,60 +1231,53 @@ Page({
       enteredPhoneCode: e.detail.value,
     });
   },
-  // Upload avatar
+  // Upload avatar with background upload
   selectAvatar: function() {
     if (!this.data.isEditingProfile) return;
 
-    wx.chooseImage({
+    wx.chooseMedia({
       count: 1,
-      sizeType: ["compressed"],
+      mediaType: ["image"],
       sourceType: ["album", "camera"],
+      sizeType: ["compressed"],
       success: (res) => {
-        const tempFilePath = res.tempFilePaths[0];
+        const tempFile = res.tempFiles[0];
+        
+        // Check file size (max 5MB)
+        if (tempFile.size > 5 * 1024 * 1024) {
+          wx.showToast({
+            title: "图片不能超过5MB",
+            icon: "none",
+          });
+          return;
+        }
+        
         this.setData({
-          selectedAvatar: tempFilePath,
-          uploadingAvatar: true,
+          selectedAvatar: tempFile.tempFilePath,
+          avatarUploading: true,
+          avatarUploadProgress: 0,
+          avatarUploaded: false,
+          avatarUploadError: null,
+          avatarUploadUrl: null,
         });
-
-        wx.uploadFile({
-          url: `${config.BACKEND_URL}/user/upload_avatar`,
-          filePath: tempFilePath,
-          name: "avatar",
-          header: {
-            Authorization: `Bearer ${getApp().globalData.userInfo.token}`,
-          },
-          success: (uploadRes) => {
-            const data = JSON.parse(uploadRes.data);
-            if (data.status === "success") {
-              this.setData({
-                "teacherProfile.avatar": data.avatar_url,
-              });
-              wx.showToast({
-                title: "头像上传成功",
-                icon: "success",
-              });
-            } else {
-              wx.showToast({
-                title: data.message || "上传失败",
-                icon: "none",
-              });
-            }
-          },
-          fail: () => {
-            wx.showToast({
-              title: "上传失败",
-              icon: "none",
-            });
-          },
-          complete: () => {
-            this.setData({ uploadingAvatar: false });
-          },
+        
+        // Start background upload immediately
+        this.uploadAvatarInBackground(tempFile);
+      },
+      fail: (err) => {
+        console.error("选择图片失败:", err);
+        if (err.errMsg.includes("cancel")) {
+          return;
+        }
+        wx.showToast({
+          title: "图片选择失败",
+          icon: "none",
         });
       },
     });
   },
 
-  // Upload credential file
+  // Upload credential file with background upload
   uploadCredential: function() {
     wx.chooseMessageFile({
       count: 1,
@@ -1289,45 +1296,36 @@ Page({
           });
           return;
         }
+        
+        // Check file size (max 10MB)
+        if (file.size > 10 * 1024 * 1024) {
+          wx.showToast({
+            title: "文件不能超过10MB",
+            icon: "none",
+          });
+          return;
+        }
 
         this.setData({
-          uploadingCredential: true,
           credentialFileName: file.name,
+          credentialUploading: true,
+          credentialUploadProgress: 0,
+          credentialUploaded: false,
+          credentialUploadError: null,
+          credentialUploadUrl: null,
         });
-
-        wx.uploadFile({
-          url: `${config.BACKEND_URL}/teacher/upload-credential`,
-          filePath: file.path,
-          name: "credential",
-          header: {
-            Authorization: `Bearer ${getApp().globalData.userInfo.token}`,
-          },
-          success: (uploadRes) => {
-            const data = JSON.parse(uploadRes.data);
-            if (data.status === "success") {
-              this.setData({
-                "teacherProfile.credentialName": data.data.url,
-              });
-              wx.showToast({
-                title: "证书上传成功",
-                icon: "success",
-              });
-            } else {
-              wx.showToast({
-                title: data.message || "上传失败",
-                icon: "none",
-              });
-            }
-          },
-          fail: () => {
-            wx.showToast({
-              title: "上传失败",
-              icon: "none",
-            });
-          },
-          complete: () => {
-            this.setData({ uploadingCredential: false });
-          },
+        
+        // Start background upload immediately
+        this.uploadCredentialInBackground(file);
+      },
+      fail: (err) => {
+        console.error("选择文件失败:", err);
+        if (err.errMsg.includes("cancel")) {
+          return;
+        }
+        wx.showToast({
+          title: "文件选择失败",
+          icon: "none",
         });
       },
     });
@@ -1355,6 +1353,33 @@ Page({
       return;
     }
 
+    // Check if files are still uploading
+    if (this.data.avatarUploading || this.data.credentialUploading) {
+      wx.showLoading({
+        title: "等待文件上传完成...",
+        mask: true,
+      });
+      
+      // Wait for uploads to complete
+      this.waitForUploadsToComplete().then(() => {
+        wx.hideLoading();
+        if (this.data.avatarUploadError || this.data.credentialUploadError) {
+          wx.showToast({
+            title: "文件上传失败，请重试",
+            icon: "none",
+            duration: 2000,
+          });
+        } else {
+          this.saveProfileWithUploads();
+        }
+      });
+    } else {
+      this.saveProfileWithUploads();
+    }
+  },
+  
+  // Save profile with uploaded file URLs
+  saveProfileWithUploads: function() {
     wx.showLoading({
       title: "保存中...",
     });
@@ -1364,45 +1389,189 @@ Page({
       ...this.data.teacherProfile,
       phone: "+86" + this.data.teacherProfile.phone,
     };
-
-    // If avatar was changed, handle file upload separately
-    if (this.data.selectedAvatar && this.data.selectedAvatar !== this.data.teacherProfile.avatar) {
-      this.uploadAvatarAndUpdateProfile(formData);
-    } else {
-      this.updateProfile(formData);
+    
+    // Add uploaded file URLs
+    if (this.data.avatarUploadUrl) {
+      formData.avatar_url = this.data.avatarUploadUrl;
     }
+    
+    if (this.data.credentialUploadUrl) {
+      formData.credential_url = this.data.credentialUploadUrl;
+    }
+
+    this.updateProfile(formData);
   },
 
-  // Upload avatar and update profile
-  uploadAvatarAndUpdateProfile: function(formData) {
-    wx.uploadFile({
-      url: `${config.BACKEND_URL}/user/upload_avatar`,
-      filePath: this.data.selectedAvatar,
-      name: 'avatar',
-      header: {
-        Authorization: `Bearer ${getApp().globalData.userInfo?.token}`,
-      },
-      success: (res) => {
-        const data = JSON.parse(res.data);
-        if (data.status === "success") {
-          formData.avatar_url = data.avatar_url;
-          formData.avatar = null;
-          this.updateProfile(formData);
-        } else {
-          wx.hideLoading();
-          wx.showToast({
-            title: "头像上传失败",
-            icon: "none"
-          });
-        }
-      },
-      fail: () => {
-        wx.hideLoading();
-        wx.showToast({
-          title: "头像上传失败",
-          icon: "none"
+  // Background upload avatar to UCloud
+  async uploadAvatarInBackground(tempFile) {
+    console.log("Starting background avatar upload:", tempFile);
+    
+    try {
+      // Progress callback
+      const progressCallback = (progress) => {
+        this.setData({
+          avatarUploadProgress: progress
         });
+      };
+      
+      // Use uploadImageSimple for direct upload without blur
+      console.log("Uploading avatar image...");
+      const uploadResult = await ucloudUpload.uploadImageSimple(
+        tempFile.tempFilePath,
+        progressCallback,
+        'teacher_avatars'  // upload folder
+      );
+      
+      console.log("Avatar upload result:", uploadResult);
+      
+      if (uploadResult && uploadResult.url) {
+        this.setData({
+          avatarUploading: false,
+          avatarUploaded: true,
+          avatarUploadUrl: uploadResult.url,
+          avatarUploadError: null,
+          "teacherProfile.avatar": uploadResult.url
+        });
+        
+        wx.showToast({
+          title: "头像上传成功",
+          icon: "success",
+          duration: 1500
+        });
+      } else {
+        throw new Error("上传结果无效");
       }
+    } catch (error) {
+      console.error("Avatar upload failed:", error);
+      
+      this.setData({
+        avatarUploading: false,
+        avatarUploaded: false,
+        avatarUploadUrl: null,
+        avatarUploadError: error.message || "上传失败"
+      });
+      
+      wx.showToast({
+        title: "头像上传失败",
+        icon: "none",
+        duration: 2000
+      });
+    }
+  },
+  
+  // Background upload credential to UCloud
+  async uploadCredentialInBackground(file) {
+    console.log("Starting background credential upload:", file);
+    
+    try {
+      // Progress callback
+      const progressCallback = (progress) => {
+        this.setData({
+          credentialUploadProgress: progress
+        });
+      };
+      
+      // Determine file type and use appropriate upload method
+      const fileExt = file.name.split('.').pop().toLowerCase();
+      let uploadResult;
+      
+      if (['jpg', 'jpeg', 'png'].includes(fileExt)) {
+        // Image credential
+        uploadResult = await ucloudUpload.uploadImageSimple(
+          file.path,
+          progressCallback,
+          'teacher_credentials'
+        );
+      } else {
+        // Document file - use generic file upload
+        const fileForUpload = {
+          tempFilePath: file.path,
+          name: file.name,
+          size: file.size,
+          type: 'file'
+        };
+        
+        uploadResult = await ucloudUpload.uploadMedia(
+          fileForUpload,
+          progressCallback,
+          { upload: 'teacher_credentials' }
+        );
+      }
+      
+      console.log("Credential upload result:", uploadResult);
+      
+      const finalUrl = uploadResult.url || uploadResult.uploadUrl || uploadResult.fileUrl;
+      
+      if (finalUrl) {
+        this.setData({
+          credentialUploading: false,
+          credentialUploaded: true,
+          credentialUploadUrl: finalUrl,
+          credentialUploadError: null,
+          "teacherProfile.credentialName": finalUrl
+        });
+        
+        wx.showToast({
+          title: "证书上传成功",
+          icon: "success",
+          duration: 1500
+        });
+      } else {
+        throw new Error("上传结果无效");
+      }
+    } catch (error) {
+      console.error("Credential upload failed:", error);
+      
+      this.setData({
+        credentialUploading: false,
+        credentialUploaded: false,
+        credentialUploadUrl: null,
+        credentialUploadError: error.message || "上传失败"
+      });
+      
+      wx.showToast({
+        title: "证书上传失败",
+        icon: "none",
+        duration: 2000
+      });
+    }
+  },
+  
+  // Wait for all uploads to complete
+  waitForUploadsToComplete() {
+    return new Promise((resolve) => {
+      const checkInterval = 100;
+      const maxWaitTime = 60000; // 60 seconds
+      let waitTime = 0;
+      
+      const check = () => {
+        const avatarDone = !this.data.avatarUploading;
+        const credentialDone = !this.data.credentialUploading;
+        
+        if (avatarDone && credentialDone) {
+          resolve();
+        } else if (waitTime >= maxWaitTime) {
+          // Timeout - mark any still uploading as failed
+          if (this.data.avatarUploading) {
+            this.setData({
+              avatarUploading: false,
+              avatarUploadError: "上传超时"
+            });
+          }
+          if (this.data.credentialUploading) {
+            this.setData({
+              credentialUploading: false,
+              credentialUploadError: "上传超时"
+            });
+          }
+          resolve();
+        } else {
+          waitTime += checkInterval;
+          setTimeout(check, checkInterval);
+        }
+      };
+      
+      check();
     });
   },
 

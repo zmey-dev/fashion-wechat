@@ -1,5 +1,6 @@
 // pages/contact/contact.js
 const { default: config } = require("../../config");
+const ucloudUpload = require("../../services/ucloudUpload");
 
 const app = getApp();
 
@@ -12,6 +13,11 @@ Page({
     images: [],
     maxImages: 4,
     isSubmitting: false,
+    
+    // Upload states
+    uploadingImages: [],
+    imageUploadProgress: {},
+    imageUploadErrors: {},
     // Chinese messages for UI text
     messages: {
       form: {
@@ -104,6 +110,11 @@ Page({
         this.setData({
           images: newImages,
         });
+
+        try {
+          this.startBackgroundUploads(tempFiles);
+        } catch (error) {
+        }
       },
     });
   },
@@ -209,7 +220,6 @@ Page({
       // Hide loading indicator
       wx.hideLoading();
 
-      console.error("Submission error:", error);
       this.setData({ isSubmitting: false });
 
       // Show error message
@@ -228,57 +238,77 @@ Page({
     }
   },
 
-  // Upload images and get their URLs
-  uploadImages: function (images) {
+  // Upload images using UCloud and get their URLs
+  uploadImages: async function (images) {
     if (!images.length) return Promise.resolve([]);
 
-    return new Promise(async (resolve, reject) => {
-      try {
-        // Create upload promises for each image
-        const uploadPromises = images.map((image) => {
-          return new Promise((innerResolve, innerReject) => {
-            wx.uploadFile({
-              url: `${config.BACKEND_URL}/contact/upload_media`,
-              filePath: image.path,
-              name: "file",
-              header: {
-                "Content-Type": "multipart/form-data",
-                Authorization: `Bearer ${getApp().globalData.userInfo.token}`,
-              },
-              success: (res) => {
-                try {
-                  const data = JSON.parse(res.data);
-                  if (data.status === "success") {
-                    innerResolve(data.url);
-                  } else {
-                    innerReject(
-                      new Error(
-                        data.message || this.data.messages.errors.uploadFailed
-                      )
-                    );
-                  }
-                } catch (error) {
-                  innerReject(new Error(this.data.messages.errors.parseFailed));
-                }
-              },
-              fail: (err) => {
-                innerReject(
-                  new Error(
-                    `${this.data.messages.errors.requestFailed}: ${err.errMsg}`
-                  )
-                );
-              },
-            });
-          });
-        });
 
-        // Wait for all uploads to complete
-        const results = await Promise.all(uploadPromises);
-        resolve(results.filter((url) => url !== null));
-      } catch (error) {
-        reject(error);
+    try {
+      const uploadResults = [];
+      
+      // Check if images are already uploaded in background
+      for (let i = 0; i < images.length; i++) {
+        const image = images[i];
+        
+        if (image.uploaded && image.uploadResult && image.uploadResult.url) {
+          uploadResults.push(image.uploadResult.url);
+        } else {
+          const uploadId = `${Date.now()}_${i}`;
+          
+          this.setData({
+            uploadingImages: [...this.data.uploadingImages, uploadId],
+            [`imageUploadProgress.${uploadId}`]: 0
+          });
+          
+          try {
+            // Progress callback
+            const progressCallback = (progress) => {
+              this.setData({
+                [`imageUploadProgress.${uploadId}`]: progress
+              });
+            };
+            
+            
+            const uploadResult = await ucloudUpload.uploadImageSimple(
+              image.path,
+              progressCallback,
+              'contact_images'
+            );
+            
+            
+            if (uploadResult && uploadResult.url) {
+              uploadResults.push(uploadResult.url);
+              
+              // Remove from uploading list
+              const updatedUploading = this.data.uploadingImages.filter(id => id !== uploadId);
+              this.setData({ uploadingImages: updatedUploading });
+              
+            } else {
+              throw new Error("上传结果无效");
+            }
+            
+            // Add delay between uploads
+            if (i < images.length - 1) {
+              await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+          } catch (error) {
+            
+            // Remove from uploading list and add error
+            const updatedUploading = this.data.uploadingImages.filter(id => id !== uploadId);
+            this.setData({
+              uploadingImages: updatedUploading,
+              [`imageUploadErrors.${uploadId}`]: error.message || "上传失败"
+            });
+            
+            throw new Error(`图片 ${i + 1} 上传失败: ${error.message}`);
+          }
+        }
       }
-    });
+      
+      return uploadResults;
+    } catch (error) {
+      throw error;
+    }
   },
 
   // Submit the form data with image URLs
@@ -317,5 +347,78 @@ Page({
         },
       });
     });
+  },
+
+  startBackgroundUploads: async function(tempFiles) {
+    
+    for (let i = 0; i < tempFiles.length; i++) {
+      const file = tempFiles[i];
+      const uploadId = `${Date.now()}_${i}`;
+      
+      
+      // Add to uploading list
+      this.setData({
+        uploadingImages: [...this.data.uploadingImages, uploadId],
+        [`imageUploadProgress.${uploadId}`]: 0
+      });
+      
+      try {
+        // Progress callback
+        const progressCallback = (progress) => {
+          this.setData({
+            [`imageUploadProgress.${uploadId}`]: progress
+          });
+        };
+        
+        // Upload using UCloud
+        const uploadResult = await ucloudUpload.uploadImageSimple(
+          file.tempFilePath,
+          progressCallback,
+          'contact_images'
+        );
+        
+        
+        if (uploadResult && uploadResult.url) {
+          // Update the corresponding image with upload result
+          const images = [...this.data.images];
+          const imageIndex = images.findIndex(img => img.path === file.tempFilePath);
+          if (imageIndex !== -1) {
+            images[imageIndex].uploadResult = uploadResult;
+            images[imageIndex].uploaded = true;
+          }
+          
+          // Remove from uploading list
+          const updatedUploading = this.data.uploadingImages.filter(id => id !== uploadId);
+          this.setData({ 
+            images: images,
+            uploadingImages: updatedUploading 
+          });
+          
+        } else {
+          throw new Error("failed upload");
+        }
+        
+        // Add delay between uploads
+        if (i < tempFiles.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      } catch (error) {
+        
+        // Remove from uploading list and add error
+        const updatedUploading = this.data.uploadingImages.filter(id => id !== uploadId);
+        this.setData({
+          uploadingImages: updatedUploading,
+          [`imageUploadErrors.${uploadId}`]: error.message || "업로드 실패"
+        });
+        
+        // Show error toast
+        wx.showToast({
+          title: `图片 ${i + 1} 上传失败`,
+          icon: 'none',
+          duration: 2000
+        });
+      }
+    }
+    
   },
 });

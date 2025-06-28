@@ -1,5 +1,6 @@
 const { default: config } = require("../../config");
 const { socketManager } = require("../../services/socket");
+const ucloudUpload = require("../../services/ucloudUpload");
 
 // pages/chat/chat.js
 Page({
@@ -26,6 +27,11 @@ Page({
       x: 0,
       y: 0,
     },
+    
+    // File upload states
+    uploadingFiles: [],
+    fileUploadProgress: {},
+    fileUploadErrors: {},
 
     // Emojis
     emojis: [
@@ -1087,43 +1093,69 @@ Page({
       },
     });
   },
-  uploadImage(filePath) {
+  async uploadImage(filePath) {
     if (this.data.isSending) return; // Prevent upload during sending
 
     // Set sending state for image upload
     this.setData({ isSending: true });
+    
+    const uploadId = Date.now().toString();
+    this.setData({
+      uploadingFiles: [...this.data.uploadingFiles, uploadId],
+      [`fileUploadProgress.${uploadId}`]: 0
+    });
 
     wx.showLoading({
       title: "上传中...",
     });
 
-    wx.uploadFile({
-      url: `${config.BACKEND_URL}/upload/image`,
-      filePath: filePath,
-      name: "image",
-      header: {
-        Authorization: `Bearer ${this.data.userInfo.token}`,
-      },
-      success: (res) => {
-        wx.hideLoading();
-        const data = JSON.parse(res.data);
-        if (data.status === "success") {
-          // Send image message
-          this.sendImageMessage(data.url);
-        }
-      },
-      fail: () => {
-        wx.hideLoading();
-        wx.showToast({
-          title: "上传失败",
-          icon: "none",
+    try {
+      // Progress callback
+      const progressCallback = (progress) => {
+        this.setData({
+          [`fileUploadProgress.${uploadId}`]: progress
         });
-      },
-      complete: () => {
-        // Reset sending state
-        this.setData({ isSending: false });
-      },
-    });
+      };
+      
+      // Use UCloud upload for images
+      const uploadResult = await ucloudUpload.uploadImageSimple(
+        filePath,
+        progressCallback,
+        'chat_images'
+      );
+      
+      if (uploadResult && uploadResult.url) {
+        wx.hideLoading();
+        
+        // Remove from uploading list
+        const updatedUploading = this.data.uploadingFiles.filter(id => id !== uploadId);
+        this.setData({ uploadingFiles: updatedUploading });
+        
+        // Send image message
+        this.sendImageMessage(uploadResult.url);
+      } else {
+        throw new Error("上传结果无效");
+      }
+    } catch (error) {
+      console.error("Image upload failed:", error);
+      
+      wx.hideLoading();
+      
+      // Remove from uploading list and add error
+      const updatedUploading = this.data.uploadingFiles.filter(id => id !== uploadId);
+      this.setData({
+        uploadingFiles: updatedUploading,
+        [`fileUploadErrors.${uploadId}`]: error.message || "上传失败"
+      });
+      
+      wx.showToast({
+        title: "上传失败",
+        icon: "none",
+      });
+    } finally {
+      // Reset sending state
+      this.setData({ isSending: false });
+    }
   },
   // Send image message
   sendImageMessage(imageUrl) {
@@ -1219,46 +1251,107 @@ Page({
       },
     });
   },
-  // Upload file
-  uploadFile(filePath, fileName) {
+  // Upload file using UCloud
+  async uploadFile(filePath, fileName) {
     if (this.data.isSending) return; // Prevent file upload during sending
 
     // Set sending state for file upload
     this.setData({ isSending: true });
+    
+    const uploadId = Date.now().toString();
+    this.setData({
+      uploadingFiles: [...this.data.uploadingFiles, uploadId],
+      [`fileUploadProgress.${uploadId}`]: 0
+    });
 
     wx.showLoading({
       title: "上传中...",
     });
 
-    wx.uploadFile({
-      url: `${config.BACKEND_URL}/upload/file`,
-      filePath: filePath,
-      name: "file",
-      formData: {
-        fileName: fileName,
-      },
-      header: {
-        Authorization: `Bearer ${this.data.userInfo.token}`,
-      },
-      success: (res) => {
-        wx.hideLoading();
-        const data = JSON.parse(res.data);
-        if (data.status === "success") {
-          this.sendFileMessage(data.url, fileName);
-        }
-      },
-      fail: () => {
-        wx.hideLoading();
-        wx.showToast({
-          title: "上传失败",
-          icon: "none",
+    try {
+      // Progress callback
+      const progressCallback = (progress) => {
+        this.setData({
+          [`fileUploadProgress.${uploadId}`]: progress
         });
-      },
-      complete: () => {
-        // Reset sending state
-        this.setData({ isSending: false });
-      },
-    });
+      };
+      
+      // Prepare file object for UCloud upload
+      const fileForUpload = {
+        tempFilePath: filePath,
+        name: fileName,
+        size: 0, // Size will be determined by UCloud service
+        type: this.getFileTypeFromName(fileName)
+      };
+      
+      // Use appropriate upload method based on file type
+      let uploadResult;
+      if (this.isImageFile(fileName)) {
+        uploadResult = await ucloudUpload.uploadImageSimple(filePath, progressCallback, 'chat_files');
+      } else if (this.isAudioFile(fileName)) {
+        uploadResult = await ucloudUpload.uploadAudio(filePath, progressCallback, 'chat_files');
+      } else {
+        // For other file types, use generic upload (you may need to implement this in ucloudUpload)
+        uploadResult = await ucloudUpload.uploadMedia(fileForUpload, progressCallback, {
+          upload: 'chat_files'
+        });
+      }
+      
+      if (uploadResult && (uploadResult.url || uploadResult.uploadUrl || uploadResult.audioUrl)) {
+        wx.hideLoading();
+        
+        // Remove from uploading list
+        const updatedUploading = this.data.uploadingFiles.filter(id => id !== uploadId);
+        this.setData({ uploadingFiles: updatedUploading });
+        
+        const fileUrl = uploadResult.url || uploadResult.uploadUrl || uploadResult.audioUrl;
+        this.sendFileMessage(fileUrl, fileName);
+      } else {
+        throw new Error("上传结果无效");
+      }
+    } catch (error) {
+      console.error("File upload failed:", error);
+      
+      wx.hideLoading();
+      
+      // Remove from uploading list and add error
+      const updatedUploading = this.data.uploadingFiles.filter(id => id !== uploadId);
+      this.setData({
+        uploadingFiles: updatedUploading,
+        [`fileUploadErrors.${uploadId}`]: error.message || "上传失败"
+      });
+      
+      wx.showToast({
+        title: "上传失败",
+        icon: "none",
+      });
+    } finally {
+      // Reset sending state
+      this.setData({ isSending: false });
+    }
+  },
+  
+  // Helper functions for file type detection
+  getFileTypeFromName(fileName) {
+    const ext = fileName.split('.').pop().toLowerCase();
+    if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(ext)) {
+      return 'image';
+    } else if (['mp3', 'wav', 'aac', 'm4a', 'flac', 'ogg'].includes(ext)) {
+      return 'audio';
+    } else if (['mp4', 'mov', 'avi', 'wmv', 'flv', 'webm'].includes(ext)) {
+      return 'video';
+    }
+    return 'file';
+  },
+  
+  isImageFile(fileName) {
+    const ext = fileName.split('.').pop().toLowerCase();
+    return ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(ext);
+  },
+  
+  isAudioFile(fileName) {
+    const ext = fileName.split('.').pop().toLowerCase();
+    return ['mp3', 'wav', 'aac', 'm4a', 'flac', 'ogg'].includes(ext);
   },
 
   // Send file message
