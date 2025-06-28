@@ -21,8 +21,10 @@ Page({
     university: null,
     faculties: [],
     availableMajors: [],
+    majorIndex: -1,
     // Profile editing state
     isEditingProfile: false,
+    facultyIndex: -1,
     profileErrors: {},
     // Avatar handling
     selectedAvatar: "",
@@ -144,13 +146,26 @@ Page({
       success: (res) => {
         if (res.statusCode === 200 && res.data.status === "success") {
           const university = res.data.university;
+          const faculties = university?.faculties || [];
+          
+          // Find faculty index
+          let facultyIndex = -1;
+          if (this.data.profileForm.faculty) {
+            facultyIndex = faculties.findIndex(
+              (faculty) => faculty.name === this.data.profileForm.faculty
+            );
+          }
+          
           this.setData({
             university,
-            faculties: university?.faculties || [],
+            faculties,
+            facultyIndex,
           });
 
           if (this.data.profileForm.faculty) {
             this.updateAvailableMajors(this.data.profileForm.faculty);
+          } else {
+            this.setData({ majorIndex: -1 });
           }
         }
       },
@@ -170,11 +185,13 @@ Page({
       const selectedIndex = parseInt(value);
       if (this.data.faculties[selectedIndex]) {
         value = this.data.faculties[selectedIndex].name;
+        this.setData({ facultyIndex: selectedIndex });
       }
     } else if (field === "major") {
       const selectedIndex = parseInt(value);
       if (this.data.availableMajors[selectedIndex]) {
         value = this.data.availableMajors[selectedIndex].name;
+        this.setData({ majorIndex: selectedIndex });
       }
     } else if (field === "admissionYear") {
       value = new Date(value).getFullYear();
@@ -214,9 +231,26 @@ Page({
       (faculty) => faculty.name === facultyName
     );
 
+    const availableMajors = selectedFaculty ? selectedFaculty.majors || [] : [];
+    let majorIndex = -1;
+    let currentMajor = this.data.profileForm.major;
+    
+    // If user already has a major, try to find it in the new faculty
+    if (currentMajor) {
+      majorIndex = availableMajors.findIndex(
+        (major) => major.name === currentMajor
+      );
+      
+      // If major not found in new faculty, clear it
+      if (majorIndex === -1) {
+        currentMajor = "";
+      }
+    }
+
     this.setData({
-      availableMajors: selectedFaculty ? selectedFaculty.majors || [] : [],
-      [`profileForm.major`]: "",
+      availableMajors,
+      majorIndex,
+      [`profileForm.major`]: currentMajor,
     });
   },
 
