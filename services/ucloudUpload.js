@@ -304,11 +304,11 @@ const createBlurImage = async (filePath) => {
               destWidth: canvasWidth * 2, // Scale up slightly for better effect
               destHeight: canvasHeight * 2,
               fileType: 'jpg',
-              quality: 0.05,
+              quality: 0.3,
               success: (res) => {
                 wx.compressImage({
                   src: res.tempFilePath,
-                  quality: 5,
+                  quality: 30,
                   success: (compressRes) => {
                     resolve(compressRes.tempFilePath);
                   },
@@ -320,7 +320,7 @@ const createBlurImage = async (filePath) => {
               fail: (error) => {
                 wx.compressImage({
                   src: filePath,
-                  quality: 5,
+                  quality: 30,
                   success: (compressRes) => {
                     resolve(compressRes.tempFilePath);
                   },
@@ -336,7 +336,7 @@ const createBlurImage = async (filePath) => {
       fail: (error) => {
         wx.compressImage({
           src: filePath,
-          quality: 5,
+          quality: 30,
           success: (res) => {
             resolve(res.tempFilePath);
           },
