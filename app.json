@@ -13,6 +13,7 @@
     "pages/post-detail/post-detail",
     "pages/user-profile/user-profile",
     "pages/profile/profile",
+    "pages/terms/terms",
     "pages/register/register",
     "pages/event-detail/event-detail",
     "pages/event-create/event-create"

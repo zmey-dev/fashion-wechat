@@ -68,7 +68,7 @@ Component({
     goToRegister() {
       this.closeModal();
       wx.navigateTo({
-        url: "/pages/register/register",
+        url: "/pages/terms/terms",
       });
     },
 
@@ -504,7 +504,7 @@ Component({
             if (res.confirm) {
               this.closeModal();
               wx.navigateTo({
-                url: "/pages/register/register?from=wechat",
+                url: "/pages/terms/terms?from=wechat",
               });
             } else {
               // Clear error when user cancels

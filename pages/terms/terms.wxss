@@ -1,0 +1,189 @@
+.terms-container {
+  min-height: 100vh;
+  background-color: #F8F9FA;
+  display: flex;
+  flex-direction: column;
+}
+
+.terms-header {
+  background: linear-gradient(135deg, #007AFF 0%, #0056B3 100%);
+  padding: 40rpx 30rpx 30rpx;
+  color: white;
+}
+
+.terms-title {
+  font-size: 44rpx;
+  font-weight: bold;
+  text-align: center;
+  color: white;
+}
+
+.terms-content {
+  flex: 1;
+  padding: 30rpx;
+  background-color: white;
+  margin: 20rpx;
+  border-radius: 12rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+  max-height: calc(100vh - 300rpx);
+}
+
+.terms-text {
+  line-height: 1.8;
+  color: #333;
+}
+
+.welcome {
+  display: block;
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #007AFF;
+  margin-bottom: 30rpx;
+  text-align: center;
+}
+
+.intro {
+  display: block;
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 40rpx;
+  line-height: 1.8;
+  text-align: justify;
+}
+
+.section {
+  margin-bottom: 40rpx;
+}
+
+.section-title {
+  display: block;
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #007AFF;
+  margin-bottom: 20rpx;
+  padding-bottom: 10rpx;
+  border-bottom: 2rpx solid #E6F3FF;
+}
+
+.section-subtitle {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333;
+  margin: 20rpx 0 10rpx;
+}
+
+.section-content {
+  display: block;
+  font-size: 26rpx;
+  color: #666;
+  margin-bottom: 15rpx;
+  line-height: 1.8;
+  text-align: justify;
+}
+
+.bullet-list {
+  margin: 15rpx 0;
+  padding-left: 20rpx;
+}
+
+.bullet-item {
+  display: block;
+  font-size: 26rpx;
+  color: #666;
+  margin-bottom: 8rpx;
+  line-height: 1.6;
+}
+
+.important {
+  color: #FF6B6B !important;
+  font-weight: 600;
+}
+
+.footer {
+  margin-top: 40rpx;
+  padding-top: 30rpx;
+  border-top: 2rpx solid #E6F3FF;
+  text-align: center;
+}
+
+.team-name {
+  display: block;
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #007AFF;
+  margin-bottom: 10rpx;
+}
+
+.copyright {
+  display: block;
+  font-size: 24rpx;
+  color: #999;
+}
+
+.agreement-section {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: white;
+  border-top: 2rpx solid #E6F3FF;
+  padding: 30rpx;
+  box-shadow: 0 -4rpx 12rpx rgba(0, 0, 0, 0.1);
+}
+
+.agreement-checkbox {
+  margin-bottom: 30rpx;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.agreement-text {
+  margin-left: 15rpx;
+  font-size: 28rpx;
+  color: #333;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 20rpx;
+}
+
+.cancel-button, .continue-button {
+  flex: 1;
+  height: 88rpx;
+  border-radius: 12rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cancel-button {
+  background-color: #F5F5F5;
+  color: #666;
+}
+
+.cancel-button:active {
+  background-color: #E6E6E6;
+}
+
+.continue-button.enabled {
+  background: linear-gradient(135deg, #007AFF 0%, #0056B3 100%);
+  color: white;
+}
+
+.continue-button.disabled {
+  background-color: #E6E6E6;
+  color: #999;
+}
+
+.continue-button.enabled:active {
+  background: linear-gradient(135deg, #0056B3 0%, #003D82 100%);
+}
