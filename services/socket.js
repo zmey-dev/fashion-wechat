@@ -9,7 +9,7 @@ class WeChatSocketManager {
     this.reconnectAttempts = 0;
     this.maxReconnectAttempts = 5;
     this.reconnectInterval = 3000;
-    this.serverUrl = "wss://45.61.161.125:3001/ws";
+    this.serverUrl = "wss://backend.xueshow.com/ws";
     this.userId = null;
     this.token = null;
     this.heartbeatInterval = null;

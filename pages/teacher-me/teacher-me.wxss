@@ -1443,6 +1443,21 @@ page {
   height: 32rpx;
 }
 
+.block-btn-top {
+  width: 120rpx;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10%;
+  background-color: #333;
+}
+
+.block-btn-top image {
+  width: 32rpx;
+  height: 32rpx;
+}
+
 /* Action Bar */
 .action-bar {
   display: flex;

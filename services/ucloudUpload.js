@@ -1133,9 +1133,50 @@ const uploadMultipleMedia = async (files, onProgress = null, folders = {}) => {
   return results;
 };
 
+// Simple image upload without blur
+const uploadImageSimple = async (filePath, onProgress = null, uploadFolder = 'uploads') => {
+  try {
+    if (!filePath) {
+      throw new Error('File path is required for image upload');
+    }
+    
+    const originalName = filePath.split('/').pop() || 'image.jpg';
+    console.log('Processing image (simple upload):', originalName);
+    
+    const { fileName } = generateUniqueFileName(originalName, uploadFolder);
+    console.log('Generated file name:', fileName);
+    
+    // Compress image before upload
+    console.log('Starting image compression...');
+    const compressedPath = await compressImage(filePath, {
+      quality: 0.7,  // 70% quality
+      maxWidthOrHeight: 1920
+    });
+    console.log('Image compression complete');
+    
+    // Upload compressed version only
+    console.log('Starting upload of compressed image:', fileName);
+    const uploadResult = await uploadToUCloud(compressedPath, fileName, onProgress);
+    console.log('Image uploaded successfully:', uploadResult);
+    
+    return {
+      url: uploadResult.url,
+      uploadUrl: uploadResult.url,
+      fileName: fileName,
+      originalName: originalName,
+      size: uploadResult.size,
+      folder: uploadFolder
+    };
+  } catch (error) {
+    console.error('Simple image upload failed:', error);
+    throw error;
+  }
+};
+
 // Export functions
 module.exports = {
   uploadImage,
+  uploadImageSimple,
   uploadVideo,
   uploadAudio,
   uploadMedia,

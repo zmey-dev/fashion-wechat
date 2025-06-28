@@ -70,9 +70,9 @@
           <image src="../../images/icons/chevron-left.svg" mode="aspectFit"></image>
           <text>返回</text>
         </view>
-        <view class="block-btn" catchtap="blockStudent" data-id="{{selectedStudent.id}}">
+        <view class="block-btn-top" catchtap="blockStudent" data-id="{{selectedStudent.id}}">
           <image src="../../images/icons/close.svg" mode="aspectFit"></image>
-          <text>屏蔽学生</text>
+          <text>堵塞</text>
         </view>
       </view>
       

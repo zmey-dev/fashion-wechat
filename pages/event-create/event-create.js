@@ -1,5 +1,6 @@
 // Event creation page
 const { default: config } = require("../../config");
+const ucloudUpload = require("../../services/ucloudUpload");
 
 Page({
   data: {
@@ -7,6 +8,7 @@ Page({
     title: "",
     posterImage: null,
     posterImageUrl: null,
+    posterUploadUrl: null, // Store the final uploaded URL
     startDate: new Date(),
     endDate: null,
     allowOtherSchool: true,
@@ -16,6 +18,12 @@ Page({
     // UI state
     isUploading: false,
     eventId: null,
+    
+    // Background upload state
+    posterUploading: false,
+    posterUploadProgress: 0,
+    posterUploaded: false,
+    posterUploadError: null,
 
     // Display data
     startDateDisplay: "选择开始时间",
@@ -111,6 +119,8 @@ Page({
         this.setData({
           title: eventData.title,
           posterImageUrl: eventData.poster_image,
+          posterUploadUrl: eventData.poster_image, // Set uploaded URL for existing poster
+          posterUploaded: true, // Mark as already uploaded
           startDate: startDate,
           endDate: endDate,
           allowOtherSchool: eventData.allow_other_school,
@@ -256,13 +266,15 @@ Page({
             that.setData({
               posterImage: tempFile,
               posterImageUrl: tempFile.tempFilePath,
+              posterUploading: true,
+              posterUploadProgress: 0,
+              posterUploaded: false,
+              posterUploadError: null,
+              posterUploadUrl: null,
             });
 
-            wx.showToast({
-              title: "图片选择成功",
-              icon: "success",
-              duration: 1000,
-            });
+            // Start background upload immediately
+            that.uploadPosterInBackground(tempFile);
           },
           fail: (err) => {
             console.error("选择图片失败:", err);
@@ -599,93 +611,45 @@ Page({
 
     // Handle image upload
     if (this.data.posterImage) {
-      // Upload new image first
-      this.uploadPosterImage(this.data.posterImage, {
-        success: (imageUrl) => {
-          formData.poster_url = imageUrl;
-
-          // Submit event data after image upload
-          this.submitEventToAPI(formData, isUpdate, {
-            success: () => {
-              wx.hideLoading();
-
-              // Clear draft on successful submission
-              if (!isUpdate) {
-                wx.removeStorageSync("eventDraft");
-              }
-
-              wx.showToast({
-                title: isUpdate ? "修改成功" : "发布成功",
-                icon: "success",
-                duration: 2000,
-              });
-
-              setTimeout(() => {
-                wx.navigateBack();
-              }, 2000);
-
-              this.setData({ isUploading: false });
-            },
-            fail: (error) => {
-              wx.hideLoading();
-              wx.showToast({
-                title: isUpdate ? "修改失败" : "发布失败",
-                icon: "none",
-                duration: 2000,
-              });
-              console.error("提交活动失败:", error);
-              this.setData({ isUploading: false });
-            },
-          });
-        },
-        fail: (error) => {
+      // Check if image is still uploading
+      if (this.data.posterUploading) {
+        wx.showLoading({
+          title: "等待图片上传完成...",
+          mask: true,
+        });
+        
+        // Wait for upload to complete
+        this.waitForPosterUpload().then(() => {
           wx.hideLoading();
-          wx.showToast({
-            title: "图片上传失败",
-            icon: "none",
-            duration: 2000,
-          });
-          console.error("图片上传失败:", error);
-          this.setData({ isUploading: false });
-        },
-      });
-    } else if (this.data.posterImageUrl) {
-      // Use existing image URL
-      formData.poster_url = this.data.posterImageUrl;
-
-      // Submit event with existing image
-      this.submitEventToAPI(formData, isUpdate, {
-        success: () => {
-          wx.hideLoading();
-
-          // Clear draft on successful submission
-          if (!isUpdate) {
-            wx.removeStorageSync("eventDraft");
+          if (this.data.posterUploadUrl) {
+            formData.poster_url = this.data.posterUploadUrl;
+            this.submitEvent(formData, isUpdate);
+          } else {
+            wx.showToast({
+              title: "图片上传失败，请重试",
+              icon: "none",
+              duration: 2000,
+            });
+            this.setData({ isUploading: false });
           }
-
-          wx.showToast({
-            title: isUpdate ? "修改成功" : "发布成功",
-            icon: "success",
-            duration: 2000,
-          });
-
-          setTimeout(() => {
-            wx.navigateBack();
-          }, 2000);
-
-          this.setData({ isUploading: false });
-        },
-        fail: (error) => {
-          wx.hideLoading();
-          wx.showToast({
-            title: isUpdate ? "修改失败" : "发布失败",
-            icon: "none",
-            duration: 2000,
-          });
-          console.error("提交活动失败:", error);
-          this.setData({ isUploading: false });
-        },
-      });
+        });
+      } else if (this.data.posterUploadUrl) {
+        // Image already uploaded
+        formData.poster_url = this.data.posterUploadUrl;
+        this.submitEvent(formData, isUpdate);
+      } else {
+        // Upload failed or not started
+        wx.showToast({
+          title: "请重新选择图片",
+          icon: "none",
+          duration: 2000,
+        });
+        this.setData({ isUploading: false });
+      }
+    } else if (this.data.posterImageUrl || this.data.posterUploadUrl) {
+      // Use existing image URL (from edit mode) or previously uploaded URL
+      formData.poster_url = this.data.posterUploadUrl || this.data.posterImageUrl;
+      this.submitEvent(formData, isUpdate);
     } else {
       // No image case (should not happen due to validation, but just in case)
       this.submitEventToAPI(formData, isUpdate, {
@@ -720,6 +684,123 @@ Page({
         },
       });
     }
+  },
+
+  // Background upload poster to UCloud
+  async uploadPosterInBackground(tempFile) {
+    console.log("Starting background poster upload:", tempFile);
+    
+    try {
+      // Progress callback
+      const progressCallback = (progress) => {
+        this.setData({
+          posterUploadProgress: progress
+        });
+      };
+      
+      // Use uploadImageSimple for direct upload without blur
+      console.log("Uploading poster image...");
+      const uploadResult = await ucloudUpload.uploadImageSimple(
+        tempFile.tempFilePath,
+        progressCallback,
+        'event_posters'  // upload folder
+      );
+      
+      console.log("Poster upload result:", uploadResult);
+      
+      if (uploadResult && uploadResult.url) {
+        this.setData({
+          posterUploading: false,
+          posterUploaded: true,
+          posterUploadUrl: uploadResult.url,
+          posterUploadError: null
+        });
+        
+        wx.showToast({
+          title: "海报上传成功",
+          icon: "success",
+          duration: 1500
+        });
+      } else {
+        throw new Error("上传结果无效");
+      }
+    } catch (error) {
+      console.error("Poster upload failed:", error);
+      
+      this.setData({
+        posterUploading: false,
+        posterUploaded: false,
+        posterUploadUrl: null,
+        posterUploadError: error.message || "上传失败"
+      });
+      
+      wx.showToast({
+        title: "海报上传失败",
+        icon: "none",
+        duration: 2000
+      });
+    }
+  },
+  
+  // Wait for poster upload to complete
+  waitForPosterUpload() {
+    return new Promise((resolve) => {
+      const checkInterval = 100;
+      const maxWaitTime = 30000; // 30 seconds
+      let waitTime = 0;
+      
+      const check = () => {
+        if (this.data.posterUploaded || this.data.posterUploadError) {
+          resolve();
+        } else if (waitTime >= maxWaitTime) {
+          this.setData({
+            posterUploading: false,
+            posterUploadError: "上传超时"
+          });
+          resolve();
+        } else {
+          waitTime += checkInterval;
+          setTimeout(check, checkInterval);
+        }
+      };
+      
+      check();
+    });
+  },
+  
+  // Submit event after upload complete
+  submitEvent(formData, isUpdate) {
+    this.submitEventToAPI(formData, isUpdate, {
+      success: () => {
+        wx.hideLoading();
+        
+        if (!isUpdate) {
+          wx.removeStorageSync("eventDraft");
+        }
+        
+        wx.showToast({
+          title: isUpdate ? "修改成功" : "发布成功",
+          icon: "success",
+          duration: 2000,
+        });
+        
+        setTimeout(() => {
+          wx.navigateBack();
+        }, 2000);
+        
+        this.setData({ isUploading: false });
+      },
+      fail: (error) => {
+        wx.hideLoading();
+        wx.showToast({
+          title: isUpdate ? "修改失败" : "发布失败",
+          icon: "none",
+          duration: 2000,
+        });
+        console.error("提交活动失败:", error);
+        this.setData({ isUploading: false });
+      },
+    });
   },
 
   loadEventFromAPI(eventId, callbacks) {
@@ -780,44 +861,6 @@ Page({
       },
       fail: (error) => {
         console.error("Submit event API error:", error);
-        if (callbacks.fail) {
-          callbacks.fail(error);
-        }
-      },
-    });
-  },
-  // Upload poster image
-  uploadPosterImage(posterImage, callbacks) {
-    wx.uploadFile({
-      url: `${config.BACKEND_URL}/teacher/event/upload_poster`,
-      filePath: posterImage.tempFilePath,
-      name: "poster_image",
-      header: {
-        Authorization: `Bearer ${getApp().globalData.userInfo?.token || ""}`,
-      },
-      formData: {
-        type: "event_poster",
-      },
-      success: (res) => {
-        try {
-          const data = JSON.parse(res.data);
-          if (data.status === "success" && data.poster_url) {
-            if (callbacks.success) {
-              callbacks.success(data.poster_url);
-            }
-          } else {
-            if (callbacks.fail) {
-              callbacks.fail(new Error(data.msg || "Upload failed"));
-            }
-          }
-        } catch (error) {
-          if (callbacks.fail) {
-            callbacks.fail(new Error("Invalid response from server"));
-          }
-        }
-      },
-      fail: (error) => {
-        console.error("Image upload failed:", error);
         if (callbacks.fail) {
           callbacks.fail(error);
         }

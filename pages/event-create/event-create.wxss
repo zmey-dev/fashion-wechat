@@ -116,6 +116,60 @@ page {
   color: #888888;
 }
 
+/* Upload Status */
+.upload-status {
+  margin-top: 20rpx;
+  padding: 20rpx;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12rpx;
+}
+
+.upload-progress {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.upload-progress-text {
+  font-size: 26rpx;
+  color: #66b3ff;
+  margin-bottom: 12rpx;
+}
+
+.upload-success {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+}
+
+.success-icon {
+  font-size: 32rpx;
+  color: #52c41a;
+}
+
+.success-text {
+  font-size: 26rpx;
+  color: #52c41a;
+}
+
+.upload-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+}
+
+.error-icon {
+  font-size: 32rpx;
+  color: #ff4d4f;
+}
+
+.error-text {
+  font-size: 24rpx;
+  color: #ff4d4f;
+}
+
 /* Form Content */
 .form-content {
   background: #111111;

@@ -24,6 +24,22 @@
             <text class="upload-hint">建议尺寸 750x400</text>
           </view>
         </view>
+        
+        <!-- Upload status indicator -->
+        <view wx:if="{{posterUploading || posterUploaded || posterUploadError}}" class="upload-status">
+          <view wx:if="{{posterUploading}}" class="upload-progress">
+            <text class="upload-progress-text">上传中... {{posterUploadProgress}}%</text>
+            <progress percent="{{posterUploadProgress}}" stroke-width="4" active show-info/>
+          </view>
+          <view wx:elif="{{posterUploaded}}" class="upload-success">
+            <text class="success-icon">✓</text>
+            <text class="success-text">上传成功</text>
+          </view>
+          <view wx:elif="{{posterUploadError}}" class="upload-error">
+            <text class="error-icon">✗</text>
+            <text class="error-text">上传失败：{{posterUploadError}}</text>
+          </view>
+        </view>
       </view>
 
       <!-- Form Content -->
@@ -212,6 +228,12 @@
       <text wx:else>{{eventId ? '保存修改' : '发布活动'}}</text>
     </button>
   </view>
+
+  <!-- Hidden Canvas for Image Compression -->
+  <canvas 
+    canvas-id="compressCanvas" 
+    style="position: fixed; top: -9999px; left: -9999px; width: 1920px; height: 1920px;"
+  ></canvas>
 
   <!-- Calendar Modal -->
   <view class="calendar-modal" wx:if="{{showStartCalendar || showEndCalendar}}">
