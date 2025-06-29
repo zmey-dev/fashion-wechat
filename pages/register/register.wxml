@@ -211,6 +211,9 @@
           </view>
         </view>
         
+        <!-- Phone verification messages -->
+        <text wx:if="{{phoneVerificationMessage}}" class="success-text">{{phoneVerificationMessage}}</text>
+        <text wx:if="{{phoneVerificationError}}" class="error-text">{{phoneVerificationError}}</text>
         <text wx:if="{{errors.phone}}" class="error-text">{{errors.phone}}</text>
       </view>
 
@@ -252,6 +255,9 @@
           </view>
         </view>
         
+        <!-- Email verification messages -->
+        <text wx:if="{{emailVerificationMessage}}" class="success-text">{{emailVerificationMessage}}</text>
+        <text wx:if="{{emailVerificationError}}" class="error-text">{{emailVerificationError}}</text>
         <text wx:if="{{errors.email}}" class="error-text">{{errors.email}}</text>
       </view>
 

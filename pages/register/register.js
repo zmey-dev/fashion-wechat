@@ -43,6 +43,12 @@ Page({
     emailChanged: false,
     phoneChanged: false,
     
+    // Verification messages
+    emailVerificationMessage: "",
+    phoneVerificationMessage: "",
+    emailVerificationError: "",
+    phoneVerificationError: "",
+    
     // Year picker data
     years: [],
     currentYear: new Date().getFullYear(),
@@ -172,13 +178,17 @@ Page({
       this.setData({
         emailChanged: true,
         emailVerified: false,
-        emailOtpCode: ""
+        emailOtpCode: "",
+        emailVerificationMessage: "",
+        emailVerificationError: ""
       });
     } else if (field === 'phone') {
       this.setData({
         phoneChanged: true,
         phoneVerified: false,
-        phoneOtpCode: ""
+        phoneOtpCode: "",
+        phoneVerificationMessage: "",
+        phoneVerificationError: ""
       });
     }
   },
@@ -234,9 +244,9 @@ Page({
   // Send email verification
   sendEmailVerification: function() {
     if (!this.data.form.email) {
-      wx.showToast({
-        title: "请先输入邮箱",
-        icon: "none"
+      this.setData({
+        emailVerificationError: "请先输入邮箱地址",
+        emailVerificationMessage: ""
       });
       return;
     }
@@ -254,21 +264,25 @@ Page({
       },
       success: (res) => {
         if (res.statusCode === 200 && res.data.status === "success") {
-          wx.showToast({
-            title: this.data.messages.success.otpSent,
-            icon: "success"
+          this.setData({
+            emailVerificationMessage: "验证码已发送到您的邮箱",
+            emailVerificationError: ""
           });
+          // Clear success message after 5 seconds
+          setTimeout(() => {
+            this.setData({ emailVerificationMessage: "" });
+          }, 5000);
         } else {
-          wx.showToast({
-            title: res.data?.msg || "发送失败",
-            icon: "none"
+          this.setData({
+            emailVerificationError: res.data?.msg || "验证码发送失败，请检查邮箱地址",
+            emailVerificationMessage: ""
           });
         }
       },
       fail: () => {
-        wx.showToast({
-          title: this.data.messages.errors.networkError,
-          icon: "none"
+        this.setData({
+          emailVerificationError: "网络错误，请稍后重试",
+          emailVerificationMessage: ""
         });
       },
       complete: () => {
@@ -280,9 +294,9 @@ Page({
   // Send phone verification
   sendPhoneVerification: function() {
     if (!this.data.form.phone) {
-      wx.showToast({
-        title: "请先输入手机号",
-        icon: "none"
+      this.setData({
+        phoneVerificationError: "请先输入手机号码",
+        phoneVerificationMessage: ""
       });
       return;
     }
@@ -300,21 +314,25 @@ Page({
       },
       success: (res) => {
         if (res.statusCode === 200 && res.data.status === "success") {
-          wx.showToast({
-            title: this.data.messages.success.otpSent,
-            icon: "success"
+          this.setData({
+            phoneVerificationMessage: "验证码已发送到您的手机",
+            phoneVerificationError: ""
           });
+          // Clear success message after 5 seconds
+          setTimeout(() => {
+            this.setData({ phoneVerificationMessage: "" });
+          }, 5000);
         } else {
-          wx.showToast({
-            title: res.data?.msg || "发送失败",
-            icon: "none"
+          this.setData({
+            phoneVerificationError: res.data?.msg || "验证码发送失败，请检查手机号码",
+            phoneVerificationMessage: ""
           });
         }
       },
       fail: () => {
-        wx.showToast({
-          title: this.data.messages.errors.networkError,
-          icon: "none"
+        this.setData({
+          phoneVerificationError: "网络错误，请稍后重试",
+          phoneVerificationMessage: ""
         });
       },
       complete: () => {
@@ -339,9 +357,9 @@ Page({
   // Verify email code
   verifyEmailCode: function() {
     if (!this.data.emailOtpCode) {
-      wx.showToast({
-        title: "请输入验证码",
-        icon: "none"
+      this.setData({
+        emailVerificationError: "请输入验证码",
+        emailVerificationMessage: ""
       });
       return;
     }
@@ -362,23 +380,25 @@ Page({
         if (res.statusCode === 200 && res.data.status === "success") {
           this.setData({ 
             emailVerified: true,
-            [`errors.email`]: null
+            [`errors.email`]: null,
+            emailVerificationMessage: "邮箱验证成功！",
+            emailVerificationError: ""
           });
-          wx.showToast({
-            title: this.data.messages.success.verificationSuccess,
-            icon: "success"
-          });
+          // Clear success message after 3 seconds
+          setTimeout(() => {
+            this.setData({ emailVerificationMessage: "" });
+          }, 3000);
         } else {
-          wx.showToast({
-            title: res.data?.msg || "验证失败",
-            icon: "none"
+          this.setData({
+            emailVerificationError: res.data?.msg || "验证码错误或已过期",
+            emailVerificationMessage: ""
           });
         }
       },
       fail: () => {
-        wx.showToast({
-          title: this.data.messages.errors.networkError,
-          icon: "none"
+        this.setData({
+          emailVerificationError: "网络错误，请稍后重试",
+          emailVerificationMessage: ""
         });
       },
       complete: () => {
@@ -390,9 +410,9 @@ Page({
   // Verify phone code
   verifyPhoneCode: function() {
     if (!this.data.phoneOtpCode) {
-      wx.showToast({
-        title: "请输入验证码",
-        icon: "none"
+      this.setData({
+        phoneVerificationError: "请输入验证码",
+        phoneVerificationMessage: ""
       });
       return;
     }
@@ -413,23 +433,25 @@ Page({
         if (res.statusCode === 200 && res.data.status === "success") {
           this.setData({ 
             phoneVerified: true,
-            [`errors.phone`]: null
+            [`errors.phone`]: null,
+            phoneVerificationMessage: "手机号验证成功！",
+            phoneVerificationError: ""
           });
-          wx.showToast({
-            title: this.data.messages.success.verificationSuccess,
-            icon: "success"
-          });
+          // Clear success message after 3 seconds
+          setTimeout(() => {
+            this.setData({ phoneVerificationMessage: "" });
+          }, 3000);
         } else {
-          wx.showToast({
-            title: res.data?.msg || "验证失败",
-            icon: "none"
+          this.setData({
+            phoneVerificationError: res.data?.msg || "验证码错误或已过期",
+            phoneVerificationMessage: ""
           });
         }
       },
       fail: () => {
-        wx.showToast({
-          title: this.data.messages.errors.networkError,
-          icon: "none"
+        this.setData({
+          phoneVerificationError: "网络错误，请稍后重试",
+          phoneVerificationMessage: ""
         });
       },
       complete: () => {

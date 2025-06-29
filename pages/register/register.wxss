@@ -382,6 +382,21 @@
   padding-left: 8rpx;
 }
 
+/* Success Text */
+.success-text {
+  font-size: 24rpx;
+  color: #10b981;
+  margin-top: 8rpx;
+  display: block;
+  font-weight: 500;
+  letter-spacing: 0.5rpx;
+  padding-left: 8rpx;
+  background: rgba(16, 185, 129, 0.1);
+  padding: 8rpx 16rpx;
+  border-radius: 8rpx;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
 /* Step Navigation */
 .step-navigation {
   display: flex;
