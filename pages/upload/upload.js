@@ -126,6 +126,10 @@ Page({
     // Simulate API call to get event info
     wx.request({
       url: `${config.BACKEND_URL}/event/${eventId}`,
+      header: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${this.data.userInfo.token}`,
+      },
       method: "GET",
       success: (res) => {
         if (res.data.status === "success") {
@@ -1024,6 +1028,7 @@ Page({
         title: title.trim(),
         content: content.trim(),
         user_id: getApp().globalData.userInfo.id,
+        event_id: this.data.eventId || null,
         allowDownload: this.data.allowDownload,
         type: this.isImage(files[0]) ? "image" : "video",
         profile_link: "",
