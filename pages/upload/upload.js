@@ -114,6 +114,13 @@ Page({
     if (mediaId) {
       this.loadExistingPost(mediaId);
     }
+
+    // Check device info for better compatibility
+    const systemInfo = wx.getSystemInfoSync();
+    console.log("System info:", systemInfo);
+    console.log("Platform:", systemInfo.platform);
+    console.log("System:", systemInfo.system);
+    console.log("WeChat version:", systemInfo.version);
   },
 
   onUnload: function () {
@@ -199,6 +206,7 @@ Page({
     ];
     if (files.length === 0) {
       itemList.push(this.data.messages.actions.takeVideo);
+      itemList.push("从相册选择视频"); // Add explicit video selection option
     }
 
     wx.showActionSheet({
@@ -213,7 +221,12 @@ Page({
             break;
           case 2:
             if (files.length === 0) {
-              this.chooseVideo();
+              this.chooseVideo("camera");
+            }
+            break;
+          case 3:
+            if (files.length === 0) {
+              this.chooseVideo("album");
             }
             break;
         }
@@ -282,7 +295,7 @@ Page({
   },
 
   // Choose video
-  chooseVideo() {
+  chooseVideo(sourceType = "album") {
     const { files } = this.data;
 
     if (files.length > 0) {
@@ -293,10 +306,16 @@ Page({
       return;
     }
 
+    // Determine source type array
+    const sourceTypes = sourceType === "camera" ? ["camera"] : ["album"];
+
     wx.chooseMedia({
       count: 1,
       mediaType: ["video"],
-      sourceType: ["album", "camera"], 
+      sourceType: sourceTypes,
+      maxDuration: 60, // Add max duration for better compatibility
+      camera: "back", // Specify camera for better compatibility
+      sizeType: ["compressed"], // Add compression for better compatibility
       success: (res) => {
         const videoFile = res.tempFiles[0];
 
@@ -380,9 +399,19 @@ Page({
       },
       fail: (error) => {
         console.error("Video selection failed:", error);
+        console.error("Error details:", JSON.stringify(error));
+        
+        // Provide more specific error messages
+        let errorMessage = "视频选择失败";
+        if (error.errMsg && error.errMsg.includes("cancel")) {
+          errorMessage = "已取消选择";
+        } else if (error.errMsg && error.errMsg.includes("permission")) {
+          errorMessage = "请允许访问相册权限";
+        }
+        
         wx.showToast({
-          title: "failed to select video",
-          icon: "error",
+          title: errorMessage,
+          icon: "none",
         });
       },
     });
@@ -633,65 +662,110 @@ Page({
       return;
     }
 
-    wx.chooseMessageFile({
-      count: 1,
-      type: "file",
-      extension: ["mp3", "wav", "aac", "m4a"],
-      success: (res) => {
-        const audioFile = res.tempFiles[0];
+    // First try wx.chooseMedia with mix type (available in newer versions)
+    const tryChooseMedia = () => {
+      wx.chooseMedia({
+        count: 1,
+        mediaType: ["mix"], // Try mix type for audio selection
+        sourceType: ["album"],
+        success: (res) => {
+          // Check if the selected file is audio
+          const file = res.tempFiles[0];
+          const fileName = file.tempFilePath || "";
+          const fileExt = fileName.split(".").pop().toLowerCase();
+          const validAudioExts = ["mp3", "wav", "aac", "m4a", "flac", "ogg"];
+          
+          if (!validAudioExts.includes(fileExt)) {
+            wx.showToast({
+              title: this.data.messages.errors.audioOnly,
+              icon: "none",
+            });
+            return;
+          }
 
-        const fileName = audioFile.name || audioFile.path;
-        const fileExt = fileName.split(".").pop().toLowerCase();
-        const validAudioExts = ["mp3", "wav", "aac", "m4a", "flac", "ogg"];
+          this.handleAudioSelected({
+            ...file,
+            name: fileName.split("/").pop() || `audio_${Date.now()}.${fileExt}`,
+            path: file.tempFilePath,
+            size: file.size || 0
+          });
+        },
+        fail: (err) => {
+          console.log("wx.chooseMedia failed, trying wx.chooseMessageFile:", err);
+          // Fallback to chooseMessageFile
+          tryChooseMessageFile();
+        }
+      });
+    };
 
-        if (!validAudioExts.includes(fileExt)) {
+    const tryChooseMessageFile = () => {
+      wx.chooseMessageFile({
+        count: 1,
+        type: "file", 
+        extension: ["mp3", "wav", "aac", "m4a", "flac", "ogg"],
+        success: (res) => {
+          const audioFile = res.tempFiles[0];
+          this.handleAudioSelected(audioFile);
+        },
+        fail: (err) => {
+          console.error("Failed to choose audio file:", err);
           wx.showToast({
-            title: this.data.messages.errors.audioOnly,
+            title: this.data.messages.errors.chooseAudioFailed,
             icon: "none",
           });
-          return;
-        }
+        },
+      });
+    };
 
-        const maxSize = 10 * 1024 * 1024; // 10MB
-        if (audioFile.size > maxSize) {
-          wx.showToast({
-            title: this.data.messages.errors.audioSizeLimit,
-            icon: "none",
-          });
-          return;
-        }
+    // Start with trying chooseMedia
+    tryChooseMedia();
+  },
 
-        const newAudio = {
-          ...audioFile,
-          uploading: true,
-          uploaded: false,
-          uploadProgress: 0,
-          uploadResult: null,
-          backgroundUpload: true,
-          file: audioFile, // Ensure we have the file reference
-        };
+  // Handle audio file selection
+  handleAudioSelected(audioFile) {
+    const fileName = audioFile.name || audioFile.path || "";
+    const fileExt = fileName.split(".").pop().toLowerCase();
+    const validAudioExts = ["mp3", "wav", "aac", "m4a", "flac", "ogg"];
 
-        this.setData({
-          audio: newAudio,
-          audioName: audioFile.name || "音频文件",
-        });
+    if (!validAudioExts.includes(fileExt)) {
+      wx.showToast({
+        title: this.data.messages.errors.audioOnly,
+        icon: "none",
+      });
+      return;
+    }
 
-        wx.showToast({
-          title: this.data.messages.success.audioSelected,
-          icon: "success",
-        });
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (audioFile.size > maxSize) {
+      wx.showToast({
+        title: this.data.messages.errors.audioSizeLimit,
+        icon: "none",
+      });
+      return;
+    }
 
-        // Start background upload for audio
-        this.uploadAudioInBackground(newAudio);
-      },
-      fail: (err) => {
-        console.error("Failed to choose audio file:", err);
-        wx.showToast({
-          title: this.data.messages.errors.chooseAudioFailed,
-          icon: "none",
-        });
-      },
+    const newAudio = {
+      ...audioFile,
+      uploading: true,
+      uploaded: false,
+      uploadProgress: 0,
+      uploadResult: null,
+      backgroundUpload: true,
+      file: audioFile, // Ensure we have the file reference
+    };
+
+    this.setData({
+      audio: newAudio,
+      audioName: audioFile.name || "音频文件",
     });
+
+    wx.showToast({
+      title: this.data.messages.success.audioSelected,
+      icon: "success",
+    });
+
+    // Start background upload for audio
+    this.uploadAudioInBackground(newAudio);
   },
 
   // Remove audio
