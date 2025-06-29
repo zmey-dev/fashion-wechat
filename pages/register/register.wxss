@@ -194,7 +194,8 @@
 
 .field-input {
   width: 100%;
-  padding: 24rpx 20rpx;
+  padding: 0 20rpx;
+  margin: 24rpx 0rpx;
   background: rgba(20, 20, 20, 0.8);
   border: 2px solid rgba(255, 255, 255, 0.1);
   border-radius: 16rpx;
@@ -203,12 +204,15 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   backdrop-filter: blur(10rpx);
   box-shadow: inset 0 2rpx 4rpx rgba(0, 0, 0, 0.3);
+  box-sizing: border-box;
+  height: 105rpx;
 }
 
 .field-input:focus {
   border-color: #667eea;
   background: rgba(25, 25, 25, 0.9);
-  box-shadow: 0 0 0 4rpx rgba(102, 126, 234, 0.1), inset 0 2rpx 4rpx rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 0 4rpx rgba(102, 126, 234, 0.1),
+    inset 0 2rpx 4rpx rgba(0, 0, 0, 0.3);
   transform: translateY(-2rpx);
 }
 
@@ -220,9 +224,16 @@
 }
 
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-4rpx); }
-  75% { transform: translateX(4rpx); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4rpx);
+  }
+  75% {
+    transform: translateX(4rpx);
+  }
 }
 
 /* Phone Input */
@@ -314,7 +325,7 @@
 
 /* Picker Styling */
 .picker-view {
-  padding: 24rpx 20rpx;
+  padding: 10rpx 20rpx;
   background: rgba(20, 20, 20, 0.8);
   border: 2px solid rgba(255, 255, 255, 0.1);
   border-radius: 16rpx;
@@ -329,7 +340,7 @@
 }
 
 .picker-view::after {
-  content: '▼';
+  content: "▼";
   position: absolute;
   right: 20rpx;
   color: #667eea;
@@ -451,48 +462,48 @@
   .register-container {
     padding: 30rpx 20rpx;
   }
-  
+
   .progress-bar {
     padding: 0 20rpx;
   }
-  
+
   .step-labels {
     padding: 0 20rpx;
   }
-  
+
   .step-label {
     font-size: 20rpx;
   }
-  
+
   .form-container {
     padding: 30rpx 24rpx;
   }
-  
+
   .step-navigation {
     flex-direction: column;
     gap: 16rpx;
   }
-  
+
   .nav-btn {
     padding: 20rpx 28rpx;
     font-size: 28rpx;
   }
-  
+
   .phone-input-container {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .phone-prefix {
     text-align: center;
     margin-bottom: 12rpx;
   }
-  
+
   .otp-input-container {
     flex-direction: column;
     gap: 12rpx;
   }
-  
+
   .verify-btn {
     width: 100%;
   }

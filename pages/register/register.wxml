@@ -146,7 +146,6 @@
       <!-- Name -->
       <view class="form-field">
         <label class="field-label">姓名</label>
-        <div style="display: flex;">
           <input 
           class="field-input {{errors.name ? 'error' : ''}}"
           value="{{form.name}}"
@@ -154,14 +153,12 @@
           data-field="name"
           bindinput="onInputChange"
           />
-        </div>
         <text wx:if="{{errors.name}}" class="error-text">{{errors.name}}</text>
       </view>
 
       <!-- ID Number -->
       <view class="form-field">
         <label class="field-label">身份证号码</label>
-        <div style="display: flex;">
           <input 
             class="field-input {{errors.id_number ? 'error' : ''}}"
             value="{{form.id_number}}"
@@ -169,7 +166,6 @@
             data-field="id_number"
             bindinput="onInputChange"
           />
-        </div>
         <text wx:if="{{errors.id_number}}" class="error-text">{{errors.id_number}}</text>
       </view>
 
