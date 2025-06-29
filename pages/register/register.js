@@ -274,7 +274,7 @@ Page({
           }, 5000);
         } else {
           this.setData({
-            emailVerificationError: res.data?.msg || "验证码发送失败，请检查邮箱地址",
+            emailVerificationError: res.data?.msg || res.data?.error || "验证码发送失败，请检查邮箱地址",
             emailVerificationMessage: ""
           });
         }
@@ -315,7 +315,7 @@ Page({
       success: (res) => {
         if (res.statusCode === 200 && res.data.status === "success") {
           this.setData({
-            phoneVerificationMessage: "验证码已发送到您的手机",
+            phoneVerificationMessage: res.data?.msg || "验证码已发送到您的手机",
             phoneVerificationError: ""
           });
           // Clear success message after 5 seconds
@@ -324,7 +324,7 @@ Page({
           }, 5000);
         } else {
           this.setData({
-            phoneVerificationError: res.data?.msg || "验证码发送失败，请检查手机号码",
+            phoneVerificationError: res.data?.msg || res.data?.error || "验证码发送失败，请检查手机号码",
             phoneVerificationMessage: ""
           });
         }
@@ -390,7 +390,7 @@ Page({
           }, 3000);
         } else {
           this.setData({
-            emailVerificationError: res.data?.msg || "验证码错误或已过期",
+            emailVerificationError: res.data?.msg || res.data?.error || "验证码错误或已过期",
             emailVerificationMessage: ""
           });
         }
@@ -443,7 +443,7 @@ Page({
           }, 3000);
         } else {
           this.setData({
-            phoneVerificationError: res.data?.msg || "验证码错误或已过期",
+            phoneVerificationError: res.data?.msg || res.data?.error || "验证码错误或已过期",
             phoneVerificationMessage: ""
           });
         }
@@ -721,7 +721,7 @@ Page({
       }, 1500);
     } else {
       wx.showToast({
-        title: res.data?.msg || this.data.messages.errors.registerFailed,
+        title: res.data?.msg || res.data?.error || this.data.messages.errors.registerFailed,
         icon: "none"
       });
       this.setData({ isLoading: false });
