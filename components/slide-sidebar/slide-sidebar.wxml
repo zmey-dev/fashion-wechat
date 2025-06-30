@@ -130,7 +130,7 @@
         <view class="nav-icon">
           <image src="/images/icons/message.svg" class="button-svg" alt="发现图标"></image>
         </view>
-        <text class="nav-label">对话</text>
+        <text class="nav-label">聊天</text>
         <view class="arrow-svg">
           <view class="arrow-line"></view>
         </view>

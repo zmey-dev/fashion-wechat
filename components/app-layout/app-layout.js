@@ -56,7 +56,7 @@ Component({
       },
       {
         key: "chat",
-        name: "对话",
+        name: "聊天",
         icon: "/images/icons/message.png",
         activeIcon: "/images/icons/message-active.png",
         path: "/pages/chat/chat",
