@@ -654,13 +654,14 @@ Page({
   chooseAudio() {
     const { files } = this.data;
 
-    if (files.length > 0 && !this.isImage(files[0])) {
-      wx.showToast({
-        title: this.data.messages.errors.videoAudioConflict,
-        icon: "none",
-      });
-      return;
-    }
+    // Remove the restriction for video files - now audio can be added to videos too
+    // if (files.length > 0 && !this.isImage(files[0])) {
+    //   wx.showToast({
+    //     title: this.data.messages.errors.videoAudioConflict,
+    //     icon: "none",
+    //   });
+    //   return;
+    // }
 
     // Get system info to determine the best approach
     const systemInfo = wx.getSystemInfoSync();

@@ -30,6 +30,10 @@ Component({
     showPlayIndicator: false,
     autoPlayTimer: null,
 
+    // Audio playback modes
+    audioMode: "both", // "both" (both audio tracks), "uploaded" (uploaded audio only), "video" (video audio only)
+    showAudioModeSelector: false,
+
     // Template-bound computed data
     currentPost: null,
     currentPostUser: null,
@@ -1055,6 +1059,35 @@ Component({
      */
     animateBackToCenter() {
       this.setData({ verticalTransform: 0 });
+    },
+
+    /**
+     * Audio mode management
+     */
+    toggleAudioModeSelector() {
+      this.setData({ showAudioModeSelector: !this.data.showAudioModeSelector });
+    },
+
+    onAudioModeChange(e) {
+      const mode = e.currentTarget.dataset.mode;
+      this.setData({ 
+        audioMode: mode,
+        showAudioModeSelector: false 
+      });
+      
+      // Notify media-display component about audio mode change
+      const mediaDisplayComponent = this.selectComponent('.media-display');
+      if (mediaDisplayComponent && mediaDisplayComponent.setAudioMode) {
+        mediaDisplayComponent.setAudioMode(mode);
+      }
+      
+      wx.showToast({
+        title: mode === 'both' ? '播放两个音轨' : 
+               mode === 'uploaded' ? '仅播放上传音频' : 
+               '仅播放视频音频',
+        icon: 'none',
+        duration: 1500
+      });
     },
     onDetailStateChange(e) {
       const { state } = e.detail;

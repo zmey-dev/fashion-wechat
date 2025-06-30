@@ -67,6 +67,34 @@
       bind:reportmodal="onShowReportModal"
       bind:continuetoggle="onContinueToggle"
     />
+
+    <!-- Audio Mode Selector for videos with uploaded audio -->
+    <view wx:if="{{ currentPost.type === 'video' && currentPost.audio_url }}" 
+          class="audio-mode-container {{ detailPanelState !== 'closed' ? 'hidden' : '' }}">
+      <view class="audio-mode-button" bindtap="toggleAudioModeSelector">
+        <text class="audio-icon">🎵</text>
+        <text class="audio-mode-text">音频: {{ audioMode === 'both' ? '全部' : audioMode === 'uploaded' ? '上传' : '视频' }}</text>
+      </view>
+      
+      <!-- Audio Mode Options -->
+      <view wx:if="{{ showAudioModeSelector }}" class="audio-mode-options">
+        <view class="audio-option {{ audioMode === 'both' ? 'active' : '' }}" 
+              data-mode="both" 
+              bindtap="onAudioModeChange">
+          <text>播放全部音轨</text>
+        </view>
+        <view class="audio-option {{ audioMode === 'uploaded' ? 'active' : '' }}" 
+              data-mode="uploaded" 
+              bindtap="onAudioModeChange">
+          <text>仅播放上传音频</text>
+        </view>
+        <view class="audio-option {{ audioMode === 'video' ? 'active' : '' }}" 
+              data-mode="video" 
+              bindtap="onAudioModeChange">
+          <text>仅播放视频音频</text>
+        </view>
+      </view>
+    </view>
   </view>
     <detail-panel
     show-detail="{{ showDetail }}"

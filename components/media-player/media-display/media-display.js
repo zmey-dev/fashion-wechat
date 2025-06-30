@@ -20,7 +20,8 @@ Component({
   data: {
     containerWidth: 0,
     containerHeight: 0,
-    calculatedDots: []
+    calculatedDots: [],
+    audioMode: 'both' // 'both', 'uploaded', 'video'
   },
 
   observers: {
@@ -231,6 +232,74 @@ Component({
       setTimeout(() => {
         this.calculateDotPositions();
       }, 100);
+    },
+
+    /**
+     * Set audio mode for video playback
+     */
+    setAudioMode(mode) {
+      this.setData({ audioMode: mode });
+      
+      // Apply audio mode to current video if playing
+      const videoContext = wx.createVideoContext('media-video', this);
+      if (videoContext && this.properties.currentPost && this.properties.currentPost.type === 'video') {
+        this.applyAudioMode(videoContext);
+      }
+    },
+
+    /**
+     * Apply audio mode settings to video
+     */
+    applyAudioMode(videoContext) {
+      const { audioMode, currentPost } = this.data;
+      
+      // Check if post has uploaded audio
+      const hasUploadedAudio = currentPost && currentPost.audio_url;
+      
+      if (!hasUploadedAudio) {
+        // No uploaded audio, just play video normally
+        return;
+      }
+      
+      // Handle different audio modes
+      if (audioMode === 'video') {
+        // Mute uploaded audio, play only video audio
+        this.muteUploadedAudio();
+      } else if (audioMode === 'uploaded') {
+        // Mute video audio, play only uploaded audio
+        videoContext.muted = true;
+        this.playUploadedAudio();
+      } else {
+        // Play both audio tracks
+        videoContext.muted = false;
+        this.playUploadedAudio();
+      }
+    },
+
+    /**
+     * Play uploaded audio
+     */
+    playUploadedAudio() {
+      const { currentPost } = this.properties;
+      if (!currentPost || !currentPost.audio_url) return;
+      
+      // Create or get audio context
+      if (!this.audioContext) {
+        this.audioContext = wx.createInnerAudioContext();
+        this.audioContext.src = currentPost.audio_url;
+        this.audioContext.loop = true;
+      }
+      
+      this.audioContext.play();
+    },
+
+    /**
+     * Mute uploaded audio
+     */
+    muteUploadedAudio() {
+      if (this.audioContext) {
+        this.audioContext.pause();
+      }
     }
   }
 });
