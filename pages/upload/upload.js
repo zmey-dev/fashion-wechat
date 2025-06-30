@@ -662,72 +662,77 @@ Page({
       return;
     }
 
-    // First try wx.chooseMedia with mix type (available in newer versions)
-    const tryChooseMedia = () => {
-      wx.chooseMedia({
+    // Get system info to determine the best approach
+    const systemInfo = wx.getSystemInfoSync();
+    const isPC = systemInfo.platform === 'windows' || systemInfo.platform === 'mac';
+    
+    console.log("Choosing audio - Platform:", systemInfo.platform, "isPC:", isPC);
+
+    // Try chooseMessageFile with all type for better compatibility
+    const tryChooseMessageFile = () => {
+      wx.chooseMessageFile({
         count: 1,
-        mediaType: ["mix"], // Try mix type for audio selection
-        sourceType: ["album"],
+        type: "all", // Change from "file" to "all" for better mobile compatibility
         success: (res) => {
-          // Check if the selected file is audio
-          const file = res.tempFiles[0];
-          const fileName = file.tempFilePath || "";
+          const audioFile = res.tempFiles[0];
+          console.log("File selected via chooseMessageFile:", audioFile);
+          
+          // Check if it's an audio file
+          const fileName = audioFile.name || audioFile.path || "";
           const fileExt = fileName.split(".").pop().toLowerCase();
-          const validAudioExts = ["mp3", "wav", "aac", "m4a", "flac", "ogg"];
+          const validAudioExts = ["mp3", "wav", "aac", "m4a", "flac", "ogg", "wma", "ape", "m4b", "amr"];
           
           if (!validAudioExts.includes(fileExt)) {
             wx.showToast({
-              title: this.data.messages.errors.audioOnly,
+              title: "请选择音频文件",
               icon: "none",
             });
             return;
           }
-
-          this.handleAudioSelected({
-            ...file,
-            name: fileName.split("/").pop() || `audio_${Date.now()}.${fileExt}`,
-            path: file.tempFilePath,
-            size: file.size || 0
-          });
-        },
-        fail: (err) => {
-          console.log("wx.chooseMedia failed, trying wx.chooseMessageFile:", err);
-          // Fallback to chooseMessageFile
-          tryChooseMessageFile();
-        }
-      });
-    };
-
-    const tryChooseMessageFile = () => {
-      wx.chooseMessageFile({
-        count: 1,
-        type: "file", 
-        extension: ["mp3", "wav", "aac", "m4a", "flac", "ogg"],
-        success: (res) => {
-          const audioFile = res.tempFiles[0];
+          
           this.handleAudioSelected(audioFile);
         },
         fail: (err) => {
-          console.error("Failed to choose audio file:", err);
-          wx.showToast({
-            title: this.data.messages.errors.chooseAudioFailed,
-            icon: "none",
-          });
+          console.error("Failed to choose file:", err);
+          
+          // Show helpful instructions
+          if (!isPC) {
+            wx.showModal({
+              title: "选择音频文件",
+              content: "1. 请先将音频文件发送到\"文件传输助手\"\n2. 然后点击确定，从聊天记录中选择该文件",
+              confirmText: "我知道了",
+              showCancel: false,
+              success: () => {
+                // Do nothing, user will try again
+              }
+            });
+          } else {
+            wx.showToast({
+              title: this.data.messages.errors.chooseAudioFailed,
+              icon: "none",
+            });
+          }
         },
       });
     };
 
-    // Start with trying chooseMedia
-    tryChooseMedia();
+    // Direct to chooseMessageFile for all platforms
+    tryChooseMessageFile();
   },
 
   // Handle audio file selection
   handleAudioSelected(audioFile) {
+    console.log("handleAudioSelected called with:", audioFile);
+    
     const fileName = audioFile.name || audioFile.path || "";
     const fileExt = fileName.split(".").pop().toLowerCase();
-    const validAudioExts = ["mp3", "wav", "aac", "m4a", "flac", "ogg"];
+    const validAudioExts = ["mp3", "wav", "aac", "m4a", "flac", "ogg", "wma", "ape", "m4b", "amr"];
+
+    console.log("Audio file name:", fileName);
+    console.log("Audio file extension:", fileExt);
 
     if (!validAudioExts.includes(fileExt)) {
+      console.error("Invalid audio extension:", fileExt);
       wx.showToast({
         title: this.data.messages.errors.audioOnly,
         icon: "none",
@@ -775,6 +780,7 @@ Page({
       audioName: "",
     });
   },
+
 
   // Form input handlers
   onTitleInput(e) {
