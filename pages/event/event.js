@@ -255,6 +255,17 @@ Page({
     this.setData({
       showRulesModal: false,
     });
+  },
+
+  // Handle past event click
+  onPastEventClick(e) {
+    const eventId = e.currentTarget.dataset.id;
+    if (!eventId) return;
+
+    // Navigate directly to event detail page to view posts
+    wx.navigateTo({
+      url: `/pages/event-detail/event-detail?eventId=${eventId}&viewOnly=true`,
+    });
   }, // Handle rules agreement
   onAgreeRules() {
     this.setData({

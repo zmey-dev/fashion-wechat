@@ -13,6 +13,7 @@ Page({
     currentDate: '',
     currentTime: '',
     canJoinEvent: false,
+    viewOnly: false,
     messages: {
       loading: "加载中...",
       errors: {
@@ -34,6 +35,8 @@ Page({
 
   onLoad: function (options) {
     const eventId = options.eventId;
+    const viewOnly = options.viewOnly === 'true';
+    
     if (!eventId) {
       wx.navigateBack();
       return;
@@ -41,6 +44,7 @@ Page({
 
     this.setData({
       eventId: eventId,
+      viewOnly: viewOnly,
       userInfo: getApp().globalData.userInfo || {}
     });
 
@@ -142,7 +146,15 @@ Page({
   },
 
   checkCanJoinEvent: function (event) {
-    const { userInfo } = this.data;
+    const { userInfo, viewOnly } = this.data;
+    
+    // If view only mode, cannot join
+    if (viewOnly) return false;
+    
+    // Check if event has ended
+    const now = new Date();
+    const endDate = new Date(event.end_date);
+    if (endDate < now) return false;
     
     if (userInfo.role !== 'user') return false;
     
