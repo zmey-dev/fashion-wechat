@@ -223,8 +223,9 @@ Page({
   // Preview image by navigating to post detail
   previewImage: function (e) {
     const current = e.currentTarget.dataset.id;
+    const userId = this.data.currentUser.id;
     wx.navigateTo({
-      url: `/pages/post-detail/post-detail?postId=${current}`,
+      url: `/pages/post-detail/post-detail?postId=${current}&user_id=${userId}`,
     });
   },
 
