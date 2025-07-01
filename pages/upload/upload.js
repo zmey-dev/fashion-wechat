@@ -1191,7 +1191,10 @@ Page({
             });
 
             setTimeout(() => {
-              wx.navigateBack();
+              // Navigate to me page instead of going back
+              wx.switchTab({
+                url: '/pages/me/me'
+              });
             }, 1500);
           } else {
             wx.showToast({
