@@ -936,7 +936,51 @@ Page({
   // Submit form
   async submitForm() {
     // Validate form fields
-    const { title, content, files } = this.data;
+    const { title, content, files, imageDots } = this.data;
+
+    // Check for swear words in title and content
+    if (isContainSword(title)) {
+      wx.showToast({
+        title: "标题包含不当语言，请修改后再上传",
+        icon: "none",
+        duration: 3000,
+      });
+      return;
+    }
+
+    if (isContainSword(content)) {
+      wx.showToast({
+        title: "内容包含不当语言，请修改后再上传",
+        icon: "none",
+        duration: 3000,
+      });
+      return;
+    }
+
+    // Check for swear words in image annotations
+    for (const imageIndex in imageDots) {
+      const dots = imageDots[imageIndex];
+      if (dots && Array.isArray(dots)) {
+        for (const dot of dots) {
+          if (dot.title && isContainSword(dot.title)) {
+            wx.showToast({
+              title: "图片标记标题包含不当语言，请修改后再上传",
+              icon: "none",
+              duration: 3000,
+            });
+            return;
+          }
+          if (dot.description && isContainSword(dot.description)) {
+            wx.showToast({
+              title: "图片标记描述包含不当语言，请修改后再上传",
+              icon: "none",
+              duration: 3000,
+            });
+            return;
+          }
+        }
+      }
+    }
 
     if (!title || !title.trim()) {
       wx.showToast({
