@@ -52,6 +52,7 @@ bindtap="onScreenTap"
     wx:else
     id="media-video"
     class="media-video"
+    controls="{{true}}"
     src="{{ currentMedia[0].url }}"
     poster="{{ currentMedia[0].preview_url }}"
     controls="{{ true }}"
