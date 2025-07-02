@@ -9,8 +9,12 @@ Page({
     followedUsers: app.globalData.followedUsers || [],
     postId: null,
     userId: null,
+    eventId: null,
     userPosts: [],
+    eventPosts: [],
     currentUserPostIndex: 0,
+    currentEventPostIndex: 0,
+    hasMoreEventPosts: true,
 
     currentPost: null,
     currentPostUser: null,
@@ -40,9 +44,11 @@ Page({
   onLoad: function (options) {
     const postId = options.postId || null;
     const userId = options.user_id || null;
+    const eventId = options.eventId || null;
     this.setData({
       postId: postId,
       userId: userId,
+      eventId: eventId,
     });
     const app = getApp();
 
@@ -64,7 +70,10 @@ Page({
       userInfo: app.globalData.userInfo || {},
       followedUsers: app.globalData.followedUsers || [],
     });
-    if (userId) {
+    if (eventId) {
+      // If eventId is provided, load event's posts
+      this.loadEventPosts(postId);
+    } else if (userId) {
       // If user_id is provided, load user's posts
       this.loadUserPosts(postId);
     } else {
@@ -74,7 +83,10 @@ Page({
     }
   },
   onShow: function () {
-    if (this.data.userId) {
+    if (this.data.eventId) {
+      // If eventId is provided, reload event's posts
+      this.loadEventPosts(this.data.postId);
+    } else if (this.data.userId) {
       // If user_id is provided, reload user's posts
       this.loadUserPosts(this.data.postId);
     } else {
@@ -216,7 +228,21 @@ Page({
   },
 
   handlePreviousPost: function () {
-    if (this.data.userId) {
+    if (this.data.eventId) {
+      // If viewing event's posts, navigate through eventPosts array
+      if (this.data.currentEventPostIndex > 0) {
+        const newIndex = this.data.currentEventPostIndex - 1;
+        this.setData({
+          currentEventPostIndex: newIndex,
+          currentPost: this.data.eventPosts[newIndex],
+        });
+      } else {
+        wx.showToast({
+          title: this.data.messages.navigation.firstPost,
+          icon: "none",
+        });
+      }
+    } else if (this.data.userId) {
       // If viewing user's posts, navigate through userPosts array
       if (this.data.currentUserPostIndex > 0) {
         const newIndex = this.data.currentUserPostIndex - 1;
@@ -244,7 +270,19 @@ Page({
   },
 
   handleNextPost: function () {
-    if (this.data.userId) {
+    if (this.data.eventId) {
+      // If viewing event's posts, navigate through eventPosts array
+      if (this.data.currentEventPostIndex < this.data.eventPosts.length - 1) {
+        const newIndex = this.data.currentEventPostIndex + 1;
+        this.setData({
+          currentEventPostIndex: newIndex,
+          currentPost: this.data.eventPosts[newIndex],
+        });
+      } else {
+        // Load more event posts if available
+        this.loadMoreEventPosts();
+      }
+    } else if (this.data.userId) {
       // If viewing user's posts, navigate through userPosts array
       if (this.data.currentUserPostIndex < this.data.userPosts.length - 1) {
         const newIndex = this.data.currentUserPostIndex + 1;
@@ -273,5 +311,145 @@ Page({
 
   closeSidebar: function () {
     this.setState("showSidebar", false);
+  },
+
+  // Load posts for a specific event
+  loadEventPosts: function (selectedPostId) {
+    this.setData({
+      isLoading: true,
+      loadError: false,
+    });
+
+    // Fetch posts for the specific event
+    wx.request({
+      url: `${config.BACKEND_URL}/post/get_posts_event_discover/${this.data.eventId}`,
+      method: "GET",
+      data: {
+        eventId: this.data.eventId,
+        scope: 30, // Get more posts at once for smoother navigation
+        isDiscover: true,
+      },
+      header: {
+        Authorization: app.globalData?.userInfo?.token
+          ? `Bearer ${app.globalData?.userInfo?.token}`
+          : "",
+      },
+      success: (res) => {
+        if (res.statusCode === 200 && res.data) {
+          const posts = res.data.posts || [];
+          if (posts.length > 0) {
+            // Find the index of the selected post
+            let currentIndex = 0;
+            if (selectedPostId) {
+              const index = posts.findIndex(post => post.id == selectedPostId);
+              if (index !== -1) {
+                currentIndex = index;
+              }
+            }
+
+            this.setData({
+              eventPosts: posts,
+              currentPost: posts[currentIndex],
+              currentEventPostIndex: currentIndex,
+              totalPosts: posts.length,
+              isLoading: false,
+              hasMoreEventPosts: res.data.has_more || false,
+            });
+          } else {
+            this.setData({
+              isLoading: false,
+              loadError: true,
+              errorMessage: "该活动暂无作品",
+            });
+          }
+        } else {
+          this.setData({
+            isLoading: false,
+            loadError: true,
+            errorMessage: this.data.messages.errors.loadFailed,
+          });
+        }
+      },
+      fail: (err) => {
+        console.error("Failed to load event posts:", err);
+        this.setData({
+          isLoading: false,
+          loadError: true,
+          errorMessage: this.data.messages.errors.networkError,
+        });
+      },
+    });
+  },
+
+  // Load more event posts when reaching the end
+  loadMoreEventPosts: function () {
+    if (!this.data.hasMoreEventPosts || this.data.isLoading) {
+      wx.showToast({
+        title: this.data.messages.navigation.lastPost,
+        icon: "none",
+      });
+      return;
+    }
+
+    this.setData({ isLoading: true });
+
+    // Get existing post IDs to avoid duplicates
+    const existingPostIds = this.data.eventPosts.map(post => post.id);
+
+    wx.request({
+      url: `${config.BACKEND_URL}/post/get_posts_event_discover/${this.data.eventId}`,
+      method: "GET",
+      data: {
+        eventId: this.data.eventId,
+        exist_post_ids: existingPostIds,
+        scope: 15,
+        isDiscover: true,
+      },
+      header: {
+        Authorization: app.globalData?.userInfo?.token
+          ? `Bearer ${app.globalData?.userInfo?.token}`
+          : "",
+      },
+      success: (res) => {
+        if (res.statusCode === 200 && res.data) {
+          const newPosts = res.data.posts || [];
+          if (newPosts.length > 0) {
+            const updatedPosts = [...this.data.eventPosts, ...newPosts];
+            const newIndex = this.data.currentEventPostIndex + 1;
+            
+            this.setData({
+              eventPosts: updatedPosts,
+              currentEventPostIndex: newIndex,
+              currentPost: updatedPosts[newIndex],
+              totalPosts: updatedPosts.length,
+              hasMoreEventPosts: res.data.has_more || false,
+              isLoading: false,
+            });
+          } else {
+            this.setData({
+              hasMoreEventPosts: false,
+              isLoading: false,
+            });
+            wx.showToast({
+              title: this.data.messages.navigation.lastPost,
+              icon: "none",
+            });
+          }
+        } else {
+          this.setData({ isLoading: false });
+          wx.showToast({
+            title: this.data.messages.errors.loadFailed,
+            icon: "none",
+          });
+        }
+      },
+      fail: () => {
+        this.setData({ isLoading: false });
+        wx.showToast({
+          title: this.data.messages.errors.networkError,
+          icon: "none",
+        });
+      },
+    });
   },
 });

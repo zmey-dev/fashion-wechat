@@ -517,8 +517,14 @@ Page({
 
   onEditorInput(e) {
     const { html, text } = e.detail;
+    // Add white color style to the HTML content
+    let styledHtml = html || text;
+    if (styledHtml && !styledHtml.includes('color:')) {
+      // Wrap content in a div with white color if no color is specified
+      styledHtml = `<div style="color: #ffffff;">${styledHtml}</div>`;
+    }
     this.setData({
-      description: html || text,
+      description: styledHtml,
     });
   },
 

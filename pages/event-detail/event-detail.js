@@ -246,9 +246,9 @@ Page({
   onPostTap: function (e) {
     const { postId, index } = e.currentTarget.dataset;
     
-    // Navigate to post detail
+    // Navigate to post detail with eventId
     wx.navigateTo({
-      url: `/pages/post-detail/post-detail?postId=${postId}&index=${index}`
+      url: `/pages/post-detail/post-detail?postId=${postId}&index=${index}&eventId=${this.data.eventId}`
     });
   },
 
