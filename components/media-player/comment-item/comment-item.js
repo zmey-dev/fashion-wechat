@@ -19,6 +19,10 @@ Component({
       type: Object,
       value: {},
     },
+    eventId: {
+      type: String,
+      value: null,
+    },
   },
 
   data: {

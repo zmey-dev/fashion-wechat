@@ -169,6 +169,20 @@
           <text class="error-text" wx:if="{{profileErrors.name}}">{{profileErrors.name}}</text>
         </view>
 
+        <!-- Nickname -->
+        <view class="form-field">
+          <label class="field-label">昵称</label>
+          <input 
+            class="field-input {{profileErrors.nickname ? 'error' : ''}}"
+            value="{{profileForm.nickname}}"
+            placeholder="请输入昵称"
+            disabled="{{!isEditingProfile}}"
+            data-field="nickname"
+            bindinput="onProfileInputChange"
+          />
+          <text class="error-text" wx:if="{{profileErrors.nickname}}">{{profileErrors.nickname}}</text>
+        </view>
+
         <!-- Phone -->
         <view class="form-field">
           <label class="field-label">

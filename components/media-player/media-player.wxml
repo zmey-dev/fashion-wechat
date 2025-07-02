@@ -107,6 +107,7 @@
     selected-dot="{{ selectedDot }}"
     display-follower-count="{{ displayFollowerCount }}"
     display-like-count="{{ displayLikeCount }}"
+    event-id="{{ eventId }}"
     bind:tabchange="onTabChange"
     bind:closedetail="onCloseDetail"
     bind:statechange="onDetailStateChange"

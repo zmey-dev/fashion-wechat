@@ -19,6 +19,10 @@ Component({
     selectedPost: {
       type: Object,
       value: {}
+    },
+    eventId: {
+      type: String,
+      value: null
     }
   },
 

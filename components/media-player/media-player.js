@@ -20,6 +20,10 @@ Component({
       type: Number,
       value: 0,
     },
+    eventId: {
+      type: String,
+      value: null,
+    },
   },
   data: {
     // Media state

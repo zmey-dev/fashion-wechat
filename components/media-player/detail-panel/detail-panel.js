@@ -11,6 +11,7 @@ Component({
     selectedDot: { type: Object, value: null },
     displayFollowerCount: { type: String, value: "0" },
     displayLikeCount: { type: String, value: "0" },
+    eventId: { type: String, value: null },
   },
   data: {
     // Remove local panelState, use property instead

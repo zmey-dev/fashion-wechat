@@ -14,6 +14,7 @@
       authUser="{{ userInfo }}"
       index="{{ currentIndex }}"
       totalCount="{{ totalPosts }}"
+      event-id="{{ eventId }}"
       bind:postNavigation="handlePostNavigation"
       bind:likeUpdated="handleLikeUpdated"
       bind:favoriteUpdated="handleFavoriteUpdated"
