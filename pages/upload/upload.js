@@ -1,5 +1,6 @@
 const { default: config } = require("../../config");
 const ucloudUpload = require("../../services/ucloudUpload");
+const { isContainSword } = require("../../utils/isContainSword");
 
 Page({
   data: {
@@ -607,14 +608,38 @@ Page({
 
   // Handle dot editor input
   onDotTitleInput(e) {
+    const inputValue = e.detail.value;
+    
+    // Check for swear words
+    if (isContainSword(inputValue)) {
+      wx.showToast({
+        title: "请避免使用不当语言",
+        icon: "none",
+        duration: 2000,
+      });
+      return;
+    }
+    
     this.setData({
-      "editingDot.title": e.detail.value,
+      "editingDot.title": inputValue,
     });
   },
 
   onDotDescInput(e) {
+    const inputValue = e.detail.value;
+    
+    // Check for swear words
+    if (isContainSword(inputValue)) {
+      wx.showToast({
+        title: "请避免使用不当语言",
+        icon: "none",
+        duration: 2000,
+      });
+      return;
+    }
+    
     this.setData({
-      "editingDot.description": e.detail.value,
+      "editingDot.description": inputValue,
     });
   },
 
@@ -813,14 +838,38 @@ Page({
 
   // Form input handlers
   onTitleInput(e) {
+    const inputValue = e.detail.value;
+    
+    // Check for swear words
+    if (isContainSword(inputValue)) {
+      wx.showToast({
+        title: "请避免使用不当语言",
+        icon: "none",
+        duration: 2000,
+      });
+      return;
+    }
+    
     this.setData({
-      title: e.detail.value,
+      title: inputValue,
     });
   },
 
   onContentInput(e) {
+    const inputValue = e.detail.value;
+    
+    // Check for swear words
+    if (isContainSword(inputValue)) {
+      wx.showToast({
+        title: "请避免使用不当语言",
+        icon: "none",
+        duration: 2000,
+      });
+      return;
+    }
+    
     this.setData({
-      content: e.detail.value,
+      content: inputValue,
     });
   },
 
