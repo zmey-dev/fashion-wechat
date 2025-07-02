@@ -400,7 +400,7 @@ Page({
       fail: (error) => {
         console.error("Video selection failed:", error);
         console.error("Error details:", JSON.stringify(error));
-        
+
         // Provide more specific error messages
         let errorMessage = "视频选择失败";
         if (error.errMsg && error.errMsg.includes("cancel")) {
@@ -408,7 +408,7 @@ Page({
         } else if (error.errMsg && error.errMsg.includes("permission")) {
           errorMessage = "请允许访问相册权限";
         }
-        
+
         wx.showToast({
           title: errorMessage,
           icon: "none",
@@ -665,9 +665,15 @@ Page({
 
     // Get system info to determine the best approach
     const systemInfo = wx.getSystemInfoSync();
-    const isPC = systemInfo.platform === 'windows' || systemInfo.platform === 'mac';
-    
-    console.log("Choosing audio - Platform:", systemInfo.platform, "isPC:", isPC);
+    const isPC =
+      systemInfo.platform === "windows" || systemInfo.platform === "mac";
+
+    console.log(
+      "Choosing audio - Platform:",
+      systemInfo.platform,
+      "isPC:",
+      isPC
+    );
 
     // Try chooseMessageFile with all type for better compatibility
     const tryChooseMessageFile = () => {
@@ -677,12 +683,23 @@ Page({
         success: (res) => {
           const audioFile = res.tempFiles[0];
           console.log("File selected via chooseMessageFile:", audioFile);
-          
+
           // Check if it's an audio file
           const fileName = audioFile.name || audioFile.path || "";
           const fileExt = fileName.split(".").pop().toLowerCase();
-          const validAudioExts = ["mp3", "wav", "aac", "m4a", "flac", "ogg", "wma", "ape", "m4b", "amr"];
-          
+          const validAudioExts = [
+            "mp3",
+            "wav",
+            "aac",
+            "m4a",
+            "flac",
+            "ogg",
+            "wma",
+            "ape",
+            "m4b",
+            "amr",
+          ];
+
           if (!validAudioExts.includes(fileExt)) {
             wx.showToast({
               title: "请选择音频文件",
@@ -690,22 +707,23 @@ Page({
             });
             return;
           }
-          
+
           this.handleAudioSelected(audioFile);
         },
         fail: (err) => {
           console.error("Failed to choose file:", err);
-          
+
           // Show helpful instructions
           if (!isPC) {
             wx.showModal({
               title: "选择音频文件",
-              content: "1. 请先将音频文件发送到\"文件传输助手\"\n2. 然后点击确定，从聊天记录中选择该文件",
+              content:
+                '1. 请先将音频文件发送到"文件传输助手"\n2. 然后点击确定，从聊天记录中选择该文件',
               confirmText: "我知道了",
               showCancel: false,
               success: () => {
                 // Do nothing, user will try again
-              }
+              },
             });
           } else {
             wx.showToast({
@@ -724,10 +742,21 @@ Page({
   // Handle audio file selection
   handleAudioSelected(audioFile) {
     console.log("handleAudioSelected called with:", audioFile);
-    
+
     const fileName = audioFile.name || audioFile.path || "";
     const fileExt = fileName.split(".").pop().toLowerCase();
-    const validAudioExts = ["mp3", "wav", "aac", "m4a", "flac", "ogg", "wma", "ape", "m4b", "amr"];
+    const validAudioExts = [
+      "mp3",
+      "wav",
+      "aac",
+      "m4a",
+      "flac",
+      "ogg",
+      "wma",
+      "ape",
+      "m4b",
+      "amr",
+    ];
 
     console.log("Audio file name:", fileName);
     console.log("Audio file extension:", fileExt);
@@ -781,7 +810,6 @@ Page({
       audioName: "",
     });
   },
-
 
   // Form input handlers
   onTitleInput(e) {
@@ -1192,10 +1220,10 @@ Page({
 
             setTimeout(() => {
               // Navigate to me page instead of going back
-              wx.switchTab({
-                url: '/pages/me/me'
+              wx.redirectTo({
+                url: `/pages/me/me`,
               });
-            }, 1500);
+            }, 500);
           } else {
             wx.showToast({
               title: res.data.msg || this.data.messages.errors.operationFailed,
@@ -1274,7 +1302,7 @@ Page({
 
         const fileForUpload = {
           tempFilePath: tempFilePath,
-          thumbTempFilePath: thumbnailPath, 
+          thumbTempFilePath: thumbnailPath,
           name: fileName,
           size: file.file ? file.file.size : file.size || 0,
           type: file.type,

@@ -112,13 +112,6 @@ Component({
         }
       }
 
-      // Add haptic feedback for better UX
-      if (Math.abs(deltaY) > 10 && Math.abs(deltaY) % 50 === 0) {
-        wx.vibrateShort({
-          type: "light",
-        });
-      }
-
       this.setData({
         currentY: touch.clientY,
         translateY: newTranslateY,
@@ -165,13 +158,6 @@ Component({
             newPanelState = "half";
           }
         }
-      }
-
-      // Add haptic feedback for state change
-      if (newPanelState !== panelState) {
-        wx.vibrateShort({
-          type: "medium",
-        });
       }
 
       // Reset dragging state

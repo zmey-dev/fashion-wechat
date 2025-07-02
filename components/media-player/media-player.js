@@ -724,7 +724,6 @@ Component({
               displayComments: this.formatNumber(updatedComments.length),
             });
 
-            wx.vibrateShort();
             wx.showToast({
               title: res.data.msg,
               icon: "success",
