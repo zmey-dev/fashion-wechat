@@ -354,12 +354,59 @@ Page({
     return errors;
   },
 
+  // Scroll to first error field
+  scrollToErrorField: function(errorKey) {
+    // Create a mapping of error keys to selector IDs
+    const fieldMap = {
+      name: 'name-field',
+      nickname: 'nickname-field',
+      phone: 'phone-field',
+      email: 'email-field',
+      gender: 'gender-field',
+      id_number: 'id-number-field',
+      student_number: 'student-number-field',
+      faculty: 'faculty-field',
+      major: 'major-field',
+      class: 'class-field'
+    };
+
+    const selector = fieldMap[errorKey];
+    if (selector) {
+      // Create a query to get the element position
+      const query = wx.createSelectorQuery();
+      query.select(`#${selector}`).boundingClientRect();
+      query.selectViewport().scrollOffset();
+      query.exec((res) => {
+        if (res[0] && res[1]) {
+          // Scroll to the element with some offset
+          wx.pageScrollTo({
+            scrollTop: res[0].top + res[1].scrollTop - 100,
+            duration: 300
+          });
+        }
+      });
+    }
+  },
+
   // Save profile changes
   saveProfile: function () {
     const errors = this.validateProfileForm();
 
     if (Object.keys(errors).length > 0) {
       this.setData({ profileErrors: errors });
+      
+      // Show error toast
+      const firstError = Object.values(errors)[0];
+      wx.showToast({
+        title: firstError,
+        icon: 'none',
+        duration: 2000
+      });
+      
+      // Scroll to first error field
+      const firstErrorKey = Object.keys(errors)[0];
+      this.scrollToErrorField(firstErrorKey);
+      
       return;
     }
 

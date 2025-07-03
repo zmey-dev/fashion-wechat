@@ -43,7 +43,7 @@
       <view class="form-section">
         <view class="section-title">基本信息</view>
           <!-- Name -->
-        <view class="form-field">
+        <view class="form-field" id="name-field">
           <label class="field-label">姓名</label>
           <view class="input-wrapper">
             <input 
@@ -59,7 +59,7 @@
         </view>
 
         <!-- Nickname -->
-        <view class="form-field">
+        <view class="form-field" id="nickname-field">
           <label class="field-label">昵称</label>
           <view class="input-wrapper">
             <input 
@@ -75,7 +75,7 @@
         </view>
 
         <!-- Phone -->
-        <view class="form-field">
+        <view class="form-field" id="phone-field">
           <label class="field-label">
             手机号
             <view class="verification-status" wx:if="{{phoneChanged && !phoneVerified}}">
@@ -118,7 +118,7 @@
           
           <text class="error-text" wx:if="{{profileErrors.phone}}">{{profileErrors.phone}}</text>
         </view>        <!-- Email -->
-        <view class="form-field">
+        <view class="form-field" id="email-field">
           <label class="field-label">
             邮箱
             <view class="verification-status" wx:if="{{emailChanged && !emailVerified}}">
@@ -160,7 +160,7 @@
         </view>
 
         <!-- Gender -->
-        <view class="form-field">
+        <view class="form-field" id="gender-field">
           <label class="field-label">性别</label>
           <view class="gender-options">
             <view 
@@ -188,7 +188,7 @@
       <view class="form-section">
         <view class="section-title">学术信息</view>
           <!-- ID Number -->
-        <view class="form-field">
+        <view class="form-field" id="id-number-field">
           <label class="field-label">身份证号</label>
           <view class="input-wrapper">
             <input 
@@ -204,7 +204,7 @@
         </view>
 
         <!-- Student Number -->
-        <view class="form-field">
+        <view class="form-field" id="student-number-field">
           <label class="field-label">学号</label>
           <view class="input-wrapper">
             <input 
@@ -220,7 +220,7 @@
         </view>
 
         <!-- Faculty -->
-        <view class="form-field">
+        <view class="form-field" id="faculty-field">
           <label class="field-label">学院</label>
           <picker 
             mode="selector"
@@ -240,7 +240,7 @@
         </view>
 
         <!-- Major -->
-        <view class="form-field">
+        <view class="form-field" id="major-field">
           <label class="field-label">专业</label>
           <picker 
             mode="selector"
@@ -258,7 +258,7 @@
           </picker>
           <text class="error-text" wx:if="{{profileErrors.major}}">{{profileErrors.major}}</text>
         </view>        <!-- Class -->
-        <view class="form-field">
+        <view class="form-field" id="class-field">
           <label class="field-label">班级</label>
           <view class="input-wrapper">
             <input 
