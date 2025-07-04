@@ -584,7 +584,7 @@
 .post-card:focus,
 .like-btn:focus,
 .float-btn:focus {
-  outline: 2rpx solid #ff5757;
+  outline: 2rpx solid #00d763;
   outline-offset: 2rpx;
 }
 
