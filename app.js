@@ -18,6 +18,9 @@ App({
     unreadMessageCount: 0,
     totalUnreadCount: 0,
     unreadMessagesByUser: {}, // { userId: { count: number, lastMessage: string } }
+    // Notification management
+    notifications: [],
+    notificationCount: 0,
   },
 
   // Subscribe to state changes
@@ -146,6 +149,26 @@ App({
   // Get total unread count
   getTotalUnreadCount() {
     return this.globalData.totalUnreadCount;
+  },
+
+  // Update notifications globally
+  updateNotifications(notifications) {
+    this.globalData.notifications = notifications || [];
+    this.globalData.notificationCount = notifications ? notifications.length : 0;
+    
+    // Notify observers
+    this.setState("notifications", this.globalData.notifications);
+    this.setState("notificationCount", this.globalData.notificationCount);
+  },
+
+  // Get current notifications
+  getNotifications() {
+    return this.globalData.notifications;
+  },
+
+  // Get notification count
+  getNotificationCount() {
+    return this.globalData.notificationCount;
   },
 
   // Fetch unread messages from server

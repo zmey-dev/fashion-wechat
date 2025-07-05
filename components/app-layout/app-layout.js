@@ -449,9 +449,14 @@ Component({
 
               console.log("Fetched notifications:", notificationCount);
 
+              // Update local state
               this.setData({
                 notificationCount: notificationCount,
               });
+
+              // Update global state so notification page can react
+              const app = getApp();
+              app.updateNotifications(notifications);
             } else {
               console.error("Failed to fetch notifications:", res.data.message);
             }

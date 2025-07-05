@@ -38,11 +38,95 @@ Page({
     this.setData({
       userInfo: app.globalData.userInfo || {},
     });
+    
+    // Subscribe to notification updates
+    this.notificationHandler = (notifications) => {
+      console.log("Notification page received global notification update:", notifications.length);
+      this.processNotifications(notifications);
+    };
+    app.subscribe("notifications", this.notificationHandler);
+    
+    // Get initial notifications
     this.getNotifications();
   },
 
   onShow() {
-    this.getNotifications();
+    // Check if there are global notifications available
+    const globalNotifications = app.getNotifications();
+    if (globalNotifications && globalNotifications.length > 0) {
+      this.processNotifications(globalNotifications);
+    } else {
+      this.getNotifications();
+    }
+  },
+
+  onUnload() {
+    // Unsubscribe from notification updates
+    if (this.notificationHandler) {
+      app.unsubscribe("notifications", this.notificationHandler);
+    }
+  },
+
+  // Pull down to refresh
+  onPullDownRefresh() {
+    console.log("Refreshing notifications...");
+    
+    // Fetch fresh notifications
+    wx.request({
+      url: `${config.BACKEND_URL}/notify/get_notifications`,
+      method: "GET",
+      header: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${this.data.userInfo.token}`,
+      },
+      success: (res) => {
+        if (res.data && res.data.status === "success") {
+          const notifications = res.data.message || [];
+          
+          // Process notifications
+          this.processNotifications(notifications);
+          
+          // Update global state
+          app.updateNotifications(notifications);
+          
+          wx.showToast({
+            title: "已刷新",
+            icon: "success",
+            duration: 1000,
+          });
+        }
+        
+        // Stop pull down refresh
+        wx.stopPullDownRefresh();
+      },
+      fail: (err) => {
+        console.error("Failed to refresh notifications:", err);
+        wx.showToast({
+          title: this.data.messages.errors.networkError,
+          icon: "none",
+        });
+        
+        // Stop pull down refresh
+        wx.stopPullDownRefresh();
+      },
+    });
+  },
+
+  processNotifications(notifications) {
+    const friendNotifications = notifications.filter(
+      (item) => item.event_type !== "new_post"
+    );
+    const postNotifications = notifications.filter(
+      (item) => item.event_type === "new_post"
+    );
+
+    this.setData({
+      notifications,
+      friendNotifications,
+      postNotifications,
+      loading: false,
+      error: null,
+    });
   },
 
   getNotifications() {
@@ -58,21 +142,12 @@ Page({
       success: (res) => {
         if (res.data && res.data.status === "success") {
           const notifications = res.data.message || [];
-
-          const friendNotifications = notifications.filter(
-            (item) => item.event_type !== "new_post"
-          );
-          const postNotifications = notifications.filter(
-            (item) => item.event_type === "new_post"
-          );
-
-          this.setData({
-            notifications,
-            friendNotifications,
-            postNotifications,
-            loading: false,
-            error: null,
-          });
+          
+          // Process notifications
+          this.processNotifications(notifications);
+          
+          // Update global state
+          app.updateNotifications(notifications);
         } else {
           this.setData({
             loading: false,
@@ -162,6 +237,9 @@ Page({
       friendNotifications,
       postNotifications,
     });
+
+    // Update global state
+    app.updateNotifications(notifications);
   },
 
   requestFriendAction(data) {
