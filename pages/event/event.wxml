@@ -45,19 +45,19 @@
                   <view wx:if="{{isTeacher}}" class="teacher-actions">
                     <button wx:if="{{selectedEvent.user.id === userInfo.id}}" class="teacher-btn edit-btn" bindtap="onUpdateEvent">
                       <view class="btn-icon">
-                        <image src="/images/icons/edit.svg" mode="aspectFit"></image>
+                        <image src="/images/icons/edit.svg" mode="aspectFit" class="image-icon"></image>
                       </view>
                       <text class="btn-text">{{messages.actions.edit}}</text>
                     </button>
                     <button wx:if="{{selectedEvent.user.id === userInfo.id}}" class="teacher-btn delete-btn" bindtap="onDeleteEvent">
                       <view class="btn-icon">
-                        <image src="/images/icons/trash.svg" mode="aspectFit"></image>
+                        <image src="/images/icons/trash.svg" mode="aspectFit" class="image-icon"></image>
                       </view>
                       <text class="btn-text">{{messages.actions.delete}}</text>
                     </button>
                     <button class="teacher-btn join-btn" bindtap="onParticipate">
                       <view class="btn-icon">
-                        <image src="/images/icons/eye.svg" mode="aspectFit"></image>
+                        <image src="/images/icons/eye.svg" mode="aspectFit" class="image-icon"></image>
                       </view>
                       <text class="btn-text">参与活动</text>
                     </button>
@@ -156,7 +156,7 @@
         <view class="modal-header">
           <view class="header-content">
             <view class="modal-icon">
-              <image class="icon-image" src="/images/icons/info-circle.svg" mode="aspectFit"></image>
+              <image class="image-icon" src="/images/icons/info-circle.svg" mode="aspectFit"></image>
             </view>
             <view class="header-text">
               <text class="modal-title">活动详情</text>
@@ -173,7 +173,7 @@
           <view class="event-info-section">
             <view class="section-header">
               <view class="section-icon">
-                <image src="/images/icons/info-circle.svg" mode="aspectFit"></image>
+                <image class="image-icon" src="/images/icons/info-circle.svg" mode="aspectFit"></image>
               </view>
               <text class="section-title">活动信息</text>
             </view>
@@ -191,7 +191,7 @@
           <view class="description-section">
             <view class="section-header">
               <view class="section-icon">
-                <image src="/images/icons/document-text.svg" mode="aspectFit"></image>
+                <image src="/images/icons/document-text.svg" mode="aspectFit" class="image-icon"></image>
               </view>
               <text class="section-title">活动说明</text>
             </view>            

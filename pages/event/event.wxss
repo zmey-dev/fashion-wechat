@@ -955,7 +955,7 @@ swiper-item {
   position: fixed;
   bottom: 120rpx;
   right: 32rpx;
-  z-index: 1000;
+  z-index: 100;
 }
 
 .fab {
