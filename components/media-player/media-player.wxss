@@ -1,66 +1,63 @@
-/* components/media-player.wxss */
+/* components/media-player/media-player.wxss */
+
 .media-player {
+  position: relative;
   width: 100%;
   height: 100%;
-  background-color: #000;
-  position: relative;
+  background: #000;
   overflow: hidden;
+  /* touch-action is not supported in WXSS, use catchtouchmove instead */
 }
 
-/* Swiping styles */
+/* Main content container with transform capability for vertical swipe */
 .media-content {
-  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
   height: 100%;
-  position: relative;
-  transition: transform 0.3s ease-out;
+  width: 100%;
+  transition: none; /* No transition during touch */
+  z-index: 1;
+  transform-origin: center center;
 }
 
 .media-content.swiping {
-  transition: none;
+  transition: none !important; /* Ensure no transition during active swipe */
 }
 
-/* Detail panel transition states */
-.media-content {
+.media-content:not(.swiping) {
+  transition: transform 0.3s ease-out !important; /* Simplified for WXSS compatibility */
+}
+
+/* Responsive layout when detail panel is open */
+.media-content.detail-open {
+  height: 25% !important;
   transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  overflow: hidden;
+  position: relative;
 }
 
-/* Detail panel half state */
+/* Specific states for different panel sizes */
 .media-content.detail-half {
-  transform: scale(0.85) translateY(-5%);
+  height: 25% !important;
   transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  overflow: hidden;
+  position: relative;
 }
 
-.media-content.detail-half .media-display {
-  height: 85%;
-  width: 100%;
-  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-/* Detail panel full state */
 .media-content.detail-full {
-  transform: scale(0.7) translateY(-15%);
-  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-/* Adjust media display for detail panel open state */
-.media-content.detail-open .media-display {
-  height: 85%;
-  width: 100%;
-  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-/* Adjust media display for detail panel half state */
-.media-content.detail-half .media-display {
-  height: 85%;
-  width: 100%;
-  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-/* Adjust media display for detail panel full state */
-.media-content.detail-full .media-display {
-  height: 0%;
-  width: 100%;
+  height: 0% !important;
   opacity: 0;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  overflow: hidden;
+  position: relative;
+}
+
+/* Ensure media display fits properly in reduced space */
+.media-content.detail-open .media-display,
+.media-content.detail-half .media-display {
+  height: 100%;
+  width: 100%;
   transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
@@ -1114,56 +1111,4 @@ action-buttons.hidden {
   height: 100%;
   width: 100%;
   transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-/* Audio Mode Selector */
-.audio-mode-container {
-  position: absolute;
-  bottom: 200rpx;
-  right: 30rpx;
-  z-index: 10;
-}
-
-.audio-mode-button {
-  background: rgba(0, 0, 0, 0.6);
-  border-radius: 40rpx;
-  padding: 16rpx 24rpx;
-  display: flex;
-  align-items: center;
-  gap: 8rpx;
-}
-
-.audio-icon {
-  width: 32rpx;
-  height: 32rpx;
-}
-
-.audio-mode-text {
-  color: white;
-  font-size: 24rpx;
-}
-
-.audio-mode-options {
-  position: absolute;
-  bottom: 80rpx;
-  right: 0;
-  background: rgba(0, 0, 0, 0.8);
-  border-radius: 16rpx;
-  padding: 16rpx 0;
-  min-width: 280rpx;
-}
-
-.audio-option {
-  padding: 20rpx 32rpx;
-  color: white;
-  font-size: 28rpx;
-}
-
-.audio-option.active {
-  background: rgba(255, 255, 255, 0.2);
-  color: #ff6b6b;
-}
-
-.audio-option:active {
-  background: rgba(255, 255, 255, 0.1);
 }
