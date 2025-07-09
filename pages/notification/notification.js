@@ -200,13 +200,33 @@ Page({
     
     const { action, notifyId } = e.currentTarget.dataset;
 
+    // Find the notification to get sender and receiver info
+    const notification = this.data.friendNotifications.find(
+      item => item.notify_id === parseInt(notifyId)
+    );
+
+    if (!notification) {
+      wx.showToast({
+        title: this.data.messages.errors.networkError,
+        icon: "none",
+      });
+      return;
+    }
+
+    console.log("Notification found:", notification);
+    console.log("Current user:", this.data.userInfo);
+
     wx.showLoading({
       title: this.data.messages.actions.processing,
     });
 
+    // For friend requests, the current user is the receiver
+    // and the notification sender is the one who sent the request
     this.requestFriendAction({
       status: action,
-      notify_id: notifyId,
+      notify_id: parseInt(notifyId),
+      sender_id: notification.sender_id,
+      receiver_id: this.data.userInfo.id || this.data.userInfo.user_id
     });
   },
 
@@ -214,9 +234,24 @@ Page({
   handlePostNotification(e) {
     const { notifyId } = e.currentTarget.dataset;
 
+    // Find the notification to get sender and receiver info
+    const notification = this.data.postNotifications.find(
+      item => item.notify_id === parseInt(notifyId)
+    );
+
+    if (!notification) {
+      wx.showToast({
+        title: this.data.messages.errors.networkError,
+        icon: "none",
+      });
+      return;
+    }
+
     this.requestFriendAction({
       status: "removed",
-      notify_id: notifyId,
+      notify_id: parseInt(notifyId),
+      sender_id: notification.sender_id,
+      receiver_id: this.data.userInfo.id || this.data.userInfo.user_id
     });
   },
 
@@ -243,6 +278,8 @@ Page({
   },
 
   requestFriendAction(data) {
+    console.log("Sending friend action request:", data);
+    
     wx.request({
       url: `${config.BACKEND_URL}/friend/handle_friend`,
       method: "POST",
@@ -258,7 +295,7 @@ Page({
           const actionText =
             data.status === "accept"
               ? this.data.messages.actions.friendAdded
-              : data.status === "reject"
+              : data.status === "declined"
               ? this.data.messages.actions.requestRejected
               : this.data.messages.actions.notificationRemoved;
 
@@ -269,6 +306,7 @@ Page({
 
           this.removeNotification(data.notify_id);
         } else {
+          console.error("Friend action failed:", res.data);
           if (res.data.msg)
             wx.showToast({
               title: res.data.msg,

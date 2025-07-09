@@ -201,14 +201,25 @@ Component({
         this.setData({ totalUnreadCount: unreadMessageCount });
       };
 
+      // Subscribe to notification count changes
+      this.notificationCountHandler = (notificationCount) => {
+        console.log(
+          "App-layout received notificationCount update:",
+          notificationCount
+        );
+        this.setData({ notificationCount });
+      };
+
       app.subscribe("showLoginModal", this.showLoginModalHandler);
       app.subscribe("userInfo", this.userInfoHandler);
       app.subscribe("totalUnreadCount", this.totalUnreadCountHandler);
-      app.subscribe("unreadMessageCount", this.unreadMessageCountHandler); // Set initial data from app's centralized state
+      app.subscribe("unreadMessageCount", this.unreadMessageCountHandler);
+      app.subscribe("notificationCount", this.notificationCountHandler); // Set initial data from app's centralized state
       this.setData({
         showLoginModal: app.globalData.showLoginModal || false,
         userInfo: app.globalData.userInfo || {},
         totalUnreadCount: app.getTotalUnreadCount(),
+        notificationCount: app.getNotificationCount() || 0,
       });
 
       // Check if user is teacher and update layout accordingly
@@ -237,6 +248,7 @@ Component({
       app.unsubscribe("userInfo", this.userInfoHandler);
       app.unsubscribe("totalUnreadCount", this.totalUnreadCountHandler);
       app.unsubscribe("unreadMessageCount", this.unreadMessageCountHandler);
+      app.unsubscribe("notificationCount", this.notificationCountHandler);
 
       // Stop notification polling
       this.stopNotificationPolling();
