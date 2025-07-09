@@ -182,7 +182,7 @@
         <view class="nav-icon">
           <image src="/images/icons/event.svg" class="button-svg" alt="发现图标"></image>
         </view>
-        <text class="nav-label">比赛</text>
+        <text class="nav-label">校秀</text>
         <view class="arrow-svg">
           <view class="arrow-line"></view>
         </view>

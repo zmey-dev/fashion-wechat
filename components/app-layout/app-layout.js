@@ -45,7 +45,7 @@ Component({
       },
       {
         key: "event",
-        name: "比赛",
+        name: "校秀",
         path: "/pages/event/event",
         type: "filter",
       },      {
@@ -117,7 +117,7 @@ Component({
       },
       {
         key: "event",
-        name: "比赛",
+        name: "校秀",
         path: "/pages/event/event",
         type: "filter",
       },      {
