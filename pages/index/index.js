@@ -297,6 +297,20 @@ Page({
     });
   },
 
+  // Handle reaching bottom of page for infinite scroll
+  onReachBottom: function() {
+    if (this.data.hasMore && !this.data.loading) {
+      this.loadPosts(false);
+    }
+  },
+
+  // Handle pull down refresh
+  onPullDownRefresh: function() {
+    this.handleRefresh();
+    // Stop pull down refresh animation
+    wx.stopPullDownRefresh();
+  },
+
   onUserTap: function (e) {
     const username = e.currentTarget.dataset.username;
     getApp().handleGoUserProfile(username);

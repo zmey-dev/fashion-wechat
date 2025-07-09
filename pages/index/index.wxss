@@ -598,3 +598,59 @@
     transform: translateY(0);
   }
 }
+
+/* Loading more styles */
+.loading-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40rpx 0;
+  gap: 16rpx;
+}
+
+.loading-more .loading-spinner {
+  width: 40rpx;
+  height: 40rpx;
+  border: 3rpx solid rgba(255, 255, 255, 0.2);
+  border-top: 3rpx solid #ffffff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.loading-more .loading-text {
+  font-size: 28rpx;
+  color: #999;
+}
+
+/* No more content */
+.no-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60rpx 0;
+}
+
+.no-more-text {
+  font-size: 26rpx;
+  color: #666;
+  position: relative;
+  padding: 0 40rpx;
+}
+
+.no-more-text::before,
+.no-more-text::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 60rpx;
+  height: 1rpx;
+  background-color: #333;
+}
+
+.no-more-text::before {
+  left: -80rpx;
+}
+
+.no-more-text::after {
+  right: -80rpx;
+}
