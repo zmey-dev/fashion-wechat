@@ -177,7 +177,6 @@
 .media-item {
   background-color: #1e1e1e;
   border-radius: 6rpx;
-  overflow: hidden;
   position: relative;
   aspect-ratio: 3/4;
   width: 100%;
