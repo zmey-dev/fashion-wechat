@@ -33,6 +33,16 @@
   color: #333;
 }
 
+.terms-full-content {
+  font-size: 26rpx;
+  color: #333;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  display: block;
+  text-align: justify;
+}
+
 .welcome {
   display: block;
   font-size: 36rpx;
@@ -186,4 +196,27 @@
 
 .continue-button.enabled:active {
   background: linear-gradient(135deg, #0056B3 0%, #003D82 100%);
+}
+
+/* Douyin 스타일 섹션 강조 */
+.douyin-style {
+  border-left: 6rpx solid #FF6B6B;
+  background: linear-gradient(135deg, rgba(255, 107, 107, 0.05) 0%, rgba(255, 107, 107, 0.02) 100%);
+  margin: 30rpx 0;
+}
+
+.douyin-style .section-title {
+  color: #FF6B6B;
+  font-weight: bold;
+  font-size: 34rpx;
+}
+
+.douyin-style .section-subtitle {
+  color: #FF6B6B;
+  font-weight: 600;
+}
+
+.douyin-style .important {
+  color: #FF6B6B !important;
+  font-weight: bold;
 }
