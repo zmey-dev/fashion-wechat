@@ -11,7 +11,7 @@
       </view>
       <view wx:if="{{ selectedDot.description }}" class="info-item">
         <text class="info-label detail-text">描述:</text>
-        <text class="info-value detail-text">{{ selectedDot.description }}</text>
+        <rich-text class="info-value detail-text" nodes="{{ descriptionWithLinks }}" bindtap="onLinkTap"></rich-text>
       </view>
     </view>
   </view>

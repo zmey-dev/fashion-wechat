@@ -59,6 +59,16 @@
   word-wrap: break-word;
 }
 
+/* Rich text link styling */
+.info-value rich-text {
+  display: block;
+}
+
+.detail-text {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
 /* Detail Content */
 .detail-content {
   color: rgba(255, 255, 255, 0.9);
