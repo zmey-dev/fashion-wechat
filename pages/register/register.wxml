@@ -324,4 +324,12 @@
     <text class="login-text">已有账号？</text>
     <text class="login-btn" bindtap="goToLogin">立即登录</text>
   </view>
+
+  <!-- Terms Agreement Text -->
+  <view class="terms-agreement">
+    <text class="agreement-prefix">注册即代表同意</text>
+    <text class="agreement-link" bindtap="goToTerms">《用户协议》</text>
+    <text class="agreement-and">和</text>
+    <text class="agreement-link" bindtap="goToPrivacy">《隐私政策》</text>
+  </view>
 </view>

@@ -72,6 +72,18 @@ Component({
       });
     },
 
+    goToTerms() {
+      wx.navigateTo({
+        url: "/pages/terms/terms",
+      });
+    },
+
+    goToPrivacy() {
+      wx.navigateTo({
+        url: "/pages/privacy/privacy",
+      });
+    },
+
     preventClose(e) {},
 
     switchLoginType(e) {

@@ -1,0 +1,253 @@
+<view class="privacy-container">
+  <!-- Header -->
+  <view class="privacy-header">
+    <text class="privacy-title">{{messages.title}}</text>
+  </view>
+
+  <!-- Privacy Content -->
+  <scroll-view 
+    class="privacy-content" 
+    scroll-y="true"
+    bindscroll="onScroll"
+    bindscrolltolower="onScrollToLower"
+  >
+    <view class="privacy-text">
+      <text class="welcome">学校秀隐私政策</text>
+      
+      <text class="update-date">更新日期：2024年1月1日</text>
+      <text class="effective-date">生效日期：2024年1月1日</text>
+      
+      <text class="intro">学校秀（以下简称"我们"）非常重视用户的隐私和个人信息保护。本隐私政策将详细说明我们如何收集、使用、存储和保护您的个人信息。</text>
+
+      <view class="section">
+        <text class="section-title">一、我们如何收集您的个人信息</text>
+        
+        <text class="section-subtitle">1.1 您主动提供的信息</text>
+        <text class="section-content">在您注册、使用我们的服务时，您需要提供：</text>
+        <view class="bullet-list">
+          <text class="bullet-item">• 账号信息：手机号码、邮箱地址</text>
+          <text class="bullet-item">• 身份信息：真实姓名、学生证、身份证号码</text>
+          <text class="bullet-item">• 学校信息：学校名称、学院、专业、学号、入学年份</text>
+          <text class="bullet-item">• 个人资料：昵称、头像、性别、生日、个人简介</text>
+        </view>
+        
+        <text class="section-subtitle">1.2 我们自动收集的信息</text>
+        <text class="section-content">在您使用服务过程中，我们可能自动收集：</text>
+        <view class="bullet-list">
+          <text class="bullet-item">• 设备信息：设备型号、操作系统、唯一设备标识符</text>
+          <text class="bullet-item">• 日志信息：IP地址、浏览器类型、访问时间、页面记录</text>
+          <text class="bullet-item">• 位置信息：基于IP地址的大致地理位置</text>
+          <text class="bullet-item">• 使用信息：使用频率、点击记录、功能使用情况</text>
+        </view>
+        
+        <text class="section-subtitle">1.3 第三方来源</text>
+        <text class="section-content">当您使用微信登录时，经您授权，我们可能从微信获取您的：</text>
+        <view class="bullet-list">
+          <text class="bullet-item">• 微信昵称、头像</text>
+          <text class="bullet-item">• OpenID（用于识别用户唯一性）</text>
+        </view>
+      </view>
+
+      <view class="section">
+        <text class="section-title">二、我们如何使用您的个人信息</text>
+        
+        <text class="section-subtitle">2.1 提供服务</text>
+        <view class="bullet-list">
+          <text class="bullet-item">• 创建和管理您的账号</text>
+          <text class="bullet-item">• 提供内容发布、浏览、互动功能</text>
+          <text class="bullet-item">• 处理您的服务请求和反馈</text>
+          <text class="bullet-item">• 发送服务相关通知</text>
+        </view>
+        
+        <text class="section-subtitle">2.2 改善服务</text>
+        <view class="bullet-list">
+          <text class="bullet-item">• 分析服务使用情况，优化用户体验</text>
+          <text class="bullet-item">• 进行数据统计和分析</text>
+          <text class="bullet-item">• 开发新功能和服务</text>
+          <text class="bullet-item">• 个性化推荐内容</text>
+        </view>
+        
+        <text class="section-subtitle">2.3 安全保障</text>
+        <view class="bullet-list">
+          <text class="bullet-item">• 验证用户身份，防止欺诈</text>
+          <text class="bullet-item">• 监测和防范安全风险</text>
+          <text class="bullet-item">• 保护用户和平台安全</text>
+        </view>
+        
+        <text class="section-subtitle">2.4 法律合规</text>
+        <view class="bullet-list">
+          <text class="bullet-item">• 遵守适用的法律法规</text>
+          <text class="bullet-item">• 配合司法机关调查</text>
+          <text class="bullet-item">• 保护我们的合法权益</text>
+        </view>
+      </view>
+
+      <view class="section">
+        <text class="section-title">三、我们如何共享您的个人信息</text>
+        
+        <text class="section-subtitle">3.1 公开展示</text>
+        <text class="section-content">您在学校秀上发布的内容（如动态、评论等）将公开展示。请谨慎决定发布的内容。</text>
+        
+        <text class="section-subtitle">3.2 征得同意的共享</text>
+        <text class="section-content">除以下情形外，未经您同意，我们不会与第三方共享您的个人信息：</text>
+        <view class="bullet-list">
+          <text class="bullet-item">• 获得您的明确同意</text>
+          <text class="bullet-item">• 基于法律法规要求</text>
+          <text class="bullet-item">• 响应政府机关要求</text>
+          <text class="bullet-item">• 为保护生命财产安全</text>
+        </view>
+        
+        <text class="section-subtitle">3.3 服务提供商</text>
+        <text class="section-content">我们可能将信息提供给支持我们业务的第三方服务商，包括：</text>
+        <view class="bullet-list">
+          <text class="bullet-item">• 云服务提供商</text>
+          <text class="bullet-item">• 数据分析服务商</text>
+          <text class="bullet-item">• 客户服务提供商</text>
+        </view>
+        <text class="section-content">这些服务商仅能在必要范围内访问信息，并受保密协议约束。</text>
+      </view>
+
+      <view class="section">
+        <text class="section-title">四、我们如何存储和保护您的个人信息</text>
+        
+        <text class="section-subtitle">4.1 存储地点</text>
+        <text class="section-content">您的个人信息将存储在中国境内的安全服务器上。</text>
+        
+        <text class="section-subtitle">4.2 存储期限</text>
+        <text class="section-content">我们仅在实现目的所必需的期限内保留您的个人信息：</text>
+        <view class="bullet-list">
+          <text class="bullet-item">• 账号信息：账号存续期间及注销后180天</text>
+          <text class="bullet-item">• 发布内容：除非您删除，否则将持续保存</text>
+          <text class="bullet-item">• 日志信息：一般保存6个月</text>
+        </view>
+        
+        <text class="section-subtitle">4.3 安全措施</text>
+        <text class="section-content">我们采取以下措施保护您的信息：</text>
+        <view class="bullet-list">
+          <text class="bullet-item">• 数据加密传输和存储</text>
+          <text class="bullet-item">• 访问权限控制</text>
+          <text class="bullet-item">• 安全审计和监控</text>
+          <text class="bullet-item">• 定期安全评估</text>
+        </view>
+        
+        <text class="section-subtitle">4.4 安全事件处理</text>
+        <text class="section-content">如发生个人信息泄露，我们将：</text>
+        <view class="bullet-list">
+          <text class="bullet-item">• 立即启动应急预案</text>
+          <text class="bullet-item">• 及时通知您和监管机构</text>
+          <text class="bullet-item">• 采取措施减少损失</text>
+        </view>
+      </view>
+
+      <view class="section">
+        <text class="section-title">五、您的权利</text>
+        
+        <text class="section-subtitle">5.1 访问权</text>
+        <text class="section-content">您有权访问我们持有的关于您的个人信息。</text>
+        
+        <text class="section-subtitle">5.2 更正权</text>
+        <text class="section-content">如您发现信息有误，可以要求更正。</text>
+        
+        <text class="section-subtitle">5.3 删除权</text>
+        <text class="section-content">在以下情况下，您可要求删除个人信息：</text>
+        <view class="bullet-list">
+          <text class="bullet-item">• 处理目的已实现或不再必要</text>
+          <text class="bullet-item">• 您撤回同意</text>
+          <text class="bullet-item">• 信息被违法处理</text>
+        </view>
+        
+        <text class="section-subtitle">5.4 限制处理权</text>
+        <text class="section-content">在特定情况下，您可要求限制处理您的信息。</text>
+        
+        <text class="section-subtitle">5.5 数据可携带权</text>
+        <text class="section-content">您有权获取您的个人信息副本。</text>
+        
+        <text class="section-subtitle">5.6 撤回同意权</text>
+        <text class="section-content">您可以随时撤回之前的授权同意。</text>
+        
+        <text class="section-subtitle">5.7 注销账号权</text>
+        <text class="section-content">您可以申请注销账号，我们将删除或匿名化您的信息。</text>
+      </view>
+
+      <view class="section">
+        <text class="section-title">六、未成年人保护</text>
+        
+        <text class="section-content">我们非常重视未成年人的个人信息保护：</text>
+        <view class="bullet-list">
+          <text class="bullet-item">• 未满18周岁的用户需在监护人指导下使用</text>
+          <text class="bullet-item">• 我们不会主动收集未成年人的个人信息</text>
+          <text class="bullet-item">• 如发现误收集未成年人信息，将立即删除</text>
+        </view>
+      </view>
+
+      <view class="section">
+        <text class="section-title">七、Cookie和类似技术</text>
+        
+        <text class="section-content">我们使用Cookie和类似技术来：</text>
+        <view class="bullet-list">
+          <text class="bullet-item">• 保存您的偏好设置</text>
+          <text class="bullet-item">• 识别您的设备</text>
+          <text class="bullet-item">• 分析服务使用情况</text>
+          <text class="bullet-item">• 提供个性化内容</text>
+        </view>
+        
+        <text class="section-content">您可以通过浏览器设置管理Cookie，但这可能影响服务使用。</text>
+      </view>
+
+      <view class="section">
+        <text class="section-title">八、第三方服务</text>
+        
+        <text class="section-content">我们的服务可能包含第三方链接或服务：</text>
+        <view class="bullet-list">
+          <text class="bullet-item">• 第三方服务有独立的隐私政策</text>
+          <text class="bullet-item">• 我们不对第三方的隐私实践负责</text>
+          <text class="bullet-item">• 请仔细阅读第三方的隐私政策</text>
+        </view>
+      </view>
+
+      <view class="section">
+        <text class="section-title">九、隐私政策的更新</text>
+        
+        <text class="section-content">我们可能适时更新本隐私政策：</text>
+        <view class="bullet-list">
+          <text class="bullet-item">• 更新时会在平台公告</text>
+          <text class="bullet-item">• 重大变更会单独征得您的同意</text>
+          <text class="bullet-item">• 请定期查看最新版本</text>
+        </view>
+      </view>
+
+      <view class="section">
+        <text class="section-title">十、联系我们</text>
+        
+        <text class="section-content">如您对本隐私政策有任何疑问，可通过以下方式联系我们：</text>
+        <view class="bullet-list">
+          <text class="bullet-item">• 邮箱：privacy@xiaoshow.com</text>
+          <text class="bullet-item">• 客服：应用内"反馈"功能</text>
+          <text class="bullet-item">• 地址：杭州市萧山区XXX号</text>
+        </view>
+        
+        <text class="section-content">我们将在15个工作日内回复您的请求。</text>
+      </view>
+
+      <view class="section important">
+        <text class="section-title">特别提示</text>
+        <text class="section-content important">请您仔细阅读本隐私政策，确保充分理解并同意后再使用我们的服务。如您不同意本政策，请停止使用学校秀服务。</text>
+      </view>
+
+      <view class="footer">
+        <text class="company">杭州萧山敩敩秀网络科技服务部</text>
+        <text class="copyright">版权所有 © 2024 学校秀</text>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- Continue Button -->
+  <view class="button-section">
+    <button 
+      class="continue-button" 
+      bindtap="onContinue"
+    >
+      {{messages.continueButton}}
+    </button>
+  </view>
+</view>

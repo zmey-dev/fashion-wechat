@@ -807,5 +807,19 @@ Page({
     wx.redirectTo({
       url: "/pages/login/login"
     });
+  },
+
+  // Navigate to terms page
+  goToTerms: function() {
+    wx.navigateTo({
+      url: "/pages/terms/terms"
+    });
+  },
+
+  // Navigate to privacy page
+  goToPrivacy: function() {
+    wx.navigateTo({
+      url: "/pages/privacy/privacy"
+    });
   }
 });

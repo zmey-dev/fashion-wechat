@@ -437,3 +437,29 @@
 .input-group .phone-wrapper.error {
   border-color: #ff6b6b;
 }
+
+/* Terms Agreement Styles */
+.terms-agreement {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20rpx;
+  padding-bottom: 20rpx;
+  font-size: 24rpx;
+}
+
+.agreement-prefix,
+.agreement-and {
+  color: #999;
+}
+
+.agreement-link {
+  color: #007AFF;
+  margin: 0 4rpx;
+  text-decoration: none;
+}
+
+.agreement-link:active {
+  opacity: 0.7;
+}
