@@ -308,9 +308,9 @@
           上一步
         </button>
         <button 
-          class="nav-btn submit-btn {{isLoading ? 'loading' : ''}}" 
+          class="nav-btn submit-btn {{isLoading ? 'loading' : ''}} {{!termsAgreed ? 'disabled' : ''}}" 
           bindtap="handleSubmit"
-          disabled="{{isLoading}}"
+          disabled="{{isLoading || !termsAgreed}}"
         >
           <text wx:if="{{isLoading}}">注册中...</text>
           <text wx:else>完成注册</text>
@@ -325,11 +325,18 @@
     <text class="login-btn" bindtap="goToLogin">立即登录</text>
   </view>
 
-  <!-- Terms Agreement Text -->
+  <!-- Terms Agreement Checkbox -->
   <view class="terms-agreement">
-    <text class="agreement-prefix">注册即代表同意</text>
-    <text class="agreement-link" bindtap="goToTerms">《用户协议》</text>
-    <text class="agreement-and">和</text>
-    <text class="agreement-link" bindtap="goToPrivacy">《隐私政策》</text>
+    <checkbox-group bindchange="onAgreeChange">
+      <label class="agreement-label">
+        <checkbox value="agree" checked="{{termsAgreed}}" color="#667eea" />
+        <text class="agreement-text">
+          <text class="agreement-prefix">注册即代表同意</text>
+          <text class="agreement-link" bindtap="goToTerms">《用户协议》</text>
+          <text class="agreement-and">和</text>
+          <text class="agreement-link" bindtap="goToPrivacy">《隐私政策》</text>
+        </text>
+      </label>
+    </checkbox-group>
   </view>
 </view>

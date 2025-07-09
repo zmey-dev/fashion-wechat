@@ -115,9 +115,9 @@
     <!-- Login Button -->
     <view class="login-button-wrapper">
       <button
-        class="login-btn {{loading ? 'loading' : ''}}"
+        class="login-btn {{loading ? 'loading' : ''}} {{!termsAgreed ? 'disabled' : ''}}"
         bindtap="handleLogin"
-        disabled="{{loading}}"
+        disabled="{{loading || !termsAgreed}}"
       >
         <span wx:if="{{!loading}}">
           {{loginType === 'wechat' ? '微信登录' : messages.buttons.login}}
@@ -134,12 +134,19 @@
       </view>
     </view>
 
-    <!-- Terms Agreement Text -->
+    <!-- Terms Agreement Checkbox -->
     <view class="terms-agreement">
-      <text class="agreement-prefix">登录或注册即代表同意</text>
-      <text class="agreement-link" bindtap="goToTerms">《用户协议》</text>
-      <text class="agreement-and">和</text>
-      <text class="agreement-link" bindtap="goToPrivacy">《隐私政策》</text>
+      <checkbox-group bindchange="onAgreeChange">
+        <label class="agreement-label">
+          <checkbox value="agree" checked="{{termsAgreed}}" color="#007AFF" />
+          <text class="agreement-text">
+            <text class="agreement-prefix">登录或注册即代表同意</text>
+            <text class="agreement-link" bindtap="goToTerms">《用户协议》</text>
+            <text class="agreement-and">和</text>
+            <text class="agreement-link" bindtap="goToPrivacy">《隐私政策》</text>
+          </text>
+        </label>
+      </checkbox-group>
     </view>
   </view>
 </view>

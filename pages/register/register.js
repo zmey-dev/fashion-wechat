@@ -7,6 +7,7 @@ Page({
     totalSteps: 3,
     isLoading: false,
     errors: {},
+    termsAgreed: false,
     
     // Universities data
     universities: [],
@@ -583,6 +584,16 @@ Page({
   },
   // Handle form submission
   handleSubmit: function() {
+    // Check if terms are agreed
+    if (!this.data.termsAgreed) {
+      wx.showToast({
+        title: "请先同意用户协议和隐私政策",
+        icon: "none",
+        duration: 2000
+      });
+      return;
+    }
+
     if (!this.validateForm()) {
       return;
     }
@@ -812,7 +823,7 @@ Page({
   // Navigate to terms page
   goToTerms: function() {
     wx.navigateTo({
-      url: "/pages/terms/terms"
+      url: "/pages/service-agreement/service-agreement"
     });
   },
 
@@ -820,6 +831,13 @@ Page({
   goToPrivacy: function() {
     wx.navigateTo({
       url: "/pages/privacy/privacy"
+    });
+  },
+
+  // Handle agreement checkbox change
+  onAgreeChange: function(e) {
+    this.setData({
+      termsAgreed: e.detail.value.length > 0
     });
   }
 });

@@ -10,6 +10,7 @@ Component({
     showPassword: false,
     countdown: 0,
     loading: false,
+    termsAgreed: false,
     emailError: "",
     phoneError: "",
     passwordError: "",
@@ -74,7 +75,7 @@ Component({
 
     goToTerms() {
       wx.navigateTo({
-        url: "/pages/terms/terms",
+        url: "/pages/service-agreement/service-agreement",
       });
     },
 
@@ -85,6 +86,12 @@ Component({
     },
 
     preventClose(e) {},
+
+    onAgreeChange(e) {
+      this.setData({
+        termsAgreed: e.detail.value.length > 0
+      });
+    },
 
     switchLoginType(e) {
       const type = e.currentTarget.dataset.type;
@@ -403,7 +410,17 @@ Component({
 
     // Handle login
     handleLogin() {
-      const { loginType } = this.data;
+      const { loginType, termsAgreed } = this.data;
+
+      // Check if terms are agreed
+      if (!termsAgreed) {
+        wx.showToast({
+          title: "请先同意用户协议和隐私政策",
+          icon: "none",
+          duration: 2000
+        });
+        return;
+      }
 
       switch (loginType) {
         case "wechat":

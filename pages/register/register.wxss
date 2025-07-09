@@ -474,12 +474,23 @@
 
 /* Terms Agreement Styles */
 .terms-agreement {
+  padding: 20rpx 30rpx 30rpx;
+}
+
+.agreement-label {
   display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  padding: 20rpx 0 30rpx;
+  align-items: flex-start;
   font-size: 24rpx;
+}
+
+.agreement-label checkbox {
+  margin-right: 8rpx;
+  margin-top: 2rpx;
+}
+
+.agreement-text {
+  flex: 1;
+  line-height: 1.4;
 }
 
 .agreement-prefix,
@@ -496,6 +507,13 @@
 
 .agreement-link:active {
   opacity: 0.7;
+}
+
+/* Disabled button style */
+.nav-btn.disabled {
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%) !important;
+  color: rgba(255, 255, 255, 0.5) !important;
+  cursor: not-allowed;
 }
 
 /* Responsive Design */
