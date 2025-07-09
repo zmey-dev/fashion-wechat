@@ -139,14 +139,14 @@
       <checkbox-group bindchange="onAgreeChange">
         <label class="agreement-label">
           <checkbox value="agree" checked="{{termsAgreed}}" color="#007AFF" />
-          <text class="agreement-text">
-            <text class="agreement-prefix">登录或注册即代表同意</text>
-            <text class="agreement-link" bindtap="goToTerms">《用户协议》</text>
-            <text class="agreement-and">和</text>
-            <text class="agreement-link" bindtap="goToPrivacy">《隐私政策》</text>
-          </text>
         </label>
       </checkbox-group>
+      <div class="agreement-text">
+        <text class="agreement-prefix">登录或注册即代表同意</text>
+        <div class="agreement-link" bindtap="goToTerms">《用户协议》</div>
+        <text class="agreement-and">和</text>
+        <div class="agreement-link" bindtap="goToPrivacy">《隐私政策》</div>
+      </div>
     </view>
   </view>
 </view>

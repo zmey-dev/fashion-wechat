@@ -442,6 +442,7 @@
 .terms-agreement {
   margin-top: 20rpx;
   padding: 0 20rpx 20rpx;
+  display: flex;
 }
 
 .agreement-label {
