@@ -1,14 +1,9 @@
 Page({
   data: {
-    agreed: false,
-    showTerms: true,
     // Chinese messages for UI text
     messages: {
-      title: "学校秀用户服务协议",
-      agreeText: "我已阅读并同意《用户服务协议》",
-      continueButton: "同意并继续",
-      disagreeCancelButton: "不同意",
-      mustAgreeError: "请先阅读并同意用户服务协议",
+      title: "用户协议",
+      continueButton: "我已了解",
       loadingText: "加载中...",
     },
   },
@@ -19,32 +14,24 @@ Page({
     this.setData({ fromPage: from || 'login' });
   },
 
-  // Handle agreement checkbox change
-  onAgreeChange: function (e) {
-    this.setData({
-      agreed: e.detail.value.length > 0,
-    });
-  },
-
   // Handle continue button tap
   onContinue: function () {
-    if (!this.data.agreed) {
-      wx.showToast({
-        title: this.data.messages.mustAgreeError,
-        icon: "none",
-        duration: 2000,
-      });
-      return;
-    }
-
-    // Navigate to register page with from parameter if applicable
-    const fromParam = this.data.fromPage ? `?from=${this.data.fromPage}` : '';
-    wx.navigateTo({
-      url: `/pages/register/register${fromParam}`
-    });
+    // Navigate back to previous page
+    wx.navigateBack();
   },
 
-  // Handle disagree/cancel button tap
+  // Handle scroll event
+  onScroll: function(e) {
+    // Track scroll position if needed
+  },
+
+  // Handle scroll to bottom
+  onScrollToLower: function() {
+    // Mark as read when user scrolls to bottom
+    this.setData({ hasReadToBottom: true });
+  },
+
+  // Handle disagree/cancel button tap (keeping for compatibility)
   onCancel: function () {
     wx.showModal({
       title: "提示",

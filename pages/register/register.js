@@ -823,7 +823,7 @@ Page({
   // Navigate to terms page
   goToTerms: function() {
     wx.navigateTo({
-      url: "/pages/service-agreement/service-agreement"
+      url: "/pages/terms/terms"
     });
   },
 

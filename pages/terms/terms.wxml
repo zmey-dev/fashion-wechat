@@ -156,74 +156,62 @@
       </view>
 
       <view class="section">
-        <text class="section-title">8. 隐私保护</text>
-        <text class="section-subtitle">8.1 信息收集</text>
-        <text class="section-content">我们仅收集必要的用户信息，用于提供服务和身份验证。</text>
-        
-        <text class="section-subtitle">8.2 信息安全</text>
-        <text class="section-content">我们采用安全技术措施保护您的个人信息，不会向第三方泄露。</text>
-        
-        <text class="section-subtitle">8.3 信息使用</text>
-        <text class="section-content">个人信息仅用于平台服务，不用于商业推广。</text>
-      </view>
-
-      <view class="section">
-        <text class="section-title">9. 知识产权</text>
-        <text class="section-subtitle">9.1 平台权益</text>
+        <text class="section-title">8. 知识产权</text>
+        <text class="section-subtitle">8.1 平台权益</text>
         <text class="section-content">学校秀的软件、界面设计等知识产权归我们所有。</text>
         
-        <text class="section-subtitle">9.2 用户内容授权</text>
+        <text class="section-subtitle">8.2 用户内容授权</text>
         <text class="section-content">您发布的内容，授权我们在平台范围内使用、展示和推广，但不会用于商业目的。</text>
         
-        <text class="section-subtitle">9.3 原创保护</text>
+        <text class="section-subtitle">8.3 原创保护</text>
         <text class="section-content">我们尊重用户的原创权益，鼓励原创内容。</text>
       </view>
 
       <view class="section">
-        <text class="section-title">10. 未成年人保护</text>
-        <text class="section-subtitle">10.1 监护人责任</text>
+        <text class="section-title">9. 未成年人保护</text>
+        <text class="section-subtitle">9.1 监护人责任</text>
         <text class="section-content">未成年用户需在监护人同意下使用，监护人应履行监督义务。</text>
         
-        <text class="section-subtitle">10.2 内容保护</text>
+        <text class="section-subtitle">9.2 内容保护</text>
         <text class="section-content">我们将严格审核涉及未成年人的内容，保护未成年人权益。</text>
       </view>
 
       <view class="section">
-        <text class="section-title">11. 免责声明</text>
-        <text class="section-subtitle">11.1 服务现状</text>
+        <text class="section-title">10. 免责声明</text>
+        <text class="section-subtitle">10.1 服务现状</text>
         <text class="section-content">我们按现有技术条件提供服务，不保证服务完全无误或不中断。</text>
         
-        <text class="section-subtitle">11.2 不可抗力</text>
+        <text class="section-subtitle">10.2 不可抗力</text>
         <text class="section-content">因自然灾害、政府行为、网络故障等不可控因素导致的服务中断，我们不承担责任。</text>
         
-        <text class="section-subtitle">11.3 用户责任</text>
+        <text class="section-subtitle">10.3 用户责任</text>
         <text class="section-content">用户应为自己的行为承担责任，因违规行为造成的损失由用户自负。</text>
       </view>
 
       <view class="section">
-        <text class="section-title">12. 服务变更</text>
-        <text class="section-subtitle">12.1 功能更新</text>
+        <text class="section-title">11. 服务变更</text>
+        <text class="section-subtitle">11.1 功能更新</text>
         <text class="section-content">我们可能会更新或调整平台功能，以提供更好的服务体验。</text>
         
-        <text class="section-subtitle">12.2 协议修改</text>
+        <text class="section-subtitle">11.2 协议修改</text>
         <text class="section-content">我们有权修改本协议，修改后将在平台内公告，继续使用即视为同意修改后的协议。</text>
       </view>
 
       <view class="section">
-        <text class="section-title">13. 争议解决</text>
-        <text class="section-subtitle">13.1 适用法律</text>
+        <text class="section-title">12. 争议解决</text>
+        <text class="section-subtitle">12.1 适用法律</text>
         <text class="section-content">本协议适用中华人民共和国法律。</text>
         
-        <text class="section-subtitle">13.2 争议处理</text>
+        <text class="section-subtitle">12.2 争议处理</text>
         <text class="section-content">发生争议时，双方应友好协商解决；协商不成的，提交有管辖权的人民法院处理。</text>
       </view>
 
       <view class="section">
-        <text class="section-title">14. 其他条款</text>
-        <text class="section-subtitle">14.1 协议效力</text>
+        <text class="section-title">13. 其他条款</text>
+        <text class="section-subtitle">13.1 协议效力</text>
         <text class="section-content">本协议自您开始使用学校秀时生效。</text>
         
-        <text class="section-subtitle">14.2 完整协议</text>
+        <text class="section-subtitle">13.2 完整协议</text>
         <text class="section-content">本协议构成双方就学校秀使用事宜的完整约定。</text>
       </view>
 
@@ -340,38 +328,20 @@
       </view>
 
       <view class="section douyin-style">
-        <text class="section-title">六、隐私保护承诺</text>
-        <text class="section-subtitle">6.1 隐私重视声明</text>
-        <text class="section-content">学校秀重视用户隐私保护，您的个人信息将按照学校秀隐私政策进行处理。</text>
-        
-        <text class="section-subtitle">6.2 信息保护承诺</text>
-        <text class="section-content">学校秀承诺不会向第三方出售、出租或以其他方式透露您的个人信息，除非：</text>
-        <view class="bullet-list">
-          <text class="bullet-item">• 获得您的明确同意</text>
-          <text class="bullet-item">• 法律法规要求</text>
-          <text class="bullet-item">• 司法或行政部门要求</text>
-          <text class="bullet-item">• 为维护学校秀合法权益</text>
-        </view>
-        
-        <text class="section-subtitle">6.3 技术信息收集</text>
-        <text class="section-content">您理解并同意，为提供更好的服务，学校秀可能会收集您的设备信息、日志信息等技术信息。</text>
-      </view>
-
-      <view class="section douyin-style">
-        <text class="section-title">七、知识产权详细规定</text>
-        <text class="section-subtitle">7.1 平台知识产权</text>
+        <text class="section-title">六、知识产权详细规定</text>
+        <text class="section-subtitle">6.1 平台知识产权</text>
         <text class="section-content">学校秀在本服务中提供的内容（包括但不限于网页、文字、图片、音频、视频、图表等）的知识产权均归学校秀所有。</text>
         
-        <text class="section-subtitle">7.2 使用限制</text>
+        <text class="section-subtitle">6.2 使用限制</text>
         <text class="section-content">除非相关法律有明确规定，未经学校秀书面同意，您不得对上述内容进行任何形式的使用、复制、修改、发布、传播等。</text>
         
-        <text class="section-subtitle">7.3 用户内容权利</text>
+        <text class="section-subtitle">6.3 用户内容权利</text>
         <text class="section-content">您在使用学校秀服务过程中产生的内容，相关知识产权归您所有，但您使用他人知识产权的，应当取得权利人许可。</text>
       </view>
 
       <view class="section douyin-style">
-        <text class="section-title">八、免责声明详细条款</text>
-        <text class="section-subtitle important">8.1 服务中断免责</text>
+        <text class="section-title">七、免责声明详细条款</text>
+        <text class="section-subtitle important">7.1 服务中断免责</text>
         <text class="section-content important">您理解并同意，学校秀服务可能因以下原因而中断或终止：</text>
         <view class="bullet-list">
           <text class="bullet-item important">• 系统维护或升级</text>
@@ -380,16 +350,16 @@
           <text class="bullet-item important">• 其他非学校秀原因</text>
         </view>
         
-        <text class="section-subtitle important">8.2 服务质量免责</text>
+        <text class="section-subtitle important">7.2 服务质量免责</text>
         <text class="section-content important">学校秀不保证服务一定能满足您的要求，也不保证服务不会中断。</text>
         
-        <text class="section-subtitle important">8.3 风险承担</text>
+        <text class="section-subtitle important">7.3 风险承担</text>
         <text class="section-content important">您理解并同意，使用学校秀服务存在风险，您应自行承担风险。</text>
       </view>
 
       <view class="section douyin-style">
-        <text class="section-title">九、违约处理详细规定</text>
-        <text class="section-subtitle">9.1 违约处理措施</text>
+        <text class="section-title">八、违约处理详细规定</text>
+        <text class="section-subtitle">8.1 违约处理措施</text>
         <text class="section-content">如您违反本协议规定，学校秀有权采取以下措施：</text>
         <view class="bullet-list">
           <text class="bullet-item">• 要求您立即停止违约行为</text>
@@ -398,34 +368,34 @@
           <text class="bullet-item">• 限制或禁止您使用学校秀服务</text>
         </view>
         
-        <text class="section-subtitle">9.2 赔偿责任</text>
+        <text class="section-subtitle">8.2 赔偿责任</text>
         <text class="section-content">因您违约给学校秀造成损失的，您应承担赔偿责任。</text>
       </view>
 
       <view class="section douyin-style">
-        <text class="section-title">十、其他重要规定</text>
-        <text class="section-subtitle">10.1 适用法律</text>
+        <text class="section-title">九、其他重要规定</text>
+        <text class="section-subtitle">9.1 适用法律</text>
         <text class="section-content">本协议的订立、执行和解释及争议的解决均应适用中华人民共和国法律。</text>
         
-        <text class="section-subtitle">10.2 争议解决</text>
+        <text class="section-subtitle">9.2 争议解决</text>
         <text class="section-content">如双方就本协议内容或其执行发生争议，双方应努力友好协商解决。</text>
         
-        <text class="section-subtitle">10.3 协议完整性</text>
+        <text class="section-subtitle">9.3 协议完整性</text>
         <text class="section-content">本协议构成双方对本协议之约定事项及其他有关事宜的完整协议。</text>
         
-        <text class="section-subtitle">10.4 条款有效性</text>
+        <text class="section-subtitle">9.4 条款有效性</text>
         <text class="section-content">本协议的任何条款无论因何种原因完全或部分无效或不具有执行力，本协议的其余条款仍应有效并且有约束力。</text>
       </view>
 
       <view class="section douyin-style">
-        <text class="section-title">十一、协议修改权利</text>
-        <text class="section-subtitle">11.1 修改权利</text>
+        <text class="section-title">十、协议修改权利</text>
+        <text class="section-subtitle">10.1 修改权利</text>
         <text class="section-content">学校秀有权在必要时修改本协议条款。</text>
         
-        <text class="section-subtitle">11.2 修改通知</text>
+        <text class="section-subtitle">10.2 修改通知</text>
         <text class="section-content">协议条款一旦发生变动，将在相关页面上提示修改内容。</text>
         
-        <text class="section-subtitle">11.3 接受修改</text>
+        <text class="section-subtitle">10.3 接受修改</text>
         <text class="section-content">如果您不同意修改的内容，您可以主动取消获得的服务。如果您继续使用学校秀服务，则视为您接受协议条款的修改。</text>
       </view>
 
@@ -439,33 +409,13 @@
     </view>
   </scroll-view>
 
-  <!-- Agreement Section -->
-  <view class="agreement-section">
-    <view class="agreement-checkbox">
-      <checkbox-group bindchange="onAgreeChange">
-        <label class="checkbox-label">
-          <checkbox value="agree" checked="{{agreed}}" color="#007AFF" />
-          <text class="agreement-text">{{messages.agreeText}}</text>
-        </label>
-      </checkbox-group>
-    </view>
-
-    <!-- Action Buttons -->
-    <view class="action-buttons">
-      <button 
-        class="cancel-button" 
-        bindtap="onCancel"
-      >
-        {{messages.disagreeCancelButton}}
-      </button>
-      
-      <button 
-        class="continue-button {{agreed ? 'enabled' : 'disabled'}}" 
-        bindtap="onContinue"
-        disabled="{{!agreed}}"
-      >
-        {{messages.continueButton}}
-      </button>
-    </view>
+  <!-- Continue Button -->
+  <view class="button-section">
+    <button 
+      class="continue-button" 
+      bindtap="onContinue"
+    >
+      {{messages.continueButton}}
+    </button>
   </view>
 </view>

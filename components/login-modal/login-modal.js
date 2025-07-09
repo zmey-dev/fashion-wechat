@@ -67,15 +67,27 @@ Component({
     },
 
     goToRegister() {
+      const { termsAgreed } = this.data;
+      
+      // Check if terms are agreed
+      if (!termsAgreed) {
+        wx.showToast({
+          title: "请先同意用户协议和隐私政策",
+          icon: "none",
+          duration: 2000
+        });
+        return;
+      }
+      
       this.closeModal();
       wx.navigateTo({
-        url: "/pages/terms/terms",
+        url: "/pages/register/register",
       });
     },
 
     goToTerms() {
       wx.navigateTo({
-        url: "/pages/service-agreement/service-agreement",
+        url: "/pages/terms/terms",
       });
     },
 
