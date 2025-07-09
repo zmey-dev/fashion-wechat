@@ -1,4 +1,5 @@
-{  "pages": [
+{
+  "pages": [
     "pages/index/index",
     "pages/recommend/recommend",
     "pages/follow/follow",
@@ -14,6 +15,7 @@
     "pages/user-profile/user-profile",
     "pages/profile/profile",
     "pages/terms/terms",
+    "pages/privacy/privacy",
     "pages/register/register",
     "pages/event-detail/event-detail",
     "pages/event-create/event-create"
