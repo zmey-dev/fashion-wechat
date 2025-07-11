@@ -231,7 +231,11 @@ Page({
 
     wx.request({
       url: `${config.BACKEND_URL}/post/get_posts_discover`,
-      method: "GET",
+      method: "POST",
+      header: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${app.globalData.userInfo?.token}`,
+      },
       data: requestData,
       success: (res) => {
         if (res.statusCode === 200 && res.data.status === "success") {

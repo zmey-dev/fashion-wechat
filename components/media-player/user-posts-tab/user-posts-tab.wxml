@@ -12,7 +12,7 @@
     </view>
   </view>
 
-  <scroll-view class="posts-grid" scroll-y="{{ true }}">
+  <view class="posts-grid" scroll-y="{{ true }}">
     <view class="posts-container">
       <view
         wx:for="{{ currentPostUser.posts || [] }}"
@@ -42,5 +42,5 @@
     <view wx:if="{{ !currentPostUser.posts || currentPostUser.posts.length === 0 }}" class="empty-posts">
       <text>暂无帖子</text>
     </view>
-  </scroll-view>
+  </view>
 </view>
