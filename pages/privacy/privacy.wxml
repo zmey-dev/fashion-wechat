@@ -12,12 +12,12 @@
     bindscrolltolower="onScrollToLower"
   >
     <view class="privacy-text">
-      <text class="welcome">学校秀隐私政策</text>
+      <text class="welcome">绍兴仁抱信息技术有限公司隐私政策</text>
       
       <text class="update-date">更新日期：2024年1月1日</text>
       <text class="effective-date">生效日期：2024年1月1日</text>
       
-      <text class="intro">学校秀（以下简称"我们"）非常重视用户的隐私和个人信息保护。本隐私政策将详细说明我们如何收集、使用、存储和保护您的个人信息。</text>
+      <text class="intro">绍兴仁抱信息技术有限公司（以下简称"我们"）非常重视用户的隐私和个人信息保护。本隐私政策将详细说明我们如何收集、使用、存储和保护您的个人信息。</text>
 
       <view class="section">
         <text class="section-title">一、我们如何收集您的个人信息</text>
@@ -86,7 +86,7 @@
         <text class="section-title">三、我们如何共享您的个人信息</text>
         
         <text class="section-subtitle">3.1 公开展示</text>
-        <text class="section-content">您在学校秀上发布的内容（如动态、评论等）将公开展示。请谨慎决定发布的内容。</text>
+        <text class="section-content">您在绍兴仁抱信息技术有限公司上发布的内容（如动态、评论等）将公开展示。请谨慎决定发布的内容。</text>
         
         <text class="section-subtitle">3.2 征得同意的共享</text>
         <text class="section-content">除以下情形外，未经您同意，我们不会与第三方共享您的个人信息：</text>
@@ -231,12 +231,12 @@
 
       <view class="section important">
         <text class="section-title">特别提示</text>
-        <text class="section-content important">请您仔细阅读本隐私政策，确保充分理解并同意后再使用我们的服务。如您不同意本政策，请停止使用学校秀服务。</text>
+        <text class="section-content important">请您仔细阅读本隐私政策，确保充分理解并同意后再使用我们的服务。如您不同意本政策，请停止使用绍兴仁抱信息技术有限公司服务。</text>
       </view>
 
       <view class="footer">
         <text class="company">绍兴仁抱信息技术有限公司</text>
-        <text class="copyright">版权所有 © 2024 学校秀</text>
+        <text class="copyright">版权所有 © 2024 绍兴仁抱信息技术有限公司</text>
       </view>
     </view>
   </scroll-view>

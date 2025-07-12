@@ -12,17 +12,17 @@
     bindscrolltolower="onScrollToLower"
   >
     <view class="terms-text">
-      <text class="welcome">欢迎使用学校秀！</text>
+      <text class="welcome">欢迎使用绍兴仁抱信息技术有限公司！</text>
       
-      <text class="intro">"学校秀"是绍兴仁抱信息技术有限公司。"学校秀"是专为大学生打造的校园社交分享平台，我们为用户提供视频分享、图片发布、校园动态、学习交流等服务。</text>
+      <text class="intro">"绍兴仁抱信息技术有限公司"是绍兴仁抱信息技术有限公司。"绍兴仁抱信息技术有限公司"是专为大学生打造的校园社交分享平台，我们为用户提供视频分享、图片发布、校园动态、学习交流等服务。</text>
 
       <view class="section">
         <text class="section-title">1. 导言</text>
         <text class="section-subtitle">1.1 协议说明</text>
-        <text class="section-content">本协议是我们与您就使用学校秀平台相关事宜的约定。请您在使用前仔细阅读本协议，特别是加粗标注的重要条款。如您未满18周岁，请在监护人陪同下阅读并征得同意后使用。</text>
+        <text class="section-content">本协议是我们与您就使用绍兴仁抱信息技术有限公司平台相关事宜的约定。请您在使用前仔细阅读本协议，特别是加粗标注的重要条款。如您未满18周岁，请在监护人陪同下阅读并征得同意后使用。</text>
         
         <text class="section-subtitle">1.2 协议接受</text>
-        <text class="section-content">当您注册、登录或使用学校秀时，即表示您已阅读并同意本协议。如不同意，请停止使用我们的服务。</text>
+        <text class="section-content">当您注册、登录或使用绍兴仁抱信息技术有限公司时，即表示您已阅读并同意本协议。如不同意，请停止使用我们的服务。</text>
         
         <text class="section-subtitle">1.3 联系方式</text>
         <text class="section-content">如有疑问，请通过平台内反馈功能或邮件联系我们：support@xiaoshow.com</text>
@@ -31,7 +31,7 @@
       <view class="section">
         <text class="section-title">2. 平台服务</text>
         <text class="section-subtitle">2.1 服务内容</text>
-        <text class="section-content">学校秀为大学生提供：</text>
+        <text class="section-content">绍兴仁抱信息技术有限公司为大学生提供：</text>
         <view class="bullet-list">
           <text class="bullet-item">• 校园生活视频、图片分享</text>
           <text class="bullet-item">• 学习资料交流</text>
@@ -48,7 +48,7 @@
         </view>
         
         <text class="section-subtitle">2.3 使用许可</text>
-        <text class="section-content">我们授予您个人、非商业使用学校秀的权利。禁止商业使用、复制、传播或其他未授权行为。</text>
+        <text class="section-content">我们授予您个人、非商业使用绍兴仁抱信息技术有限公司的权利。禁止商业使用、复制、传播或其他未授权行为。</text>
       </view>
 
       <view class="section">
@@ -158,7 +158,7 @@
       <view class="section">
         <text class="section-title">8. 知识产权</text>
         <text class="section-subtitle">8.1 平台权益</text>
-        <text class="section-content">学校秀的软件、界面设计等知识产权归我们所有。</text>
+        <text class="section-content">绍兴仁抱信息技术有限公司的软件、界面设计等知识产权归我们所有。</text>
         
         <text class="section-subtitle">8.2 用户内容授权</text>
         <text class="section-content">您发布的内容，授权我们在平台范围内使用、展示和推广，但不会用于商业目的。</text>
@@ -209,35 +209,35 @@
       <view class="section">
         <text class="section-title">13. 其他条款</text>
         <text class="section-subtitle">13.1 协议效力</text>
-        <text class="section-content">本协议自您开始使用学校秀时生效。</text>
+        <text class="section-content">本协议自您开始使用绍兴仁抱信息技术有限公司时生效。</text>
         
         <text class="section-subtitle">13.2 完整协议</text>
-        <text class="section-content">本协议构成双方就学校秀使用事宜的完整约定。</text>
+        <text class="section-content">本协议构成双方就绍兴仁抱信息技术有限公司使用事宜的完整约定。</text>
       </view>
 
       <!-- 新增 Douyin 风格详细条款 -->
       <view class="section douyin-style">
         <text class="section-title important">补充条款 - 详细服务规范</text>
         <text class="section-subtitle important">【特别提示】</text>
-        <text class="section-content important">学校秀提醒您：在使用学校秀服务前，请您务必仔细阅读并透彻理解本协议内容，特别是限制或免除责任的条款。限制、免除责任的条款可能以粗体或下划线形式提示您注意。</text>
+        <text class="section-content important">绍兴仁抱信息技术有限公司提醒您：在使用绍兴仁抱信息技术有限公司服务前，请您务必仔细阅读并透彻理解本协议内容，特别是限制或免除责任的条款。限制、免除责任的条款可能以粗体或下划线形式提示您注意。</text>
       </view>
 
       <view class="section douyin-style">
         <text class="section-title">一、服务协议的确认和接纳</text>
         <text class="section-subtitle">1.1 服务所有权</text>
-        <text class="section-content">学校秀的各项服务的所有权和运营权归学校秀所有。</text>
+        <text class="section-content">绍兴仁抱信息技术有限公司的各项服务的所有权和运营权归绍兴仁抱信息技术有限公司所有。</text>
         
         <text class="section-subtitle">1.2 协议接受确认</text>
-        <text class="section-content">您通过网络页面点击确认或以其他方式选择接受本协议，即表示您与学校秀已达成协议并同意接受本协议的全部约定内容。</text>
+        <text class="section-content">您通过网络页面点击确认或以其他方式选择接受本协议，即表示您与绍兴仁抱信息技术有限公司已达成协议并同意接受本协议的全部约定内容。</text>
         
         <text class="section-subtitle">1.3 理解确认</text>
-        <text class="section-content">如果您不同意本协议的任意内容，或者无法准确理解学校秀对条款的解释，请不要进行后续操作。</text>
+        <text class="section-content">如果您不同意本协议的任意内容，或者无法准确理解绍兴仁抱信息技术有限公司对条款的解释，请不要进行后续操作。</text>
       </view>
 
       <view class="section douyin-style">
         <text class="section-title">二、具体服务内容</text>
         <text class="section-subtitle">2.1 核心服务功能</text>
-        <text class="section-content">学校秀的具体服务内容由学校秀根据实际情况提供，包括但不限于：</text>
+        <text class="section-content">绍兴仁抱信息技术有限公司的具体服务内容由绍兴仁抱信息技术有限公司根据实际情况提供，包括但不限于：</text>
         <view class="bullet-list">
           <text class="bullet-item">• 大学生时尚内容分享</text>
           <text class="bullet-item">• 校园生活展示</text>
@@ -250,16 +250,16 @@
         <text class="section-content">除非本协议另有其它明示规定，增加、强化、优化现有服务的任何新功能，均受到本协议的规范。</text>
         
         <text class="section-subtitle">2.3 服务变更权利</text>
-        <text class="section-content">您理解并同意，学校秀有权根据业务发展需要，对提供的服务进行变更、升级、功能强化、修改。</text>
+        <text class="section-content">您理解并同意，绍兴仁抱信息技术有限公司有权根据业务发展需要，对提供的服务进行变更、升级、功能强化、修改。</text>
       </view>
 
       <view class="section douyin-style">
         <text class="section-title">三、用户行为规范</text>
         <text class="section-subtitle important">3.1 法律合规要求</text>
-        <text class="section-content important">您在使用学校秀服务时，必须遵守中华人民共和国相关法律法规，不得利用学校秀服务进行任何违法或不当行为。</text>
+        <text class="section-content important">您在使用绍兴仁抱信息技术有限公司服务时，必须遵守中华人民共和国相关法律法规，不得利用绍兴仁抱信息技术有限公司服务进行任何违法或不当行为。</text>
         
         <text class="section-subtitle important">3.2 严禁发布内容</text>
-        <text class="section-content important">您承诺不会利用学校秀服务发送或传播：</text>
+        <text class="section-content important">您承诺不会利用绍兴仁抱信息技术有限公司服务发送或传播：</text>
         <view class="bullet-list">
           <text class="bullet-item important">• 反对宪法所确定的基本原则的</text>
           <text class="bullet-item important">• 危害国家安全，泄露国家秘密，颠覆国家政权，破坏国家统一的</text>
@@ -278,20 +278,20 @@
         </view>
         
         <text class="section-subtitle important">3.4 诚信使用要求</text>
-        <text class="section-content important">您承诺合法、真实、准确地使用学校秀服务，不得：</text>
+        <text class="section-content important">您承诺合法、真实、准确地使用绍兴仁抱信息技术有限公司服务，不得：</text>
         <view class="bullet-list">
           <text class="bullet-item important">• 冒充他人或以虚假信息骗取账号注册</text>
           <text class="bullet-item important">• 强制、诱导其他用户关注、点击链接页面或分享信息</text>
           <text class="bullet-item important">• 虚构事实、隐瞒真相以误导、欺骗他人</text>
           <text class="bullet-item important">• 利用技术手段批量建立虚假账号</text>
-          <text class="bullet-item important">• 利用学校秀账号或本服务从事任何违法犯罪活动</text>
+          <text class="bullet-item important">• 利用绍兴仁抱信息技术有限公司账号或本服务从事任何违法犯罪活动</text>
         </view>
       </view>
 
       <view class="section douyin-style">
         <text class="section-title">四、学生身份验证规定</text>
         <text class="section-subtitle">4.1 身份要求</text>
-        <text class="section-content">学校秀是专为在校大学生设计的平台，注册用户需要：</text>
+        <text class="section-content">绍兴仁抱信息技术有限公司是专为在校大学生设计的平台，注册用户需要：</text>
         <view class="bullet-list">
           <text class="bullet-item">• 提供真实有效的学生身份信息</text>
           <text class="bullet-item">• 通过学校邮箱或学生证件验证</text>
@@ -299,16 +299,16 @@
         </view>
         
         <text class="section-subtitle">4.2 身份验证权利</text>
-        <text class="section-content">学校秀有权要求您提供能够证明身份真实性的材料，如学生证、学校证明等。</text>
+        <text class="section-content">绍兴仁抱信息技术有限公司有权要求您提供能够证明身份真实性的材料，如学生证、学校证明等。</text>
         
         <text class="section-subtitle">4.3 虚假信息处理</text>
-        <text class="section-content">若发现虚假身份信息，学校秀有权立即终止提供服务。</text>
+        <text class="section-content">若发现虚假身份信息，绍兴仁抱信息技术有限公司有权立即终止提供服务。</text>
       </view>
 
       <view class="section douyin-style">
         <text class="section-title">五、内容管理细则</text>
         <text class="section-subtitle">5.1 内容权利确认</text>
-        <text class="section-content">您通过学校秀发布的内容，包括但不限于文字、图片、视频、音频等，您应确保：</text>
+        <text class="section-content">您通过绍兴仁抱信息技术有限公司发布的内容，包括但不限于文字、图片、视频、音频等，您应确保：</text>
         <view class="bullet-list">
           <text class="bullet-item">• 拥有合法的权利或已获得相关授权</text>
           <text class="bullet-item">• 不侵犯任何第三方的知识产权、人身权等合法权益</text>
@@ -316,13 +316,13 @@
         </view>
         
         <text class="section-subtitle">5.2 内容审核权利</text>
-        <text class="section-content">您理解并同意，学校秀有权对您发布的内容进行审核，并有权根据相关法律法规和本协议规定对违法违规内容进行处理。</text>
+        <text class="section-content">您理解并同意，绍兴仁抱信息技术有限公司有权对您发布的内容进行审核，并有权根据相关法律法规和本协议规定对违法违规内容进行处理。</text>
         
         <text class="section-subtitle">5.3 内容使用授权</text>
-        <text class="section-content">您同意授予学校秀对您发布内容的使用权，包括但不限于：</text>
+        <text class="section-content">您同意授予绍兴仁抱信息技术有限公司对您发布内容的使用权，包括但不限于：</text>
         <view class="bullet-list">
-          <text class="bullet-item">• 在学校秀平台上使用、修改、复制、发布、翻译、传播</text>
-          <text class="bullet-item">• 为推广学校秀服务而使用</text>
+          <text class="bullet-item">• 在绍兴仁抱信息技术有限公司平台上使用、修改、复制、发布、翻译、传播</text>
+          <text class="bullet-item">• 为推广绍兴仁抱信息技术有限公司服务而使用</text>
           <text class="bullet-item">• 根据法律法规要求向相关部门提供</text>
         </view>
       </view>
@@ -330,46 +330,46 @@
       <view class="section douyin-style">
         <text class="section-title">六、知识产权详细规定</text>
         <text class="section-subtitle">6.1 平台知识产权</text>
-        <text class="section-content">学校秀在本服务中提供的内容（包括但不限于网页、文字、图片、音频、视频、图表等）的知识产权均归学校秀所有。</text>
+        <text class="section-content">绍兴仁抱信息技术有限公司在本服务中提供的内容（包括但不限于网页、文字、图片、音频、视频、图表等）的知识产权均归绍兴仁抱信息技术有限公司所有。</text>
         
         <text class="section-subtitle">6.2 使用限制</text>
-        <text class="section-content">除非相关法律有明确规定，未经学校秀书面同意，您不得对上述内容进行任何形式的使用、复制、修改、发布、传播等。</text>
+        <text class="section-content">除非相关法律有明确规定，未经绍兴仁抱信息技术有限公司书面同意，您不得对上述内容进行任何形式的使用、复制、修改、发布、传播等。</text>
         
         <text class="section-subtitle">6.3 用户内容权利</text>
-        <text class="section-content">您在使用学校秀服务过程中产生的内容，相关知识产权归您所有，但您使用他人知识产权的，应当取得权利人许可。</text>
+        <text class="section-content">您在使用绍兴仁抱信息技术有限公司服务过程中产生的内容，相关知识产权归您所有，但您使用他人知识产权的，应当取得权利人许可。</text>
       </view>
 
       <view class="section douyin-style">
         <text class="section-title">七、免责声明详细条款</text>
         <text class="section-subtitle important">7.1 服务中断免责</text>
-        <text class="section-content important">您理解并同意，学校秀服务可能因以下原因而中断或终止：</text>
+        <text class="section-content important">您理解并同意，绍兴仁抱信息技术有限公司服务可能因以下原因而中断或终止：</text>
         <view class="bullet-list">
           <text class="bullet-item important">• 系统维护或升级</text>
           <text class="bullet-item important">• 通讯故障</text>
           <text class="bullet-item important">• 不可抗力因素</text>
-          <text class="bullet-item important">• 其他非学校秀原因</text>
+          <text class="bullet-item important">• 其他非绍兴仁抱信息技术有限公司原因</text>
         </view>
         
         <text class="section-subtitle important">7.2 服务质量免责</text>
-        <text class="section-content important">学校秀不保证服务一定能满足您的要求，也不保证服务不会中断。</text>
+        <text class="section-content important">绍兴仁抱信息技术有限公司不保证服务一定能满足您的要求，也不保证服务不会中断。</text>
         
         <text class="section-subtitle important">7.3 风险承担</text>
-        <text class="section-content important">您理解并同意，使用学校秀服务存在风险，您应自行承担风险。</text>
+        <text class="section-content important">您理解并同意，使用绍兴仁抱信息技术有限公司服务存在风险，您应自行承担风险。</text>
       </view>
 
       <view class="section douyin-style">
         <text class="section-title">八、违约处理详细规定</text>
         <text class="section-subtitle">8.1 违约处理措施</text>
-        <text class="section-content">如您违反本协议规定，学校秀有权采取以下措施：</text>
+        <text class="section-content">如您违反本协议规定，绍兴仁抱信息技术有限公司有权采取以下措施：</text>
         <view class="bullet-list">
           <text class="bullet-item">• 要求您立即停止违约行为</text>
           <text class="bullet-item">• 立即终止向您提供服务</text>
           <text class="bullet-item">• 删除违规内容</text>
-          <text class="bullet-item">• 限制或禁止您使用学校秀服务</text>
+          <text class="bullet-item">• 限制或禁止您使用绍兴仁抱信息技术有限公司服务</text>
         </view>
         
         <text class="section-subtitle">8.2 赔偿责任</text>
-        <text class="section-content">因您违约给学校秀造成损失的，您应承担赔偿责任。</text>
+        <text class="section-content">因您违约给绍兴仁抱信息技术有限公司造成损失的，您应承担赔偿责任。</text>
       </view>
 
       <view class="section douyin-style">
@@ -390,18 +390,18 @@
       <view class="section douyin-style">
         <text class="section-title">十、协议修改权利</text>
         <text class="section-subtitle">10.1 修改权利</text>
-        <text class="section-content">学校秀有权在必要时修改本协议条款。</text>
+        <text class="section-content">绍兴仁抱信息技术有限公司有权在必要时修改本协议条款。</text>
         
         <text class="section-subtitle">10.2 修改通知</text>
         <text class="section-content">协议条款一旦发生变动，将在相关页面上提示修改内容。</text>
         
         <text class="section-subtitle">10.3 接受修改</text>
-        <text class="section-content">如果您不同意修改的内容，您可以主动取消获得的服务。如果您继续使用学校秀服务，则视为您接受协议条款的修改。</text>
+        <text class="section-content">如果您不同意修改的内容，您可以主动取消获得的服务。如果您继续使用绍兴仁抱信息技术有限公司服务，则视为您接受协议条款的修改。</text>
       </view>
 
       <view class="footer">
-        <text class="team-name">学校秀团队</text>
-        <text class="copyright">本协议最终解释权归学校秀平台所有</text>
+        <text class="team-name">绍兴仁抱信息技术有限公司团队</text>
+        <text class="copyright">本协议最终解释权归绍兴仁抱信息技术有限公司平台所有</text>
         <text class="copyright">如您对本协议有任何疑问，请联系我们：support@xiaoshow.com</text>
         <text class="copyright">网站：https://xiaoshow.com</text>
         <text class="copyright">本协议自您点击同意之日起生效。</text>

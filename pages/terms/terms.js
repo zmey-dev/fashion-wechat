@@ -35,7 +35,7 @@ Page({
   onCancel: function () {
     wx.showModal({
       title: "提示",
-      content: "不同意用户服务协议将无法使用学校秀服务",
+      content: "不同意用户服务协议将无法使用绍兴仁抱信息技术有限公司服务",
       confirmText: "重新阅读",
       cancelText: "返回",
       success: (res) => {
