@@ -50,7 +50,7 @@ Component({
         type: "filter",
       },      {
         key: "contact",
-        name: "联系我们",
+        name: "学校",
         path: "/pages/contact/contact",
         type: "filter",
       },
@@ -122,7 +122,7 @@ Component({
         type: "filter",
       },      {
         key: "contact",
-        name: "联系我们",
+        name: "学校",
         path: "/pages/contact/contact",
         type: "filter",
       },

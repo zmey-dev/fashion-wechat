@@ -1,10 +1,9 @@
 <!-- components/user-posts-tab/user-posts-tab.wxml -->
 <view class="user-posts-tab" wx:if="{{ currentPostUser }}">
   <view class="user-info">
-
     <view class="user-stats">
-      <span>标题 :</span>{{ selectedPost.title || '无标题' }} ,
-      <span>内容 :</span>{{ selectedPost.content || '无内容' }}
+      <span>标题 :{{ selectedPost.title || '无标题' }} ,</span>
+      <span>内容 :{{ selectedPost.content || '无内容' }}</span>
     </view>  
     <view class="user-stats">
       <text class="stat-item">关注者: {{ displayFollowerCount }}</text>
@@ -26,15 +25,6 @@
           class="post-thumbnail"
           mode="aspectFill"
         />
-        <view wx:if="{{ item.type === 'video' }}" class="video-indicator">
-          <view class="svg-icon video-svg">
-            <image
-              src="/images/icons/play-small.svg"
-              class="svg-icon"
-              mode="aspectFit"
-            ></image>
-          </view>
-        </view>
       </view>
     </view>
     

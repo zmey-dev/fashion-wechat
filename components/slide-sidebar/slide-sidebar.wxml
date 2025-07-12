@@ -195,7 +195,7 @@
         <view class="nav-icon">
           <image src="/images/icons/support.svg" class="button-svg" alt="发现图标"></image>
         </view>
-        <text class="nav-label">联系我们</text>
+        <text class="nav-label">学校</text>
         <view class="arrow-svg">
           <view class="arrow-line"></view>
         </view>

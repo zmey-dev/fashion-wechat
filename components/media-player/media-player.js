@@ -688,7 +688,7 @@ Component({
       const { post } = e.detail;
       this.onCloseDetail();
       wx.navigateTo({
-        url: `/pages/index/index?postId=${post.id}`,
+        url: `/pages/post-detail/post-detail?postId=${post.id}`,
       });
       this.triggerEvent("selectUserPost", { post });
     },
