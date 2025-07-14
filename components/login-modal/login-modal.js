@@ -27,7 +27,7 @@ Component({
         phone: "验证码登录",
       },
       formLabels: {
-        loginIdentifier: "用户名/手机号", // Username or phone
+        loginIdentifier: "用户名/电话号码/电子邮件", // Username or phone
         phone: "手机号码",
         password: "密码",
         verificationCode: "验证码",
