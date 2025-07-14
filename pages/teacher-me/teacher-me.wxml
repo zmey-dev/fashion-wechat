@@ -670,36 +670,6 @@
           </view>
         </view>
       </view>
-
-      <!-- Profile Status (when not editing) -->
-      <view wx:if="{{!isEditingProfile}}" class="profile-status">
-        <view class="section-title">
-          <text>资料完成度</text>
-        </view>
-        
-        <view class="status-grid">
-          <view class="status-item">
-            <view class="status-icon {{phoneVerified ? 'completed' : 'incomplete'}}">
-              <image src="../../images/icons/{{phoneVerified ? 'check' : 'info-circle'}}.svg" mode="aspectFit"></image>
-            </view>
-            <text class="status-label">手机验证</text>
-          </view>
-          
-          <view class="status-item">
-            <view class="status-icon {{teacherProfile.credentialName ? 'completed' : 'incomplete'}}">
-              <image src="../../images/icons/{{teacherProfile.credentialName ? 'check' : 'info-circle'}}.svg" mode="aspectFit"></image>
-            </view>
-            <text class="status-label">资格证书</text>
-          </view>
-          
-          <view class="status-item">
-            <view class="status-icon {{profileFormValid ? 'completed' : 'incomplete'}}">
-              <image src="../../images/icons/{{profileFormValid ? 'check' : 'info-circle'}}.svg" mode="aspectFit"></image>
-            </view>
-            <text class="status-label">基本信息</text>
-          </view>
-        </view>
-      </view>
       
       <!-- WeChat Linking Section -->
       <view wx:if="{{!isEditingProfile}}" class="wechat-section">

@@ -62,7 +62,7 @@ Page({
 
     // Validation states
     profileErrors: {},
-    profileFormValid: false,    // Original values for comparison
+    profileFormValid: false, // Original values for comparison
     // originalEmail: "",
     originalPhone: "",
 
@@ -87,14 +87,14 @@ Page({
     // Upload states
     uploadingAvatar: false,
     uploadingCredential: false,
-    
+
     // Background upload states
     avatarUploading: false,
     avatarUploadProgress: 0,
     avatarUploaded: false,
     avatarUploadError: null,
     avatarUploadUrl: null,
-    
+
     credentialUploading: false,
     credentialUploadProgress: 0,
     credentialUploaded: false,
@@ -124,11 +124,11 @@ Page({
         saved: "保存成功",
       },
     },
-    
+
     // Contact form data
     contactForm: {
       title: "",
-      description: ""
+      description: "",
     },
   },
   onLoad: function () {
@@ -217,7 +217,8 @@ Page({
           });
           this.setData({ loading: false });
         }
-      },      fail: (err) => {
+      },
+      fail: (err) => {
         wx.showToast({
           title: this.data.messages.errors.networkError,
           icon: "none",
@@ -286,7 +287,8 @@ Page({
           });
           this.setData({ loading: false });
         }
-      },      fail: (err) => {
+      },
+      fail: (err) => {
         wx.showToast({
           title: this.data.messages.errors.networkError,
           icon: "none",
@@ -339,7 +341,8 @@ Page({
           });
           this.setData({ loading: false });
         }
-      },      fail: (err) => {
+      },
+      fail: (err) => {
         wx.showToast({
           title: this.data.messages.errors.networkError,
           icon: "none",
@@ -408,7 +411,8 @@ Page({
                 });
                 this.setData({ loading: false });
               }
-            },            fail: (err) => {
+            },
+            fail: (err) => {
               wx.showToast({
                 title: this.data.messages.errors.networkError,
                 icon: "none",
@@ -459,7 +463,8 @@ Page({
                 });
                 this.setData({ loading: false });
               }
-            },            fail: (err) => {
+            },
+            fail: (err) => {
               wx.showToast({
                 title: this.data.messages.errors.networkError,
                 icon: "none",
@@ -490,7 +495,8 @@ Page({
       method: "GET",
       header: {
         Authorization: `Bearer ${getApp().globalData.userInfo.token}`,
-      },      success: (resUni) => {
+      },
+      success: (resUni) => {
         if (resUni.data.status === "success" && resUni.data.university) {
           // Process faculties to add hasIssues flag
           const processedUniversity = this.processUniversityData(
@@ -591,7 +597,8 @@ Page({
           icon: "none",
         });
       },
-    });  },
+    });
+  },
 
   // Select a faculty
   selectFaculty: function (e) {
@@ -866,7 +873,8 @@ Page({
           });
         }
         this.setData({ loading: false });
-      },      fail: (err) => {
+      },
+      fail: (err) => {
         wx.showToast({
           title: this.data.messages.errors.networkError,
           icon: "none",
@@ -897,13 +905,14 @@ Page({
   // ======= Teacher Profile Management Functions =======
 
   // Load teacher profile data
-  loadTeacherProfile: function() {
+  loadTeacherProfile: function () {
     const userInfo = getApp().globalData.userInfo || {};
-    
+
     // Process phone number (remove +86 prefix if present)
-    const processedPhone = userInfo.phone && userInfo.phone.startsWith("+86") 
-      ? userInfo.phone.substring(3) 
-      : userInfo.phone || "";
+    const processedPhone =
+      userInfo.phone && userInfo.phone.startsWith("+86")
+        ? userInfo.phone.substring(3)
+        : userInfo.phone || "";
 
     this.setData({
       teacherProfile: {
@@ -928,7 +937,7 @@ Page({
   },
 
   // Toggle edit mode for profile
-  toggleProfileEdit: function() {
+  toggleProfileEdit: function () {
     this.setData({
       isEditingProfile: !this.data.isEditingProfile,
     });
@@ -948,13 +957,13 @@ Page({
   },
 
   // Handle profile form input changes
-  onProfileInputChange: function(e) {
+  onProfileInputChange: function (e) {
     const { field } = e.currentTarget.dataset;
     const value = e.detail.value;
 
     // For picker components
-    if (e.type === 'change') {
-      if (field === 'gender') {
+    if (e.type === "change") {
+      if (field === "gender") {
         const genders = ["", "male", "female"];
         this.setData({
           [`teacherProfile.${field}`]: genders[parseInt(value)],
@@ -973,7 +982,7 @@ Page({
     //     emailChanged: value !== this.data.originalEmail,
     //   });
     // } else if (field === 'phone') {
-    if (field === 'phone') {
+    if (field === "phone") {
       this.setData({
         phoneChanged: value !== this.data.originalPhone,
       });
@@ -988,11 +997,11 @@ Page({
   },
 
   // Handle gender selection
-  onGenderChange: function(e) {
+  onGenderChange: function (e) {
     const { value } = e.currentTarget.dataset;
-    
+
     this.setData({
-      'teacherProfile.gender': value,
+      "teacherProfile.gender": value,
     });
 
     // Clear error for gender field
@@ -1003,13 +1012,18 @@ Page({
     this.validateProfileForm();
   },
   // Validate profile form
-  validateProfileForm: function() {
-    const { teacherProfile, /* emailChanged, */ phoneChanged, /* emailVerified, */ phoneVerified } = this.data;
+  validateProfileForm: function () {
+    const {
+      teacherProfile,
+      /* emailChanged, */ phoneChanged,
+      /* emailVerified, */ phoneVerified,
+    } = this.data;
     let formErrors = {};
 
     if (!teacherProfile.name) formErrors.name = "姓名为必填项";
     if (!teacherProfile.id_number) formErrors.id_number = "身份证号为必填项";
-    if (!teacherProfile.school_position) formErrors.school_position = "学校职位为必填项";
+    if (!teacherProfile.school_position)
+      formErrors.school_position = "学校职位为必填项";
     if (!teacherProfile.credential) formErrors.credential = "资格证书为必填项";
     if (!teacherProfile.gender) formErrors.gender = "请选择性别";
 
@@ -1045,9 +1059,9 @@ Page({
   // Send email verification code
   // sendEmailVerificationCode: function() {
   //   if (!this.data.emailChanged || !this.data.teacherProfile.email) return;
-    
+
   //   wx.showLoading({ title: "发送中..." });
-    
+
   //   wx.request({
   //     url: `${config.BACKEND_URL}/verification/send_email_code`,
   //     method: "POST",
@@ -1091,9 +1105,9 @@ Page({
   //     });
   //     return;
   //   }
-    
+
   //   wx.showLoading({ title: "验证中..." });
-    
+
   //   wx.request({
   //     url: `${config.BACKEND_URL}/verification/verify_email_code`,
   //     method: "POST",
@@ -1107,7 +1121,7 @@ Page({
   //     },
   //     success: (res) => {
   //       if (res.statusCode === 200 && res.data.status === "success") {
-  //         this.setData({ 
+  //         this.setData({
   //           emailVerified: true,
   //           emailCodeSent: false
   //         });
@@ -1135,16 +1149,16 @@ Page({
   //   });
   // },
   // Send phone verification code
-  sendPhoneVerificationCode: function() {
+  sendPhoneVerificationCode: function () {
     if (!this.data.phoneChanged || !this.data.teacherProfile.phone) return;
-    
+
     wx.showLoading({ title: "发送中..." });
-    
+
     wx.request({
       url: `${config.BACKEND_URL}/verification/send_phone_sms_code`,
       method: "POST",
       data: {
-        phone: "+86" + this.data.teacherProfile.phone
+        phone: "+86" + this.data.teacherProfile.phone,
       },
       header: {
         "Content-Type": "application/json",
@@ -1154,44 +1168,44 @@ Page({
         if (res.statusCode === 200 && res.data.status === "success") {
           wx.showToast({
             title: "验证码已发送",
-            icon: "success"
+            icon: "success",
           });
         } else {
           wx.showToast({
             title: res.data?.msg || "发送失败",
-            icon: "none"
+            icon: "none",
           });
         }
       },
       fail: () => {
         wx.showToast({
           title: "网络错误",
-          icon: "none"
+          icon: "none",
         });
       },
       complete: () => {
         wx.hideLoading();
-      }
+      },
     });
   },
   // Verify phone code
-  verifyPhoneCode: function() {
+  verifyPhoneCode: function () {
     if (!this.data.enteredPhoneCode || !this.data.teacherProfile.phone) {
       wx.showToast({
         title: "请输入验证码",
-        icon: "none"
+        icon: "none",
       });
       return;
     }
-    
+
     wx.showLoading({ title: "验证中..." });
-    
+
     wx.request({
       url: `${config.BACKEND_URL}/verification/verify_phone_sms_code`,
       method: "POST",
       data: {
         phone: "+86" + this.data.teacherProfile.phone,
-        code: this.data.enteredPhoneCode
+        code: this.data.enteredPhoneCode,
       },
       header: {
         "Content-Type": "application/json",
@@ -1199,47 +1213,47 @@ Page({
       },
       success: (res) => {
         if (res.statusCode === 200 && res.data.status === "success") {
-          this.setData({ 
+          this.setData({
             phoneVerified: true,
-            [`profileErrors.phone`]: false
+            [`profileErrors.phone`]: false,
           });
           wx.showToast({
             title: "手机验证成功",
-            icon: "success"
+            icon: "success",
           });
           this.validateProfileForm();
         } else {
           wx.showToast({
             title: res.data?.msg || "验证失败",
-            icon: "none"
+            icon: "none",
           });
         }
       },
       fail: () => {
         wx.showToast({
           title: "网络错误",
-          icon: "none"
+          icon: "none",
         });
       },
       complete: () => {
         wx.hideLoading();
-      }
+      },
     });
   },
   // Handle verification code input
-  onEmailOtpInput: function(e) {
+  onEmailOtpInput: function (e) {
     this.setData({
       enteredEmailCode: e.detail.value,
     });
   },
 
-  onPhoneOtpInput: function(e) {
+  onPhoneOtpInput: function (e) {
     this.setData({
       enteredPhoneCode: e.detail.value,
     });
   },
   // Upload avatar with background upload
-  selectAvatar: function() {
+  selectAvatar: function () {
     if (!this.data.isEditingProfile) return;
 
     wx.chooseMedia({
@@ -1249,7 +1263,7 @@ Page({
       sizeType: ["compressed"],
       success: (res) => {
         const tempFile = res.tempFiles[0];
-        
+
         // Check file size (max 5MB)
         if (tempFile.size > 5 * 1024 * 1024) {
           wx.showToast({
@@ -1258,7 +1272,7 @@ Page({
           });
           return;
         }
-        
+
         this.setData({
           selectedAvatar: tempFile.tempFilePath,
           avatarUploading: true,
@@ -1267,7 +1281,7 @@ Page({
           avatarUploadError: null,
           avatarUploadUrl: null,
         });
-        
+
         // Start background upload immediately
         this.uploadAvatarInBackground(tempFile);
       },
@@ -1285,7 +1299,7 @@ Page({
   },
 
   // Upload credential file with background upload
-  uploadCredential: function() {
+  uploadCredential: function () {
     wx.chooseMessageFile({
       count: 1,
       type: "file",
@@ -1303,7 +1317,7 @@ Page({
           });
           return;
         }
-        
+
         // Check file size (max 10MB)
         if (file.size > 10 * 1024 * 1024) {
           wx.showToast({
@@ -1321,7 +1335,7 @@ Page({
           credentialUploadError: null,
           credentialUploadUrl: null,
         });
-        
+
         // Start background upload immediately
         this.uploadCredentialInBackground(file);
       },
@@ -1339,7 +1353,7 @@ Page({
   },
 
   // View credential file
-  viewCredentialFile: function() {
+  viewCredentialFile: function () {
     if (this.data.teacherProfile.credentialName) {
       this.setData({
         showImageModal: true,
@@ -1348,9 +1362,9 @@ Page({
     }
   },
   // Save profile changes
-  saveProfile: function() {
+  saveProfile: function () {
     const errors = this.validateProfileForm();
-    
+
     if (!this.data.profileFormValid || Object.keys(errors).length > 0) {
       this.setData({ profileErrors: errors });
       wx.showToast({
@@ -1366,7 +1380,7 @@ Page({
         title: "等待文件上传完成...",
         mask: true,
       });
-      
+
       // Wait for uploads to complete
       this.waitForUploadsToComplete().then(() => {
         wx.hideLoading();
@@ -1384,9 +1398,9 @@ Page({
       this.saveProfileWithUploads();
     }
   },
-  
+
   // Save profile with uploaded file URLs
-  saveProfileWithUploads: function() {
+  saveProfileWithUploads: function () {
     wx.showLoading({
       title: "保存中...",
     });
@@ -1396,18 +1410,18 @@ Page({
       ...this.data.teacherProfile,
       phone: "+86" + this.data.teacherProfile.phone,
     };
-    
+
     // Convert avatar to avatar_url for backend
     if (formData.avatar) {
       formData.avatar_url = formData.avatar;
       delete formData.avatar;
     }
-    
+
     // Add uploaded file URLs (will override existing avatar_url if new upload)
     if (this.data.avatarUploadUrl) {
       formData.avatar_url = this.data.avatarUploadUrl;
     }
-    
+
     if (this.data.credentialUploadUrl) {
       formData.credential_url = this.data.credentialUploadUrl;
     }
@@ -1418,82 +1432,82 @@ Page({
   // Background upload avatar to UCloud
   async uploadAvatarInBackground(tempFile) {
     console.log("Starting background avatar upload:", tempFile);
-    
+
     try {
       // Progress callback
       const progressCallback = (progress) => {
         this.setData({
-          avatarUploadProgress: progress
+          avatarUploadProgress: progress,
         });
       };
-      
+
       // Use uploadImageSimple for direct upload without blur
       console.log("Uploading avatar image...");
       const uploadResult = await ucloudUpload.uploadImageSimple(
         tempFile.tempFilePath,
         progressCallback,
-        'teacher_avatars'  // upload folder
+        "teacher_avatars" // upload folder
       );
-      
+
       console.log("Avatar upload result:", uploadResult);
-      
+
       if (uploadResult && uploadResult.url) {
         this.setData({
           avatarUploading: false,
           avatarUploaded: true,
           avatarUploadUrl: uploadResult.url,
           avatarUploadError: null,
-          "teacherProfile.avatar": uploadResult.url
+          "teacherProfile.avatar": uploadResult.url,
         });
-        
+
         wx.showToast({
           title: "头像上传成功",
           icon: "success",
-          duration: 1500
+          duration: 1500,
         });
       } else {
         throw new Error("上传结果无效");
       }
     } catch (error) {
       console.error("Avatar upload failed:", error);
-      
+
       this.setData({
         avatarUploading: false,
         avatarUploaded: false,
         avatarUploadUrl: null,
-        avatarUploadError: error.message || "上传失败"
+        avatarUploadError: error.message || "上传失败",
       });
-      
+
       wx.showToast({
         title: "头像上传失败",
         icon: "none",
-        duration: 2000
+        duration: 2000,
       });
     }
   },
-  
+
   // Background upload credential to UCloud
   async uploadCredentialInBackground(file) {
     console.log("Starting background credential upload:", file);
-    
+
     try {
       // Progress callback
       const progressCallback = (progress) => {
         this.setData({
-          credentialUploadProgress: progress
+          credentialUploadProgress: progress,
         });
       };
-      
+
       // Determine file type and use appropriate upload method
-      const fileExt = file.name.split('.').pop().toLowerCase();
+      const fileExt = file.name.split(".").pop().toLowerCase();
       let uploadResult;
-      
-      if (['jpg', 'jpeg', 'png'].includes(fileExt)) {
+
+      if (["jpg", "jpeg", "png"].includes(fileExt)) {
         // Image credential
         uploadResult = await ucloudUpload.uploadImageSimple(
           file.path,
           progressCallback,
-          'teacher_credentials'
+          "teacher_credentials"
         );
       } else {
         // Document file - use generic file upload
@@ -1501,66 +1515,67 @@ Page({
           tempFilePath: file.path,
           name: file.name,
           size: file.size,
-          type: 'file'
+          type: "file",
         };
-        
+
         uploadResult = await ucloudUpload.uploadMedia(
           fileForUpload,
           progressCallback,
-          { upload: 'teacher_credentials' }
+          { upload: "teacher_credentials" }
         );
       }
-      
+
       console.log("Credential upload result:", uploadResult);
-      
-      const finalUrl = uploadResult.url || uploadResult.uploadUrl || uploadResult.fileUrl;
-      
+
+      const finalUrl =
+        uploadResult.url || uploadResult.uploadUrl || uploadResult.fileUrl;
+
       if (finalUrl) {
         this.setData({
           credentialUploading: false,
           credentialUploaded: true,
           credentialUploadUrl: finalUrl,
           credentialUploadError: null,
-          "teacherProfile.credentialName": finalUrl
+          "teacherProfile.credentialName": finalUrl,
         });
-        
+
         wx.showToast({
           title: "证书上传成功",
           icon: "success",
-          duration: 1500
+          duration: 1500,
         });
       } else {
         throw new Error("上传结果无效");
       }
     } catch (error) {
       console.error("Credential upload failed:", error);
-      
+
       this.setData({
         credentialUploading: false,
         credentialUploaded: false,
         credentialUploadUrl: null,
-        credentialUploadError: error.message || "上传失败"
+        credentialUploadError: error.message || "上传失败",
       });
-      
+
       wx.showToast({
         title: "证书上传失败",
         icon: "none",
-        duration: 2000
+        duration: 2000,
       });
     }
   },
-  
+
   // Wait for all uploads to complete
   waitForUploadsToComplete() {
     return new Promise((resolve) => {
       const checkInterval = 100;
       const maxWaitTime = 60000; // 60 seconds
       let waitTime = 0;
-      
+
       const check = () => {
         const avatarDone = !this.data.avatarUploading;
         const credentialDone = !this.data.credentialUploading;
-        
+
         if (avatarDone && credentialDone) {
           resolve();
         } else if (waitTime >= maxWaitTime) {
@@ -1568,13 +1583,13 @@ Page({
           if (this.data.avatarUploading) {
             this.setData({
               avatarUploading: false,
-              avatarUploadError: "上传超时"
+              avatarUploadError: "上传超时",
             });
           }
           if (this.data.credentialUploading) {
             this.setData({
               credentialUploading: false,
-              credentialUploadError: "上传超时"
+              credentialUploadError: "上传超时",
             });
           }
           resolve();
@@ -1583,13 +1598,13 @@ Page({
           setTimeout(check, checkInterval);
         }
       };
-      
+
       check();
     });
   },
 
   // Update profile using standard endpoint
-  updateProfile: function(formData) {
+  updateProfile: function (formData) {
     wx.request({
       url: `${config.BACKEND_URL}/user/update_user`,
       method: "POST",
@@ -1601,26 +1616,35 @@ Page({
       success: (res) => {
         if (res.statusCode === 200 && res.data.status === "success") {
           const updatedUserInfo = res.data.user;
-          
+
           this.setData({
             teacherProfile: {
               ...this.data.teacherProfile,
-              ...updatedUserInfo
+              ...updatedUserInfo,
             },
             isEditingProfile: false,
             profileErrors: {},
-            selectedAvatar: updatedUserInfo?.avatar || this.data.teacherProfile.avatar,
+            selectedAvatar:
+              updatedUserInfo?.avatar || this.data.teacherProfile.avatar,
             // originalEmail: updatedUserInfo?.email || this.data.teacherProfile.email,
-            originalPhone: updatedUserInfo?.phone?.replace("+86", "") || this.data.teacherProfile.phone,
+            originalPhone:
+              updatedUserInfo?.phone?.replace("+86", "") ||
+              this.data.teacherProfile.phone,
             // emailChanged: false,
             phoneChanged: false,
             // enteredEmailCode: "",
-            enteredPhoneCode: ""
+            enteredPhoneCode: "",
           });
-          
-          getApp().setState("userInfo", updatedUserInfo);
-          wx.setStorageSync('userInfo', updatedUserInfo);
-          
+
+          getApp().setState("userInfo", {
+            ...this.data.userInfo,
+            ...updatedUserInfo,
+          });
+          wx.setStorageSync("userInfo", {
+            ...this.data.userInfo,
+            ...updatedUserInfo,
+          });
+
           wx.showToast({
             title: "保存成功",
             icon: "success",
@@ -1644,7 +1668,7 @@ Page({
     });
   },
   // Cancel profile editing
-  cancelProfileEdit: function() {
+  cancelProfileEdit: function () {
     this.setData({
       isEditingProfile: false,
       profileErrors: {},
@@ -1663,7 +1687,7 @@ Page({
   },
 
   // Handle logout
-  handleLogout: function() {
+  handleLogout: function () {
     wx.showModal({
       title: "确认退出",
       content: "您确定要退出登录吗？",
@@ -1672,44 +1696,45 @@ Page({
           // Clear user data
           const app = getApp();
           app.globalData.userInfo = {};
-          
+
           // Clear local storage
-          wx.removeStorageSync('userInfo');
-          wx.removeStorageSync('token');
-          
+          wx.removeStorageSync("userInfo");
+          wx.removeStorageSync("token");
+
           // Navigate to login page
           wx.reLaunch({
-            url: '/pages/index/index'
+            url: "/pages/index/index",
           });
         }
-      }
+      },
     });
   },
 
   // Phone number validation
-  validatePhoneNumber: function(phone) {
+  validatePhoneNumber: function (phone) {
     const phoneRegex = /^1[3-9]\d{9}$/;
     return phoneRegex.test(phone);
   },
 
   // Email validation
-  validateEmail: function(email) {
+  validateEmail: function (email) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   },
 
   // ID number validation
-  validateIdNumber: function(idNumber) {
-    const idRegex = /^[1-9]\d{5}(18|19|20)\d{2}((0[1-9])|(1[0-2]))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/;
+  validateIdNumber: function (idNumber) {
+    const idRegex =
+      /^[1-9]\d{5}(18|19|20)\d{2}((0[1-9])|(1[0-2]))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/;
     return idRegex.test(idNumber);
   },
 
   // Enhanced form validation with specific field validation
-  validateProfileField: function(field, value) {
+  validateProfileField: function (field, value) {
     const errors = { ...this.data.profileErrors };
 
     switch (field) {
-      case 'name':
+      case "name":
         if (!value || value.trim().length < 2) {
           errors.name = "姓名至少需要2个字符";
         } else if (value.trim().length > 20) {
@@ -1719,7 +1744,7 @@ Page({
         }
         break;
 
-      case 'phone':
+      case "phone":
         if (!value) {
           errors.phone = "请输入手机号码";
         } else if (!this.validatePhoneNumber(value)) {
@@ -1729,7 +1754,7 @@ Page({
         }
         break;
 
-      case 'email':
+      case "email":
         if (!value) {
           errors.email = "请输入邮箱地址";
         } else if (!this.validateEmail(value)) {
@@ -1739,7 +1764,7 @@ Page({
         }
         break;
 
-      case 'id_number':
+      case "id_number":
         if (!value) {
           errors.id_number = "请输入身份证号";
         } else if (!this.validateIdNumber(value)) {
@@ -1749,7 +1774,7 @@ Page({
         }
         break;
 
-      case 'school_position':
+      case "school_position":
         if (!value || value.trim().length === 0) {
           errors.school_position = "请输入学校职位";
         } else {
@@ -1757,7 +1782,7 @@ Page({
         }
         break;
 
-      case 'credential':
+      case "credential":
         if (!value || value.trim().length === 0) {
           errors.credential = "请输入资格证书";
         } else {
@@ -1765,8 +1790,8 @@ Page({
         }
         break;
 
-      case 'gender':
-        if (!value || value === '') {
+      case "gender":
+        if (!value || value === "") {
           errors.gender = "请选择性别";
         } else {
           delete errors.gender;
@@ -1779,26 +1804,29 @@ Page({
   },
 
   // Check if profile data has been modified
-  hasProfileChanges: function() {
+  hasProfileChanges: function () {
     const { teacherProfile, originalEmail, originalPhone } = this.data;
     const originalData = getApp().globalData.userInfo || {};
 
     return (
-      teacherProfile.name !== (originalData.name || '') ||
+      teacherProfile.name !== (originalData.name || "") ||
       // teacherProfile.email !== originalEmail ||
       teacherProfile.phone !== originalPhone ||
-      teacherProfile.gender !== (originalData.gender || '') ||
-      teacherProfile.id_number !== (originalData.id_number || '') ||
-      teacherProfile.school_position !== (originalData.school_position || '') ||
-      teacherProfile.credential !== (originalData.credential || '') ||
+      teacherProfile.gender !== (originalData.gender || "") ||
+      teacherProfile.id_number !== (originalData.id_number || "") ||
+      teacherProfile.school_position !== (originalData.school_position || "") ||
+      teacherProfile.credential !== (originalData.credential || "") ||
       this.data.selectedAvatar ||
       this.data.credentialFile
     );
   },
   // Clean up profile resources
-  cleanupProfileResources: function() {
+  cleanupProfileResources: function () {
     // Revoke any blob URLs created for avatar preview
-    if (this.data.selectedAvatar && this.data.selectedAvatar.startsWith('blob:')) {
+    if (
+      this.data.selectedAvatar &&
+      this.data.selectedAvatar.startsWith("blob:")
+    ) {
       URL.revokeObjectURL(this.data.selectedAvatar);
     }
   },
@@ -1813,36 +1841,36 @@ Page({
       // Get WeChat login code
       const loginResult = await this.promiseWrapper(wx.login);
       if (!loginResult.code) {
-        throw new Error('获取微信授权码失败');
+        throw new Error("获取微信授权码失败");
       }
 
       // Send link request to backend
       const response = await this.requestWechatLink(loginResult.code);
-      
-      if (response.status === 'success') {
+
+      if (response.status === "success") {
         // Update user info with WeChat data
         const app = getApp();
         const updatedUserInfo = { ...this.data.userInfo, ...response.user };
         app.setState("userInfo", updatedUserInfo);
-        wx.setStorageSync('userInfo', updatedUserInfo);
-        
-        this.setData({ 
+        wx.setStorageSync("userInfo", updatedUserInfo);
+
+        this.setData({
           userInfo: updatedUserInfo,
-          isWechatLinked: true 
+          isWechatLinked: true,
         });
-        
+
         wx.showToast({
-          title: '微信绑定成功',
-          icon: 'success'
+          title: "微信绑定成功",
+          icon: "success",
         });
       } else {
-        throw new Error(response.msg || '绑定失败');
+        throw new Error(response.msg || "绑定失败");
       }
     } catch (error) {
-      console.error('WeChat linking error:', error);
+      console.error("WeChat linking error:", error);
       wx.showToast({
-        title: error.message || '微信绑定失败',
-        icon: 'none'
+        title: error.message || "微信绑定失败",
+        icon: "none",
       });
     } finally {
       this.setData({ wechatLinking: false });
@@ -1852,42 +1880,42 @@ Page({
   async unlinkWechat() {
     try {
       const result = await this.showConfirmDialog(
-        '解除绑定',
-        '确定要解除微信绑定吗？解除后您将无法使用微信登录。'
+        "解除绑定",
+        "确定要解除微信绑定吗？解除后您将无法使用微信登录。"
       );
-      
+
       if (!result.confirm) return;
 
       const response = await this.requestWechatUnlink();
-      
-      if (response.status === 'success') {
+
+      if (response.status === "success") {
         // Update user info
         const app = getApp();
-        const updatedUserInfo = { 
-          ...this.data.userInfo, 
+        const updatedUserInfo = {
+          ...this.data.userInfo,
           wechat_openid: null,
-          wechat_unionid: null 
+          wechat_unionid: null,
         };
         app.setState("userInfo", updatedUserInfo);
-        wx.setStorageSync('userInfo', updatedUserInfo);
-        
-        this.setData({ 
+        wx.setStorageSync("userInfo", updatedUserInfo);
+
+        this.setData({
           userInfo: updatedUserInfo,
-          isWechatLinked: false 
+          isWechatLinked: false,
         });
-        
+
         wx.showToast({
-          title: '解除绑定成功',
-          icon: 'success'
+          title: "解除绑定成功",
+          icon: "success",
         });
       } else {
-        throw new Error(response.msg || '解除绑定失败');
+        throw new Error(response.msg || "解除绑定失败");
       }
     } catch (error) {
-      console.error('WeChat unlinking error:', error);
+      console.error("WeChat unlinking error:", error);
       wx.showToast({
-        title: error.message || '解除绑定失败',
-        icon: 'none'
+        title: error.message || "解除绑定失败",
+        icon: "none",
       });
     }
   },
@@ -1897,20 +1925,20 @@ Page({
     return new Promise((resolve, reject) => {
       wx.request({
         url: `${config.BACKEND_URL}/user/link-wechat`,
-        method: 'POST',
+        method: "POST",
         data: { code },
         header: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.data.userInfo.token}`
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${this.data.userInfo.token}`,
         },
         success: (res) => {
           if (res.statusCode === 200) {
             resolve(res.data);
           } else {
-            reject(new Error(res.data?.msg || '请求失败'));
+            reject(new Error(res.data?.msg || "请求失败"));
           }
         },
-        fail: reject
+        fail: reject,
       });
     });
   },
@@ -1919,19 +1947,19 @@ Page({
     return new Promise((resolve, reject) => {
       wx.request({
         url: `${config.BACKEND_URL}/user/unlink-wechat`,
-        method: 'POST',
+        method: "POST",
         header: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.data.userInfo.token}`
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${this.data.userInfo.token}`,
         },
         success: (res) => {
           if (res.statusCode === 200) {
             resolve(res.data);
           } else {
-            reject(new Error(res.data?.msg || '请求失败'));
+            reject(new Error(res.data?.msg || "请求失败"));
           }
         },
-        fail: reject
+        fail: reject,
       });
     });
   },
@@ -1942,7 +1970,7 @@ Page({
       fn({
         ...options,
         success: resolve,
-        fail: reject
+        fail: reject,
       });
     });
   },
@@ -1952,7 +1980,7 @@ Page({
       wx.showModal({
         title,
         content,
-        success: resolve
+        success: resolve,
       });
     });
   },
@@ -1960,7 +1988,7 @@ Page({
   // Check WeChat link status on load
   checkWechatLinkStatus() {
     const { userInfo } = this.data;
-    const isLinked = !!(userInfo?.wechat_openid);
+    const isLinked = !!userInfo?.wechat_openid;
     this.setData({ isWechatLinked: isLinked });
   },
 
@@ -1969,58 +1997,58 @@ Page({
     const { field } = e.currentTarget.dataset;
     const { value } = e.detail;
     this.setData({
-      [`contactForm.${field}`]: value
+      [`contactForm.${field}`]: value,
     });
   },
 
   async submitContact() {
     const { title, description } = this.data.contactForm;
-    
+
     if (!title || !description) {
       wx.showToast({
-        title: '请填写标题和描述',
-        icon: 'none'
+        title: "请填写标题和描述",
+        icon: "none",
       });
       return;
     }
 
-    wx.showLoading({ title: '提交中...' });
+    wx.showLoading({ title: "提交中..." });
 
     try {
       const res = await wx.request({
-        url: config.BASE_URL + '/api/add-contact',
-        method: 'POST',
+        url: config.BASE_URL + "/api/add-contact",
+        method: "POST",
         header: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + wx.getStorageSync('token')
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + wx.getStorageSync("token"),
         },
         data: {
           title,
-          description
-        }
+          description,
+        },
       });
 
-      if (res.data.status === 'success') {
+      if (res.data.status === "success") {
         wx.showToast({
-          title: '提交成功',
-          icon: 'success'
+          title: "提交成功",
+          icon: "success",
         });
-        
+
         // Clear form
         this.setData({
           contactForm: {
-            title: '',
-            description: ''
-          }
+            title: "",
+            description: "",
+          },
         });
       } else {
-        throw new Error(res.data.message || '提交失败');
+        throw new Error(res.data.message || "提交失败");
       }
     } catch (error) {
-      console.error('Submit contact error:', error);
+      console.error("Submit contact error:", error);
       wx.showToast({
-        title: error.message || '提交失败',
-        icon: 'none'
+        title: error.message || "提交失败",
+        icon: "none",
       });
     } finally {
       wx.hideLoading();
