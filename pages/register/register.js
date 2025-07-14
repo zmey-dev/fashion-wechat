@@ -1,6 +1,32 @@
 const { default: config } = require("../../config");
 
 Page({
+  // Utility function to ensure phone has +86 prefix
+  ensureCountryCode: function(phoneNumber) {
+    if (!phoneNumber) return phoneNumber;
+    
+    // Remove all spaces and non-digit characters except + 
+    const cleaned = phoneNumber.replace(/[^\d+]/g, "");
+    
+    // If already starts with +86, return as is
+    if (cleaned.startsWith('+86')) {
+      return cleaned;
+    }
+    
+    // If starts with 86, add + prefix
+    if (cleaned.startsWith('86') && cleaned.length === 13) {
+      return '+' + cleaned;
+    }
+    
+    // If it's just the phone number (11 digits), add +86
+    if (cleaned.length === 11 && !cleaned.startsWith('86')) {
+      return '+86' + cleaned;
+    }
+    
+    // If starts with +86 but user typed it, just return
+    return cleaned.startsWith('+86') ? cleaned : '+86' + cleaned.replace(/^\+?86?/, '');
+  },
+
   data: {
     // Form step state
     formStep: 1,
@@ -167,7 +193,12 @@ Page({
   // Handle input changes
   onInputChange: function(e) {
     const { field } = e.currentTarget.dataset;
-    const value = e.detail.value;
+    let value = e.detail.value;
+    
+    // Remove spaces from phone input
+    if (field === 'phone') {
+      value = value.replace(/\s/g, "");
+    }
     
     this.setData({
       [`form.${field}`]: value,
@@ -308,7 +339,7 @@ Page({
       url: `${config.BACKEND_URL}/verification/send_phone_sms_code`,
       method: "POST",
       data: {
-        phone: "+86" + this.data.form.phone
+        phone: this.ensureCountryCode(this.data.form.phone)
       },
       header: {
         "Content-Type": "application/json"
@@ -424,7 +455,7 @@ Page({
       url: `${config.BACKEND_URL}/verification/verify_phone_sms_code`,
       method: "POST",
       data: {
-        phone: "+86" + this.data.form.phone,
+        phone: this.ensureCountryCode(this.data.form.phone),
         code: this.data.phoneOtpCode
       },
       header: {
@@ -621,7 +652,7 @@ Page({
       name: form.name,
       username: form.id_number,
       email: form.email,
-      phone: form.phone,
+      phone: this.ensureCountryCode(form.phone),
       id_number: form.id_number,
       password: form.password,
       password_confirmation: form.password_confirmation,
@@ -663,7 +694,7 @@ Page({
             name: form.name,
             username: form.id_number,
             email: form.email,
-            phone: form.phone,
+            phone: this.ensureCountryCode(form.phone),
             id_number: form.id_number,
             password: form.password,
             password_confirmation: form.password_confirmation,
@@ -755,7 +786,7 @@ Page({
       name: form.name,
       username: form.school?.name + form.id_number,
       email: form.email,
-      phone: "+86" + form.phone,
+      phone: this.ensureCountryCode(form.phone),
       id_number: form.id_number,
       password: form.password,
       password_confirmation: form.password_confirmation,
