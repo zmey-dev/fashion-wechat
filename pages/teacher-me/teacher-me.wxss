@@ -1725,7 +1725,8 @@ page {
 }
 
 /* Main Content Wrapper */
-.contact-container > * {
+.contact-container .header,
+.contact-container .content {
   position: relative;
   z-index: 2;
 }
