@@ -316,7 +316,7 @@ Page({
       sourceType: sourceTypes,
       maxDuration: 60, // Add max duration for better compatibility
       camera: "back", // Specify camera for better compatibility
-      sizeType: ["compressed"], // Add compression for better compatibility
+      sizeType: ["original"], // Use original quality for better video quality
       success: (res) => {
         const videoFile = res.tempFiles[0];
 

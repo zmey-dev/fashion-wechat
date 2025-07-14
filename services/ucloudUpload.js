@@ -1048,10 +1048,10 @@ const compressVideo = async (filePath, options = {}) => {
     if (typeof wx.compressVideo === 'function') {
       wx.compressVideo({
         src: filePath,
-        quality: options.quality || 'medium',
-        bitrate: options.bitrate || 1000,
+        quality: options.quality || 'high',
+        bitrate: options.bitrate || 3000,
         fps: options.fps || 24,
-        resolution: options.resolution || 0.8,
+        resolution: options.resolution || 1.0,
         success: (res) => {
           resolve(res.tempFilePath);
         },
@@ -1065,7 +1065,7 @@ const compressVideo = async (filePath, options = {}) => {
         success: (fileInfo) => {
           const fileSizeMB = fileInfo.size / (1024 * 1024);
           
-          if (fileSizeMB > 50) {
+          if (fileSizeMB > 200) {
             reject(new Error('Video file too large and compression not available'));
           } else {
             resolve(filePath);
