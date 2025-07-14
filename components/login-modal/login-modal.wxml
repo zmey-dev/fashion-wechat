@@ -12,15 +12,13 @@
       >
         <span>{{messages.loginTypes.wechat}}</span>
       </view>
-      <!-- EMAIL LOGIN TAB DISABLED
       <view 
-        class="tab-item {{loginType === 'email' ? 'active' : ''}}"
-        data-type="email"
+        class="tab-item {{loginType === 'password' ? 'active' : ''}}"
+        data-type="password"
         bindtap="switchLoginType"
       >
-        <span>{{messages.loginTypes.email}}</span>
+        <span>{{messages.loginTypes.password}}</span>
       </view>
-      -->
       <view 
         class="tab-item {{loginType === 'phone' ? 'active' : ''}}"
         data-type="phone"
@@ -39,6 +37,39 @@
           <span class="wechat-desc">安全便捷</span>
           <text class="error-text" wx:if="{{wechatError}}">{{wechatError}}</text>
         </view>      
+      </view>
+
+      <!-- Password Login -->
+      <view class="form-container {{loginType === 'password' ? 'active' : ''}}">
+        <view class="input-group">
+          <input
+            class="form-input {{loginIdentifierError ? 'error' : ''}}"
+            type="text"
+            placeholder="{{messages.formLabels.loginIdentifier}}"
+            value="{{loginIdentifier}}"
+            bindinput="onLoginIdentifierInput"
+            disabled="{{loading}}"
+          />
+          <text class="error-text" wx:if="{{loginIdentifierError}}">{{loginIdentifierError}}</text>
+        </view>
+        
+        <view class="input-group">
+          <view class="password-wrapper">
+            <input
+              class="form-input {{passwordError ? 'error' : ''}}"
+              type="text"
+              password="{{!showPassword}}"
+              placeholder="{{messages.formLabels.password}}"
+              value="{{password}}"
+              bindinput="onPasswordInput"
+              disabled="{{loading}}"
+            />
+            <view class="password-toggle" bindtap="togglePassword" data-action="toggle">
+              <text class="toggle-icon">{{showPassword ? '🙈' : '👁'}}</text>
+            </view>
+          </view>
+          <text class="error-text" wx:if="{{passwordError}}">{{passwordError}}</text>
+        </view>
       </view>
 
       <!-- EMAIL LOGIN FORM DISABLED

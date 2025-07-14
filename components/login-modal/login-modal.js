@@ -4,6 +4,7 @@ Component({
   data: {
     loginType: "wechat",
     // email: "",
+    loginIdentifier: "", // For username/phone login
     phone: "",
     password: "",
     verificationCode: "",
@@ -12,6 +13,7 @@ Component({
     loading: false,
     termsAgreed: false,
     // emailError: "",
+    loginIdentifierError: "", // For username/phone login errors
     phoneError: "",
     passwordError: "",
     codeError: "",
@@ -21,11 +23,11 @@ Component({
     messages: {
       loginTypes: {
         wechat: "微信登录",
-        // email: "密码登录",
+        password: "密码登录", // Changed from email to password
         phone: "验证码登录",
       },
       formLabels: {
-        // email: "邮箱/手机号/校秀号",
+        loginIdentifier: "用户名/手机号", // Username or phone
         phone: "手机号码",
         password: "密码",
         verificationCode: "验证码",
@@ -110,6 +112,7 @@ Component({
       this.setData({
         loginType: type,
         // emailError: "",
+        loginIdentifierError: "",
         phoneError: "",
         passwordError: "",
         codeError: "",
@@ -119,10 +122,10 @@ Component({
       });
     },
 
-    onEmailInput(e) {
+    onLoginIdentifierInput(e) {
       this.setData({
-        // email: e.detail.value,
-        // emailError: "",
+        loginIdentifier: e.detail.value,
+        loginIdentifierError: "",
         generalError: "",
       });
     },
@@ -290,6 +293,59 @@ Component({
     //   }
     // },
 
+    async passwordLogin() {
+      const { loginIdentifier, password } = this.data;
+
+      if (!loginIdentifier) {
+        this.setData({ loginIdentifierError: "请输入用户名或手机号" });
+        return;
+      }
+
+      if (!password) {
+        this.setData({
+          passwordError: this.data.messages.errors.passwordRequired,
+        });
+        return;
+      }
+
+      if (password.length < 6) {
+        this.setData({
+          passwordError: this.data.messages.errors.passwordTooShort,
+        });
+        return;
+      }
+
+      try {
+        this.setData({ loading: true });
+
+        const authResult = await this.requestLogin({
+          login_identifier: loginIdentifier, // Changed to match backend
+          password: password,
+        });
+
+        this.handleLoginSuccess(authResult);
+      } catch (error) {
+        console.log(error);
+        this.setData({
+          loginIdentifierError: "",
+          passwordError: "",
+        });
+
+        // set field-specific error based on error message
+        if (error.message && error.message.includes("password")) {
+          this.setData({
+            passwordError: "密码错误",
+          });
+        } else {
+          this.setData({
+            loginIdentifierError: "用户名或手机号不存在",
+          });
+        }
+      } finally {
+        this.setData({ loading: false });
+      }
+    },
+
     async phoneLogin() {
       const { phone, verificationCode } = this.data;
 
@@ -440,9 +496,9 @@ Component({
         case "wechat":
           this.wechatLogin();
           break;
-        // case "email":
-        //   this.emailLogin();
-        //   break;
+        case "password":
+          this.passwordLogin();
+          break;
         case "phone":
           this.phoneLogin();
           break;
@@ -563,6 +619,8 @@ Component({
       // Set field-specific error instead of showing toast
       if (fieldType === "phone") {
         this.setData({ phoneError: message });
+      } else if (fieldType === "loginIdentifier") {
+        this.setData({ loginIdentifierError: message });
       } else if (fieldType === "password") {
         this.setData({ passwordError: message });
       } else if (fieldType === "code") {
