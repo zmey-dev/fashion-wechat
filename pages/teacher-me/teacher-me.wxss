@@ -1696,20 +1696,25 @@ page {
   padding: 20rpx;
   background: #111111;
   min-height: 100%;
+  box-sizing: border-box;
 }
 
+/* Header Section */
 .contact-container .header {
   background: linear-gradient(135deg, rgba(147, 51, 234, 0.2), rgba(59, 130, 246, 0.2));
   border-radius: 24rpx;
   padding: 40rpx;
   margin-bottom: 40rpx;
   border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10rpx);
 }
 
 .contact-container .header-content {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20rpx;
 }
 
 .contact-container .header-title {
@@ -1718,83 +1723,163 @@ page {
   gap: 20rpx;
   font-size: 48rpx;
   font-weight: 700;
-  color: #fff;
+  color: #ffffff;
+  flex: 1;
 }
 
 .contact-container .header-icon {
   font-size: 48rpx;
+  color: #ffffff;
 }
 
 .contact-container .header-badge {
-  background: rgba(255, 255, 255, 0.1);
-  padding: 10rpx 20rpx;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 12rpx 24rpx;
   border-radius: 20rpx;
   font-size: 24rpx;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(5rpx);
 }
 
+/* Content Section */
 .contact-container .content {
-  background: rgba(30, 30, 30, 0.8);
+  background: rgba(30, 30, 30, 0.9);
   border-radius: 24rpx;
   padding: 40rpx;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10rpx);
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.3);
+}
+
+.contact-container .form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 40rpx;
 }
 
 .contact-container .form-item {
-  margin-bottom: 40rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
 }
 
 .contact-container .form-label {
-  display: block;
   font-size: 32rpx;
-  font-weight: 500;
-  color: #e5e5e5;
-  margin-bottom: 16rpx;
+  font-weight: 600;
+  color: #ffffff;
+  letter-spacing: 1rpx;
 }
 
+/* Form Controls */
 .contact-container .form-input,
 .contact-container .form-textarea {
   width: 100%;
-  background: rgba(45, 45, 45, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(45, 45, 45, 0.8);
+  border: 2px solid rgba(255, 255, 255, 0.1);
   border-radius: 16rpx;
   padding: 24rpx;
-  color: #fff;
+  color: #ffffff;
   font-size: 28rpx;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+}
+
+.contact-container .form-input::placeholder,
+.contact-container .form-textarea::placeholder {
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .contact-container .form-input:focus,
 .contact-container .form-textarea:focus {
-  border-color: rgba(147, 51, 234, 0.5);
-  background: rgba(45, 45, 45, 0.8);
+  border-color: rgba(147, 51, 234, 0.8);
+  background: rgba(45, 45, 45, 1);
+  box-shadow: 0 0 0 4rpx rgba(147, 51, 234, 0.1);
+  outline: none;
 }
 
 .contact-container .form-textarea {
   min-height: 300rpx;
   resize: none;
+  font-family: inherit;
+  line-height: 1.6;
 }
 
+/* Submit Button */
 .contact-container .submit-button {
   width: 100%;
   background: linear-gradient(135deg, #9333ea, #3b82f6);
-  color: #fff;
+  color: #ffffff;
   border: none;
   border-radius: 16rpx;
   padding: 32rpx;
   font-size: 32rpx;
-  font-weight: 600;
+  font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 16rpx;
   margin-top: 40rpx;
+  transition: all 0.3s ease;
+  box-shadow: 0 8rpx 24rpx rgba(147, 51, 234, 0.3);
+  letter-spacing: 1rpx;
 }
 
 .contact-container .submit-button:active {
-  opacity: 0.8;
-  transform: scale(0.98);
+  opacity: 0.9;
+  transform: scale(0.98) translateY(2rpx);
+  box-shadow: 0 4rpx 16rpx rgba(147, 51, 234, 0.4);
 }
 
 .contact-container .submit-icon {
   font-size: 36rpx;
+}
+
+/* Responsive Design for Contact Section */
+@media screen and (max-width: 600rpx) {
+  .contact-container {
+    padding: 16rpx;
+  }
+  
+  .contact-container .header {
+    padding: 32rpx 24rpx;
+    margin-bottom: 32rpx;
+  }
+  
+  .contact-container .header-title {
+    font-size: 40rpx;
+  }
+  
+  .contact-container .header-badge {
+    font-size: 22rpx;
+    padding: 10rpx 20rpx;
+  }
+  
+  .contact-container .content {
+    padding: 32rpx 24rpx;
+  }
+  
+  .contact-container .form-section {
+    gap: 32rpx;
+  }
+  
+  .contact-container .form-label {
+    font-size: 28rpx;
+  }
+  
+  .contact-container .form-input,
+  .contact-container .form-textarea {
+    padding: 20rpx;
+    font-size: 26rpx;
+  }
+  
+  .contact-container .form-textarea {
+    min-height: 240rpx;
+  }
+  
+  .contact-container .submit-button {
+    padding: 28rpx;
+    font-size: 28rpx;
+    margin-top: 32rpx;
+  }
 }

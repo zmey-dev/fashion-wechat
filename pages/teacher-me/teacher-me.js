@@ -13,7 +13,7 @@ Page({
 
     // UI states
     currentTab: 0, // 0: students, 1: university, 2: profile, 3: contact
-    tabs: ["学生", "大学信息", "个人资料", "学校"],
+    tabs: ["学生", "大学信息", "个人资料", "联系我们"],
     loading: false,
     hasMore: true,
 

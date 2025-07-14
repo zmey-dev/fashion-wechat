@@ -7,7 +7,7 @@ Page({  data: {
     loading: false,
     hasMore: true,
     currentTab: 0,
-    tabs: ["作品", "喜欢", "收藏", "历史", "学校"], // Added contact tab
+    tabs: ["作品", "喜欢", "收藏", "历史", "联系我们"], // Added contact tab
     age: 0,
     // WeChat linking state
     isWechatLinked: false,
