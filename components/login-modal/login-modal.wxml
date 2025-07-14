@@ -12,6 +12,7 @@
       >
         <span>{{messages.loginTypes.wechat}}</span>
       </view>
+      <!-- EMAIL LOGIN TAB DISABLED
       <view 
         class="tab-item {{loginType === 'email' ? 'active' : ''}}"
         data-type="email"
@@ -19,6 +20,7 @@
       >
         <span>{{messages.loginTypes.email}}</span>
       </view>
+      -->
       <view 
         class="tab-item {{loginType === 'phone' ? 'active' : ''}}"
         data-type="phone"
@@ -39,6 +41,7 @@
         </view>      
       </view>
 
+      <!-- EMAIL LOGIN FORM DISABLED
       <view class="form-container {{loginType === 'email' ? 'active' : ''}}"><view class="input-group">
           <input
             class="form-input {{emailError ? 'error' : ''}}"
@@ -67,6 +70,7 @@
           <text class="error-text" wx:if="{{passwordError}}">{{passwordError}}</text>
         </view>
       </view>
+      -->
 
       <!-- Phone Login -->
       <view class="form-container {{loginType === 'phone' ? 'active' : ''}}">        <view class="input-group">
@@ -141,12 +145,12 @@
           <checkbox value="agree" checked="{{termsAgreed}}" color="#007AFF" />
         </label>
       </checkbox-group>
-      <div class="agreement-text">
+      <view class="agreement-text">
         <text class="agreement-prefix">登录或注册即代表同意</text>
-        <div class="agreement-link" bindtap="goToTerms">《用户协议》</div>
+        <text class="agreement-link" bindtap="goToTerms">《用户协议》</text>
         <text class="agreement-and">和</text>
-        <div class="agreement-link" bindtap="goToPrivacy">《隐私政策》</div>
-      </div>
+        <text class="agreement-link" bindtap="goToPrivacy">《隐私政策》</text>
+      </view>
     </view>
   </view>
 </view>

@@ -184,7 +184,9 @@ Component({
     validatePhone(phone) {
       const phoneRegex = /\d{11}$/;
       return phoneRegex.test(phone);
-    },    async wechatLogin() {
+    },
+    
+    async wechatLogin() {
       try {
         this.setData({ loading: true, wechatError: "" });
 
@@ -559,9 +561,7 @@ Component({
     // Handle login error
     handleLoginError(message, fieldType = null) {
       // Set field-specific error instead of showing toast
-      // if (fieldType === "email") {
-      //   this.setData({ emailError: message });
-      // } else if (fieldType === "phone") {
+      if (fieldType === "phone") {
         this.setData({ phoneError: message });
       } else if (fieldType === "password") {
         this.setData({ passwordError: message });
@@ -576,7 +576,9 @@ Component({
           // emailError: message, // Fallback to email field for general errors
         });
       }
-    }, // API request wrapper
+    },
+    
+    // API request wrapper
     requestLogin(data) {
       return new Promise((resolve, reject) => {
         wx.request({
