@@ -49,7 +49,7 @@ Page({
       id_number: "",
       school_position: "",
       credential: "",
-      avatar_url: "",
+      avatar: "",
       credentialName: "",
     },
 
@@ -915,7 +915,7 @@ Page({
         id_number: userInfo.id_number || "",
         school_position: userInfo.school_position || "",
         credential: userInfo.credential || "",
-        avatar_url: userInfo.avatar_url || "",
+        avatar: userInfo.avatar || "",
         credentialName: userInfo.credentialName || "",
       },
       // originalEmail: userInfo.email || "",
@@ -1397,7 +1397,13 @@ Page({
       phone: "+86" + this.data.teacherProfile.phone,
     };
     
-    // Add uploaded file URLs
+    // Convert avatar to avatar_url for backend
+    if (formData.avatar) {
+      formData.avatar_url = formData.avatar;
+      delete formData.avatar;
+    }
+    
+    // Add uploaded file URLs (will override existing avatar_url if new upload)
     if (this.data.avatarUploadUrl) {
       formData.avatar_url = this.data.avatarUploadUrl;
     }
@@ -1437,7 +1443,7 @@ Page({
           avatarUploaded: true,
           avatarUploadUrl: uploadResult.url,
           avatarUploadError: null,
-          "teacherProfile.avatar_url": uploadResult.url
+          "teacherProfile.avatar": uploadResult.url
         });
         
         wx.showToast({
@@ -1603,7 +1609,7 @@ Page({
             },
             isEditingProfile: false,
             profileErrors: {},
-            selectedAvatar: updatedUserInfo?.avatar_url || this.data.teacherProfile.avatar_url,
+            selectedAvatar: updatedUserInfo?.avatar || this.data.teacherProfile.avatar,
             // originalEmail: updatedUserInfo?.email || this.data.teacherProfile.email,
             originalPhone: updatedUserInfo?.phone?.replace("+86", "") || this.data.teacherProfile.phone,
             // emailChanged: false,
@@ -1648,7 +1654,7 @@ Page({
       phoneVerified: true,
       // enteredEmailCode: "",
       enteredPhoneCode: "",
-      selectedAvatar: this.data.teacherProfile.avatar_url || "",
+      selectedAvatar: this.data.teacherProfile.avatar || "",
       credentialFile: null,
       credentialFileName: "",
       skipCredential: false,

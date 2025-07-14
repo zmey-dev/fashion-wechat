@@ -39,7 +39,7 @@
             bindtap="selectStudent"
           >
             <view class="student-avatar">
-              <image src="{{item.avatar_url || '../../images/icons/user.svg'}}" mode="aspectFill"></image>
+              <image src="{{item.avatar || '../../images/icons/user.svg'}}" mode="aspectFill"></image>
             </view>
             <view class="student-info">
               <view class="student-name">{{item.name}}</view>
@@ -81,7 +81,7 @@
         <view class="student-header">
           <avatar 
             class="student-avatar-large" 
-            avatar="{{selectedStudent.avatar_url}}"
+            avatar="{{selectedStudent.avatar}}"
             name="{{selectedStudent.name}}"
             mode="aspectFill"
             size="160"
@@ -466,7 +466,7 @@
         <view class="avatar-container-large" bindtap="selectAvatar">
           <image 
             class="avatar-large" 
-            src="{{selectedAvatar || teacherProfile.avatar_url || '../../images/icons/user.svg'}}" 
+            src="{{selectedAvatar || teacherProfile.avatar || '../../images/icons/user.svg'}}" 
             mode="aspectFill"
           ></image>
           <view class="avatar-overlay" wx:if="{{isEditingProfile}}">
