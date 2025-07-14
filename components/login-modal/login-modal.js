@@ -63,6 +63,32 @@ Component({
     },
   },
   methods: {
+    // Utility function to ensure phone has +86 prefix
+    ensureCountryCode(phoneNumber) {
+      if (!phoneNumber) return phoneNumber;
+      
+      // Remove all spaces and non-digit characters except + 
+      const cleaned = phoneNumber.replace(/[^\d+]/g, "");
+      
+      // If already starts with +86, return as is
+      if (cleaned.startsWith('+86')) {
+        return cleaned;
+      }
+      
+      // If starts with 86, add + prefix
+      if (cleaned.startsWith('86') && cleaned.length === 13) {
+        return '+' + cleaned;
+      }
+      
+      // If it's just the phone number (11 digits), add +86
+      if (cleaned.length === 11 && !cleaned.startsWith('86')) {
+        return '+86' + cleaned;
+      }
+      
+      // If starts with +86 but user typed it, just return
+      return cleaned.startsWith('+86') ? cleaned : '+86' + cleaned.replace(/^\+?86?/, '');
+    },
+
     closeModal() {
       const app = getApp();
       app.setState("showLoginModal", false);
@@ -132,7 +158,7 @@ Component({
 
     onPhoneInput(e) {
       this.setData({
-        phone: e.detail.value,
+        phone: e.detail.value.replace(/\s/g, ""),
         phoneError: "",
         phoneSuccessMessage: "",
         generalError: "",
@@ -318,8 +344,17 @@ Component({
       try {
         this.setData({ loading: true });
 
+        // Check if login_identifier is a phone number and ensure +86 prefix
+        let processedIdentifier = loginIdentifier.trim();
+        
+        // Check if it's a phone number (contains only digits, +, or spaces)
+        const phoneRegex = /^[\d\s+]+$/;
+        if (phoneRegex.test(processedIdentifier) && processedIdentifier.replace(/\D/g, "").length >= 11) {
+          processedIdentifier = this.ensureCountryCode(processedIdentifier);
+        }
+
         const authResult = await this.requestLogin({
-          login_identifier: loginIdentifier, // Changed to match backend
+          login_identifier: processedIdentifier,
           password: password,
         });
 
@@ -375,7 +410,7 @@ Component({
         url: `${config.BACKEND_URL}/verification/verify_and_login`,
         method: "POST",
         data: {
-          phone: "+86" + phone,
+          phone: this.ensureCountryCode(phone),
           code: verificationCode,
         },
         header: {
@@ -437,7 +472,7 @@ Component({
           title: this.data.messages.status.sendingCode,
           mask: true,
         });
-        const data = await this.requestVerificationCode("+86" + phone);
+        const data = await this.requestVerificationCode(this.ensureCountryCode(phone));
         console.log("Verification code sent:", data);
         // Start countdown
         this.startCountdown(); // Clear any previous errors and show success message
