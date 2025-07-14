@@ -973,47 +973,6 @@
     font-size: 18rpx;
   }
 }
-
-/* Ultra Small Screens */
-@media screen and (max-width: 400rpx) {
-  .profile-action-btn {
-    padding: 16rpx 20rpx;
-    font-size: 22rpx;
-    min-width: 80rpx;
-  }
-  
-  .form-section {
-    margin: 0 12rpx 20rpx 12rpx;
-    padding: 28rpx 20rpx;
-  }
-  
-  .section-title {
-    font-size: 30rpx;
-  }
-  
-  .field-input, .phone-prefix, .picker-view {
-    padding: 18rpx 14rpx;
-    font-size: 26rpx;
-  }
-  
-  .profile-button-container {
-    margin-left: 8rpx;
-  }
-  
-  .profile-redirect-btn {
-    padding: 8rpx 10rpx;
-    min-width: 60rpx;
-  }
-  
-  .profile-btn-icon {
-    font-size: 18rpx;
-    margin-bottom: 2rpx;
-  }
-  
-  .profile-btn-text {
-    font-size: 16rpx;
-  }
-
 /* ===================== MODERN CONTACT SECTION DESIGN ===================== */
 
 .contact-container {
@@ -1209,23 +1168,16 @@
 /* Input Field Styling */
 .contact-container .form-input,
 .contact-container .form-textarea {
-  width: 100%;
-  background: linear-gradient(135deg, 
-    rgba(40, 40, 40, 0.8) 0%, 
-    rgba(50, 50, 50, 0.6) 100%);
-  border: 2px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20rpx;
-  padding: 30rpx 25rpx;
-  color: #ffffff;
-  font-size: 30rpx;
+  min-height: 90rpx;
   box-sizing: border-box;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  backdrop-filter: blur(10rpx);
-  box-shadow: 
-    inset 0 2rpx 4rpx rgba(0, 0, 0, 0.3),
-    0 4rpx 20rpx rgba(0, 0, 0, 0.1);
-  position: relative;
-  font-family: inherit;
+  width: 100%;
+  padding: 24rpx;
+  border: 2rpx solid rgba(255, 255, 255, 0.2);
+  border-radius: 16rpx;
+  font-size: 28rpx;
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+  transition: border-color 0.3s ease;
 }
 
 .contact-container .form-input::placeholder,
@@ -1269,11 +1221,10 @@
     #9333ea 50%, 
     #3b82f6 100%);
   background-size: 200% 200%;
-  animation: gradientShift 4s ease infinite;
   color: #ffffff;
   border: none;
   border-radius: 25rpx;
-  padding: 35rpx;
+  padding: 25rpx;
   font-size: 34rpx;
   font-weight: 800;
   display: flex;
@@ -1281,7 +1232,6 @@
   justify-content: center;
   gap: 20rpx;
   margin-top: 60rpx;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 
     0 10rpx 30rpx rgba(255, 50, 50, 0.3),
     0 20rpx 60rpx rgba(147, 51, 234, 0.2),
@@ -1345,55 +1295,4 @@
   0% { transform: scale(0); }
   50% { transform: scale(1.2); }
   100% { transform: scale(1); }
-}
-
-/* Responsive Design */
-@media screen and (max-width: 600rpx) {
-  .contact-container .header {
-    padding: 60rpx 30rpx 40rpx;
-    margin-bottom: 40rpx;
-  }
-  
-  .contact-container .header-icon {
-    font-size: 80rpx;
-  }
-  
-  .contact-container .header-title text:last-child {
-    font-size: 40rpx;
-  }
-  
-  .contact-container .header-badge {
-    font-size: 24rpx;
-    padding: 16rpx 32rpx;
-  }
-  
-  .contact-container .content {
-    padding: 40rpx 30rpx 60rpx;
-    margin: 0 16rpx;
-    border-radius: 30rpx 30rpx 0 0;
-  }
-  
-  .contact-container .form-section {
-    gap: 40rpx;
-  }
-  
-  .contact-container .form-label {
-    font-size: 28rpx;
-  }
-  
-  .contact-container .form-input,
-  .contact-container .form-textarea {
-    padding: 24rpx 20rpx;
-    font-size: 26rpx;
-  }
-  
-  .contact-container .form-textarea {
-    min-height: 240rpx;
-  }
-  
-  .contact-container .submit-button {
-    padding: 30rpx;
-    font-size: 30rpx;
-    margin-top: 40rpx;
-  }
 }
