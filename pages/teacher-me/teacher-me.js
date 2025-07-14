@@ -49,7 +49,7 @@ Page({
       id_number: "",
       school_position: "",
       credential: "",
-      avatar: "",
+      avatar_url: "",
       credentialName: "",
     },
 
@@ -915,7 +915,7 @@ Page({
         id_number: userInfo.id_number || "",
         school_position: userInfo.school_position || "",
         credential: userInfo.credential || "",
-        avatar: userInfo.avatar || "",
+        avatar_url: userInfo.avatar_url || "",
         credentialName: userInfo.credentialName || "",
       },
       // originalEmail: userInfo.email || "",
@@ -1437,7 +1437,7 @@ Page({
           avatarUploaded: true,
           avatarUploadUrl: uploadResult.url,
           avatarUploadError: null,
-          "teacherProfile.avatar": uploadResult.url
+          "teacherProfile.avatar_url": uploadResult.url
         });
         
         wx.showToast({
@@ -1603,7 +1603,7 @@ Page({
             },
             isEditingProfile: false,
             profileErrors: {},
-            selectedAvatar: updatedUserInfo?.avatar || this.data.teacherProfile.avatar,
+            selectedAvatar: updatedUserInfo?.avatar_url || this.data.teacherProfile.avatar_url,
             // originalEmail: updatedUserInfo?.email || this.data.teacherProfile.email,
             originalPhone: updatedUserInfo?.phone?.replace("+86", "") || this.data.teacherProfile.phone,
             // emailChanged: false,
@@ -1648,7 +1648,7 @@ Page({
       phoneVerified: true,
       // enteredEmailCode: "",
       enteredPhoneCode: "",
-      selectedAvatar: this.data.teacherProfile.avatar || "",
+      selectedAvatar: this.data.teacherProfile.avatar_url || "",
       credentialFile: null,
       credentialFileName: "",
       skipCredential: false,
@@ -1779,7 +1779,7 @@ Page({
 
     return (
       teacherProfile.name !== (originalData.name || '') ||
-      teacherProfile.email !== originalEmail ||
+      // teacherProfile.email !== originalEmail ||
       teacherProfile.phone !== originalPhone ||
       teacherProfile.gender !== (originalData.gender || '') ||
       teacherProfile.id_number !== (originalData.id_number || '') ||

@@ -39,7 +39,7 @@
             bindtap="selectStudent"
           >
             <view class="student-avatar">
-              <image src="{{item.avatar || '../../images/icons/user.svg'}}" mode="aspectFill"></image>
+              <image src="{{item.avatar_url || '../../images/icons/user.svg'}}" mode="aspectFill"></image>
             </view>
             <view class="student-info">
               <view class="student-name">{{item.name}}</view>
@@ -81,7 +81,7 @@
         <view class="student-header">
           <avatar 
             class="student-avatar-large" 
-            avatar="{{selectedStudent.avatar}}"
+            avatar="{{selectedStudent.avatar_url}}"
             name="{{selectedStudent.name}}"
             mode="aspectFill"
             size="160"
@@ -139,13 +139,15 @@
             <view class="detail-value">{{selectedStudent.phone || '未设置'}}</view>
           </view>
           
+          <!--
           <view class="detail-row">
             <view class="detail-icon">
               <image src="../../images/icons/mail.svg" mode="aspectFit"></image>
             </view>
             <view class="detail-label">邮箱:</view>
             <view class="detail-value">{{selectedStudent.email || '未设置'}}</view>
-          </view>
+          </view>* 
+          -->
           
           <view class="detail-row">
             <view class="detail-icon">
@@ -464,7 +466,7 @@
         <view class="avatar-container-large" bindtap="selectAvatar">
           <image 
             class="avatar-large" 
-            src="{{selectedAvatar || teacherProfile.avatar || '../../images/icons/user.svg'}}" 
+            src="{{selectedAvatar || teacherProfile.avatar_url || '../../images/icons/user.svg'}}" 
             mode="aspectFill"
           ></image>
           <view class="avatar-overlay" wx:if="{{isEditingProfile}}">
@@ -521,7 +523,7 @@
                 data-field="phone"
                 bindinput="onProfileInputChange"
               />
-              <button 
+              <div 
                 class="verify-btn {{phoneChanged && !phoneVerified && !sendingPhoneCode ? '' : 'disabled'}}"
                 bindtap="sendPhoneVerificationCode"
                 wx:if="{{isEditingProfile}}"
@@ -533,7 +535,7 @@
                   <text>发送中</text>
                 </block>
                 <block wx:else>获取验证码</block>
-              </button>
+              </div>
             </view>
             
             <!-- Phone Verification Section -->
@@ -555,54 +557,7 @@
           </view>
 
           <!-- Email -->
-          <view class="form-field">
-            <label class="field-label">
-              邮箱
-              <view class="verification-status" wx:if="{{emailChanged && !emailVerified}}">
-                <text class="status-text">需要验证</text>
-              </view>
-            </label>
-            <view class="email-input">
-              <input 
-                class="field-input {{profileErrors.email ? 'error' : ''}}"
-                value="{{teacherProfile.email}}"
-                placeholder="请输入邮箱"
-                disabled="{{!isEditingProfile}}"
-                data-field="email"
-                bindinput="onProfileInputChange"
-              />
-              <button 
-                class="verify-btn {{emailChanged && !emailVerified && !sendingEmailCode ? '' : 'disabled'}}"
-                bindtap="sendEmailVerificationCode"
-                wx:if="{{isEditingProfile}}"
-              >
-                <block wx:if="{{!emailChanged}}">未修改</block>
-                <block wx:elif="{{emailVerified}}">已验证</block>
-                <block wx:elif="{{sendingEmailCode}}">
-                  <view class="loading-spinner small"></view>
-                  <text>发送中</text>
-                </block>
-                <block wx:else>获取验证码</block>
-              </button>
-            </view>
-            
-            <!-- Email Verification Section -->
-            <view wx:if="{{emailCodeSent && emailChanged && !emailVerified && isEditingProfile}}" class="verification-section">
-              <view class="otp-input-container">
-                <input 
-                  class="otp-input"
-                  placeholder="请输入邮箱验证码"
-                  value="{{enteredEmailCode}}"
-                  bindinput="onEmailOtpInput"
-                />
-                <button class="verify-code-btn" bindtap="verifyEmailCode">
-                  验证
-                </button>
-              </view>
-            </view>
-            
-            <text class="error-text" wx:if="{{profileErrors.email}}">{{profileErrors.email}}</text>
-          </view>
+          
 
           <!-- Gender -->
           <view class="form-field">
@@ -731,13 +686,6 @@
           </view>
           
           <view class="status-item">
-            <view class="status-icon {{emailVerified ? 'completed' : 'incomplete'}}">
-              <image src="../../images/icons/{{emailVerified ? 'check' : 'info-circle'}}.svg" mode="aspectFit"></image>
-            </view>
-            <text class="status-label">邮箱验证</text>
-          </view>
-          
-          <view class="status-item">
             <view class="status-icon {{teacherProfile.credentialName ? 'completed' : 'incomplete'}}">
               <image src="../../images/icons/{{teacherProfile.credentialName ? 'check' : 'info-circle'}}.svg" mode="aspectFit"></image>
             </view>
@@ -795,21 +743,12 @@
           </view>
         </view>
       </view>
-    </view>      </block>
+    </view>      
+  </block>
 
   <!-- Contact Tab -->
   <block wx:if="{{currentTab === 3}}">
     <view class="contact-container">
-      <view class="header">
-        <view class="header-content">
-          <view class="header-title">
-            <text class="header-icon">ℹ️</text>
-            <text>提交您的建议</text>
-          </view>
-          <view class="header-badge">帮助我们变得更好</view>
-        </view>
-      </view>
-      
       <view class="content">
         <view class="form-section">
           <view class="form-item">
