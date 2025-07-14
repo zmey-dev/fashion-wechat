@@ -97,8 +97,52 @@
     </view>
   </view>
 
-  <!-- Profile Tab Content (tab 4) -->
-  <view class="profile-tab-container" wx:if="{{currentTab === 4}}">
+  <!-- Contact Tab Content (tab 4) -->
+  <view class="contact-container" wx:if="{{currentTab === 4}}">
+    <view class="header">
+      <view class="header-content">
+        <view class="header-title">
+          <text class="header-icon">ℹ️</text>
+          <text>提交您的建议</text>
+        </view>
+        <view class="header-badge">帮助我们变得更好</view>
+      </view>
+    </view>
+    
+    <view class="content">
+      <view class="form-section">
+        <view class="form-item">
+          <text class="form-label">标题</text>
+          <input 
+            class="form-input" 
+            placeholder="请输入简短的标题描述您的建议" 
+            value="{{contactForm.title}}" 
+            data-field="title"
+            bindinput="onContactInputChange"
+          />
+        </view>
+        
+        <view class="form-item">
+          <text class="form-label">详细描述</text>
+          <textarea 
+            class="form-textarea" 
+            placeholder="请详细描述您的建议或问题，以便我们能更好地理解和改进" 
+            value="{{contactForm.description}}" 
+            data-field="description"
+            bindinput="onContactInputChange"
+          />
+        </view>
+      </view>
+      
+      <button class="submit-button" bindtap="submitContact">
+        <text class="submit-icon">📤</text>
+        <text>提交建议</text>
+      </button>
+    </view>
+  </view>
+  
+  <!-- Profile Tab Content (moved to separate page) -->
+  <view class="profile-tab-container" wx:if="{{false}}">
     <!-- Profile Header Actions -->
     <view class="profile-actions">
       <view class="left-actions">

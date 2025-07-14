@@ -7,7 +7,7 @@ Page({  data: {
     loading: false,
     hasMore: true,
     currentTab: 0,
-    tabs: ["作品", "喜欢", "收藏", "历史"], // 资료 탭 제거
+    tabs: ["作品", "喜欢", "收藏", "历史", "学校"], // Added contact tab
     age: 0,
     // WeChat linking state
     isWechatLinked: false,
@@ -42,6 +42,11 @@ Page({  data: {
     avatarUploaded: false,
     avatarUploadError: null,
     avatarUploadUrl: null,
+    // Contact form data
+    contactForm: {
+      title: "",
+      description: ""
+    },
     // Verification states - original values for comparison
     originalEmail: "",
     originalPhone: "",
@@ -1225,5 +1230,68 @@ Page({  data: {
       
       check();
     });
+  },
+
+  // Contact form handlers
+  onContactInputChange(e) {
+    const { field } = e.currentTarget.dataset;
+    const { value } = e.detail;
+    this.setData({
+      [`contactForm.${field}`]: value
+    });
+  },
+
+  async submitContact() {
+    const { title, description } = this.data.contactForm;
+    
+    if (!title || !description) {
+      wx.showToast({
+        title: '请填写标题和描述',
+        icon: 'none'
+      });
+      return;
+    }
+
+    wx.showLoading({ title: '提交中...' });
+
+    try {
+      const res = await wx.request({
+        url: config.BASE_URL + '/api/add-contact',
+        method: 'POST',
+        header: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + wx.getStorageSync('token')
+        },
+        data: {
+          title,
+          description
+        }
+      });
+
+      if (res.data.status === 'success') {
+        wx.showToast({
+          title: '提交成功',
+          icon: 'success'
+        });
+        
+        // Clear form
+        this.setData({
+          contactForm: {
+            title: '',
+            description: ''
+          }
+        });
+      } else {
+        throw new Error(res.data.message || '提交失败');
+      }
+    } catch (error) {
+      console.error('Submit contact error:', error);
+      wx.showToast({
+        title: error.message || '提交失败',
+        icon: 'none'
+      });
+    } finally {
+      wx.hideLoading();
+    }
   },
 });

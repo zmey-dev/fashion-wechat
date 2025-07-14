@@ -12,8 +12,8 @@ Page({
     university: null,
 
     // UI states
-    currentTab: 0, // 0: students, 1: university, 2: profile
-    tabs: ["学生", "大学信息", "个人资料"],
+    currentTab: 0, // 0: students, 1: university, 2: profile, 3: contact
+    tabs: ["学生", "大学信息", "个人资料", "学校"],
     loading: false,
     hasMore: true,
 
@@ -123,6 +123,12 @@ Page({
         deleted: "删除成功",
         saved: "保存成功",
       },
+    },
+    
+    // Contact form data
+    contactForm: {
+      title: "",
+      description: ""
     },
   },
   onLoad: function () {
@@ -1949,5 +1955,68 @@ Page({
     const { userInfo } = this.data;
     const isLinked = !!(userInfo?.wechat_openid);
     this.setData({ isWechatLinked: isLinked });
+  },
+
+  // Contact form handlers
+  onContactInputChange(e) {
+    const { field } = e.currentTarget.dataset;
+    const { value } = e.detail;
+    this.setData({
+      [`contactForm.${field}`]: value
+    });
+  },
+
+  async submitContact() {
+    const { title, description } = this.data.contactForm;
+    
+    if (!title || !description) {
+      wx.showToast({
+        title: '请填写标题和描述',
+        icon: 'none'
+      });
+      return;
+    }
+
+    wx.showLoading({ title: '提交中...' });
+
+    try {
+      const res = await wx.request({
+        url: config.BASE_URL + '/api/add-contact',
+        method: 'POST',
+        header: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + wx.getStorageSync('token')
+        },
+        data: {
+          title,
+          description
+        }
+      });
+
+      if (res.data.status === 'success') {
+        wx.showToast({
+          title: '提交成功',
+          icon: 'success'
+        });
+        
+        // Clear form
+        this.setData({
+          contactForm: {
+            title: '',
+            description: ''
+          }
+        });
+      } else {
+        throw new Error(res.data.message || '提交失败');
+      }
+    } catch (error) {
+      console.error('Submit contact error:', error);
+      wx.showToast({
+        title: error.message || '提交失败',
+        icon: 'none'
+      });
+    } finally {
+      wx.hideLoading();
+    }
   },
 });

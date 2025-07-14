@@ -49,12 +49,6 @@ Component({
         path: "/pages/event/event",
         type: "filter",
       },      {
-        key: "contact",
-        name: "学校",
-        path: "/pages/contact/contact",
-        type: "filter",
-      },
-      {
         key: "chat",
         name: "聊天",
         icon: "/images/icons/message.png",
@@ -121,12 +115,6 @@ Component({
         path: "/pages/event/event",
         type: "filter",
       },      {
-        key: "contact",
-        name: "学校",
-        path: "/pages/contact/contact",
-        type: "filter",
-      },
-      {
         key: "me",
         name: "我的",
         icon: "/images/icons/me.png",
