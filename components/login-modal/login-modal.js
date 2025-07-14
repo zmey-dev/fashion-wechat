@@ -3,7 +3,7 @@ const { default: config } = require("../../config");
 Component({
   data: {
     loginType: "wechat",
-    email: "",
+    // email: "",
     phone: "",
     password: "",
     verificationCode: "",
@@ -11,7 +11,7 @@ Component({
     countdown: 0,
     loading: false,
     termsAgreed: false,
-    emailError: "",
+    // emailError: "",
     phoneError: "",
     passwordError: "",
     codeError: "",
@@ -21,11 +21,11 @@ Component({
     messages: {
       loginTypes: {
         wechat: "微信登录",
-        email: "密码登录",
+        // email: "密码登录",
         phone: "验证码登录",
       },
       formLabels: {
-        email: "邮箱/手机号/校秀号",
+        // email: "邮箱/手机号/校秀号",
         phone: "手机号码",
         password: "密码",
         verificationCode: "验证码",
@@ -39,8 +39,8 @@ Component({
         wechatLogin: "微信登录",
       },
       errors: {
-        emailRequired: "请输入邮箱地址",
-        emailInvalid: "请输入有效的邮箱地址",
+        // emailRequired: "请输入邮箱地址",
+        // emailInvalid: "请输入有效的邮箱地址",
         phoneRequired: "请输入手机号码",
         phoneInvalid: "请输入有效的手机号码",
         passwordRequired: "请输入密码",
@@ -48,7 +48,7 @@ Component({
         codeRequired: "请输入验证码",
         codeInvalid: "验证码必须为6位数字",
         wechatLoginFailed: "微信登录失败，请重试",
-        emailLoginFailed: "邮箱登录失败，请检查凭据",
+        // emailLoginFailed: "邮箱登录失败，请检查凭据",
         phoneLoginFailed: "手机登录失败，请检查验证码",
         verificationFailed: "验证失败",
       },
@@ -109,7 +109,7 @@ Component({
       const type = e.currentTarget.dataset.type;
       this.setData({
         loginType: type,
-        emailError: "",
+        // emailError: "",
         phoneError: "",
         passwordError: "",
         codeError: "",
@@ -121,8 +121,8 @@ Component({
 
     onEmailInput(e) {
       this.setData({
-        email: e.detail.value,
-        emailError: "",
+        // email: e.detail.value,
+        // emailError: "",
         generalError: "",
       });
     },
@@ -176,10 +176,10 @@ Component({
     },
 
     // Validation methods
-    validateEmail(email) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      return emailRegex.test(email);
-    },
+    // validateEmail(email) {
+    //   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    //   return emailRegex.test(email);
+    // },
 
     validatePhone(phone) {
       const phoneRegex = /\d{11}$/;
@@ -226,67 +226,67 @@ Component({
       }
     },
 
-    async emailLogin() {
-      const { email, password } = this.data;
+    // async emailLogin() {
+    //   const { email, password } = this.data;
 
-      if (!email) {
-        this.setData({ emailError: this.data.messages.errors.emailRequired });
-        return;
-      }
+    //   if (!email) {
+    //     this.setData({ emailError: this.data.messages.errors.emailRequired });
+    //     return;
+    //   }
 
-      if (!this.validateEmail(email)) {
-        this.setData({ emailError: this.data.messages.errors.emailInvalid });
-        return;
-      }
+    //   if (!this.validateEmail(email)) {
+    //     this.setData({ emailError: this.data.messages.errors.emailInvalid });
+    //     return;
+    //   }
 
-      if (!password) {
-        this.setData({
-          passwordError: this.data.messages.errors.passwordRequired,
-        });
-        return;
-      }
+    //   if (!password) {
+    //     this.setData({
+    //       passwordError: this.data.messages.errors.passwordRequired,
+    //     });
+    //     return;
+    //   }
 
-      if (password.length < 6) {
-        this.setData({
-          passwordError: this.data.messages.errors.passwordTooShort,
-        });
-        return;
-      }
+    //   if (password.length < 6) {
+    //     this.setData({
+    //       passwordError: this.data.messages.errors.passwordTooShort,
+    //     });
+    //     return;
+    //   }
 
-      try {
-        this.setData({ loading: true });
+    //   try {
+    //     this.setData({ loading: true });
 
-        const authResult = await this.requestLogin({
-          email,
-          password,
-        });
-        console.log("Email login result:", authResult);
+    //     const authResult = await this.requestLogin({
+    //       email,
+    //       password,
+    //     });
+    //     console.log("Email login result:", authResult);
 
-        this.handleLoginSuccess(authResult);
-      } catch (error) {
-        console.log(error);
-        this.setData({
-          emailError: "",
-          passwordError: "",
-        });
+    //     this.handleLoginSuccess(authResult);
+    //   } catch (error) {
+    //     console.log(error);
+    //     this.setData({
+    //       // emailError: "",
+    //       passwordError: "",
+    //     });
 
-        if (error.message && error.message.includes("email")) {
-          this.setData({
-            emailError: this.data.messages.errors.emailLoginFailed,
-          });
-        } else if (error.message && error.message.includes("password")) {
-          this.setData({
-            passwordError: this.data.messages.errors.emailLoginFailed,
-          });
-        } else {
-          this.setData({
-            emailError: this.data.messages.errors.emailLoginFailed,
-          });
-        }
-      } finally {
-        this.setData({ loading: false });
-      }
-    },
+    //     if (error.message && error.message.includes("email")) {
+    //       this.setData({
+    //         emailError: this.data.messages.errors.emailLoginFailed,
+    //       });
+    //     } else if (error.message && error.message.includes("password")) {
+    //       this.setData({
+    //         passwordError: this.data.messages.errors.emailLoginFailed,
+    //       });
+    //     } else {
+    //       this.setData({
+    //         emailError: this.data.messages.errors.emailLoginFailed,
+    //       });
+    //     }
+    //   } finally {
+    //     this.setData({ loading: false });
+    //   }
+    // },
 
     async phoneLogin() {
       const { phone, verificationCode } = this.data;
@@ -438,9 +438,9 @@ Component({
         case "wechat":
           this.wechatLogin();
           break;
-        case "email":
-          this.emailLogin();
-          break;
+        // case "email":
+        //   this.emailLogin();
+        //   break;
         case "phone":
           this.phoneLogin();
           break;
@@ -559,9 +559,9 @@ Component({
     // Handle login error
     handleLoginError(message, fieldType = null) {
       // Set field-specific error instead of showing toast
-      if (fieldType === "email") {
-        this.setData({ emailError: message });
-      } else if (fieldType === "phone") {
+      // if (fieldType === "email") {
+      //   this.setData({ emailError: message });
+      // } else if (fieldType === "phone") {
         this.setData({ phoneError: message });
       } else if (fieldType === "password") {
         this.setData({ passwordError: message });
@@ -573,7 +573,7 @@ Component({
         // For general errors, set general error field or default to email field
         this.setData({
           generalError: message,
-          emailError: message, // Fallback to email field for general errors
+          // emailError: message, // Fallback to email field for general errors
         });
       }
     }, // API request wrapper

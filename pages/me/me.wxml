@@ -254,7 +254,8 @@
           <text class="error-text" wx:if="{{profileErrors.phone}}">{{profileErrors.phone}}</text>
         </view>
 
-        <!-- Email -->
+        <!-- EMAIL FIELD DISABLED -->
+        <!--
         <view class="form-field">
           <label class="field-label">
             邮箱
@@ -271,7 +272,6 @@
             bindinput="onProfileInputChange"
           />
           
-          <!-- Email Verification Section -->
           <view wx:if="{{emailChanged && !emailVerified && isEditingProfile}}" class="verification-section">
             <button class="send-code-btn" bindtap="sendEmailVerificationCode">
               发送验证码
@@ -291,6 +291,7 @@
           
           <text class="error-text" wx:if="{{profileErrors.email}}">{{profileErrors.email}}</text>
         </view>
+        -->
 
         <!-- Gender -->
         <view class="form-field">

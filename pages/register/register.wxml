@@ -217,7 +217,8 @@
         <text wx:if="{{errors.phone}}" class="error-text">{{errors.phone}}</text>
       </view>
 
-      <!-- Email with Verification -->
+      <!-- EMAIL VERIFICATION DISABLED -->
+      <!--
       <view class="form-field">
         <label class="field-label">
           电子邮箱
@@ -237,7 +238,6 @@
             bindinput="onInputChange"
           />
         </div>
-        <!-- Email Verification -->
         <view wx:if="{{emailChanged && !emailVerified}}" class="verification-section">
           <button class="send-code-btn" bindtap="sendEmailVerification">
             发送验证码
@@ -255,11 +255,11 @@
           </view>
         </view>
         
-        <!-- Email verification messages -->
         <text wx:if="{{emailVerificationMessage}}" class="success-text">{{emailVerificationMessage}}</text>
         <text wx:if="{{emailVerificationError}}" class="error-text">{{emailVerificationError}}</text>
         <text wx:if="{{errors.email}}" class="error-text">{{errors.email}}</text>
       </view>
+      -->
 
       <!-- Step 2 Navigation -->
       <view class="step-navigation">

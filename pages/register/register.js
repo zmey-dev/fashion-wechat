@@ -17,7 +17,7 @@ Page({
       // Basic info
       name: "",
       username: "",
-      email: "",
+      // email: "",
       phone: "",
       id_number: "",
       password: "",
@@ -37,17 +37,17 @@ Page({
     availableMajors: [],
     
     // Verification states
-    emailVerified: false,
+    // emailVerified: false,
     phoneVerified: false,
-    emailOtpCode: "",
+    // emailOtpCode: "",
     phoneOtpCode: "",
-    emailChanged: false,
+    // emailChanged: false,
     phoneChanged: false,
     
     // Verification messages
-    emailVerificationMessage: "",
+    // emailVerificationMessage: "",
     phoneVerificationMessage: "",
-    emailVerificationError: "",
+    // emailVerificationError: "",
     phoneVerificationError: "",
     
     // Year picker data
@@ -59,7 +59,7 @@ Page({
       stepTitles: ["学生信息", "基本信息", "设置密码"],
       placeholders: {
         name: "姓名",
-        email: "电子邮箱",
+        // email: "电子邮箱",
         phone: "手机号码",
         id_number: "身份证号码",
         password: "密码（至少8个字符）",
@@ -73,7 +73,7 @@ Page({
       },
       errors: {
         required: "不能为空",
-        emailFormat: "请输入有效的电子邮箱地址",
+        // emailFormat: "请输入有效的电子邮箱地址",
         phoneFormat: "手机号码格式不正确",
         passwordLength: "密码长度必须至少为8个字符",
         passwordMismatch: "两次输入的密码不一致",
@@ -243,54 +243,54 @@ Page({
   },
 
   // Send email verification
-  sendEmailVerification: function() {
-    if (!this.data.form.email) {
-      this.setData({
-        emailVerificationError: "请先输入邮箱地址",
-        emailVerificationMessage: ""
-      });
-      return;
-    }
+  // sendEmailVerification: function() {
+  //   if (!this.data.form.email) {
+  //     this.setData({
+  //       emailVerificationError: "请先输入邮箱地址",
+  //       emailVerificationMessage: ""
+  //     });
+  //     return;
+  //   }
 
-    wx.showLoading({ title: "发送中..." });
+  //   wx.showLoading({ title: "发送中..." });
     
-    wx.request({
-      url: `${config.BACKEND_URL}/verification/send_email_code`,
-      method: "POST",
-      data: {
-        email: this.data.form.email
-      },
-      header: {
-        "Content-Type": "application/json"
-      },
-      success: (res) => {
-        if (res.statusCode === 200 && res.data.status === "success") {
-          this.setData({
-            emailVerificationMessage: "验证码已发送到您的邮箱",
-            emailVerificationError: ""
-          });
-          // Clear success message after 5 seconds
-          setTimeout(() => {
-            this.setData({ emailVerificationMessage: "" });
-          }, 5000);
-        } else {
-          this.setData({
-            emailVerificationError: res.data?.msg || res.data?.error || "验证码发送失败，请检查邮箱地址",
-            emailVerificationMessage: ""
-          });
-        }
-      },
-      fail: () => {
-        this.setData({
-          emailVerificationError: "网络错误，请稍后重试",
-          emailVerificationMessage: ""
-        });
-      },
-      complete: () => {
-        wx.hideLoading();
-      }
-    });
-  },
+  //   wx.request({
+  //     url: `${config.BACKEND_URL}/verification/send_email_code`,
+  //     method: "POST",
+  //     data: {
+  //       email: this.data.form.email
+  //     },
+  //     header: {
+  //       "Content-Type": "application/json"
+  //     },
+  //     success: (res) => {
+  //       if (res.statusCode === 200 && res.data.status === "success") {
+  //         this.setData({
+  //           emailVerificationMessage: "验证码已发送到您的邮箱",
+  //           emailVerificationError: ""
+  //         });
+  //         // Clear success message after 5 seconds
+  //         setTimeout(() => {
+  //           this.setData({ emailVerificationMessage: "" });
+  //         }, 5000);
+  //       } else {
+  //         this.setData({
+  //           emailVerificationError: res.data?.msg || res.data?.error || "验证码发送失败，请检查邮箱地址",
+  //           emailVerificationMessage: ""
+  //         });
+  //       }
+  //     },
+  //     fail: () => {
+  //       this.setData({
+  //         emailVerificationError: "网络错误，请稍后重试",
+  //         emailVerificationMessage: ""
+  //       });
+  //     },
+  //     complete: () => {
+  //       wx.hideLoading();
+  //     }
+  //   });
+  // },
 
   // Send phone verification
   sendPhoneVerification: function() {
@@ -343,11 +343,11 @@ Page({
   },
 
   // Handle OTP input
-  onEmailOtpInput: function(e) {
-    this.setData({
-      emailOtpCode: e.detail.value
-    });
-  },
+  // onEmailOtpInput: function(e) {
+  //   this.setData({
+  //     emailOtpCode: e.detail.value
+  //   });
+  // },
 
   onPhoneOtpInput: function(e) {
     this.setData({
@@ -356,57 +356,57 @@ Page({
   },
 
   // Verify email code
-  verifyEmailCode: function() {
-    if (!this.data.emailOtpCode) {
-      this.setData({
-        emailVerificationError: "请输入验证码",
-        emailVerificationMessage: ""
-      });
-      return;
-    }
+  // verifyEmailCode: function() {
+  //   if (!this.data.emailOtpCode) {
+  //     this.setData({
+  //       emailVerificationError: "请输入验证码",
+  //       emailVerificationMessage: ""
+  //     });
+  //     return;
+  //   }
 
-    wx.showLoading({ title: "验证中..." });
+  //   wx.showLoading({ title: "验证中..." });
     
-    wx.request({
-      url: `${config.BACKEND_URL}/verification/verify_email_code`,
-      method: "POST",
-      data: {
-        email: this.data.form.email,
-        code: this.data.emailOtpCode
-      },
-      header: {
-        "Content-Type": "application/json"
-      },
-      success: (res) => {
-        if (res.statusCode === 200 && res.data.status === "success") {
-          this.setData({ 
-            emailVerified: true,
-            [`errors.email`]: null,
-            emailVerificationMessage: "邮箱验证成功！",
-            emailVerificationError: ""
-          });
-          // Clear success message after 3 seconds
-          setTimeout(() => {
-            this.setData({ emailVerificationMessage: "" });
-          }, 3000);
-        } else {
-          this.setData({
-            emailVerificationError: res.data?.msg || res.data?.error || "验证码错误或已过期",
-            emailVerificationMessage: ""
-          });
-        }
-      },
-      fail: () => {
-        this.setData({
-          emailVerificationError: "网络错误，请稍后重试",
-          emailVerificationMessage: ""
-        });
-      },
-      complete: () => {
-        wx.hideLoading();
-      }
-    });
-  },
+  //   wx.request({
+  //     url: `${config.BACKEND_URL}/verification/verify_email_code`,
+  //     method: "POST",
+  //     data: {
+  //       email: this.data.form.email,
+  //       code: this.data.emailOtpCode
+  //     },
+  //     header: {
+  //       "Content-Type": "application/json"
+  //     },
+  //     success: (res) => {
+  //       if (res.statusCode === 200 && res.data.status === "success") {
+  //         this.setData({ 
+  //           emailVerified: true,
+  //           [`errors.email`]: null,
+  //           emailVerificationMessage: "邮箱验证成功！",
+  //           emailVerificationError: ""
+  //         });
+  //         // Clear success message after 3 seconds
+  //         setTimeout(() => {
+  //           this.setData({ emailVerificationMessage: "" });
+  //         }, 3000);
+  //       } else {
+  //         this.setData({
+  //           emailVerificationError: res.data?.msg || res.data?.error || "验证码错误或已过期",
+  //           emailVerificationMessage: ""
+  //         });
+  //       }
+  //     },
+  //     fail: () => {
+  //       this.setData({
+  //         emailVerificationError: "网络错误，请稍后重试",
+  //         emailVerificationMessage: ""
+  //       });
+  //     },
+  //     complete: () => {
+  //       wx.hideLoading();
+  //     }
+  //   });
+  // },
 
   // Verify phone code
   verifyPhoneCode: function() {

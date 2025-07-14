@@ -42,7 +42,7 @@ Page({
     // Teacher profile data
     teacherProfile: {
       phone: "",
-      email: "",
+      // email: "",
       name: "",
       username: "",
       gender: "",
@@ -63,11 +63,11 @@ Page({
     // Validation states
     profileErrors: {},
     profileFormValid: false,    // Original values for comparison
-    originalEmail: "",
+    // originalEmail: "",
     originalPhone: "",
 
     // Change tracking
-    emailChanged: false,
+    // emailChanged: false,
     phoneChanged: false,
 
     // WeChat linking state
@@ -75,13 +75,13 @@ Page({
     wechatLinking: false,
 
     // Verification states
-    emailCodeSent: false,
+    // emailCodeSent: false,
     phoneCodeSent: false,
-    emailVerified: false,
+    // emailVerified: false,
     phoneVerified: false,
-    enteredEmailCode: "",
+    // enteredEmailCode: "",
     enteredPhoneCode: "",
-    sendingEmailCode: false,
+    // sendingEmailCode: false,
     sendingPhoneCode: false,
 
     // Upload states
@@ -908,7 +908,7 @@ Page({
     this.setData({
       teacherProfile: {
         phone: processedPhone,
-        email: userInfo.email || "",
+        // email: userInfo.email || "",
         name: userInfo.name || "",
         username: userInfo.username || "",
         gender: userInfo.gender || "",
@@ -918,9 +918,9 @@ Page({
         avatar: userInfo.avatar || "",
         credentialName: userInfo.credentialName || "",
       },
-      originalEmail: userInfo.email || "",
+      // originalEmail: userInfo.email || "",
       originalPhone: processedPhone,
-      emailVerified: userInfo.email_verified || false,
+      // emailVerified: userInfo.email_verified || false,
       phoneVerified: userInfo.phone_verified || false,
     });
 
@@ -936,11 +936,11 @@ Page({
     // Reset states when entering edit mode
     if (this.data.isEditingProfile) {
       this.setData({
-        emailChanged: false,
+        // emailChanged: false,
         phoneChanged: false,
-        emailCodeSent: false,
+        // emailCodeSent: false,
         phoneCodeSent: false,
-        enteredEmailCode: "",
+        // enteredEmailCode: "",
         enteredPhoneCode: "",
         profileErrors: {},
       });
@@ -968,11 +968,12 @@ Page({
     }
 
     // Check if email or phone is being changed
-    if (field === 'email') {
-      this.setData({
-        emailChanged: value !== this.data.originalEmail,
-      });
-    } else if (field === 'phone') {
+    // if (field === 'email') {
+    //   this.setData({
+    //     emailChanged: value !== this.data.originalEmail,
+    //   });
+    // } else if (field === 'phone') {
+    if (field === 'phone') {
       this.setData({
         phoneChanged: value !== this.data.originalPhone,
       });
@@ -1003,7 +1004,7 @@ Page({
   },
   // Validate profile form
   validateProfileForm: function() {
-    const { teacherProfile, emailChanged, phoneChanged, emailVerified, phoneVerified } = this.data;
+    const { teacherProfile, /* emailChanged, */ phoneChanged, /* emailVerified, */ phoneVerified } = this.data;
     let formErrors = {};
 
     if (!teacherProfile.name) formErrors.name = "姓名为必填项";
@@ -1013,9 +1014,9 @@ Page({
     if (!teacherProfile.gender) formErrors.gender = "请选择性别";
 
     // Email validation
-    if (teacherProfile.email && !/\S+@\S+\.\S+/.test(teacherProfile.email)) {
-      formErrors.email = "邮箱格式不正确";
-    }
+    // if (teacherProfile.email && !/\S+@\S+\.\S+/.test(teacherProfile.email)) {
+    //   formErrors.email = "邮箱格式不正确";
+    // }
 
     // Phone validation
     if (teacherProfile.phone && !/\d{11}$/.test(teacherProfile.phone)) {
@@ -1023,9 +1024,9 @@ Page({
     }
 
     // Only validate phone if it's been changed and not verified
-    if (emailChanged && !emailVerified) {
-      formErrors.email = "请验证电子邮箱";
-    }
+    // if (emailChanged && !emailVerified) {
+    //   formErrors.email = "请验证电子邮箱";
+    // }
 
     // Only validate email if it's been changed and not verified
     if (phoneChanged && !phoneVerified) {
@@ -1042,97 +1043,97 @@ Page({
     return formErrors;
   },
   // Send email verification code
-  sendEmailVerificationCode: function() {
-    if (!this.data.emailChanged || !this.data.teacherProfile.email) return;
+  // sendEmailVerificationCode: function() {
+  //   if (!this.data.emailChanged || !this.data.teacherProfile.email) return;
     
-    wx.showLoading({ title: "发送中..." });
+  //   wx.showLoading({ title: "发送中..." });
     
-    wx.request({
-      url: `${config.BACKEND_URL}/verification/send_email_code`,
-      method: "POST",
-      data: {
-        email: this.data.teacherProfile.email
-      },
-      header: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${getApp().globalData.userInfo?.token}`,
-      },
-      success: (res) => {
-        if (res.statusCode === 200 && res.data.status === "success") {
-          wx.showToast({
-            title: "验证码已发送",
-            icon: "success"
-          });
-        } else {
-          wx.showToast({
-            title: res.data?.msg || "发送失败",
-            icon: "none"
-          });
-        }
-      },
-      fail: () => {
-        wx.showToast({
-          title: "网络错误",
-          icon: "none"
-        });
-      },
-      complete: () => {
-        wx.hideLoading();
-      }
-    });
-  },
+  //   wx.request({
+  //     url: `${config.BACKEND_URL}/verification/send_email_code`,
+  //     method: "POST",
+  //     data: {
+  //       email: this.data.teacherProfile.email
+  //     },
+  //     header: {
+  //       "Content-Type": "application/json",
+  //       Authorization: `Bearer ${getApp().globalData.userInfo?.token}`,
+  //     },
+  //     success: (res) => {
+  //       if (res.statusCode === 200 && res.data.status === "success") {
+  //         wx.showToast({
+  //           title: "验证码已发送",
+  //           icon: "success"
+  //         });
+  //       } else {
+  //         wx.showToast({
+  //           title: res.data?.msg || "发送失败",
+  //           icon: "none"
+  //         });
+  //       }
+  //     },
+  //     fail: () => {
+  //       wx.showToast({
+  //         title: "网络错误",
+  //         icon: "none"
+  //       });
+  //     },
+  //     complete: () => {
+  //       wx.hideLoading();
+  //     }
+  //   });
+  // },
   // Verify email code
-  verifyEmailCode: function() {
-    if (!this.data.enteredEmailCode || !this.data.teacherProfile.email) {
-      wx.showToast({
-        title: "请输入验证码",
-        icon: "none"
-      });
-      return;
-    }
+  // verifyEmailCode: function() {
+  //   if (!this.data.enteredEmailCode || !this.data.teacherProfile.email) {
+  //     wx.showToast({
+  //       title: "请输入验证码",
+  //       icon: "none"
+  //     });
+  //     return;
+  //   }
     
-    wx.showLoading({ title: "验证中..." });
+  //   wx.showLoading({ title: "验证中..." });
     
-    wx.request({
-      url: `${config.BACKEND_URL}/verification/verify_email_code`,
-      method: "POST",
-      data: {
-        email: this.data.teacherProfile.email,
-        code: this.data.enteredEmailCode
-      },
-      header: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${getApp().globalData.userInfo?.token}`,
-      },
-      success: (res) => {
-        if (res.statusCode === 200 && res.data.status === "success") {
-          this.setData({ 
-            emailVerified: true,
-            emailCodeSent: false
-          });
-          wx.showToast({
-            title: "邮箱验证成功",
-            icon: "success"
-          });
-          this.validateProfileForm();
-        } else {
-          wx.showToast({
-            title: res.data?.msg || "验证失败",
-            icon: "none"
-          });
-        }
-      },
-      fail: () => {
-        wx.showToast({
-          title: "网络错误",
-          icon: "none"
-        });
-      },
-      complete: () => {
-        wx.hideLoading();
-      }
-    });
-  },
+  //   wx.request({
+  //     url: `${config.BACKEND_URL}/verification/verify_email_code`,
+  //     method: "POST",
+  //     data: {
+  //       email: this.data.teacherProfile.email,
+  //       code: this.data.enteredEmailCode
+  //     },
+  //     header: {
+  //       "Content-Type": "application/json",
+  //       Authorization: `Bearer ${getApp().globalData.userInfo?.token}`,
+  //     },
+  //     success: (res) => {
+  //       if (res.statusCode === 200 && res.data.status === "success") {
+  //         this.setData({ 
+  //           emailVerified: true,
+  //           emailCodeSent: false
+  //         });
+  //         wx.showToast({
+  //           title: "邮箱验证成功",
+  //           icon: "success"
+  //         });
+  //         this.validateProfileForm();
+  //       } else {
+  //         wx.showToast({
+  //           title: res.data?.msg || "验证失败",
+  //           icon: "none"
+  //         });
+  //       }
+  //     },
+  //     fail: () => {
+  //       wx.showToast({
+  //         title: "网络错误",
+  //         icon: "none"
+  //       });
+  //     },
+  //     complete: () => {
+  //       wx.hideLoading();
+  //     }
+  //   });
+  // },
   // Send phone verification code
   sendPhoneVerificationCode: function() {
     if (!this.data.phoneChanged || !this.data.teacherProfile.phone) return;
@@ -1603,11 +1604,11 @@ Page({
             isEditingProfile: false,
             profileErrors: {},
             selectedAvatar: updatedUserInfo?.avatar || this.data.teacherProfile.avatar,
-            originalEmail: updatedUserInfo?.email || this.data.teacherProfile.email,
+            // originalEmail: updatedUserInfo?.email || this.data.teacherProfile.email,
             originalPhone: updatedUserInfo?.phone?.replace("+86", "") || this.data.teacherProfile.phone,
-            emailChanged: false,
+            // emailChanged: false,
             phoneChanged: false,
-            enteredEmailCode: "",
+            // enteredEmailCode: "",
             enteredPhoneCode: ""
           });
           
@@ -1641,11 +1642,11 @@ Page({
     this.setData({
       isEditingProfile: false,
       profileErrors: {},
-      emailChanged: false,
+      // emailChanged: false,
       phoneChanged: false,
       emailVerified: true,
       phoneVerified: true,
-      enteredEmailCode: "",
+      // enteredEmailCode: "",
       enteredPhoneCode: "",
       selectedAvatar: this.data.teacherProfile.avatar || "",
       credentialFile: null,
