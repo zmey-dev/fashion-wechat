@@ -27,6 +27,24 @@ Page({
     return cleaned.startsWith('+86') ? cleaned : '+86' + cleaned.replace(/^\+?86?/, '');
   },
 
+  // Generate default student ID
+  generateDefaultStudentId: function() {
+    // Get current date in YYYYMMDD format
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const dateString = `${year}${month}${day}`;
+    
+    // Get current timestamp in milliseconds
+    const timestamp = Date.now();
+    
+    // Extract the last 9 digits of the timestamp to keep the ID reasonably short
+    const timestampSuffix = String(timestamp).slice(-9);
+    
+    return `xs${dateString}${timestampSuffix}`;
+  },
+
   data: {
     // Form step state
     formStep: 1,
@@ -661,10 +679,13 @@ Page({
 
   // Handle normal registration
   handleNormalRegistration: function(form) {
+    // Generate default student ID instead of using id_number
+    const studentId = this.generateDefaultStudentId();
+    
     // Prepare form data exactly like React version
     const formData = {
       name: form.name,
-      username: form.id_number,
+      username: studentId,
       email: form.email,
       phone: this.ensureCountryCode(form.phone),
       id_number: form.id_number,
@@ -703,10 +724,13 @@ Page({
     wx.login({
       success: (loginRes) => {
         if (loginRes.code) {
+          // Generate default student ID instead of using id_number
+          const studentId = this.generateDefaultStudentId();
+          
           const formData = {
             wechat_code: loginRes.code,
             name: form.name,
-            username: form.id_number,
+            username: studentId,
             email: form.email,
             phone: this.ensureCountryCode(form.phone),
             id_number: form.id_number,
@@ -795,10 +819,13 @@ Page({
 
   // Legacy method (kept for compatibility)
   submitForm: function() {
+    // Generate default student ID
+    const studentId = this.generateDefaultStudentId();
+    
     // Prepare form data exactly like React version
     const formData = {
       name: form.name,
-      username: form.school?.name + form.id_number,
+      username: studentId,
       email: form.email,
       phone: this.ensureCountryCode(form.phone),
       id_number: form.id_number,
