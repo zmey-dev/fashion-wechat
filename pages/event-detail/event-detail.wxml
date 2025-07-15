@@ -29,7 +29,7 @@
       <view class="event-info-section">
         <view class="info-container">
           <view class="event-title-wrapper">
-            <text class="event-title">{{event.title || '活动发现页'}}</text>
+            <text class="event-title" style="color: {{event.title_color || '#FFFFFF'}};">{{event.title || '活动发现页'}}</text>
             
             <view class="event-meta">
               <!-- Date Info -->

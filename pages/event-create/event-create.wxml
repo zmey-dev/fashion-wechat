@@ -61,6 +61,29 @@
             />
             <view class="char-count">{{title.length}}/50</view>
           </view>
+        </view>
+
+        <!-- Title Color -->
+        <view class="form-group">
+          <view class="form-label">
+            <text class="label-text">标题颜色</text>
+          </view>
+          <view class="color-picker-wrapper">
+            <view class="color-options">
+              <view 
+                wx:for="{{['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#FFA500', '#800080', '#000000', '#FFFFFF']}}" 
+                wx:key="*this"
+                class="color-option {{titleColor === item ? 'selected' : ''}}"
+                style="background-color: {{item}};"
+                data-color="{{item}}"
+                bindtap="selectColor"
+              ></view>
+            </view>
+            <view class="color-preview">
+              <text class="preview-label">预览: </text>
+              <text class="preview-text" style="color: {{titleColor}};">{{title || '活动标题'}}</text>
+            </view>
+          </view>
         </view>        <!-- Event Time -->
         <view class="form-group">
           <view class="form-label">

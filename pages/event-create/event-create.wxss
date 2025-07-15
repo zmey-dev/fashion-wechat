@@ -874,3 +874,55 @@ page {
   outline: none;
   box-shadow: 0 0 0 4rpx rgba(128, 196, 255, 0.25);
 }
+
+/* Color Picker Styles */
+.color-picker-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+}
+
+.color-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+  justify-content: flex-start;
+}
+
+.color-option {
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 50%;
+  border: 4rpx solid #4a4a4a;
+  transition: all 0.3s ease;
+  position: relative;
+  cursor: pointer;
+}
+
+.color-option.selected {
+  border-color: #ffffff;
+  transform: scale(1.1);
+  box-shadow: 0 4rpx 12rpx rgba(255, 255, 255, 0.3);
+}
+
+.color-option:active {
+  transform: scale(0.95);
+}
+
+.color-preview {
+  padding: 20rpx;
+  background: #2d2d2d;
+  border-radius: 12rpx;
+  border: 1rpx solid #4a4a4a;
+}
+
+.preview-label {
+  font-size: 28rpx;
+  color: #bbbbbb;
+}
+
+.preview-text {
+  font-size: 32rpx;
+  font-weight: 600;
+  margin-left: 8rpx;
+}

@@ -237,10 +237,28 @@ Page({
       return;
     }
 
-    // Navigate to create post for event
-    wx.navigateTo({
-      url: `/pages/upload/upload?eventId=${this.data.eventId}&type=event`
-    });
+    // Show event rules before proceeding
+    if (this.data.event?.description) {
+      wx.showModal({
+        title: '活动规则',
+        content: this.data.event.description.replace(/<[^>]*>/g, '').substring(0, 200) + (this.data.event.description.length > 200 ? '...' : ''),
+        confirmText: '确认参加',
+        cancelText: '取消',
+        success: (res) => {
+          if (res.confirm) {
+            // Navigate to create post for event
+            wx.navigateTo({
+              url: `/pages/upload/upload?eventId=${this.data.eventId}&type=event`
+            });
+          }
+        }
+      });
+    } else {
+      // Navigate to create post for event directly if no description
+      wx.navigateTo({
+        url: `/pages/upload/upload?eventId=${this.data.eventId}&type=event`
+      });
+    }
   },
 
   onPostTap: function (e) {

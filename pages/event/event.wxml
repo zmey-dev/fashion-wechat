@@ -92,7 +92,7 @@
                 <image class="item-image" src="{{item.poster_image}}" mode="aspectFill"></image>
               </view>
               <view class="nav-item-content">
-                <text class="item-title">{{item.title}}</text>
+                <text class="item-title" style="color: {{item.title_color || '#FFFFFF'}};">{{item.title}}</text>
                 <text class="item-subtitle">{{item.user.university.name}}</text>
                 <view class="item-indicator" wx:if="{{currentEventIndex === index}}"></view>
               </view>
@@ -116,7 +116,7 @@
             <view class="past-status">已结束</view>
           </view>
           <view class="past-info">
-            <text class="past-title">{{item.title}}</text>
+            <text class="past-title" style="color: {{item.title_color || '#FFFFFF'}};">{{item.title}}</text>
             <text class="past-university">{{item.user.university.name}}</text>
             <view class="past-stats">
               <text class="past-participants" wx:if="{{item.allow_limit}}">{{item.students_count}}/{{item.limit}} 参与者</text>
@@ -197,7 +197,7 @@
             </view>            
             <view class="description-content">
               <view class="info-content">
-                  <text class="info-title">{{selectedEvent.title}}</text>
+                  <text class="info-title" style="color: {{selectedEvent.title_color || '#FFFFFF'}};">{{selectedEvent.title}}</text>
                   <view class="info-meta">
                     <view class="meta-row">
                       <view class="meta-icon">

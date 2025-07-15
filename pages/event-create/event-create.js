@@ -6,6 +6,7 @@ Page({
   data: {
     // Form data
     title: "",
+    titleColor: "#000000",
     posterImage: null,
     posterImageUrl: null,
     posterUploadUrl: null, // Store the final uploaded URL
@@ -118,6 +119,7 @@ Page({
         );
         this.setData({
           title: eventData.title,
+          titleColor: eventData.title_color || "#000000",
           posterImageUrl: eventData.poster_image,
           posterUploadUrl: eventData.poster_image, // Set uploaded URL for existing poster
           posterUploaded: true, // Mark as already uploaded
@@ -212,6 +214,19 @@ Page({
   onTitleInput(e) {
     this.setData({
       title: e.detail.value,
+    });
+  },
+
+  onTitleColorChange(e) {
+    this.setData({
+      titleColor: e.detail.value,
+    });
+  },
+
+  selectColor(e) {
+    const color = e.currentTarget.dataset.color;
+    this.setData({
+      titleColor: color,
     });
   },
 
@@ -607,6 +622,7 @@ Page({
     // Prepare form data
     const formData = {
       title: this.data.title.trim(),
+      title_color: this.data.titleColor,
       description: this.data.description.trim(),
       start_date: this.formatDateString(this.data.startDate),
       end_date: this.formatDateString(this.data.endDate),

@@ -210,43 +210,9 @@ Page({
     const event = this.data.selectedEvent;
     if (!event) return;
 
-    // If teacher, show event details without participation checks
-    if (this.data.isTeacher) {
-      this.setData({
-        showRulesModal: true,
-      });
-      return;
-    }
-
-    // Get current user info
-    const userInfo = getApp().globalData.userInfo || {};
-
-    // Check participation limit
-    if (event.allow_limit && event.students_count >= event.limit) {
-      wx.showToast({
-        title: this.data.messages.errors.eventFull,
-        icon: "none",
-        duration: 2000,
-      });
-      return;
-    }
-
-    // Check if other school students are allowed
-    if (
-      !event.allow_other_school &&
-      userInfo.university_id !== event.user.university_id
-    ) {
-      wx.showToast({
-        title: this.data.messages.errors.schoolRestriction,
-        icon: "none",
-        duration: 2000,
-      });
-      return;
-    }
-
-    // Show rules modal
-    this.setData({
-      showRulesModal: true,
+    // Navigate directly to event detail page for both teachers and students
+    wx.navigateTo({
+      url: `/pages/event-detail/event-detail?eventId=${event.id}`,
     });
   },
 
