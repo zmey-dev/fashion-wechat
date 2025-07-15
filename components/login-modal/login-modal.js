@@ -474,20 +474,35 @@ Component({
         });
         const data = await this.requestVerificationCode(this.ensureCountryCode(phone));
         console.log("Verification code sent:", data);
-        // Start countdown
-        this.startCountdown(); // Clear any previous errors and show success message
-        this.setData({
-          phoneError: "",
-          codeError: "",
-          phoneSuccessMessage: data.msg || this.data.messages.status.codeSent,
-        });
-
-        // Clear the success message after 3 seconds
-        setTimeout(() => {
+        // Check if it's an alert (existing code) or new code sent
+        if (data.alert) {
+          // Don't start countdown for existing codes, just show alert
           this.setData({
-            phoneSuccessMessage: "",
+            phoneError: "",
+            codeError: "",
+            phoneSuccessMessage: data.alert,
           });
-        }, 3000);
+          // Clear the success message after 8 seconds
+          setTimeout(() => {
+            this.setData({
+              phoneSuccessMessage: "",
+            });
+          }, 8000);
+        } else {
+          // Normal success - new code sent
+          this.startCountdown(); // Start countdown
+          this.setData({
+            phoneError: "",
+            codeError: "",
+            phoneSuccessMessage: data.msg || this.data.messages.status.codeSent,
+          });
+          // Clear the success message after 3 seconds
+          setTimeout(() => {
+            this.setData({
+              phoneSuccessMessage: "",
+            });
+          }, 3000);
+        }
       } catch (error) {
         this.setData({
           phoneError: this.data.messages.status.sendFailed,

@@ -346,14 +346,28 @@ Page({
       },
       success: (res) => {
         if (res.statusCode === 200 && res.data.status === "success") {
-          this.setData({
-            phoneVerificationMessage: res.data?.msg || "验证码已发送到您的手机",
-            phoneVerificationError: ""
-          });
-          // Clear success message after 5 seconds
-          setTimeout(() => {
-            this.setData({ phoneVerificationMessage: "" });
-          }, 5000);
+          // Check if it's an alert (existing code) or new code sent
+          if (res.data.alert) {
+            // Display alert in green
+            this.setData({
+              phoneVerificationMessage: res.data.alert,
+              phoneVerificationError: ""
+            });
+            // Clear success message after 8 seconds
+            setTimeout(() => {
+              this.setData({ phoneVerificationMessage: "" });
+            }, 8000);
+          } else {
+            // Normal success - new code sent
+            this.setData({
+              phoneVerificationMessage: res.data?.msg || "验证码已发送到您的手机",
+              phoneVerificationError: ""
+            });
+            // Clear success message after 5 seconds
+            setTimeout(() => {
+              this.setData({ phoneVerificationMessage: "" });
+            }, 5000);
+          }
         } else {
           this.setData({
             phoneVerificationError: res.data?.msg || res.data?.error || "验证码发送失败，请检查手机号码",

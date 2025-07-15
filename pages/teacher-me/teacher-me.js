@@ -83,6 +83,8 @@ Page({
     enteredPhoneCode: "",
     // sendingEmailCode: false,
     sendingPhoneCode: false,
+    phoneSuccessMessage: "",
+    phoneErrorMessage: "",
 
     // Upload states
     uploadingAvatar: false,
@@ -985,6 +987,8 @@ Page({
     if (field === "phone") {
       this.setData({
         phoneChanged: value !== this.data.originalPhone,
+        phoneSuccessMessage: "",
+        phoneErrorMessage: ""
       });
     }
 
@@ -1166,21 +1170,39 @@ Page({
       },
       success: (res) => {
         if (res.statusCode === 200 && res.data.status === "success") {
-          wx.showToast({
-            title: "验证码已发送",
-            icon: "success",
-          });
+          // Check if it's an alert (existing code) or new code sent
+          if (res.data.alert) {
+            // Display alert in green
+            this.setData({
+              phoneSuccessMessage: res.data.alert,
+              phoneErrorMessage: ""
+            });
+            // Clear success message after 8 seconds
+            setTimeout(() => {
+              this.setData({ phoneSuccessMessage: "" });
+            }, 8000);
+          } else {
+            // Normal success - new code sent
+            this.setData({
+              phoneSuccessMessage: res.data?.msg || "验证码已发送",
+              phoneErrorMessage: ""
+            });
+            // Clear success message after 5 seconds
+            setTimeout(() => {
+              this.setData({ phoneSuccessMessage: "" });
+            }, 5000);
+          }
         } else {
-          wx.showToast({
-            title: res.data?.msg || "发送失败",
-            icon: "none",
+          this.setData({
+            phoneErrorMessage: res.data?.msg || "发送失败",
+            phoneSuccessMessage: ""
           });
         }
       },
       fail: () => {
-        wx.showToast({
-          title: "网络错误",
-          icon: "none",
+        this.setData({
+          phoneErrorMessage: "网络错误",
+          phoneSuccessMessage: ""
         });
       },
       complete: () => {
@@ -1216,23 +1238,25 @@ Page({
           this.setData({
             phoneVerified: true,
             [`profileErrors.phone`]: false,
+            phoneSuccessMessage: "手机验证成功",
+            phoneErrorMessage: ""
           });
-          wx.showToast({
-            title: "手机验证成功",
-            icon: "success",
-          });
+          // Clear success message after 3 seconds
+          setTimeout(() => {
+            this.setData({ phoneSuccessMessage: "" });
+          }, 3000);
           this.validateProfileForm();
         } else {
-          wx.showToast({
-            title: res.data?.msg || "验证失败",
-            icon: "none",
+          this.setData({
+            phoneErrorMessage: res.data?.msg || "验证失败",
+            phoneSuccessMessage: ""
           });
         }
       },
       fail: () => {
-        wx.showToast({
-          title: "网络错误",
-          icon: "none",
+        this.setData({
+          phoneErrorMessage: "网络错误",
+          phoneSuccessMessage: ""
         });
       },
       complete: () => {

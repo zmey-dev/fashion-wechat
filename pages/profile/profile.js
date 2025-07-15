@@ -713,21 +713,39 @@ Page({
       },
       success: (res) => {
         if (res.statusCode === 200 && res.data.status === "success") {
-          wx.showToast({
-            title: this.data.messages.success.otpSent,
-            icon: "success",
-          });
+          // Check if it's an alert (existing code) or new code sent
+          if (res.data.alert) {
+            // Display alert in green
+            this.setData({
+              phoneSuccessMessage: res.data.alert,
+              phoneErrorMessage: ""
+            });
+            // Clear success message after 8 seconds
+            setTimeout(() => {
+              this.setData({ phoneSuccessMessage: "" });
+            }, 8000);
+          } else {
+            // Normal success - new code sent
+            this.setData({
+              phoneSuccessMessage: res.data?.msg || this.data.messages.success.otpSent,
+              phoneErrorMessage: ""
+            });
+            // Clear success message after 5 seconds
+            setTimeout(() => {
+              this.setData({ phoneSuccessMessage: "" });
+            }, 5000);
+          }
         } else {
-          wx.showToast({
-            title: res.data?.msg || this.data.messages.errors.otpSendFailed,
-            icon: "none",
+          this.setData({
+            phoneErrorMessage: res.data?.msg || this.data.messages.errors.otpSendFailed,
+            phoneSuccessMessage: ""
           });
         }
       },
       fail: () => {
-        wx.showToast({
-          title: this.data.messages.errors.networkError,
-          icon: "none",
+        this.setData({
+          phoneErrorMessage: this.data.messages.errors.networkError,
+          phoneSuccessMessage: ""
         });
       },
       complete: () => {

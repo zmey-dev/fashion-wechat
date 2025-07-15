@@ -1135,6 +1135,17 @@ page {
   padding-left: 8rpx;
 }
 
+/* Success Text */
+.success-text {
+  font-size: 24rpx;
+  color: #10b981;
+  margin-top: 12rpx;
+  display: block;
+  font-weight: 500;
+  letter-spacing: 0.5rpx;
+  padding-left: 8rpx;
+}
+
 /* Profile Status */
 .profile-status {
   background: rgba(30, 30, 30, 0.8);

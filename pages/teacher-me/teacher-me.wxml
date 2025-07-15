@@ -553,6 +553,10 @@
               </view>
             </view>
             
+            <!-- Success message -->
+            <text class="success-text" wx:if="{{phoneSuccessMessage}}">{{phoneSuccessMessage}}</text>
+            <!-- Error message -->
+            <text class="error-text" wx:if="{{phoneErrorMessage}}">{{phoneErrorMessage}}</text>
             <text class="error-text" wx:if="{{profileErrors.phone}}">{{profileErrors.phone}}</text>
           </view>
 
