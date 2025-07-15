@@ -2,7 +2,7 @@
 .app-layout {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  min-height: 100vh;
   background-color: #000;
 }
 
@@ -131,11 +131,9 @@
 /* Content Area */
 .app-layout-content {
   flex: 1;
-  overflow-y: hidden;
   position: relative;
   padding-top: 120rpx; /* Space for fixed filter bar */
   padding-bottom: 120rpx; /* Space for fixed tab bar */
-  overflow: hidden;
 }
 
 /* Teacher layout - no bottom tab bar, so no bottom padding needed */

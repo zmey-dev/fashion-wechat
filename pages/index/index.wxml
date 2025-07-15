@@ -65,10 +65,14 @@
   <!-- Scroll To Top Button -->
   <view 
     wx:if="{{showScrollTop}}" 
-    class="scroll-top-button" 
+    class="scroll-top-button {{scrollTopAnimating ? 'animating' : ''}}" 
     bindtap="onScrollToTop"
   >
-    <text class="scroll-up-icon">⬆️</text>
+    <view class="scroll-top-inner">
+      <view class="arrow-up"></view>
+      <view class="arrow-up second"></view>
+    </view>
+    <view class="scroll-top-ripple"></view>
   </view>
     
   <!-- Login Modal -->

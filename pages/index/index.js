@@ -11,6 +11,7 @@ Page({
     userInfo: null,
     showLoginModal: false,
     showScrollTop: false,
+    scrollTopAnimating: false,
     existPostIds: [],
     showUserIdModal: false,
     userId: "",
@@ -303,7 +304,14 @@ Page({
 
   // Handle reaching bottom of page for infinite scroll
   onReachBottom: function() {
+    console.log('onReachBottom triggered', {
+      hasMore: this.data.hasMore,
+      loading: this.data.loading,
+      postsLength: this.data.posts.length
+    });
+    
     if (this.data.hasMore && !this.data.loading) {
+      console.log('Loading more posts...');
       this.loadPosts(false);
     }
   },
@@ -344,11 +352,6 @@ Page({
     this.handleRefresh();
   },
 
-  onReachBottom: function () {
-    if (this.data.hasMore && !this.data.loading) {
-      this.loadPosts(false);
-    }
-  },
 
   onPageScroll: function (e) {
     // Show scroll to top button based on scroll position
@@ -359,9 +362,22 @@ Page({
   },
 
   onScrollToTop: function () {
+    // Add animation feedback
+    this.setData({ scrollTopAnimating: true });
+    
+    // Haptic feedback
+    wx.vibrateShort({ type: 'light' });
+    
+    // Smooth scroll to top
     wx.pageScrollTo({
       scrollTop: 0,
-      duration: 300,
+      duration: 500,
+      complete: () => {
+        // Remove animation class after scroll completes
+        setTimeout(() => {
+          this.setData({ scrollTopAnimating: false });
+        }, 600);
+      }
     });
   },
 
