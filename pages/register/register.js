@@ -224,15 +224,16 @@ Page({
     });
 
     // Handle specific field changes
-    if (field === 'email') {
-      this.setData({
-        emailChanged: true,
-        emailVerified: false,
-        emailOtpCode: "",
-        emailVerificationMessage: "",
-        emailVerificationError: ""
-      });
-    } else if (field === 'phone') {
+    // if (field === 'email') {
+    //   this.setData({
+    //     emailChanged: true,
+    //     emailVerified: false,
+    //     emailOtpCode: "",
+    //     emailVerificationMessage: "",
+    //     emailVerificationError: ""
+    //   });
+    // } else 
+    if (field === 'phone') {
       this.setData({
         phoneChanged: true,
         phoneVerified: false,
@@ -549,13 +550,13 @@ Page({
       // Basic info validation
       if (!form.name.trim()) errors.name = "姓名不能为空";
       
-      if (!form.email.trim()) {
-        errors.email = "电子邮箱不能为空";
-      } else if (!/\S+@\S+\.\S+/.test(form.email)) {
-        errors.email = "请输入有效的电子邮箱地址";
-      } else if (this.data.emailChanged && !this.data.emailVerified) {
-        errors.email = "请验证邮箱";
-      }
+      // if (!form.email.trim()) {
+      //   errors.email = "电子邮箱不能为空";
+      // } else if (!/\S+@\S+\.\S+/.test(form.email)) {
+      //   errors.email = "请输入有效的电子邮箱地址";
+      // } else if (this.data.emailChanged && !this.data.emailVerified) {
+      //   errors.email = "请验证邮箱";
+      // }
       
       if (!form.phone.trim()) {
         errors.phone = "手机号码不能为空";
@@ -590,13 +591,13 @@ Page({
     // Basic info
     if (!form.name.trim()) errors.name = "姓名不能为空";
     
-    if (!form.email.trim()) {
-      errors.email = "电子邮箱不能为空";
-    } else if (!/\S+@\S+\.\S+/.test(form.email)) {
-      errors.email = "请输入有效的电子邮箱地址";
-    } else if (this.data.emailChanged && !this.data.emailVerified) {
-      errors.email = "请验证邮箱";
-    }
+    // if (!form.email.trim()) {
+    //   errors.email = "电子邮箱不能为空";
+    // } else if (!/\S+@\S+\.\S+/.test(form.email)) {
+    //   errors.email = "请输入有效的电子邮箱地址";
+    // } else if (this.data.emailChanged && !this.data.emailVerified) {
+    //   errors.email = "请验证邮箱";
+    // }
     
     if (!form.phone.trim()) {
       errors.phone = "手机号码不能为空";
@@ -686,7 +687,7 @@ Page({
     const formData = {
       name: form.name,
       username: studentId,
-      email: form.email,
+      // email: form.email,
       phone: this.ensureCountryCode(form.phone),
       id_number: form.id_number,
       password: form.password,
@@ -731,7 +732,7 @@ Page({
             wechat_code: loginRes.code,
             name: form.name,
             username: studentId,
-            email: form.email,
+            // email: form.email,
             phone: this.ensureCountryCode(form.phone),
             id_number: form.id_number,
             password: form.password,
@@ -826,7 +827,7 @@ Page({
     const formData = {
       name: form.name,
       username: studentId,
-      email: form.email,
+      // email: form.email,
       phone: this.ensureCountryCode(form.phone),
       id_number: form.id_number,
       password: form.password,
