@@ -50,6 +50,9 @@ Page({
     // WeChat linking state
     isWechatLinked: false,
     wechatLinking: false,
+    
+    // Countdown for SMS resend
+    phoneCountdown: 0,
     // Chinese messages for UI text
     messages: {
       loading: "加载中...",
@@ -695,9 +698,29 @@ Page({
   //   });
   // },
 
+  // Start countdown timer
+  startCountdown: function() {
+    this.setData({ phoneCountdown: 60 });
+
+    const timer = setInterval(() => {
+      const { phoneCountdown } = this.data;
+      if (phoneCountdown <= 1) {
+        clearInterval(timer);
+        this.setData({ phoneCountdown: 0 });
+      } else {
+        this.setData({ phoneCountdown: phoneCountdown - 1 });
+      }
+    }, 1000);
+  },
+
   // Send phone verification code
   sendPhoneVerificationCode: function () {
     if (!this.data.phoneChanged || !this.data.profileForm.phone) return;
+
+    // Check if countdown is active
+    if (this.data.phoneCountdown > 0) {
+      return;
+    }
 
     wx.showLoading({ title: "发送中..." });
 
@@ -713,6 +736,9 @@ Page({
       },
       success: (res) => {
         if (res.statusCode === 200 && res.data.status === "success") {
+          // Always start countdown regardless of alert or new code
+          this.startCountdown();
+          
           // Check if it's an alert (existing code) or new code sent
           if (res.data.alert) {
             // Display alert in green

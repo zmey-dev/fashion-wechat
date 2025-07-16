@@ -98,8 +98,8 @@
           
           <!-- Phone Verification Section -->
           <view wx:if="{{phoneChanged && !phoneVerified && isEditingProfile}}" class="verification-section">
-            <view class="profile-action-btn send-code-btn" bindtap="sendPhoneVerificationCode">
-              <text class="btn-text">发送验证码</text>
+            <view class="profile-action-btn send-code-btn {{phoneCountdown > 0 ? 'disabled' : ''}}" bindtap="sendPhoneVerificationCode">
+              <text class="btn-text">{{phoneCountdown > 0 ? phoneCountdown + '秒后重试' : '发送验证码'}}</text>
             </view>
             <view class="otp-input-container">
               <view class="input-wrapper">

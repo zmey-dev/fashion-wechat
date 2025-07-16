@@ -474,9 +474,12 @@ Component({
         });
         const data = await this.requestVerificationCode(this.ensureCountryCode(phone));
         console.log("Verification code sent:", data);
+        // Always start countdown regardless of alert or new code
+        this.startCountdown();
+        
         // Check if it's an alert (existing code) or new code sent
         if (data.alert) {
-          // Don't start countdown for existing codes, just show alert
+          // Show alert message
           this.setData({
             phoneError: "",
             codeError: "",
@@ -490,7 +493,6 @@ Component({
           }, 8000);
         } else {
           // Normal success - new code sent
-          this.startCountdown(); // Start countdown
           this.setData({
             phoneError: "",
             codeError: "",

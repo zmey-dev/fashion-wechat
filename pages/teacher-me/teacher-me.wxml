@@ -524,7 +524,7 @@
                 bindinput="onProfileInputChange"
               />
               <div 
-                class="verify-btn {{phoneChanged && !phoneVerified && !sendingPhoneCode ? '' : 'disabled'}}"
+                class="verify-btn {{phoneChanged && !phoneVerified && !sendingPhoneCode && phoneCountdown === 0 ? '' : 'disabled'}}"
                 bindtap="sendPhoneVerificationCode"
                 wx:if="{{isEditingProfile}}"
               >
@@ -534,12 +534,13 @@
                   <view class="loading-spinner small"></view>
                   <text>发送中</text>
                 </block>
+                <block wx:elif="{{phoneCountdown > 0}}">{{phoneCountdown}}秒后重试</block>
                 <block wx:else>获取验证码</block>
               </div>
             </view>
             
             <!-- Phone Verification Section -->
-            <view wx:if="{{phoneCodeSent && phoneChanged && !phoneVerified && isEditingProfile}}" class="verification-section">
+            <view wx:if="{{phoneChanged && !phoneVerified && isEditingProfile}}" class="verification-section">
               <view class="otp-input-container">
                 <input 
                   class="otp-input"

@@ -94,6 +94,9 @@ Page({
     // emailVerificationError: "",
     phoneVerificationError: "",
     
+    // Countdown for SMS resend
+    phoneCountdown: 0,
+    
     // Year picker data
     years: [],
     currentYear: new Date().getFullYear(),
@@ -341,6 +344,21 @@ Page({
   //   });
   // },
 
+  // Start countdown timer
+  startCountdown: function() {
+    this.setData({ phoneCountdown: 60 });
+
+    const timer = setInterval(() => {
+      const { phoneCountdown } = this.data;
+      if (phoneCountdown <= 1) {
+        clearInterval(timer);
+        this.setData({ phoneCountdown: 0 });
+      } else {
+        this.setData({ phoneCountdown: phoneCountdown - 1 });
+      }
+    }, 1000);
+  },
+
   // Send phone verification
   sendPhoneVerification: function() {
     if (!this.data.form.phone) {
@@ -348,6 +366,11 @@ Page({
         phoneVerificationError: "请先输入手机号码",
         phoneVerificationMessage: ""
       });
+      return;
+    }
+
+    // Check if countdown is active
+    if (this.data.phoneCountdown > 0) {
       return;
     }
 
@@ -364,6 +387,9 @@ Page({
       },
       success: (res) => {
         if (res.statusCode === 200 && res.data.status === "success") {
+          // Always start countdown regardless of alert or new code
+          this.startCountdown();
+          
           // Check if it's an alert (existing code) or new code sent
           if (res.data.alert) {
             // Display alert in green

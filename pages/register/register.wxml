@@ -194,8 +194,8 @@
         
         <!-- Phone Verification -->
         <view wx:if="{{phoneChanged && !phoneVerified}}" class="verification-section">
-          <button class="send-code-btn" bindtap="sendPhoneVerification">
-            发送验证码
+          <button class="send-code-btn" bindtap="sendPhoneVerification" disabled="{{phoneCountdown > 0}}">
+            {{phoneCountdown > 0 ? phoneCountdown + '秒后重试' : '发送验证码'}}
           </button>
           <view class="otp-input-container">
             <input 
