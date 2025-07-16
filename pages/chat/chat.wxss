@@ -16,7 +16,7 @@ page {
 
 /* Chat Container */
 .chat-container {
-  height: 100%;
+  height: calc(100vh - 240rpx);
   width: 100%;
   position: relative;
   overflow: hidden;
