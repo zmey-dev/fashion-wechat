@@ -7,6 +7,31 @@
   position: relative;
 }
 
+/* Post Info Section */
+.post-info-section {
+  padding: 24rpx 30rpx;
+  background-color: #0f0f0f;
+  border-bottom: 1px solid #2a2a2a;
+  margin-bottom: 16rpx;
+}
+
+.post-full-title {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: #fff;
+  line-height: 1.4;
+  margin-bottom: 12rpx;
+  word-wrap: break-word;
+}
+
+.post-full-content {
+  font-size: 30rpx;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.5;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
 /* Comments List */
 .comments-list {
   flex: 1;

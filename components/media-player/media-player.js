@@ -225,9 +225,9 @@ Component({
       if (!currentPost) return;
 
       this.setData({
-        displayTitle: this.truncateTitle(currentPost.title, 50),
+        displayTitle: this.truncateTitle(currentPost.title, 30),
         displayContent: currentPost.content
-          ? this.truncateTitle(currentPost.content, 100)
+          ? this.truncateTitle(currentPost.content, 60)
           : "",
         displayLikes: this.formatNumber(currentPost.likes),
         displayComments: this.formatNumber(currentPost.comments?.length || 0),

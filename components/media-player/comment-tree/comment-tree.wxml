@@ -1,5 +1,11 @@
 <!-- comment-tree.wxml -->
 <view class="comment-tree-container">
+  <!-- Post Info Section -->
+  <view wx:if="{{selectedPost.title || selectedPost.content}}" class="post-info-section">
+    <view wx:if="{{selectedPost.title}}" class="post-full-title">{{selectedPost.title}}</view>
+    <view wx:if="{{selectedPost.content}}" class="post-full-content">{{selectedPost.content}}</view>
+  </view>
+  
   <!-- Comments List -->
   <scroll-view class="comments-list" scroll-y="true" enhanced="true">
     <view wx:if="{{comments.length === 0}}" class="no-comments">

@@ -1112,3 +1112,18 @@ action-buttons.hidden {
   width: 100%;
   transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
+
+/* Post Info Overlay Positioning */
+.post-info-overlay {
+  position: absolute;
+  bottom: 160rpx;
+  left: 0;
+  right: 0;
+  z-index: 300;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.post-info-overlay.hidden {
+  opacity: 0;
+}

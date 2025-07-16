@@ -48,6 +48,13 @@
       bind:continuetoggle="onContinueToggle"
       bind:progresstap="onProgressTap"
     />
+    <!-- Post Info Overlay -->
+    <post-info-overlay
+      class="post-info-overlay {{ detailPanelState !== 'closed' ? 'hidden' : '' }}"
+      display-title="{{ displayTitle }}"
+      display-content="{{ displayContent }}"
+    />
+    
     <action-buttons
       class="action-buttons {{ detailPanelState !== 'closed' ? 'hidden' : '' }}"
       current-post="{{ currentPost }}"
