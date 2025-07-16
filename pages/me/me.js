@@ -805,7 +805,7 @@ Page({  data: {
           this.data.currentTab == 1
         }&isFavorite=${this.data.currentTab == 2}&isHistory=${
           this.data.currentTab == 3
-        }`,
+        }&showMyEventPosts=${this.data.currentTab == 0}`,
         header: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${getApp().globalData.userInfo?.token}`,
@@ -855,6 +855,7 @@ Page({  data: {
       requestData.isLike = this.data.currentTab == 1;
       requestData.isFavorite = this.data.currentTab == 2;
       requestData.isHistory = this.data.currentTab == 3;
+      requestData.showMyEventPosts = this.data.currentTab == 0;
 
       // Add exist_post_ids for pagination
       if (this.data.posts.length > 0) {
