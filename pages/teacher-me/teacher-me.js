@@ -26,16 +26,14 @@ Page({
     // Faculty & major management - improved structure
     existsFaculties: [],
     existsMajors: [],
-    activeFaculty: null,
+    // Selected faculty for detail view
+    selectedFaculty: null,
 
     // Input states for adding new items
     newFacultyInput: "",
     newMajorInput: "",
     showFacultyInput: false,
     showMajorInput: false,
-
-    // Current faculty majors (for display)
-    currentFacultyMajors: [],
     // Validation status
     hasValidationIssues: true,
 
@@ -513,21 +511,8 @@ Page({
           });
 
           // Set active faculty if available
-          if (
-            processedUniversity.faculties &&
-            processedUniversity.faculties.length > 0
-          ) {
-            const firstFaculty = processedUniversity.faculties[0];
-            const firstFacultyMajors = firstFaculty.majors || [];
-
-            this.setData({
-              activeFaculty: firstFaculty.name,
-              currentFacultyMajors: firstFacultyMajors,
-            });
-
-            // Update validation status
-            this.updateValidationStatus();
-          }
+          // Update validation status
+          this.updateValidationStatus();
         }
 
         // Load available faculties and majors
@@ -607,16 +592,18 @@ Page({
 
   // Select a faculty
   selectFaculty: function (e) {
-    const { faculty } = e.currentTarget.dataset;
-
-    // Find majors for the selected faculty directly from data
-    const universityFaculties = this.data.university?.faculties || [];
-    const selectedFaculty = universityFaculties.find((f) => f.name === faculty);
-    const currentMajors = selectedFaculty ? selectedFaculty.majors : [];
-
+    const faculty = e.currentTarget.dataset.faculty;
     this.setData({
-      activeFaculty: faculty,
-      currentFacultyMajors: currentMajors,
+      selectedFaculty: faculty
+    });
+  },
+
+  // Back to faculty list
+  backToFacultyList: function () {
+    this.setData({
+      selectedFaculty: null,
+      showMajorInput: false,
+      newMajorInput: ""
     });
   },
 
@@ -663,10 +650,8 @@ Page({
 
     this.setData({
       university: university,
-      activeFaculty: facultyName,
       showFacultyInput: false,
-      newFacultyInput: "",
-      currentFacultyMajors: [], // New faculty has no majors initially
+      newFacultyInput: ""
     });
 
     // Update validation status
@@ -683,27 +668,17 @@ Page({
       (f) => f.name !== faculty
     );
 
-    // Set new active faculty if needed
-    let activeFaculty = this.data.activeFaculty;
-    let currentFacultyMajors = this.data.currentFacultyMajors;
-    if (activeFaculty === faculty) {
-      if (university.faculties.length > 0) {
-        activeFaculty = university.faculties[0].name;
-        const facultyData = university.faculties.find(
-          (f) => f.name === activeFaculty
-        );
-        currentFacultyMajors = facultyData ? facultyData.majors : [];
-      } else {
-        activeFaculty = null;
-        currentFacultyMajors = [];
-      }
+    // If deleted faculty is selected, clear selection
+    if (this.data.selectedFaculty && this.data.selectedFaculty.name === faculty) {
+      this.setData({ selectedFaculty: null });
     }
 
     this.setData({
-      university: university,
-      activeFaculty: activeFaculty,
-      currentFacultyMajors: currentFacultyMajors,
+      university: university
     });
+    
+    // Update validation status
+    this.updateValidationStatus();
   },
 
   // Show/hide major input
@@ -721,18 +696,18 @@ Page({
     });
   },
 
-  // Add major to active faculty
+  // Add major to selected faculty
   addMajor: function () {
     const majorName = this.data.newMajorInput.trim();
-    const faculty = this.data.activeFaculty;
+    const selectedFaculty = this.data.selectedFaculty;
 
-    if (!majorName || !faculty) return;
+    if (!majorName || !selectedFaculty) return;
 
     const university = this.data.university;
     const faculties = university.faculties;
 
     // Find the faculty and add the major
-    const facultyIndex = faculties.findIndex((f) => f.name === faculty);
+    const facultyIndex = faculties.findIndex((f) => f.name === selectedFaculty.name);
     if (facultyIndex >= 0) {
       // Check if major already exists in this faculty
       if (faculties[facultyIndex].majors.some((m) => m.name === majorName)) {
@@ -748,16 +723,15 @@ Page({
       faculties[facultyIndex].hasIssues = false; // Now has at least one major
 
       university.faculties = faculties;
-
-      // Update current faculty majors if this is the active faculty
-      const activeFacultyData = faculties.find((f) => f.name === faculty);
-      const updatedMajors = activeFacultyData ? activeFacultyData.majors : [];
-
+      
+      // Update selected faculty
+      const updatedFaculty = faculties[facultyIndex];
+      
       this.setData({
         university: university,
+        selectedFaculty: updatedFaculty,
         showMajorInput: false,
-        newMajorInput: "",
-        currentFacultyMajors: updatedMajors,
+        newMajorInput: ""
       });
 
       // Update validation status
@@ -784,17 +758,20 @@ Page({
         faculties[facultyIndex].majors.length === 0;
 
       university.faculties = faculties;
-      // Update current faculty majors if this is the active faculty
-      if (faculty === this.data.activeFaculty) {
-        const facultyData = faculties.find((f) => f.name === faculty);
-        const updatedMajors = facultyData ? facultyData.majors : [];
+      
+      // Update selected faculty if this is the current one
+      if (this.data.selectedFaculty && this.data.selectedFaculty.name === faculty) {
+        const updatedFaculty = faculties[facultyIndex];
         this.setData({
           university: university,
-          currentFacultyMajors: updatedMajors,
+          selectedFaculty: updatedFaculty
         });
       } else {
         this.setData({ university: university });
       }
+      
+      // Update validation status
+      this.updateValidationStatus();
     }
   },
 

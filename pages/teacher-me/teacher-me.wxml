@@ -238,189 +238,210 @@
     </block>
   </block>
 
-  <!-- University Management Tab - Redesigned for Mobile -->
+  <!-- University Management Tab -->
   <block wx:if="{{currentTab === 1}}">
-    <view class="card section-title">
-      <text>学院与专业信息</text>
-    </view>
-    
-    <!-- University Info Card -->
-    <view class="university-info-card">
-      <view class="info-row">
-        <text class="info-label">名称:</text>
-        <text class="info-value">{{university.name || '未设置'}}</text>
+    <block wx:if="{{!selectedFaculty}}">
+      <!-- Faculty List View -->
+      <view class="card section-title">
+        <text>学院与专业信息</text>
       </view>
       
-      <view class="info-row">
-        <text class="info-label">联系方式:</text>
-        <text class="info-value">{{university.phoneNumber || '未设置'}}</text>
-      </view>
-      
-      <view class="info-row">
-        <text class="info-label">地址:</text>
-        <text class="info-value">{{university.address || '未设置'}}</text>
-      </view>
-      
-      <view class="info-row">
-        <text class="info-label">合同 ID:</text>
-        <text class="info-value">{{university.contract_id || '未设置'}}</text>
-        <view wx:if="{{university.contractName}}" class="view-contract" bindtap="viewContractImage">
-          <image src="../../images/icons/eye.svg" mode="aspectFit"></image>
-        </view>
-      </view>
-    </view>
-    
-    <!-- Mobile-optimized Faculty Management -->
-    <view class="mobile-faculty-management">
-      <!-- Faculty Section -->
-      <view class="management-section">
-        <view class="section-header">
-          <text class="section-title">学院管理</text>
-          <view class="add-button" bindtap="toggleFacultyInput">
-            <image src="../../images/icons/plus.svg" mode="aspectFit"></image>
-          </view>
+      <!-- University Info Card -->
+      <view class="university-info-card">
+        <view class="info-row">
+          <text class="info-label">名称:</text>
+          <text class="info-value">{{university.name || '未设置'}}</text>
         </view>
         
-        <!-- Faculty Input (conditionally shown) -->
-        <view wx:if="{{showFacultyInput}}" class="input-section">
-          <view class="input-row">
-            <input 
-              class="mobile-input" 
-              placeholder="输入学院名称..." 
-              value="{{newFacultyInput}}"
-              bindinput="onFacultyInput"
-            />
-            <view class="input-actions">
-              <view class="confirm-btn" bindtap="addFaculty">
-                <image src="../../images/icons/check.svg" mode="aspectFit"></image>
-              </view>
-              <view class="cancel-btn" bindtap="toggleFacultyInput">
-                <image src="../../images/icons/close.svg" mode="aspectFit"></image>
-              </view>
+        <view class="info-row">
+          <text class="info-label">联系方式:</text>
+          <text class="info-value">{{university.phoneNumber || '未设置'}}</text>
+        </view>
+        
+        <view class="info-row">
+          <text class="info-label">地址:</text>
+          <text class="info-value">{{university.address || '未设置'}}</text>
+        </view>
+        
+        <view class="info-row">
+          <text class="info-label">合同 ID:</text>
+          <text class="info-value">{{university.contract_id || '未设置'}}</text>
+          <view wx:if="{{university.contractName}}" class="view-contract" bindtap="viewContractImage">
+            <image src="../../images/icons/eye.svg" mode="aspectFit"></image>
+          </view>
+        </view>
+      </view>
+      
+      <!-- Faculty List Section -->
+      <view class="card section-title">
+        <text>学院管理</text>
+        <view class="add-button" bindtap="toggleFacultyInput">
+          <image src="../../images/icons/plus.svg" mode="aspectFit"></image>
+        </view>
+      </view>
+      
+      <!-- Faculty Input (conditionally shown) -->
+      <view wx:if="{{showFacultyInput}}" class="input-section">
+        <view class="input-row">
+          <input 
+            class="mobile-input" 
+            placeholder="输入学院名称..." 
+            value="{{newFacultyInput}}"
+            bindinput="onFacultyInput"
+          />
+          <view class="input-actions">
+            <view class="confirm-btn" bindtap="addFaculty">
+              <image src="../../images/icons/check.svg" mode="aspectFit"></image>
+            </view>
+            <view class="cancel-btn" bindtap="toggleFacultyInput">
+              <image src="../../images/icons/close.svg" mode="aspectFit"></image>
             </view>
           </view>
         </view>
-        
-        <!-- Faculty List -->
-        <view class="faculty-mobile-list">
-          <block wx:if="{{university.faculties && university.faculties.length > 0}}">
-            <view 
-              wx:for="{{university.faculties}}" 
-              wx:key="name" 
-              wx:for-item="faculty"
-              data-faculty="{{faculty.name}}"
-              bindtap="selectFaculty"
-              class="faculty-mobile-item {{activeFaculty === faculty.name ? 'active' : ''}}"
-            >
-              <view class="faculty-main-info">
-                <view class="faculty-name">{{faculty.name}}</view>
-                <view class="faculty-meta">
-                  <view class="major-count">{{faculty.majors.length || 0}} 个专业</view>                  <view wx:if="{{faculty.hasIssues}}" class="warning-badge">
-                    <image src="../../images/icons/info-circle.svg" mode="aspectFit"></image>
-                    <text>需要专业</text>
-                  </view>
-                </view>
-              </view>
-              
-              <view class="faculty-actions">
-                <view class="delete-btn" catchtap="deleteFaculty" data-faculty="{{faculty.name}}">
-                  <image src="../../images/icons/trash.svg" mode="aspectFit"></image>
+      </view>
+      
+      <!-- Faculty List -->
+      <view class="faculty-list">
+        <block wx:if="{{university.faculties && university.faculties.length > 0}}">
+          <view 
+            wx:for="{{university.faculties}}" 
+            wx:key="name" 
+            class="faculty-item"
+            data-faculty="{{item}}"
+            bindtap="selectFaculty"
+          >
+            <view class="faculty-info">
+              <view class="faculty-name">{{item.name}}</view>
+              <view class="faculty-detail">
+                <text class="major-count">{{item.majors.length || 0}} 个专业</text>
+                <view wx:if="{{item.hasIssues}}" class="warning-badge">
+                  <image src="../../images/icons/info-circle.svg" mode="aspectFit"></image>
+                  <text>需要专业</text>
                 </view>
               </view>
             </view>
+            <view class="faculty-actions">
+              <view 
+                class="delete-btn" 
+                catchtap="deleteFaculty" 
+                data-faculty="{{item.name}}"
+              >
+                <image src="../../images/icons/trash.svg" mode="aspectFit"></image>
+              </view>
+            </view>
+          </view>
+        </block>
+        <view wx:else class="empty-state">
+          <image src="../../images/icons/graduation-cap.svg" mode="aspectFit"></image>
+          <text>请添加至少一个学院</text>
+        </view>
+      </view>
+      
+      <!-- Save Button -->
+      <view class="save-section">
+        <button 
+          class="save-button {{loading || hasValidationIssues ? 'disabled' : ''}}" 
+          bindtap="saveUniversityData" 
+          disabled="{{loading || hasValidationIssues}}"
+        >
+          <block wx:if="{{loading}}">
+            <view class="button-spinner"></view>
+            <text>保存中...</text>
           </block>
-            <view wx:else class="empty-message">
-            <image src="../../images/icons/graduation-cap.svg" mode="aspectFit"></image>
-            <text>请添加至少一个学院</text>
-          </view>
-        </view>
-      </view>
-      
-      <!-- Major Section (shown when faculty is selected) -->
-      <view wx:if="{{activeFaculty}}" class="management-section">        <view class="section-header">
-          <text class="section-title">{{activeFaculty}} - 专业管理</text>
-          <view class="add-button" bindtap="toggleMajorInput">
-            <image src="../../images/icons/plus.svg" mode="aspectFit"></image>
-          </view>
-        </view>
-        
-        <!-- Major Input (conditionally shown) -->
-        <view wx:if="{{showMajorInput}}" class="input-section">
-          <view class="input-row">
-            <input 
-              class="mobile-input" 
-              placeholder="输入专业名称..." 
-              value="{{newMajorInput}}"
-              bindinput="onMajorInput"
-            />
-            <view class="input-actions">
-              <view class="confirm-btn" bindtap="addMajor">
-                <image src="../../images/icons/check.svg" mode="aspectFit"></image>
-              </view>
-              <view class="cancel-btn" bindtap="toggleMajorInput">
-                <image src="../../images/icons/close.svg" mode="aspectFit"></image>
-              </view>
-            </view>
-          </view>
-        </view>
-        
-        <!-- Major List -->
-        <view class="major-mobile-list">
-          <block wx:if="{{currentFacultyMajors.length > 0}}">
-            <view 
-              wx:for="{{currentFacultyMajors}}" 
-              wx:key="name"
-              wx:for-item="major"
-              class="major-mobile-item"
-            >
-              <view class="major-name">{{major.name}}</view>
-              <view class="major-actions">
-                <view 
-                  class="delete-btn" 
-                  catchtap="deleteMajor" 
-                  data-faculty="{{activeFaculty}}" 
-                  data-major="{{major.name}}"
-                >
-                  <image src="../../images/icons/close.svg" mode="aspectFit"></image>
-                </view>
-              </view>
-            </view>
-          </block>          <view wx:else class="empty-message">
-            <image src="../../images/icons/book-open.svg" mode="aspectFit"></image>
-            <text>尚未为此学院添加专业</text>
-          </view>
-        </view>
-      </view>
-      
-      <!-- Faculty Selection Prompt -->
-      <view wx:else class="select-faculty-prompt">
-        <image src="../../images/icons/arrow-up.svg" mode="aspectFit"></image>
-        <text>请先选择一个学院来管理专业</text>
-      </view>
-    </view>
-    
-    <!-- Save Button -->
-    <view class="save-section">
-      <button 
-        class="save-button {{loading || hasValidationIssues ? 'disabled' : ''}}" 
-        bindtap="saveUniversityData" 
-        disabled="{{loading || hasValidationIssues}}"
-      >
-        <block wx:if="{{loading}}">
-          <view class="button-spinner"></view>
-          <text>保存中...</text>
-        </block>
-        <block wx:else>
-          <image src="../../images/icons/check.svg" mode="aspectFit"></image>
-          <text>保存</text>
-        </block>
-      </button>
+          <block wx:else>
+            <image src="../../images/icons/check.svg" mode="aspectFit"></image>
+            <text>保存</text>
+          </block>
+        </button>
         <!-- Validation Messages -->
-      <view wx:if="{{hasValidationIssues}}" class="validation-message">
-        <image src="../../images/icons/info-circle.svg" mode="aspectFit"></image>
-        <text>请确保每个学院至少有一个专业</text>
+        <view wx:if="{{hasValidationIssues}}" class="validation-message">
+          <image src="../../images/icons/info-circle.svg" mode="aspectFit"></image>
+          <text>请确保每个学院至少有一个专业</text>
+        </view>
       </view>
-    </view>
+    </block>
+    
+    <block wx:else>
+      <!-- Faculty Detail View (Major Management) -->
+      <view class="action-bar">
+        <view class="back-btn" bindtap="backToFacultyList">
+          <image src="../../images/icons/chevron-left.svg" mode="aspectFit"></image>
+          <text>返回</text>
+        </view>
+        <view class="delete-btn-top" catchtap="deleteFaculty" data-faculty="{{selectedFaculty.name}}">
+          <image src="../../images/icons/trash.svg" mode="aspectFit"></image>
+          <text>删除学院</text>
+        </view>
+      </view>
+      
+      <!-- Faculty Profile Card -->
+      <view class="faculty-profile-card">
+        <view class="faculty-header">
+          <view class="faculty-icon">
+            <image src="../../images/icons/graduation-cap.svg" mode="aspectFit"></image>
+          </view>
+          <view class="faculty-name-large">{{selectedFaculty.name}}</view>
+          <view class="major-count-large">{{selectedFaculty.majors.length || 0}} 个专业</view>
+        </view>
+      </view>
+      
+      <!-- Major Management Section -->
+      <view class="card section-title">
+        <text>专业管理</text>
+        <view class="add-button" bindtap="toggleMajorInput">
+          <image src="../../images/icons/plus.svg" mode="aspectFit"></image>
+        </view>
+      </view>
+      
+      <!-- Major Input (conditionally shown) -->
+      <view wx:if="{{showMajorInput}}" class="input-section">
+        <view class="input-row">
+          <input 
+            class="mobile-input" 
+            placeholder="输入专业名称..." 
+            value="{{newMajorInput}}"
+            bindinput="onMajorInput"
+          />
+          <view class="input-actions">
+            <view class="confirm-btn" bindtap="addMajor">
+              <image src="../../images/icons/check.svg" mode="aspectFit"></image>
+            </view>
+            <view class="cancel-btn" bindtap="toggleMajorInput">
+              <image src="../../images/icons/close.svg" mode="aspectFit"></image>
+            </view>
+          </view>
+        </view>
+      </view>
+      
+      <!-- Major List -->
+      <view class="major-list">
+        <block wx:if="{{selectedFaculty.majors && selectedFaculty.majors.length > 0}}">
+          <view 
+            wx:for="{{selectedFaculty.majors}}" 
+            wx:key="name"
+            class="major-item"
+          >
+            <view class="major-info">
+              <view class="major-name">{{item.name}}</view>
+            </view>
+            <view class="major-actions">
+              <view 
+                class="delete-btn" 
+                catchtap="deleteMajor" 
+                data-faculty="{{selectedFaculty.name}}" 
+                data-major="{{item.name}}"
+              >
+                <image src="../../images/icons/trash.svg" mode="aspectFit"></image>
+              </view>
+            </view>
+          </view>
+        </block>
+        <view wx:else class="empty-state">
+          <image src="../../images/icons/book-open.svg" mode="aspectFit"></image>
+          <text>尚未为此学院添加专业</text>
+        </view>
+      </view>
+    </block>
   </block>
 
   <!-- Teacher Profile Tab -->

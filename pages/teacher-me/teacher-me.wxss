@@ -2025,3 +2025,162 @@ page {
   50% { transform: scale(1.2); }
   100% { transform: scale(1); }
 }
+
+/* Faculty and Major Management - New Styles */
+.card.section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 30rpx 20rpx;
+  padding: 20rpx 30rpx;
+  background-color: #1e1e1e;
+  border-radius: 16rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.3);
+}
+
+.card.section-title text {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #fff;
+}
+
+/* Faculty List Styles - Match Student List */
+.faculty-list {
+  padding: 0 30rpx;
+}
+
+.faculty-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx 30rpx;
+  background-color: #1e1e1e;
+  border-radius: 16rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.3);
+  transition: all 0.2s;
+}
+
+.faculty-item:active {
+  transform: scale(0.98);
+  background-color: #262626;
+}
+
+.faculty-info {
+  flex: 1;
+}
+
+.faculty-info .faculty-name {
+  font-size: 32rpx;
+  font-weight: 500;
+  color: #fff;
+  margin-bottom: 8rpx;
+}
+
+.faculty-detail {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  font-size: 26rpx;
+  color: #888;
+}
+
+/* Faculty Profile Card */
+.faculty-profile-card {
+  background-color: #1e1e1e;
+  border-radius: 16rpx;
+  padding: 40rpx 30rpx;
+  margin: 0 30rpx 30rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.4);
+}
+
+.faculty-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.faculty-icon {
+  width: 120rpx;
+  height: 120rpx;
+  background: linear-gradient(135deg, #1976d2 0%, #42a5f5 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24rpx;
+}
+
+.faculty-icon image {
+  width: 60rpx;
+  height: 60rpx;
+  filter: brightness(0) invert(1);
+}
+
+.faculty-name-large {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 8rpx;
+}
+
+.major-count-large {
+  font-size: 26rpx;
+  color: #888;
+}
+
+/* Major List Styles */
+.major-list {
+  padding: 0 30rpx;
+}
+
+.major-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 30rpx;
+  background-color: #1e1e1e;
+  border-radius: 12rpx;
+  margin-bottom: 16rpx;
+  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.2);
+}
+
+.major-info {
+  flex: 1;
+}
+
+.major-info .major-name {
+  font-size: 30rpx;
+  color: #fff;
+  font-weight: 500;
+}
+
+/* Delete button at top */
+.delete-btn-top {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 16rpx 24rpx;
+  background-color: rgba(244, 67, 54, 0.1);
+  border: 1px solid #f44336;
+  border-radius: 24rpx;
+  transition: all 0.2s;
+}
+
+.delete-btn-top:active {
+  background-color: rgba(244, 67, 54, 0.2);
+  transform: scale(0.95);
+}
+
+.delete-btn-top image {
+  width: 28rpx;
+  height: 28rpx;
+  filter: brightness(0) saturate(100%) invert(44%) sepia(57%) saturate(5932%) hue-rotate(348deg) brightness(96%) contrast(91%);
+}
+
+.delete-btn-top text {
+  font-size: 26rpx;
+  color: #f44336;
+  font-weight: 500;
+}
