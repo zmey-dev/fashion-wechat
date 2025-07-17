@@ -13,6 +13,12 @@
   background-color: #000;
 }
 
+/* Teacher specific styles - no bottom padding */
+.post-viewer-container.teacher-container {
+  height: calc(100vh - 120rpx);
+  padding-bottom: 0;
+}
+
 .loading-container {
   position: absolute;
   top: 0;

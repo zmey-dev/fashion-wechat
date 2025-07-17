@@ -4,7 +4,7 @@
   <login-modal wx:if="{{ showLoginModal }}" class="login-modal" />
   
   <!-- Post Viewer Container -->
-  <view class="post-viewer-container">
+  <view class="post-viewer-container {{userInfo.role === 'teacher' ? 'teacher-container' : ''}}">
     <!-- Media Player Component -->
     <media-player
       wx:if="{{ currentPost }}"
