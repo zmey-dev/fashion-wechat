@@ -99,7 +99,7 @@
           >
             <!-- Crown for Top 3 -->
             <view wx:if="{{index < 3}}" class="crown-wrapper">
-              <image class="crown-icon" src="/images/crown{{index + 4}}.png" mode="aspectFit"></image>
+              <image class="crown-icon" src="/images/crown{{index}}.png" mode="aspectFit"></image>
             </view>
 
             <!-- Blocked Post Overlay -->

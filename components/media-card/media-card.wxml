@@ -2,7 +2,7 @@
 <view class="media-card-container {{item.active === false ? 'inactive' : ''}}" bindtap="onClickCard">
   <!-- Gold crown for top 3 in event -->
   <view wx:if="{{index < 3 && isEvent}}" class="crown-container">
-    <image src="/images/crown{{index + 4}}.png" class="crown-image" mode="aspectFit"></image>
+    <image src="/images/crown{{index}}.png" class="crown-image" mode="aspectFit"></image>
   </view>
 
   <!-- Inactive badge -->
