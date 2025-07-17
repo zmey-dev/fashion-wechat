@@ -1142,7 +1142,7 @@ action-buttons.hidden {
 /* Post Info Overlay Positioning */
 .post-info-overlay {
   position: absolute;
-  bottom: 160rpx;
+  bottom: 120rpx;
   left: 0;
   right: 0;
   z-index: 300;

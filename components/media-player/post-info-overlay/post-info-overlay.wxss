@@ -3,7 +3,7 @@
 /* Post Info Container */
 .post-info {
   position: absolute;
-  bottom: 160rpx;
+  bottom: 0rpx;
   left: 30rpx;
   right: 160rpx;
   z-index: 300;
@@ -83,28 +83,6 @@
 
 /* Simple text styling for better readability */
 
-/* Interactive States */
-.post-info:active {
-  transform: scale(0.98);
-}
-
-.post-info:active .post-title {
-  transform: translateX(5rpx);
-}
-
-.post-info:active .post-content {
-  transform: translateX(3rpx);
-}
-
-/* Remove complex background effect (already defined above) */
-
-.post-info:hover {
-  background: rgba(0, 0, 0, 0.3);
-  border-color: rgba(255, 255, 255, 0.15);
-  transform: translateY(-2rpx);
-  box-shadow: 0 8rpx 25rpx rgba(0, 0, 0, 0.3);
-}
-
 /* Typing Animation Effect */
 .post-title.typing {
   overflow: visible;
@@ -132,15 +110,6 @@
 
 .post-content.loading {
   min-height: 80rpx;
-}
-
-/* Empty State */
-.post-info:empty::before {
-  content: 'No content available';
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 28rpx;
-  font-style: italic;
-  text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.8);
 }
 
 /* Animations */
@@ -210,132 +179,4 @@
 .post-content::selection {
   background: rgba(255, 107, 107, 0.3);
   color: #fff;
-}
-
-/* Focus States for Accessibility */
-.post-info:focus {
-  outline: 3rpx solid rgba(255, 255, 255, 0.5);
-  outline-offset: 5rpx;
-}
-
-/* Responsive Design */
-@media (max-width: 750rpx) {
-  .post-info {
-    left: 20rpx;
-    right: 140rpx;
-    bottom: 140rpx;
-    max-width: calc(100vw - 180rpx);
-  }
-
-  .post-title {
-    font-size: 30rpx;
-    -webkit-line-clamp: 2;
-  }
-
-  .post-content {
-    font-size: 26rpx;
-    -webkit-line-clamp: 3;
-  }
-}
-
-@media (max-width: 600rpx) {
-  .post-info {
-    left: 15rpx;
-    right: 80rpx;
-    bottom: 160rpx;
-  }
-
-  .post-title {
-    font-size: 28rpx;
-  }
-
-  .post-content {
-    font-size: 24rpx;
-  }
-}
-
-/* High Contrast Mode */
-@media (prefers-contrast: high) {
-  .post-title,
-  .post-content {
-    background: none;
-    -webkit-text-fill-color: #fff;
-    text-shadow: 2rpx 2rpx 4rpx rgba(0, 0, 0, 1);
-  }
-
-  .post-info {
-    background: rgba(0, 0, 0, 0.8);
-    border-color: rgba(255, 255, 255, 0.5);
-  }
-}
-
-/* Reduced Motion */
-@media (prefers-reduced-motion: reduce) {
-  .post-info,
-  .post-title,
-  .post-content {
-    animation: none;
-    transition: none;
-  }
-
-  .post-title.typing,
-  .post-content.typing {
-    animation: none;
-    white-space: normal;
-    border-right: none;
-  }
-}
-
-/* Print Styles */
-@media print {
-  .post-info {
-    position: static;
-    background: white;
-    color: black;
-    text-shadow: none;
-    border: 1rpx solid #ccc;
-  }
-
-  .post-title,
-  .post-content {
-    color: black;
-    background: none;
-    -webkit-text-fill-color: black;
-  }
-}
-
-/* RTL Support */
-.rtl .post-info {
-  left: 120rpx;
-  right: 30rpx;
-}
-
-.rtl .post-title::before {
-  left: auto;
-  right: -10rpx;
-}
-
-.rtl .post-info:active .post-title,
-.rtl .post-info:active .post-content {
-  transform: translateX(-5rpx);
-}
-
-/* Dark Mode Enhancements */
-@media (prefers-color-scheme: dark) {
-  .post-info {
-    background: rgba(0, 0, 0, 0.4);
-    border-color: rgba(255, 255, 255, 0.2);
-  }
-}
-
-/* Performance Optimizations */
-.post-info {
-  will-change: transform;
-  transform: translateZ(0);
-}
-
-.post-title,
-.post-content {
-  will-change: transform;
-  contain: layout style paint;
 }
