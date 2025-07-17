@@ -3,6 +3,17 @@
 class="media-container"
 bindtap="onScreenTap"
 >
+  <!-- Blur Background -->
+  <view class="blur-background-container">
+    <image 
+      wx:if="{{ currentPost && currentPost.media && currentPost.media.length > 0 }}"
+      class="blur-background"
+      src="{{ currentPost.media[currentSlideIndex || 0].preview_url || currentPost.media[currentSlideIndex || 0].url || currentPost.media[0].preview_url || currentPost.media[0].url }}"
+      mode="aspectFill"
+    />
+    <view class="blur-overlay"></view>
+  </view>
+  
   <!-- Media content -->
   <swiper
     class="media-swiper"
