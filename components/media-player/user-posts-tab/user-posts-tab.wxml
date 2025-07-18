@@ -11,7 +11,7 @@
     </view>
   </view>
 
-  <view class="posts-grid" scroll-y="{{ true }}">
+  <view class="posts-grid" style="overflow-y: auto">
     <view class="posts-container">
       <view
         wx:for="{{ currentPostUser.posts || [] }}"
