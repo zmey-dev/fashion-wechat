@@ -1,8 +1,8 @@
 <!-- components/action-buttons/action-buttons.wxml -->
 <view class="action-buttons"
 >
-  <!-- User Avatar with Follow Badge -->
-  <view class="action-item" style="margin-bottom:20rpx" bindtap="onUserProfile">
+  <!-- User Avatar with Follow Badge - Hidden in event context -->
+  <view wx:if="{{ !eventId }}" class="action-item" style="margin-bottom:20rpx" bindtap="onUserProfile">
     <view class="user-avatar">
       <avatar
         avatar="{{ currentPostUser.avatar }}"
@@ -65,8 +65,8 @@
     </view>
     <text class="action-count">{{ displayComments }}</text>
   </view>
-  <!-- Favorite button -->
-  <view wx:if="{{ authUser.role !== 'teacher' }}" class="action-item" bindtap="handleFavorite">
+  <!-- Favorite button - Hidden in event context -->
+  <view wx:if="{{ authUser.role !== 'teacher' && !eventId }}" class="action-item" bindtap="handleFavorite">
     <view
       class="action-icon {{ currentPost.favorites_exists ? 'favorited' : '' }}"
     >
@@ -101,8 +101,8 @@
     </view>
     <text class="action-count">{{ displayShares }}</text>
   </view>
-  <!-- Report button -->
-  <view class="action-item" bindtap="onShowReportModal">
+  <!-- Report button - Hidden in event context -->
+  <view wx:if="{{ !eventId }}" class="action-item" bindtap="onShowReportModal">
     <view class="action-icon">
       <view class="svg-icon">
         <image

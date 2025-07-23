@@ -24,6 +24,10 @@ Component({
       type: String,
       value: null,
     },
+    isLoading: {
+      type: Boolean,
+      value: false,
+    },
   },
   data: {
     // Media state
@@ -76,10 +80,18 @@ Component({
     minSwipeDistance: 50, // Minimum distance for valid swipe
     maxHorizontalThreshold: 100, // Maximum horizontal movement still considered vertical swipe
     maxTransformDistance: 150, // Maximum transform distance for visual feedback
-  }
+
+    // Animation states
+    isAnimating: false,
+    animationType: "", // "slide_up", "slide_down", "fade", "zoom"
+    animationOpacity: 1,
+    animationScale: 1,
+    animationBlur: 0,
+
+  },
   /**
    * Component lifecycle
-   */,
+   */
   attached() {
     this.initializeComponent();
 
@@ -126,6 +138,13 @@ Component({
       }
       // Update container dimensions when detail panel is shown/hidden
       setTimeout(() => this.getContainerDimensions(), 300);
+    },
+    isLoading: function (loading) {
+      if (loading) {
+        this.animateLoadingState();
+      } else {
+        this.restoreFromLoadingState();
+      }
     },
   },
 
@@ -1006,7 +1025,8 @@ Component({
           this.handleVerticalSwipeDown();
         }
       } else {
-        // Invalid swipe - animate back to original position
+        // Invalid swipe - animate back to original position with subtle feedback
+        wx.vibrateShort({ type: 'light' });
         this.animateBackToCenter();
       }
 
@@ -1038,30 +1058,163 @@ Component({
       this.animateSwipeOut("down", () => {
         this.moveToPreviousPost();
       });
-    }
+    },
     /**
-     * Animate swipe out effect
-     */,
+     * Professional slide animation for post transitions
+     */
     animateSwipeOut(direction, callback) {
-      const { containerHeight, windowHeight } = this.data;
-      // Use containerHeight if available, fallback to windowHeight
-      const height = containerHeight || windowHeight;
-      const targetTransform = direction === "up" ? -height : height;
-      this.setData({ verticalTransform: targetTransform });
+      if (this.data.isAnimating) return;
 
-      // Execute callback after animation
+      this.setData({ 
+        isAnimating: true,
+        animationType: direction === "up" ? "slide_up" : "slide_down"
+      });
+
+      // Add haptic feedback
+      wx.vibrateShort({ type: 'light' });
+
+      const { containerHeight, windowHeight } = this.data;
+      const height = containerHeight || windowHeight;
+      
+      // Create smooth slide animation
+      const animation = wx.createAnimation({
+        duration: 400,
+        timingFunction: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)', // easeOutQuad
+      });
+
+      // Phase 1: Slide out with subtle scaling and opacity
+      const targetTransform = direction === "up" ? -height : height;
+      animation
+        .translateY(targetTransform)
+        .scale(0.95)
+        .opacity(0.8)
+        .step();
+
+      this.setData({
+        slideAnimation: animation.export(),
+        verticalTransform: targetTransform,
+        animationOpacity: 0.8,
+        animationScale: 0.95
+      });
+
+      // Phase 2: Execute callback and prepare for next post
       setTimeout(() => {
-        if (callback) callback();
-        // Reset transform for next post
-        this.setData({ verticalTransform: 0 });
-      }, 300);
+        if (callback) {
+          // Prepare for new content
+          this.setData({
+            animationOpacity: 0,
+            animationScale: 1.05,
+            verticalTransform: direction === "up" ? height : -height
+          });
+          
+          callback();
+          
+          // Phase 3: Slide in new content
+          setTimeout(() => {
+            this.animateSlideIn();
+          }, 50);
+        }
+      }, 400);
     },
 
     /**
-     * Animate back to center when swipe is not valid
+     * Animate new post sliding in
+     */
+    animateSlideIn() {
+      const animation = wx.createAnimation({
+        duration: 500,
+        timingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)', // easeOutExpo
+      });
+
+      animation
+        .translateY(0)
+        .scale(1)
+        .opacity(1)
+        .step();
+
+      this.setData({
+        slideAnimation: animation.export(),
+        verticalTransform: 0,
+        animationOpacity: 1,
+        animationScale: 1,
+        isAnimating: false,
+        animationType: ""
+      });
+    },
+
+    /**
+     * Professional spring-back animation when swipe is invalid
      */
     animateBackToCenter() {
-      this.setData({ verticalTransform: 0 });
+      if (this.data.isAnimating) return;
+
+      // Add subtle haptic feedback
+      wx.vibrateShort({ type: 'light' });
+
+      const animation = wx.createAnimation({
+        duration: 350,
+        timingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)', // easeOutBack
+      });
+
+      animation
+        .translateY(0)
+        .scale(1)
+        .opacity(1)
+        .step();
+
+      this.setData({
+        slideAnimation: animation.export(),
+        verticalTransform: 0,
+        animationOpacity: 1,
+        animationScale: 1
+      });
+    },
+
+    /**
+     * Loading state animation
+     */
+    animateLoadingState() {
+      if (this.data.isAnimating) return;
+
+      this.setData({ isAnimating: true });
+
+      const animation = wx.createAnimation({
+        duration: 300,
+        timingFunction: 'ease-out',
+      });
+
+      animation
+        .opacity(0.6)
+        .scale(0.98)
+        .step();
+
+      this.setData({
+        slideAnimation: animation.export(),
+        animationOpacity: 0.6,
+        animationScale: 0.98
+      });
+    },
+
+    /**
+     * Restore from loading state
+     */
+    restoreFromLoadingState() {
+      const animation = wx.createAnimation({
+        duration: 400,
+        timingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
+      });
+
+      animation
+        .opacity(1)
+        .scale(1)
+        .step();
+
+      this.setData({
+        slideAnimation: animation.export(),
+        animationOpacity: 1,
+        animationScale: 1,
+        isAnimating: false
+      });
     },
 
     /**
@@ -1117,5 +1270,6 @@ Component({
         }
       }
     },
+
   },
 });

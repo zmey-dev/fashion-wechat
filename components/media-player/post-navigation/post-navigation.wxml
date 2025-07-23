@@ -1,0 +1,55 @@
+<!-- components/post-navigation/post-navigation.wxml -->
+<view class="post-navigation {{ show ? 'show' : 'hide' }}">
+  <!-- Previous Button -->
+  <view 
+    class="nav-button prev-button {{ !hasPrevious ? 'disabled' : '' }}" 
+    data-type="prev"
+    bindtap="onPreviousPost"
+    bind:touchstart="onTouchStart"
+    bind:touchend="onTouchEnd"
+  >
+    <view class="nav-icon">
+      <view class="arrow-icon arrow-left">‹</view>
+    </view>
+    <view class="nav-label">上一个</view>
+  </view>
+
+  <!-- Progress Indicator -->
+  <view class="progress-container">
+    <view class="progress-bar">
+      <view 
+        class="progress-fill" 
+        style="width: {{ progressPercentage }}%"
+      ></view>
+    </view>
+    <view class="progress-text">
+      {{ currentIndex + 1 }} / {{ totalCount }}
+    </view>
+  </view>
+
+  <!-- Next Button -->
+  <view 
+    class="nav-button next-button {{ !hasNext ? 'disabled' : '' }}" 
+    data-type="next"
+    bindtap="onNextPost"
+    bind:touchstart="onTouchStart"
+    bind:touchend="onTouchEnd"
+  >
+    <view class="nav-icon">
+      <view class="arrow-icon arrow-right">›</view>
+    </view>
+    <view class="nav-label">下一个</view>
+  </view>
+</view>
+
+<!-- Floating Navigation Hints -->
+<view class="floating-hints {{ showHints ? 'show' : 'hide' }}">
+  <view class="hint hint-left {{ !hasPrevious ? 'disabled' : '' }}">
+    <view class="hint-icon">‹</view>
+    <view class="hint-text">上一个</view>
+  </view>
+  <view class="hint hint-right {{ !hasNext ? 'disabled' : '' }}">
+    <view class="hint-icon">›</view>
+    <view class="hint-text">下一个</view>
+  </view>
+</view>

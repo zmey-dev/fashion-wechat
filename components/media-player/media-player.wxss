@@ -25,8 +25,23 @@
   transition: none !important; /* Ensure no transition during active swipe */
 }
 
-.media-content:not(.swiping) {
+.media-content:not(.swiping):not(.animating) {
   transition: transform 0.3s ease-out !important; /* Simplified for WXSS compatibility */
+}
+
+/* Professional animation states */
+.media-content.animating {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.media-content.animating.slide-up {
+  transform-origin: center bottom;
+}
+
+.media-content.animating.slide-down {
+  transform-origin: center top;
 }
 
 /* Responsive layout when detail panel is open */

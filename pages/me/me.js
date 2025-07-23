@@ -42,6 +42,8 @@ Page({  data: {
     avatarUploaded: false,
     avatarUploadError: null,
     avatarUploadUrl: null,
+    // Filter for posts
+    filterText: "",
     // Contact form data
     contactForm: {
       title: "",
@@ -793,19 +795,30 @@ Page({  data: {
       });
     }, 1500);
   },
-  // Load posts based on current tab
+  // Load posts based on current tab - web version pattern
   async loadPosts() {
-    this.setData({ loading: true });
+    this.setData({ 
+      loading: true,
+      posts: [], // Reset posts for refresh
+    });
+
+    // Use web version API pattern
+    const apiUrl = this.getApiUrl(this.data.currentTab);
+    const requestData = {
+      limit: 20, // Match web version
+      offset: 0,
+    };
+
+    // Add filter parameter if available (from URL or search)
+    const filter_text = this.data.filterText || "";
+    if (filter_text) {
+      requestData.filter = filter_text;
+    }
 
     try {
       wx.request({
-        url: `${config.BACKEND_URL}/post/get_posts?scope=15&${
-          this.data.currentTab == 0 && "user_id="
-        }${this.data.currentTab == 0 ? this.data.userInfo?.id : ""}&isLike=${
-          this.data.currentTab == 1
-        }&isFavorite=${this.data.currentTab == 2}&isHistory=${
-          this.data.currentTab == 3
-        }&showMyEventPosts=${this.data.currentTab == 0}`,
+        url: apiUrl,
+        data: requestData,
         header: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${getApp().globalData.userInfo?.token}`,
@@ -814,9 +827,9 @@ Page({  data: {
         success: (res) => {
           if (res.data && res.data.status === "success") {
             this.setData({
-              posts: this.data.posts.concat(res.data.posts),
-              loading: false,
+              posts: res.data.posts || [],
               hasMore: res.data.has_more || false,
+              loading: false,
             });
           } else {
             this.setData({ hasMore: false, loading: false });
@@ -835,45 +848,40 @@ Page({  data: {
       this.setData({ loading: false });
     }
   },
+
+  // Get API URL based on tab like web version
+  getApiUrl: function(tabIndex) {
+    switch (tabIndex) {
+      case 0: return `${config.BACKEND_URL}/v2/post/me`; // 作品
+      case 1: return `${config.BACKEND_URL}/v2/post/liked`; // 喜欢
+      case 2: return `${config.BACKEND_URL}/v2/post/favorite`; // 收藏
+      case 3: return `${config.BACKEND_URL}/v2/post/history`; // 历史
+      default: return `${config.BACKEND_URL}/v2/post/me`;
+    }
+  },
   // Load more posts for pagination
   async loadMorePosts() {
-    if (this.data.loading) return;
+    if (this.data.loading || !this.data.hasMore) return;
 
     this.setData({ loading: true });
 
+    // Use web version API pattern
+    const apiUrl = this.getApiUrl(this.data.currentTab);
+    const requestData = {
+      limit: 20, // Match web version
+      offset: this.data.posts.length,
+    };
+
+    // Add filter parameter if available
+    const filter_text = this.data.filterText || "";
+    if (filter_text) {
+      requestData.filter = filter_text;
+    }
+
     try {
-      const requestData = {
-        scope: "15",
-      };
-
-      // Add user_id for user posts tab
-      if (this.data.currentTab == 0) {
-        requestData.user_id = this.data.userInfo?.id;
-      }
-
-      // Add filter parameters
-      requestData.isLike = this.data.currentTab == 1;
-      requestData.isFavorite = this.data.currentTab == 2;
-      requestData.isHistory = this.data.currentTab == 3;
-      requestData.showMyEventPosts = this.data.currentTab == 0;
-
-      // Add exist_post_ids for pagination
-      if (this.data.posts.length > 0) {
-        requestData.exist_post_ids = this.data.posts.map((post) => post.id);
-      }
-
-      // Convert to query string
-      const queryParams = new URLSearchParams();
-      Object.keys(requestData).forEach((key) => {
-        if (Array.isArray(requestData[key])) {
-          requestData[key].forEach((item) => queryParams.append(key, item));
-        } else {
-          queryParams.append(key, requestData[key]);
-        }
-      });
-
       wx.request({
-        url: `${config.BACKEND_URL}/post/get_posts?${queryParams.toString()}`,
+        url: apiUrl,
+        data: requestData,
         header: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${getApp().globalData.userInfo?.token}`,
@@ -973,9 +981,30 @@ Page({  data: {
   },
   onPostTap: function (e) {
     const postId = e.currentTarget.dataset.id;
-    wx.navigateTo({
-      url: `/pages/post-detail/post-detail?postId=${postId}`,
-    });
+    
+    // Get sort_type based on current tab like web version
+    const sortType = this.getSortType(this.data.currentTab);
+    
+    // Build URL with web version parameters
+    let url = `/pages/post-detail/post-detail?postId=${postId}&type=${sortType}`;
+    
+    // Add filter parameter if available
+    if (this.data.filterText) {
+      url += `&filter=${encodeURIComponent(this.data.filterText)}`;
+    }
+    
+    wx.navigateTo({ url });
+  },
+
+  // Get sort type for navigation context like web version
+  getSortType: function(tabIndex) {
+    switch (tabIndex) {
+      case 0: return "me";        // 作品 - my posts
+      case 1: return "like";      // 喜欢 - liked posts  
+      case 2: return "favorite";  // 收藏 - favorite posts
+      case 3: return "history";   // 历史 - history posts
+      default: return "me";
+    }
   },
 
   // WeChat linking functionality

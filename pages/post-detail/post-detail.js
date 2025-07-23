@@ -10,6 +10,7 @@ Page({
     postId: null,
     userId: null,
     eventId: null,
+    type: "discover", // Add type like web version
     userPosts: [],
     eventPosts: [],
     currentUserPostIndex: 0,
@@ -20,6 +21,9 @@ Page({
     currentPostUser: null,
     currentIndex: 0,
     totalPosts: 0,
+    // Navigation data from v2 API like web version
+    nextPostId: null,
+    previousPostId: null,
     isLoading: true,
     loadError: false,
     errorMessage: "",
@@ -44,11 +48,15 @@ Page({
   onLoad: function (options) {
     const postId = options.postId || null;
     const userId = options.user_id || null;
-    const eventId = options.eventId || null;
+    const eventId = options.eventId || options.event_id || null; // Support both formats
+    const type = options.type || "discover"; // Add type parameter like web version
+    const filter = options.filter || ""; // Add filter parameter like web version
     this.setData({
       postId: postId,
       userId: userId,
       eventId: eventId,
+      type: type,
+      filter: filter,
     });
     const app = getApp();
 
@@ -70,32 +78,30 @@ Page({
       userInfo: app.globalData.userInfo || {},
       followedUsers: app.globalData.followedUsers || [],
     });
-    if (eventId) {
-      // If eventId is provided, load event's posts
-      this.loadEventPosts(postId);
-    } else if (userId) {
-      // If user_id is provided, load user's posts
-      this.loadUserPosts(postId);
+    
+    // Load post using web version logic - use getPostDetail with type
+    if (postId) {
+      const options = {};
+      if (userId) options.user_id = userId;
+      if (eventId) options.event_id = eventId;
+      if (filter) options.filter = filter;
+      this.loadPostDetail(postId, type, options);
     } else {
-      // Otherwise, use the original logic
-      if (postId) this.loadPostData(null, postId);
-      else this.loadPostData(0);
+      this.setData({
+        isLoading: false,
+        loadError: true,
+        errorMessage: "No post ID provided",
+      });
     }
   },
   onShow: function () {
-    if (this.data.eventId) {
-      // If eventId is provided, reload event's posts
-      this.loadEventPosts(this.data.postId);
-    } else if (this.data.userId) {
-      // If user_id is provided, reload user's posts
-      this.loadUserPosts(this.data.postId);
-    } else {
-      // Otherwise, use the original logic
-      if(this.data.postId) {
-        this.loadPostData(null, this.data.postId);
-      } else {
-        this.loadPostData(0);
-      }
+    // Reload post using web version logic
+    if(this.data.postId) {
+      const options = {};
+      if (this.data.userId) options.user_id = this.data.userId;
+      if (this.data.eventId) options.event_id = this.data.eventId;
+      if (this.data.filter) options.filter = this.data.filter;
+      this.loadPostDetail(this.data.postId, this.data.type, options);
     }
   },
   onUnload: function () {
@@ -104,6 +110,59 @@ Page({
     app.unsubscribe("userInfo", this.userInfoHandler);
     app.unsubscribe("showLoginModal", this.showLoginModalHandler);
     app.unsubscribe("followedUser", this.followedUserHandler);
+  },
+
+  // Load post detail using web version API pattern
+  loadPostDetail: function (postId, type, options = {}) {
+    this.setData({
+      isLoading: true,
+      loadError: false,
+    });
+
+    // Build query parameters like web version
+    const params = { type };
+    Object.keys(options).forEach(key => {
+      if (options[key] !== null && options[key] !== undefined) {
+        params[key] = options[key];
+      }
+    });
+
+    // Use v2 API like web version
+    wx.request({
+      url: `${config.BACKEND_URL}/v2/post/detail/${postId}`,
+      method: "GET",
+      data: params,
+      header: {
+        "Content-Type": "application/json",
+        Authorization: app.globalData?.userInfo?.token
+          ? `Bearer ${app.globalData?.userInfo?.token}`
+          : "",
+      },
+      success: (res) => {
+        if (res.statusCode === 200 && res.data.status === "success") {
+          this.setData({
+            currentPost: res.data.post,
+            nextPostId: res.data.next_post_id,
+            previousPostId: res.data.previous_post_id,
+            isLoading: false,
+          });
+        } else {
+          this.setData({
+            isLoading: false,
+            loadError: true,
+            errorMessage: res.data?.msg || this.data.messages.errors.loadFailed,
+          });
+        }
+      },
+      fail: (err) => {
+        console.error("Failed to load post detail:", err);
+        this.setData({
+          isLoading: false,
+          loadError: true,
+          errorMessage: this.data.messages.errors.networkError,
+        });
+      },
+    });
   },
 
   // Load posts for a specific user
@@ -115,12 +174,12 @@ Page({
 
     // Fetch all posts for the specific user
     wx.request({
-      url: `${config.BACKEND_URL}/post/get_posts`,
+      url: `${config.BACKEND_URL}/v2/post/by-user-id`,
       method: "GET",
       data: {
         user_id: this.data.userId,
-        page: 1,
-        pageSize: 100, // Get many posts at once
+        limit: 100, // Get many posts at once
+        offset: 0,
       },
       header: {
         Authorization: app.globalData?.userInfo?.token
@@ -189,7 +248,7 @@ Page({
 
     // Fetch post data from API
     wx.request({
-      url: `${config.BACKEND_URL}/post/get_post_in_discover`,
+      url: `${config.BACKEND_URL}/v2/post/recommend`,
       method: "GET",
       data: data,
       header: {
@@ -228,84 +287,34 @@ Page({
   },
 
   handlePreviousPost: function () {
-    if (this.data.eventId) {
-      // If viewing event's posts, navigate through eventPosts array
-      if (this.data.currentEventPostIndex > 0) {
-        const newIndex = this.data.currentEventPostIndex - 1;
-        this.setData({
-          currentEventPostIndex: newIndex,
-          currentPost: this.data.eventPosts[newIndex],
-        });
-      } else {
-        wx.showToast({
-          title: this.data.messages.navigation.firstPost,
-          icon: "none",
-        });
-      }
-    } else if (this.data.userId) {
-      // If viewing user's posts, navigate through userPosts array
-      if (this.data.currentUserPostIndex > 0) {
-        const newIndex = this.data.currentUserPostIndex - 1;
-        this.setData({
-          currentUserPostIndex: newIndex,
-          currentPost: this.data.userPosts[newIndex],
-        });
-      } else {
-        wx.showToast({
-          title: this.data.messages.navigation.firstPost,
-          icon: "none",
-        });
-      }
+    // Use web version navigation with previousPostId
+    if (this.data.previousPostId) {
+      const options = {};
+      if (this.data.userId) options.user_id = this.data.userId;
+      if (this.data.eventId) options.event_id = this.data.eventId;
+      if (this.data.filter) options.filter = this.data.filter;
+      this.loadPostDetail(this.data.previousPostId, this.data.type, options);
     } else {
-      // Original logic for discover posts
-      if (this.data.currentIndex > 0) {
-        this.loadPostData(this.data.currentIndex - 1);
-      } else {
-        wx.showToast({
-          title: this.data.messages.navigation.firstPost,
-          icon: "none",
-        });
-      }
+      wx.showToast({
+        title: this.data.messages.navigation.firstPost,
+        icon: "none",
+      });
     }
   },
 
   handleNextPost: function () {
-    if (this.data.eventId) {
-      // If viewing event's posts, navigate through eventPosts array
-      if (this.data.currentEventPostIndex < this.data.eventPosts.length - 1) {
-        const newIndex = this.data.currentEventPostIndex + 1;
-        this.setData({
-          currentEventPostIndex: newIndex,
-          currentPost: this.data.eventPosts[newIndex],
-        });
-      } else {
-        // Load more event posts if available
-        this.loadMoreEventPosts();
-      }
-    } else if (this.data.userId) {
-      // If viewing user's posts, navigate through userPosts array
-      if (this.data.currentUserPostIndex < this.data.userPosts.length - 1) {
-        const newIndex = this.data.currentUserPostIndex + 1;
-        this.setData({
-          currentUserPostIndex: newIndex,
-          currentPost: this.data.userPosts[newIndex],
-        });
-      } else {
-        wx.showToast({
-          title: this.data.messages.navigation.lastPost,
-          icon: "none",
-        });
-      }
+    // Use web version navigation with nextPostId
+    if (this.data.nextPostId) {
+      const options = {};
+      if (this.data.userId) options.user_id = this.data.userId;
+      if (this.data.eventId) options.event_id = this.data.eventId;
+      if (this.data.filter) options.filter = this.data.filter;
+      this.loadPostDetail(this.data.nextPostId, this.data.type, options);
     } else {
-      // Original logic for discover posts
-      if (this.data.currentIndex < this.data.totalPosts - 1) {
-        this.loadPostData(this.data.currentIndex + 1);
-      } else {
-        wx.showToast({
-          title: this.data.messages.navigation.lastPost,
-          icon: "none",
-        });
-      }
+      wx.showToast({
+        title: this.data.messages.navigation.lastPost,
+        icon: "none",
+      });
     }
   },
 

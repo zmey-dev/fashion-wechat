@@ -15,6 +15,7 @@
       index="{{ currentIndex }}"
       totalCount="{{ totalPosts }}"
       event-id="{{ eventId }}"
+      is-loading="{{ isLoading }}"
       bind:postNavigation="handlePostNavigation"
       bind:likeUpdated="handleLikeUpdated"
       bind:favoriteUpdated="handleFavoriteUpdated"

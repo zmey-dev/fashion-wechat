@@ -28,8 +28,9 @@
     bind:close="onCloseReportModal"
     bind:submit="onSubmitReport"
   />    <view 
-    class="media-content {{ isVerticalSwiping ? 'swiping' : '' }} {{ detailPanelState === 'half' ? 'detail-half' : '' }} {{ detailPanelState === 'full' ? 'detail-full' : '' }}"
-    style="transform: translateY({{ verticalTransform }}px);"
+    class="media-content {{ isVerticalSwiping ? 'swiping' : '' }} {{ detailPanelState === 'half' ? 'detail-half' : '' }} {{ detailPanelState === 'full' ? 'detail-full' : '' }} {{ isAnimating ? 'animating' : '' }}"
+    style="transform: translateY({{ verticalTransform }}px); opacity: {{ animationOpacity }}; transform: translateY({{ verticalTransform }}px) scale({{ animationScale }});"
+    animation="{{ slideAnimation }}"
   ><!-- Media Display Component -->
     <media-display
       current-post="{{ currentPost }}"
@@ -76,6 +77,7 @@
       display-favorites="{{ displayFavorites }}"
       display-shares="{{ displayShares }}"
       is-continue="{{ isContinue }}"
+      event-id="{{ eventId }}"
       bind:userprofile="onUserProfile"
       bind:like="handleLike"
       bind:favorite="handleFavorite"
@@ -138,4 +140,5 @@
     bind:imagepreview="onImagePreview"
     bind:loginrequired="onLoginRequired"
   />
+
 </view>

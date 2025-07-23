@@ -23,7 +23,7 @@
   >
     <view class="tab-bar">
       <view
-        wx:if="{{ currentPost && !currentPost.event_id }}"
+        wx:if="{{ currentPost && !currentPost.event_id && !eventId }}"
         class="tab-item {{ tabIndex === 0 ? 'active' : '' }}"
         data-index="0"
         bindtap="onTabChange"
@@ -57,9 +57,9 @@
 
   <!-- Panel content -->
   <view class="panel-content">
-    <!-- User posts tab -->
+    <!-- User posts tab - Hidden in event context -->
     <user-posts-tab
-      wx:if="{{ tabIndex === 0 && currentPostUser }}"
+      wx:if="{{ tabIndex === 0 && currentPostUser && !eventId }}"
       current-post-user="{{ currentPostUser }}"
       selected-post="{{ currentPost }}"
       auth-user="{{ authUser }}"

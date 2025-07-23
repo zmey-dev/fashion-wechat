@@ -176,12 +176,12 @@ Page({
     this.setData({ loading: true });
 
     wx.request({
-      url: `${config.BACKEND_URL}/post/get_posts`,
+      url: `${config.BACKEND_URL}/v2/post/by-user-id`,
       method: "GET",
       data: {
         user_id: userId,
-        page: this.data.page,
-        pageSize: this.data.pageSize,
+        limit: this.data.pageSize,
+        offset: (this.data.page - 1) * this.data.pageSize,
       },
       header: {
         "Content-Type": "application/json",
@@ -233,7 +233,7 @@ Page({
     const current = e.currentTarget.dataset.id;
     const userId = this.data.currentUser.id;
     wx.navigateTo({
-      url: `/pages/post-detail/post-detail?postId=${current}&user_id=${userId}`,
+      url: `/pages/post-detail/post-detail?postId=${current}&user_id=${userId}&type=by_user_id`,
     });
   },
 

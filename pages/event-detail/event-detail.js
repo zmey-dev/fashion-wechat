@@ -262,11 +262,11 @@ Page({
   },
 
   onPostTap: function (e) {
-    const { postId, index } = e.currentTarget.dataset;
+    const { postId } = e.currentTarget.dataset;
     
-    // Navigate to post detail with eventId
+    // Navigate to post detail with event context like web version
     wx.navigateTo({
-      url: `/pages/post-detail/post-detail?postId=${postId}&index=${index}&eventId=${this.data.eventId}`
+      url: `/pages/post-detail/post-detail?postId=${postId}&type=by_event_id&event_id=${this.data.eventId}`
     });
   },
 

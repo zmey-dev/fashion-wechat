@@ -4,13 +4,12 @@
   <view class="post-viewer-container">
     <media-player
       class="media-player"
-      wx:if="{{ currentPost }}"
-      selectedPost="{{ currentPost }}"
-      selectedPostUser="{{ currentPostUser }}"
+      wx:if="{{ selectedPost }}"
+      selectedPost="{{ selectedPost }}"
       followedUsers="{{ followedUsers }}"
       authUser="{{ userInfo }}"
-      index="{{ currentIndex }}"
-      totalCount="{{ totalPosts }}"
+      hasNext="{{ !!nextPostId }}"
+      hasPrevious="{{ !!previousPostId }}"
       bind:postNavigation="handlePostNavigation"
       bind:likeUpdated="handleLikeUpdated"
       bind:favoriteUpdated="handleFavoriteUpdated"
@@ -20,6 +19,7 @@
       bind:navigateToProfile="navigateToUserProfile"
       bind:previousPost="handlePreviousPost"
       bind:nextPost="handleNextPost"
+      bind:refreshPost="handleRefreshPost"
     >
     </media-player>
 

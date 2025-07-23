@@ -200,7 +200,7 @@ Page({
     this.clearAllTimers();
   },
   // Clear all timers to prevent memory leaks
-  clearAllTimers() {
+  clearAllTimers: function() {
     // Clear all typing timers
     Object.values(this.typingTimers).forEach((timer) => {
       if (timer) clearTimeout(timer);
@@ -215,7 +215,7 @@ Page({
   },
 
   // Setup socket event listeners
-  setupSocketListeners() {
+  setupSocketListeners: function() {
     // Handle user online events
     socketManager.on("user_online", this.handleUserOnline.bind(this));
 
@@ -233,7 +233,7 @@ Page({
   },
 
   // Remove socket event listeners
-  removeSocketListeners() {
+  removeSocketListeners: function() {
     socketManager.off("user_online", this.handleUserOnline.bind(this));
     socketManager.off("user_offline", this.handleUserOffline.bind(this));
     socketManager.off("typing_message", this.handleTypingMessage.bind(this));
@@ -244,7 +244,7 @@ Page({
   },
 
   // Handle new message from socket
-  handleNewMessage(data) {
+  handleNewMessage: function(data) {
     console.log("New message received:", data);
 
     if (
@@ -290,7 +290,7 @@ Page({
   },
 
   // Handle typing message event from socket - closely follows React implementation
-  handleTypingMessage(data) {
+  handleTypingMessage: function(data) {
     console.log("Typing message received:", data);
 
     const senderId = data.sender_id;
@@ -323,17 +323,17 @@ Page({
   },
 
   // Check if a friend is currently typing
-  isFriendTyping(friendId) {
+  isFriendTyping: function(friendId) {
     return this.data.friendsTyping[friendId] || false;
   },
 
   // Handle online/offline status updates
-  handleUserOnline(userId) {
+  handleUserOnline: function(userId) {
     console.log(`User ${userId} came online`);
     this.updateFriendStatus(userId, "online");
   },
 
-  handleUserOffline(userId) {
+  handleUserOffline: function(userId) {
     console.log(`User ${userId} went offline`);
     this.updateFriendStatus(userId, "offline");
   },
@@ -550,7 +550,7 @@ Page({
   },
 
   // Context menu actions
-  onContextAction(e) {
+  onContextAction: function(e) {
     const action = e.currentTarget.dataset.action;
     const friendId = this.data.contextMenu.friendId;
 
@@ -569,13 +569,13 @@ Page({
     this.hideContextMenu();
   },
 
-  hideContextMenu() {
+  hideContextMenu: function() {
     this.setData({
       contextMenu: { visible: false, friendId: null, x: 0, y: 0 },
     });
   },
 
-  getFriends() {
+  getFriends: function() {
     try {
       wx.request({
         url: `${config.BACKEND_URL}/friend/get_friends`,
@@ -1413,5 +1413,140 @@ Page({
     if (friend) {
       this.switchToChat(friend);
     }
+  },
+
+  // Block user (same as web version - actually deletes friend)
+  blockUser: function (friendId) {
+    wx.showModal({
+      title: "确认操作",
+      content: "您确定要删除您的好友请求吗？", // Same message as web version
+      confirmText: "确定",
+      cancelText: "取消",
+      success: (res) => {
+        if (res.confirm) {
+          wx.showLoading({ title: "处理中..." });
+          
+          wx.request({
+            url: `${config.BACKEND_URL}/friend/del_friend_by_friend_id`,
+            method: "DELETE",
+            data: {
+              friend_id: friendId
+            },
+            header: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${this.data.userInfo.token}`,
+            },
+            success: (res) => {
+              wx.hideLoading();
+              if (res.statusCode === 200) {
+                // Remove friend from local state
+                const updatedFriends = this.data.friends.filter(f => f.id !== friendId);
+                const updatedFilteredFriends = this.data.filteredFriends.filter(f => f.id !== friendId);
+                
+                this.setData({
+                  friends: updatedFriends,
+                  filteredFriends: updatedFilteredFriends,
+                  currentView: "list", // Go back to list like web version
+                  selectedUser: null,
+                  chatMessages: []
+                });
+                
+                wx.showToast({
+                  title: "已删除好友",
+                  icon: "success"
+                });
+              } else {
+                wx.showToast({
+                  title: "删除失败",
+                  icon: "none"
+                });
+              }
+            },
+            fail: () => {
+              wx.hideLoading();
+              wx.showToast({
+                title: "网络错误",
+                icon: "none"
+              });
+            }
+          });
+        }
+      }
+    });
+  },
+
+  // Delete messages with friend (like web version)
+  deleteMessages: function (friendId) {
+    wx.showModal({
+      title: "确认删除",
+      content: "确定要删除与此好友的所有聊天记录吗？",
+      confirmText: "删除",
+      cancelText: "取消",
+      success: (res) => {
+        if (res.confirm) {
+          wx.showLoading({ title: "删除中..." });
+          
+          wx.request({
+            url: `${config.BACKEND_URL}/messages/del_messages_by_friend_id`,
+            method: "DELETE",
+            data: {
+              friend_id: friendId
+            },
+            header: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${this.data.userInfo.token}`,
+            },
+            success: (res) => {
+              wx.hideLoading();
+              if (res.statusCode === 200) {
+                // Clear chat messages if currently viewing this friend
+                if (this.data.selectedUser && this.data.selectedUser.id === friendId) {
+                  this.setData({
+                    chatMessages: []
+                  });
+                }
+                
+                // Update last message in friends list
+                const updatedFriends = this.data.friends.map(f => {
+                  if (f.id === friendId) {
+                    return { ...f, lastMessage: null, unreadCount: 0 };
+                  }
+                  return f;
+                });
+                
+                const updatedFilteredFriends = this.data.filteredFriends.map(f => {
+                  if (f.id === friendId) {
+                    return { ...f, lastMessage: null, unreadCount: 0 };
+                  }
+                  return f;
+                });
+                
+                this.setData({
+                  friends: updatedFriends,
+                  filteredFriends: updatedFilteredFriends
+                });
+                
+                wx.showToast({
+                  title: "聊天记录已删除",
+                  icon: "success"
+                });
+              } else {
+                wx.showToast({
+                  title: "删除失败",
+                  icon: "none"
+                });
+              }
+            },
+            fail: () => {
+              wx.hideLoading();
+              wx.showToast({
+                title: "网络错误",
+                icon: "none"
+              });
+            }
+          });
+        }
+      }
+    });
   },
 });

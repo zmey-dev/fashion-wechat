@@ -9,13 +9,14 @@ Page({
     followedUsers: app.globalData.followedUsers || [],
     postId: null,
 
-    currentPost: null,
-    currentPostUser: null,
-    currentIndex: 0,
-    totalPosts: 0,
+    // Web version style data structure
+    selectedPost: null,
+    nextPostId: null,
+    previousPostId: null,
     isLoading: true,
     loadError: false,
     errorMessage: "",
+    filterText: "",
 
     touchStartX: 0,
     touchStartY: 0,
@@ -36,8 +37,10 @@ Page({
 
   onLoad: function (options) {
     const postId = options.postId || null;
+    const filterText = options.filter || "";
     this.setData({
       postId: postId,
+      filterText: filterText,
     });
     const app = getApp();
 
@@ -60,19 +63,15 @@ Page({
       showLoginModal: app.globalData.showLoginModal || false,
       userInfo: app.globalData.userInfo || {},
       followedUsers: app.globalData.followedUsers || [],
-      showSidebar: app.globalData.showSidebar || false,
     });
 
-    if (postId) this.loadPostData(null, postId);
-    else this.loadPostData(0);
+    // Load initial post like web version
+    this.loadInitialPost();
   },
 
   onShow: function () {
-    if(this.data.postId) {
-      this.loadPostData(null, this.data.postId);
-    } else {
-      this.loadPostData(0);
-    }
+    // Reload initial post
+    this.loadInitialPost();
   },
 
   onUnload: function () {
@@ -81,43 +80,35 @@ Page({
     app.unsubscribe("userInfo", this.userInfoHandler);
     app.unsubscribe("showLoginModal", this.showLoginModalHandler);
     app.unsubscribe("followedUser", this.followedUserHandler);
+    
+    // Clear selected post like web version
+    this.setData({ selectedPost: null });
   },
 
-  loadPostData: function (index, postId) {
-    this.setData({
-      isLoading: true,
-      loadError: false,
-    });
-
-    const data = {};
-    if (index !== null && index !== undefined) {
-      data.index = index;
-    }
-    if (postId) {
-      data.id = postId;
-    }
-
-    // Fetch post data from API
+  // Load initial post like web version
+  loadInitialPost: function () {
+    this.setData({ isLoading: true });
+    
+    // Get first recommended post
     wx.request({
-      url: `${config.BACKEND_URL}/post/get_post_recommend`,
+      url: `${config.BACKEND_URL}/v2/post/recommend`,
       method: "GET",
-      data: data,
+      data: {
+        limit: 1,
+        offset: 0,
+        filter: this.data.filterText,
+      },
       header: {
+        "Content-Type": "application/json",
         Authorization: app.globalData?.userInfo?.token
           ? `Bearer ${app.globalData?.userInfo?.token}`
           : "",
       },
       success: (res) => {
-        if (res.statusCode === 200 && res.data) {
-          // Get post count for navigation
-          const totalPosts = res.data.count || 1;
-
-          this.setData({
-            currentPost: res.data.post,
-            currentIndex: index || 0,
-            totalPosts: totalPosts,
-            isLoading: false,
-          });
+        if (res.statusCode === 200 && res.data.status === "success" && res.data.posts.length > 0) {
+          const firstPost = res.data.posts[0];
+          // Get detailed post data with navigation like web version
+          this.fetchPostDetail(firstPost.id, "recommend", {});
         } else {
           this.setData({
             isLoading: false,
@@ -127,7 +118,7 @@ Page({
         }
       },
       fail: (err) => {
-        console.error("Failed to load post:", err);
+        console.error("Failed to load initial post:", err);
         this.setData({
           isLoading: false,
           loadError: true,
@@ -137,9 +128,59 @@ Page({
     });
   },
 
+  // Fetch post detail like web version
+  fetchPostDetail: function (postId, type, options = {}) {
+    // Build query parameters like web version
+    const params = { type };
+    Object.keys(options).forEach(key => {
+      if (options[key] !== null && options[key] !== undefined) {
+        params[key] = options[key];
+      }
+    });
+
+    wx.request({
+      url: `${config.BACKEND_URL}/v2/post/detail/${postId}`,
+      method: "GET",
+      data: params,
+      header: {
+        "Content-Type": "application/json",
+        Authorization: app.globalData?.userInfo?.token
+          ? `Bearer ${app.globalData?.userInfo?.token}`
+          : "",
+      },
+      success: (res) => {
+        if (res.statusCode === 200 && res.data.status === "success") {
+          this.setData({
+            selectedPost: res.data.post,
+            nextPostId: res.data.next_post_id,
+            previousPostId: res.data.previous_post_id,
+            isLoading: false,
+          });
+        } else {
+          this.setData({
+            isLoading: false,
+            loadError: true,
+            errorMessage: res.data?.msg || this.data.messages.errors.loadFailed,
+          });
+        }
+      },
+      fail: (err) => {
+        console.error("Failed to fetch post detail:", err);
+        this.setData({
+          isLoading: false,
+          loadError: true,
+          errorMessage: this.data.messages.errors.networkError,
+        });
+      },
+    });
+  },
+
+
+  // Navigation like web version onClickArrow
   handlePreviousPost: function () {
-    if (this.data.currentIndex > 0) {
-      this.loadPostData(this.data.currentIndex - 1);
+    if (this.data.previousPostId) {
+      this.setData({ isLoading: true });
+      this.fetchPostDetail(this.data.previousPostId, "recommend", {});
     } else {
       wx.showToast({
         title: this.data.messages.navigation.firstPost,
@@ -149,13 +190,22 @@ Page({
   },
 
   handleNextPost: function () {
-    if (this.data.currentIndex < this.data.totalPosts - 1) {
-      this.loadPostData(this.data.currentIndex + 1);
+    if (this.data.nextPostId) {
+      this.setData({ isLoading: true });
+      this.fetchPostDetail(this.data.nextPostId, "recommend", {});
     } else {
       wx.showToast({
         title: this.data.messages.navigation.lastPost,
         icon: "none",
       });
+    }
+  },
+
+  // Refresh current post like web version
+  handleRefreshPost: function () {
+    if (this.data.selectedPost?.id) {
+      this.setData({ isLoading: true });
+      this.fetchPostDetail(this.data.selectedPost.id, "recommend", {});
     }
   },
 

@@ -8,7 +8,8 @@ Component({  properties: {
     displayComments: { type: String, value: "0" },
     displayFavorites: { type: String, value: "0" },
     displayShares: { type: String, value: "0" },
-    isContinue: { type: Boolean, value: true }
+    isContinue: { type: Boolean, value: true },
+    eventId: { type: String, value: null }
   },
 
   methods: {

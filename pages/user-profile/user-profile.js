@@ -10,8 +10,8 @@ Page({
     userMediaList: [],
     loading: false,
     hasMore: true,
-    page: 1,
-    pageSize: 10,
+    offset: 0,
+    limit: 20, // Match web version
     error: false,
     // Chinese messages for UI text
     messages: {
@@ -139,25 +139,26 @@ Page({
 
     this.setData({ loading: true });
 
+    // Use web version API pattern
     wx.request({
-      url: `${config.BACKEND_URL}/post/get_posts`,
+      url: `${config.BACKEND_URL}/v2/post/by-user-id`,
       method: "GET",
       data: {
         user_id: userId,
-        page: this.data.page,
-        pageSize: this.data.pageSize,
+        limit: this.data.limit,
+        offset: this.data.offset,
       },
       header: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${getApp().globalData.userInfo.token}`,
       },
       success: (res) => {
-        if (res.statusCode === 200) {
+        if (res.statusCode === 200 && res.data.status === "success") {
           const newMedia = res.data.posts || [];
           this.setData({
             userMediaList: this.data.userMediaList.concat(newMedia),
             hasMore: res.data.has_more || false,
-            page: this.data.page + 1,
+            offset: this.data.offset + this.data.limit,
           });
         } else {
           wx.showToast({
@@ -185,12 +186,15 @@ Page({
     }
   },
 
-  // Preview image by navigating to post detail
+  // Preview image by navigating to post detail with web version parameters
   previewImage: function (e) {
-    const current = e.currentTarget.dataset.id;
-    wx.navigateTo({
-      url: `/pages/post-detail/post-detail?postId=${current}`,
-    });
+    const postId = e.currentTarget.dataset.id;
+    const userId = this.data.currentUser.id;
+    
+    // Build URL with web version parameters
+    const url = `/pages/post-detail/post-detail?postId=${postId}&type=by_user_id&user_id=${userId}`;
+    
+    wx.navigateTo({ url });
   },
 
   // Handle pull down refresh
@@ -198,7 +202,7 @@ Page({
     if (this.data.currentUser) {
       this.setData({
         userMediaList: [],
-        page: 1,
+        offset: 0,
         hasMore: true,
       });
       this.loadUserMedia(this.data.currentUser.id);

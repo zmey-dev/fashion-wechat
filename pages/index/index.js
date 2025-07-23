@@ -221,18 +221,13 @@ Page({
     this.setData({ loading: true });
 
     const requestData = {
-      scope: this.data.pageSize,
-      isDiscover: true,
+      limit: this.data.pageSize,
+      offset: refresh ? 0 : this.data.posts.length,
     };
 
-    // Add exist_post_ids for pagination (not refresh)
-    if (!refresh && this.data.posts.length > 0) {
-      requestData.exist_post_ids = this.data.existPostIds;
-    }
-
     wx.request({
-      url: `${config.BACKEND_URL}/post/get_posts_discover`,
-      method: "POST",
+      url: `${config.BACKEND_URL}/v2/post/discover`,
+      method: "GET",
       header: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${app.globalData.userInfo?.token}`,
@@ -298,7 +293,7 @@ Page({
   onPostTap: function (e) {
     const postId = e.currentTarget.dataset.postId;
     wx.navigateTo({
-      url: `/pages/post-detail/post-detail?postId=${postId}`,
+      url: `/pages/post-detail/post-detail?postId=${postId}&type=discover`,
     });
   },
 
