@@ -330,6 +330,14 @@ Page({
     let errors = {};
 
     if (!profileForm.name) errors.name = "姓名为必填项";
+    
+    // Validate nickname (required field)
+    if (!profileForm.nickname) {
+      errors.nickname = "昵称为必填项";
+    } else if (profileForm.nickname.length > 50) {
+      errors.nickname = "昵称不能超过50个字符";
+    }
+    
     if (!profileForm.gender) errors.gender = "性别为必填项";
     if (!profileForm.id_number) errors.id_number = "身份证号为必填项";
     if (!profileForm.student_number) errors.student_number = "学号为必填项";

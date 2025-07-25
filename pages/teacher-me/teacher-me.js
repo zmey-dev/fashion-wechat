@@ -42,6 +42,7 @@ Page({
       phone: "",
       // email: "",
       name: "",
+      nickname: "",
       username: "",
       gender: "",
       id_number: "",
@@ -901,6 +902,7 @@ Page({
         phone: processedPhone,
         // email: userInfo.email || "",
         name: userInfo.name || "",
+        nickname: userInfo.nickname || "",
         username: userInfo.username || "",
         gender: userInfo.gender || "",
         id_number: userInfo.id_number || "",
@@ -1005,6 +1007,14 @@ Page({
     let formErrors = {};
 
     if (!teacherProfile.name) formErrors.name = "姓名为必填项";
+    
+    // Validate nickname (required field)
+    if (!teacherProfile.nickname) {
+      formErrors.nickname = "昵称为必填项";
+    } else if (teacherProfile.nickname.length > 50) {
+      formErrors.nickname = "昵称不能超过50个字符";
+    }
+    
     if (!teacherProfile.id_number) formErrors.id_number = "身份证号为必填项";
     if (!teacherProfile.school_position)
       formErrors.school_position = "学校职位为必填项";
@@ -1768,6 +1778,16 @@ Page({
           errors.name = "姓名不能超过20个字符";
         } else {
           delete errors.name;
+        }
+        break;
+
+      case "nickname":
+        if (!value || value.trim().length === 0) {
+          errors.nickname = "昵称为必填项";
+        } else if (value.trim().length > 50) {
+          errors.nickname = "昵称不能超过50个字符";
+        } else {
+          delete errors.nickname;
         }
         break;
 
