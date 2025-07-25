@@ -253,6 +253,31 @@ Page({
     }
   },
 
+  // Supported image formats for event posters
+  getSupportedImageFormats() {
+    return {
+      extensions: ['jpg', 'jpeg', 'png', 'gif', 'heic', 'heif', 'ico', 'bmp'],
+      maxSize: 200 * 1024 * 1024, // 200MB
+      displayText: 'JPG, JPEG, PNG, GIF, HEIC, ICO, BMP'
+    };
+  },
+
+  // Validate image file
+  validateImageFile(file) {
+    const supportedFormats = this.getSupportedImageFormats();
+    
+    // Check file size
+    if (file.size > supportedFormats.maxSize) {
+      const maxSizeMB = Math.round(supportedFormats.maxSize / (1024 * 1024));
+      return { 
+        valid: false, 
+        error: `图片大小不能超过 ${maxSizeMB}MB` 
+      };
+    }
+
+    return { valid: true };
+  },
+
   // Image upload
   triggerFileInput() {
     const that = this;
@@ -269,11 +294,14 @@ Page({
           camera: "back",
           success: (res) => {
             const tempFile = res.tempFiles[0];
-            // Check file size (max 5MB)
-            if (tempFile.size > 5 * 1024 * 1024) {
+            
+            // Validate image file
+            const validation = that.validateImageFile(tempFile);
+            if (!validation.valid) {
               wx.showToast({
-                title: "图片不能超过5MB",
+                title: validation.error,
                 icon: "none",
+                duration: 3000
               });
               return;
             }

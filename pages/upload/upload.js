@@ -235,6 +235,49 @@ Page({
     });
   },
 
+  // Supported file formats
+  getSupportedFormats() {
+    return {
+      images: {
+        extensions: ['jpg', 'jpeg', 'png', 'gif', 'heic', 'heif', 'ico', 'bmp'],
+        maxSize: 200 * 1024 * 1024, // 200MB
+        displayText: 'JPG, JPEG, PNG, GIF, HEIC, ICO, BMP'
+      },
+      videos: {
+        extensions: ['mp4', 'mov', 'avi'],
+        maxSize: 200 * 1024 * 1024, // 200MB
+        displayText: 'MP4, MOV, AVI'
+      },
+      audio: {
+        extensions: ['mp3', 'wav', 'aac', 'm4a', 'flac', 'ogg', 'wma', 'ape', 'm4b', 'amr'],
+        maxSize: 50 * 1024 * 1024, // 50MB
+        displayText: 'MP3, WAV, AAC, M4A, FLAC, OGG'
+      }
+    };
+  },
+
+  // Validate file type and size
+  validateFile(file, type) {
+    const supportedFormats = this.getSupportedFormats();
+    const formats = supportedFormats[type];
+    
+    if (!formats) return { valid: false, error: "不支持的文件类型" };
+
+    // Check file size
+    if (file.size > formats.maxSize) {
+      const maxSizeMB = Math.round(formats.maxSize / (1024 * 1024));
+      return { 
+        valid: false, 
+        error: `文件大小不能超过 ${maxSizeMB}MB` 
+      };
+    }
+
+    // For images and videos, WeChat's chooseMedia already filters by type
+    // For audio, we'll validate in the audio selection function
+    
+    return { valid: true };
+  },
+
   // Choose images
   chooseImage(sourceType) {
     const { files } = this.data;
@@ -255,9 +298,36 @@ Page({
       sourceType: [sourceType],
       sizeType: ["compressed"],
       success: (res) => {
+        // Validate each selected file
+        const validFiles = [];
+        const invalidFiles = [];
+
+        res.tempFiles.forEach(file => {
+          const validation = this.validateFile(file, 'images');
+          if (validation.valid) {
+            validFiles.push(file);
+          } else {
+            invalidFiles.push({ file, error: validation.error });
+          }
+        });
+
+        // Show error for invalid files
+        if (invalidFiles.length > 0) {
+          const firstError = invalidFiles[0].error;
+          wx.showToast({
+            title: firstError,
+            icon: "none",
+            duration: 3000
+          });
+          
+          // If all files are invalid, return early
+          if (validFiles.length === 0) {
+            return;
+          }
+        }
         this.setData({ imageLoading: true });
 
-        const newFiles = res.tempFiles.map((file, index) => ({
+        const newFiles = validFiles.map((file, index) => ({
           url: file.tempFilePath,
           size: file.size,
           type: "image",
@@ -319,6 +389,17 @@ Page({
       sizeType: ["original"], // Use original quality for better video quality
       success: (res) => {
         const videoFile = res.tempFiles[0];
+
+        // Validate video file
+        const validation = this.validateFile(videoFile, 'videos');
+        if (!validation.valid) {
+          wx.showToast({
+            title: validation.error,
+            icon: "none",
+            duration: 3000
+          });
+          return;
+        }
 
         console.log("Video file selected:", videoFile);
         console.log("Video file keys:", Object.keys(videoFile));
@@ -768,41 +849,33 @@ Page({
   handleAudioSelected(audioFile) {
     console.log("handleAudioSelected called with:", audioFile);
 
+    // Validate audio file using unified validation
+    const validation = this.validateFile(audioFile, 'audio');
+    if (!validation.valid) {
+      wx.showToast({
+        title: validation.error,
+        icon: "none",
+        duration: 3000
+      });
+      return;
+    }
+
+    // Additional check for audio file extension
     const fileName = audioFile.name || audioFile.path || "";
     const fileExt = fileName.split(".").pop().toLowerCase();
-    const validAudioExts = [
-      "mp3",
-      "wav",
-      "aac",
-      "m4a",
-      "flac",
-      "ogg",
-      "wma",
-      "ape",
-      "m4b",
-      "amr",
-    ];
+    const supportedFormats = this.getSupportedFormats();
+    
+    if (!supportedFormats.audio.extensions.includes(fileExt)) {
+      wx.showToast({
+        title: `不支持的音频格式。支持的格式: ${supportedFormats.audio.displayText}`,
+        icon: "none",
+        duration: 3000
+      });
+      return;
+    }
 
     console.log("Audio file name:", fileName);
     console.log("Audio file extension:", fileExt);
-
-    if (!validAudioExts.includes(fileExt)) {
-      console.error("Invalid audio extension:", fileExt);
-      wx.showToast({
-        title: this.data.messages.errors.audioOnly,
-        icon: "none",
-      });
-      return;
-    }
-
-    const maxSize = 10 * 1024 * 1024; // 10MB
-    if (audioFile.size > maxSize) {
-      wx.showToast({
-        title: this.data.messages.errors.audioSizeLimit,
-        icon: "none",
-      });
-      return;
-    }
 
     const newAudio = {
       ...audioFile,

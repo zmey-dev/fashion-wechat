@@ -21,7 +21,7 @@
           <view wx:else class="poster-placeholder">
             <text class="camera-icon">📷</text>
             <text class="upload-text">点击上传活动海报</text>
-            <text class="upload-hint">建议尺寸 750x400</text>
+            <text class="upload-hint">支持图片格式</text>
           </view>
         </view>
         
@@ -38,6 +38,27 @@
           <view wx:elif="{{posterUploadError}}" class="upload-error">
             <text class="error-icon">✗</text>
             <text class="error-text">上传失败：{{posterUploadError}}</text>
+          </view>
+        </view>
+        
+        <!-- 支持的海报格式 -->
+        <view class="supported-formats-section">
+          <view class="formats-header">
+            <text class="formats-title">📸 支持的海报格式</text>
+          </view>
+          <view class="formats-content">
+            <view class="format-item">
+              <text class="format-label">图片格式:</text>
+              <text class="format-types">JPG, PNG, GIF, HEIC, ICO, BMP</text>
+            </view>
+            <view class="format-item">
+              <text class="format-label">文件大小:</text>
+              <text class="format-types">最大 200MB</text>
+            </view>
+            <view class="format-item">
+              <text class="format-label">建议尺寸:</text>
+              <text class="format-types">750x400 或 1080x1920</text>
+            </view>
           </view>
         </view>
       </view>

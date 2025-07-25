@@ -94,9 +94,9 @@
               <view wx:if="{{imageLoading}}" class="loading-spinner"></view>
               <view wx:else class="upload-content">
                 <text class="upload-icon">➕</text>
-                <text class="upload-text">添加文件</text>
+                <text class="upload-text">添加媒体文件</text>
                 <text class="upload-hint">
-                  {{files.length === 0 ? '支持图片和视频' : '仅支持图片'}}
+                  {{files.length === 0 ? '支持图片、视频和音频' : '仅支持图片'}}
                 </text>
               </view>
             </view>
@@ -118,6 +118,33 @@
               <view class="instruction-item">• 标记点可以添加标题和描述信息</view>
               <view class="instruction-item">• 视频模式只能上传一个文件</view>
               <view class="instruction-item">• 图片模式最多可上传{{maxFiles}}个文件</view>
+            </view>
+          </view>
+          
+          <!-- 支持的文件格式 -->
+          <view class="supported-formats-section">
+            <view class="formats-header">
+              <text class="formats-title">📁 支持的文件格式</text>
+            </view>
+            <view class="formats-content">
+              <view class="format-item">
+                <text class="format-icon">📸</text>
+                <text class="format-label">图片:</text>
+                <text class="format-types">JPG, PNG, GIF, HEIC, ICO, BMP</text>
+              </view>
+              <view class="format-item">
+                <text class="format-icon">🎥</text>
+                <text class="format-label">视频:</text>
+                <text class="format-types">MP4, MOV, AVI</text>
+              </view>
+              <view class="format-item">
+                <text class="format-icon">🎵</text>
+                <text class="format-label">音频:</text>
+                <text class="format-types">MP3, WAV, AAC, M4A, FLAC, OGG</text>
+              </view>
+              <view class="format-limits">
+                <text class="limit-text">图片/视频最大: 200MB | 音频最大: 50MB</text>
+              </view>
             </view>
           </view>
         </view>
