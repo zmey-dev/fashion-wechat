@@ -21,7 +21,10 @@ Component({
     containerWidth: 0,
     containerHeight: 0,
     calculatedDots: [],
-    audioMode: 'both' // 'both', 'uploaded', 'video'
+    audioMode: 'both', // 'both', 'uploaded', 'video'
+    imageLoadingStates: {}, // Track loading state for each image
+    currentImageLoading: true, // Current image loading state
+    showImageLoader: false // Show loader overlay
   },
 
   observers: {
@@ -31,6 +34,10 @@ Component({
       } else {
         this.setData({ calculatedDots: [] });
       }
+    },
+    'currentMedia, currentSlideIndex': function(currentMedia, currentSlideIndex) {
+      // Check if current image is loaded when media or slide changes
+      this.checkCurrentImageLoadingState(currentMedia, currentSlideIndex);
     }
   },
   ready() {
@@ -50,6 +57,74 @@ Component({
   },
 
   methods: {
+    /**
+     * Check current image loading state
+     */
+    checkCurrentImageLoadingState(currentMedia, currentSlideIndex) {
+      if (!currentMedia || !currentMedia[currentSlideIndex]) {
+        this.setData({ 
+          currentImageLoading: false,
+          showImageLoader: false 
+        });
+        return;
+      }
+
+      const currentItem = currentMedia[currentSlideIndex];
+      const imageUrl = currentItem.url;
+      const { imageLoadingStates } = this.data;
+
+      // If image is already loaded, don't show loader
+      if (imageLoadingStates[imageUrl]) {
+        this.setData({ 
+          currentImageLoading: false,
+          showImageLoader: false 
+        });
+        return;
+      }
+
+      // Show loader for unloaded image
+      this.setData({ 
+        currentImageLoading: true,
+        showImageLoader: true 
+      });
+
+      // Start preloading the image
+      this.preloadImage(imageUrl);
+    },
+
+    /**
+     * Preload image and update loading state
+     */
+    preloadImage(imageUrl) {
+      wx.getImageInfo({
+        src: imageUrl,
+        success: () => {
+          // Image loaded successfully, but add artificial delay
+          const { imageLoadingStates } = this.data;
+          imageLoadingStates[imageUrl] = true;
+          
+          // Force longer loading time for better UX
+          setTimeout(() => {
+            this.setData({ 
+              imageLoadingStates,
+              currentImageLoading: false,
+              showImageLoader: false 
+            });
+          }, 2500); // Increased to 2.5 seconds artificial delay
+        },
+        fail: (error) => {
+          console.error('Failed to preload image:', error);
+          // Hide loader even on error after delay
+          setTimeout(() => {
+            this.setData({ 
+              currentImageLoading: false,
+              showImageLoader: false 
+            });
+          }, 1500); // Increased error delay to 1.5 seconds
+        }
+      });
+    },
+
     /**
      * Calculate actual image size within container (aspectFit mode)
      */
@@ -228,7 +303,25 @@ Component({
     /**
      * Handle image load event to recalculate positions
      */
-    onImageLoad() {
+    onImageLoad(e) {
+      // Get the loaded image URL from the event
+      const loadedImageUrl = e.currentTarget.dataset.src || e.detail.src;
+      
+      if (loadedImageUrl) {
+        // Update loading state for this specific image with artificial delay
+        const { imageLoadingStates } = this.data;
+        imageLoadingStates[loadedImageUrl] = true;
+        
+        // Force longer loading time for better visual feedback
+        setTimeout(() => {
+          this.setData({ 
+            imageLoadingStates,
+            currentImageLoading: false,
+            showImageLoader: false 
+          });
+        }, 2200); // Increased to 2.2 seconds artificial delay
+      }
+
       setTimeout(() => {
         this.calculateDotPositions();
       }, 100);

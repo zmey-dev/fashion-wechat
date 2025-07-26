@@ -4,9 +4,9 @@
     <!-- User Profile Header -->
     <view class="profile-header">
       <view class="profile-info">
-        <avatar class="profile-avatar" avatar="{{currentUser.avatar}}" name="{{currentUser.username}}" size="{{80}}" mode="aspectFill"></avatar>
+        <avatar class="profile-avatar" avatar="{{currentUser.avatar}}" name="{{currentUser.nickname}}" size="{{80}}" mode="aspectFill"></avatar>
         <view class="profile-details">
-          <text class="profile-username">@{{currentUser.username}}</text>
+          <text class="profile-username">@{{currentUser.nickname}}</text>
           <text class="profile-university">{{(currentUser.university && currentUser.university.name) || '未设置大学'}}</text>
           <text class="profile-faculty">{{currentUser.faculty || '未设置学院'}}</text>
         </view>

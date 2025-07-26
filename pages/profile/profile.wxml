@@ -3,13 +3,13 @@
   <view class="profile-container"><!-- Avatar Section - Horizontal Layout with Edit/Cancel Buttons -->
     <view class="avatar-section-horizontal">
       <view class="avatar-container-horizontal" bindtap="selectAvatar">
-        <avatar class="avatar-medium" avatar="{{selectedAvatar || userInfo.avatar}}" name="{{userInfo.username}}" size="120" mode="aspectFill" />
+        <avatar class="avatar-medium" avatar="{{selectedAvatar || userInfo.avatar}}" name="{{userInfo.nickname}}" size="120" mode="aspectFill" />
         <view class="avatar-overlay" wx:if="{{isEditingProfile}}">
           <text class="avatar-edit-icon">📷</text>
         </view>
       </view>
       <view class="user-info-horizontal">
-        <text class="user-name-horizontal">{{userInfo.name || userInfo.username}}</text>
+        <text class="user-name-horizontal">{{userInfo.name || userInfo.nickname}}</text>
         <text class="user-university-horizontal">{{university.name || '未设置大学'}}</text>
       </view>
       

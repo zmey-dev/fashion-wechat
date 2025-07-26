@@ -24,9 +24,9 @@
         <!-- User Section -->
         <view class="user-section">
           <view class="user-info">
-            <view class="user-row" catchtap="onUserTap" data-username="{{item.user.username}}" data-userId="{{item.user.id}}">
-              <avatar avatar="{{item.user.avatar}}" name="{{item.user.username}}" size="45"></avatar>
-              <text class="user-name">{{item.user.username}}</text>
+            <view class="user-row" catchtap="onUserTap" data-username="{{item.user.nickname}}" data-userId="{{item.user.id}}">
+              <avatar avatar="{{item.user.avatar}}" name="{{item.user.nickname}}" size="45"></avatar>
+              <text class="user-name">{{item.user.nickname}}</text>
             </view>
           </view>
           <view class="like-display">
@@ -91,7 +91,7 @@
         <view class="modal-header">
           <text class="modal-title">用户 ID</text>
           <text class="modal-warning">
-            请注意：您当前的 ID 是 {{userInfo.username}}。
+            请注意：您当前的 ID 是 {{userInfo.nickname}}。
             您只能更改一次您的用户 ID！
           </text>
         </view>

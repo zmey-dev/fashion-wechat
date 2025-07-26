@@ -32,7 +32,7 @@
           <avatar 
             class="friend-avatar" 
             avatar="{{item.avatar}}"
-            name="{{item.username}}"
+            name="{{item.nickname}}"
             size="{{70}}"
             mode="aspectFill"
           />
@@ -46,7 +46,7 @@
         
         <view class="friend-content">
           <view class="friend-main">
-            <view class="friend-name">{{item.username}}</view>
+            <view class="friend-name">{{item.nickname}}</view>
             <view class="timestamp">{{item.timestamp || ''}}</view>
           </view>
           
@@ -79,14 +79,14 @@
           <avatar 
             class="user-avatar" 
             avatar="{{selectedUser.avatar}}"
-            name="{{selectedUser.username}}"
+            name="{{selectedUser.nickname}}"
             size="{{70}}"
             mode="aspectFill"
           />
           <view wx:if="{{selectedUser.status === 'online'}}" class="online-dot"></view>
         </view>
         <view class="user-info">
-          <view class="user-name">{{selectedUser.username}}</view>
+          <view class="user-name">{{selectedUser.nickname}}</view>
           <!-- Show typing indicator in header when user is typing -->
           <view wx:if="{{friendsTyping[selectedUser.id]}}" class="header-typing">
             <text class="header-typing-text">正在输入</text>
@@ -126,7 +126,7 @@
               <avatar 
                 class="message-avatar" 
                 avatar="{{selectedUser.avatar}}"
-                name="{{selectedUser.username}}"
+                name="{{selectedUser.nickname}}"
                 size="{{70}}"
                 mode="aspectFill"
               />
@@ -148,7 +148,7 @@
               <avatar 
                 class="message-avatar" 
                 avatar="{{userInfo.avatar}}"
-                name="{{userInfo.username}}"
+                name="{{userInfo.nickname}}"
                 size="{{70}}"
                 mode="aspectFill"
               />
@@ -164,7 +164,7 @@
           <avatar 
             class="typing-avatar"
             avatar="{{selectedUser.avatar}}"
-            name="{{selectedUser.username}}"
+            name="{{selectedUser.nickname}}"
             size="{{70}}"
             mode="aspectFill"
           />

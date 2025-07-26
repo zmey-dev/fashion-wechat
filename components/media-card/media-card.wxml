@@ -28,9 +28,9 @@
       <!-- User profile section (not shown for events) -->
       <view wx:if="{{!isEvent}}" class="user-section" catchtap="onUserClick">
         <view class="avatar-container">
-          <avatar avatar="{{item.user.avatar}}" name="{{item.user.username}}" mode="aspectFill" />
+          <avatar avatar="{{item.user.avatar}}" name="{{item.user.nickname}}" mode="aspectFill" />
         </view>
-        <text class="username-text">@{{item.user.username}}</text>
+        <text class="username-text">@{{item.user.nickname}}</text>
       </view>
 
       <!-- Action buttons -->

@@ -403,7 +403,7 @@ Page({
   onSearchInput(e) {
     const searchText = e.detail.value.toLowerCase();
     const filtered = this.data.friends.filter((friend) =>
-      friend.username.toLowerCase().includes(searchText)
+      friend.nickname.toLowerCase().includes(searchText)
     );
 
     this.setData({
@@ -758,12 +758,14 @@ Page({
             sender: {
               id: this.data.userInfo.id,
               username: this.data.userInfo.username,
+              nickname: this.data.userInfo.nickname,
               avatar: this.data.userInfo.avatar,
             },
             // Include receiver info
             receiver: {
               id: this.data.selectedUser.id,
               username: this.data.selectedUser.username,
+              nickname: this.data.selectedUser.nickname,
               avatar: this.data.selectedUser.avatar,
             },
           });

@@ -45,11 +45,11 @@
           <avatar 
             class="reply-avatar" 
             src="{{replyToComment.sender.avatar || ''}}" 
-            name="{{replyToComment.sender.username || ''}}" 
+            name="{{replyToComment.sender.nickname || ''}}" 
             mode="aspectFill"
           />
         </view>
-        <text class="reply-username">{{replyToComment.sender.username}}:</text>
+        <text class="reply-username">{{replyToComment.sender.nickname}}:</text>
         <text wx:if="{{replyToComment.comment_text}}" class="reply-preview">
           {{replyToComment.comment_text}}
         </text>

@@ -11,11 +11,11 @@
           <avatar
             class="avatar" 
             avatar="{{item.sender.avatar||''}}" 
-            name="{{item.sender.username}}"
+            name="{{item.sender.nickname}}"
             mode="aspectFill"
           />
         </view>
-        <text class="username">@{{eventId ? (item.sender && item.sender.nickname ? item.sender.nickname : (item.sender && item.sender.username ? item.sender.username : '')) : (item.sender && item.sender.username ? item.sender.username : '')}}</text>
+        <text class="username">@{{eventId ? (item.sender && item.sender.nickname ? item.sender.nickname : (item.sender && item.sender.nickname ? item.sender.nickname : '')) : (item.sender && item.sender.nickname ? item.sender.nickname : '')}}</text>
       </navigator>
     </view>
     <text class="timestamp">{{createdTime}}</text>

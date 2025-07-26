@@ -259,7 +259,7 @@
             <view class="contact-info">
               <view class="contact-item">
                 <text class="contact-label">组织者:</text>
-                <text class="contact-value">{{selectedEvent.user.username}}</text>
+                <text class="contact-value">{{selectedEvent.user.nickname}}</text>
               </view>
               <view class="contact-item" wx:if="{{selectedEvent.user.phone}}">
                 <text class="contact-label">电话:</text>

@@ -350,3 +350,71 @@
   display: flex !important;
   opacity: 1 !important;
 } */
+
+/* Image Loading Overlay */
+.image-loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 300;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.image-loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-loading-spinner {
+  width: 60rpx;
+  height: 60rpx;
+  border: 4rpx solid rgba(255, 255, 255, 0.2);
+  border-left: 4rpx solid #ffffff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20rpx;
+}
+
+.image-loading-text {
+  color: #ffffff;
+  font-size: 28rpx;
+  font-weight: 400;
+  opacity: 0.9;
+}
+
+/* Loading animations */
+@keyframes spin {
+  0% { 
+    transform: rotate(0deg); 
+  }
+  100% { 
+    transform: rotate(360deg); 
+  }
+}
+
+@keyframes fadeIn {
+  0% { 
+    opacity: 0; 
+  }
+  100% { 
+    opacity: 1; 
+  }
+}
+
+@keyframes fadeOut {
+  0% { 
+    opacity: 1; 
+  }
+  100% { 
+    opacity: 0; 
+  }
+}

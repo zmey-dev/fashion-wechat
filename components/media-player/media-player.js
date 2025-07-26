@@ -221,6 +221,7 @@ Component({
         currentPostUser: {
           id: postUser.id || "",
           username: postUser.username || "Unknown User",
+          nickname: postUser.nickname || "Unknown User",
           avatar: postUser.avatar || "",
           is_followed: postUser.is_followed || false,
           posts: postUser.posts || [],
@@ -1076,9 +1077,9 @@ Component({
       const { containerHeight, windowHeight } = this.data;
       const height = containerHeight || windowHeight;
       
-      // Create smooth slide animation
+      // Create faster slide animation
       const animation = wx.createAnimation({
-        duration: 400,
+        duration: 250, // Reduced from 400ms to 250ms
         timingFunction: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)', // easeOutQuad
       });
 
@@ -1097,32 +1098,82 @@ Component({
         animationScale: 0.95
       });
 
-      // Phase 2: Execute callback and prepare for next post
+      // Phase 2: Execute callback immediately without return animation
       setTimeout(() => {
         if (callback) {
-          // Prepare for new content
-          this.setData({
-            animationOpacity: 0,
-            animationScale: 1.05,
-            verticalTransform: direction === "up" ? height : -height
-          });
-          
           callback();
           
-          // Phase 3: Slide in new content
+          // Phase 3: Slide in new content directly
           setTimeout(() => {
             this.animateSlideIn();
-          }, 50);
+          }, 30);
         }
-      }, 400);
+      }, 250);
     },
 
     /**
-     * Animate new post sliding in
+     * Animate new post sliding in (wait for image loading)
      */
     animateSlideIn() {
+      // Reset position and prepare for slide in
+      this.setData({
+        verticalTransform: 0,
+        animationOpacity: 1,
+        animationScale: 1
+      });
+
+      // Check if current post has images that need loading
+      const { currentPost } = this.data;
+      if (currentPost && currentPost.type === 'image') {
+        // Start with loading state animation
+        this.animateLoadingState();
+        
+        // Wait for image loading completion
+        this.waitForImageLoading(() => {
+          this.animateContentIn();
+        });
+      } else {
+        // For videos, animate in immediately
+        this.animateContentIn();
+      }
+    },
+
+    /**
+     * Wait for image loading and then callback
+     */
+    waitForImageLoading(callback) {
+      const mediaDisplay = this.selectComponent('#media-display') || this.selectComponent('media-display');
+      if (!mediaDisplay) {
+        // Fallback if component not found
+        setTimeout(callback, 300);
+        return;
+      }
+
+      // Check loading state periodically
+      const checkInterval = 100;
+      const maxWaitTime = 5000; // Increased to 5 seconds max wait
+      let waitTime = 0;
+
+      const checkLoading = () => {
+        const loadingState = mediaDisplay.data.showImageLoader;
+        
+        if (!loadingState || waitTime >= maxWaitTime) {
+          callback();
+        } else {
+          waitTime += checkInterval;
+          setTimeout(checkLoading, checkInterval);
+        }
+      };
+
+      checkLoading();
+    },
+
+    /**
+     * Animate content in after loading complete
+     */
+    animateContentIn() {
       const animation = wx.createAnimation({
-        duration: 500,
+        duration: 350, // Reduced from 500ms to 350ms
         timingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)', // easeOutExpo
       });
 
@@ -1152,7 +1203,7 @@ Component({
       wx.vibrateShort({ type: 'light' });
 
       const animation = wx.createAnimation({
-        duration: 350,
+        duration: 200, // Reduced from 350ms to 200ms
         timingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)', // easeOutBack
       });
 
@@ -1171,7 +1222,7 @@ Component({
     },
 
     /**
-     * Loading state animation
+     * Loading state animation - smoother transition
      */
     animateLoadingState() {
       if (this.data.isAnimating) return;
@@ -1179,13 +1230,13 @@ Component({
       this.setData({ isAnimating: true });
 
       const animation = wx.createAnimation({
-        duration: 300,
+        duration: 150, // Reduced from 200ms to 150ms
         timingFunction: 'ease-out',
       });
 
       animation
-        .opacity(0.6)
-        .scale(0.98)
+        .opacity(0.3)
+        .scale(0.95)
         .step();
 
       this.setData({
@@ -1200,7 +1251,7 @@ Component({
      */
     restoreFromLoadingState() {
       const animation = wx.createAnimation({
-        duration: 400,
+        duration: 300, // Reduced from 400ms to 300ms
         timingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
       });
 

@@ -126,9 +126,9 @@
               
               <view class="post-actions">
                 <!-- User Info (Hidden for Event) -->
-                <!-- <view class="user-info" catchtap="onUserTap" data-username="{{item.user.username}}" data-userId="{{item.user.id}}">
-                  <avatar avatar="{{item.user.avatar}}" name="{{item.user.username}}" size="32"></avatar>
-                  <text class="username">@{{item.user.username}}</text>
+                <!-- <view class="user-info" catchtap="onUserTap" data-username="{{item.user.nickname}}" data-userId="{{item.user.id}}">
+                  <avatar avatar="{{item.user.avatar}}" name="{{item.user.nickname}}" size="32"></avatar>
+                  <text class="username">@{{item.user.nickname}}</text>
                 </view> -->
                       <!-- Like Button (User Role Only) -->
             <view wx:if="{{userInfo.role === 'user'}}" class="like-section">

@@ -3,7 +3,7 @@
   <view class="profile-header">
     <view class="profile-info">
       <view class="avatar-container">
-        <avatar class="avatar" avatar="{{userInfo.avatar}}" name="{{userInfo.username}}" size="120" mode="aspectFill" />
+        <avatar class="avatar" avatar="{{userInfo.avatar}}" name="{{userInfo.nickname}}" size="120" mode="aspectFill" />
       </view>
         <view class="user-details">
         <view class="stats-container">
@@ -171,14 +171,14 @@
     <!-- Avatar Section -->
     <view class="avatar-section">
       <view class="avatar-container-large" bindtap="selectAvatar">
-        <avatar class="avatar-large" avatar="{{selectedAvatar || userInfo.avatar}}" name="{{userInfo.username}}" size="156" mode="aspectFill" />
+        <avatar class="avatar-large" avatar="{{selectedAvatar || userInfo.avatar}}" name="{{userInfo.nickname}}" size="156" mode="aspectFill" />
         <view class="avatar-overlay" wx:if="{{isEditingProfile}}">
           <text class="avatar-edit-icon">📷</text>
           <text class="avatar-edit-text">更换头像</text>
         </view>
       </view>
       <view class="avatar-info">
-        <text class="avatar-name">{{userInfo.name || userInfo.username}}</text>
+        <text class="avatar-name">{{userInfo.name || userInfo.nickname}}</text>
         <text class="avatar-university">{{university.name || '未设置大学'}}</text>
       </view>
     </view>

@@ -119,7 +119,7 @@ Page({
     }
 
     const filtered = this.data.userList.filter((user) =>
-      user.username.toLowerCase().includes(searchValue)
+      user.nickname.toLowerCase().includes(searchValue)
     );
 
     this.setData({
@@ -317,7 +317,7 @@ Page({
     if (!searchValue) return userList;
 
     return userList.filter((user) =>
-      user.username.toLowerCase().includes(searchValue)
+      user.nickname.toLowerCase().includes(searchValue)
     );
   },
 

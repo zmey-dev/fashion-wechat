@@ -87,7 +87,7 @@
             size="160"
           ></avatar>
           <view class="student-name-large">{{selectedStudent.name}}</view>
-          <view class="student-username">@{{selectedStudent.username}}</view>
+          <view class="student-username">@{{selectedStudent.nickname}}</view>
         </view>
         
         <view class="student-details">
@@ -499,7 +499,7 @@
           </view>
         </view>
         <view class="avatar-info">
-          <text class="avatar-name">{{teacherProfile.name || teacherProfile.username}}</text>
+          <text class="avatar-name">{{teacherProfile.name || teacherProfile.nickname}}</text>
           <text class="avatar-university">{{university.name || '未设置大学'}}</text>
         </view>
       </view>
