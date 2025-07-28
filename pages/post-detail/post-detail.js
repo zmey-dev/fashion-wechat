@@ -1,4 +1,7 @@
 import config from "../../config";
+const postCacheService = require('../../services/postCache');
+const postPreloaderService = require('../../services/postPreloader');
+const mediaPreloaderService = require('../../services/mediaPreloader');
 const app = getApp();
 
 Page({
@@ -60,6 +63,11 @@ Page({
     });
     const app = getApp();
 
+    // Initialize global config for services
+    if (!app.globalData.config) {
+      app.globalData.config = config;
+    }
+
     // Subscribe to state changes
     this.userInfoHandler = (userInfo) => {
       this.setData({ userInfo });
@@ -79,13 +87,13 @@ Page({
       followedUsers: app.globalData.followedUsers || [],
     });
     
-    // Load post using web version logic - use getPostDetail with type
+    // Load post using enhanced caching and preloading
     if (postId) {
-      const options = {};
-      if (userId) options.user_id = userId;
-      if (eventId) options.event_id = eventId;
-      if (filter) options.filter = filter;
-      this.loadPostDetail(postId, type, options);
+      const requestOptions = {};
+      if (userId) requestOptions.user_id = userId;
+      if (eventId) requestOptions.event_id = eventId;
+      if (filter) requestOptions.filter = filter;
+      this.loadPostDetailWithCaching(postId, type, requestOptions);
     } else {
       this.setData({
         isLoading: false,
@@ -95,13 +103,13 @@ Page({
     }
   },
   onShow: function () {
-    // Reload post using web version logic
-    if(this.data.postId) {
+    // Only reload if we don't have current post data (avoids unnecessary reloads during navigation)
+    if(this.data.postId && !this.data.currentPost) {
       const options = {};
       if (this.data.userId) options.user_id = this.data.userId;
       if (this.data.eventId) options.event_id = this.data.eventId;
       if (this.data.filter) options.filter = this.data.filter;
-      this.loadPostDetail(this.data.postId, this.data.type, options);
+      this.loadPostDetailWithCaching(this.data.postId, this.data.type, options);
     }
   },
   onUnload: function () {
@@ -112,57 +120,206 @@ Page({
     app.unsubscribe("followedUser", this.followedUserHandler);
   },
 
-  // Load post detail using web version API pattern
-  loadPostDetail: function (postId, type, options = {}) {
+  // Enhanced post loading with caching and preloading
+  loadPostDetailWithCaching: async function (postId, type, options = {}) {
     this.setData({
       isLoading: true,
       loadError: false,
     });
 
-    // Build query parameters like web version
-    const params = { type };
-    Object.keys(options).forEach(key => {
-      if (options[key] !== null && options[key] !== undefined) {
-        params[key] = options[key];
-      }
-    });
-
-    // Use v2 API like web version
-    wx.request({
-      url: `${config.BACKEND_URL}/v2/post/detail/${postId}`,
-      method: "GET",
-      data: params,
-      header: {
-        "Content-Type": "application/json",
-        Authorization: app.globalData?.userInfo?.token
-          ? `Bearer ${app.globalData?.userInfo?.token}`
-          : "",
-      },
-      success: (res) => {
-        if (res.statusCode === 200 && res.data.status === "success") {
-          this.setData({
-            currentPost: res.data.post,
-            nextPostId: res.data.next_post_id,
-            previousPostId: res.data.previous_post_id,
-            isLoading: false,
-          });
-        } else {
-          this.setData({
-            isLoading: false,
-            loadError: true,
-            errorMessage: res.data?.msg || this.data.messages.errors.loadFailed,
-          });
+    try {
+      // Try to get from cache first
+      let cachedData = postCacheService.getPost(postId, type, options);
+      
+      if (cachedData) {
+        await this.handlePostDataLoaded(cachedData, true);
+        
+        // Notify media player of post change for TikTok-style transition
+        const mediaPlayer = this.selectComponent('#media-player');
+        if (mediaPlayer && mediaPlayer.onPostChanged) {
+          mediaPlayer.onPostChanged();
         }
-      },
-      fail: (err) => {
-        console.error("Failed to load post detail:", err);
-        this.setData({
-          isLoading: false,
-          loadError: true,
-          errorMessage: this.data.messages.errors.networkError,
-        });
-      },
+      } else {
+        const data = await this.fetchPostFromAPI(postId, type, options);
+        if (data) {
+          // Cache the data
+          postCacheService.setPost(postId, type, data, options);
+          await this.handlePostDataLoaded(data, false);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to load post detail:", error);
+      this.setData({
+        isLoading: false,
+        loadError: true,
+        errorMessage: this.data.messages.errors.networkError,
+      });
+    }
+  },
+
+  // Fetch post from API (extracted for reusability)
+  fetchPostFromAPI: function (postId, type, options = {}) {
+    return new Promise((resolve, reject) => {
+      // Build query parameters
+      const params = { type };
+      Object.keys(options).forEach(key => {
+        if (options[key] !== null && options[key] !== undefined) {
+          params[key] = options[key];
+        }
+      });
+
+      wx.request({
+        url: `${config.BACKEND_URL}/v2/post/detail/${postId}`,
+        method: "GET",
+        data: params,
+        header: {
+          "Content-Type": "application/json",
+          Authorization: app.globalData?.userInfo?.token
+            ? `Bearer ${app.globalData?.userInfo?.token}`
+            : "",
+        },
+        success: (res) => {
+          if (res.statusCode === 200 && res.data.status === "success") {
+            resolve(res.data);
+          } else {
+            reject(new Error(res.data?.msg || this.data.messages.errors.loadFailed));
+          }
+        },
+        fail: (err) => {
+          reject(err);
+        },
+      });
     });
+  },
+
+  // Handle loaded post data with media preloading
+  handlePostDataLoaded: async function (data, fromCache = false, keepLoading = false) {
+    
+    // Support both new and old API formats with detailed logging
+    const post = data.current || data.post;
+    
+    // NEW: Backend now returns full post objects instead of just IDs
+    const next_post = data.next || data.next_post || null;
+    const previous_post = data.previous || data.previous_post || null;
+    
+    // Extract IDs from full post objects (NEW format)
+    let next_post_id = null;
+    let previous_post_id = null;
+    
+    if (next_post && typeof next_post === 'object') {
+      next_post_id = next_post.id;
+    } else if (data.next_post_id) {
+      // Fallback to old format
+      next_post_id = data.next_post_id;
+    }
+    
+    if (previous_post && typeof previous_post === 'object') {
+      previous_post_id = previous_post.id;
+    } else if (data.previous_post_id) {
+      // Fallback to old format
+      previous_post_id = data.previous_post_id;
+    }
+    
+    
+    // Additional validation check
+    if (next_post && !next_post_id) {
+      console.warn('[PostDetail] WARNING: next_post exists but next_post_id is null!', next_post);
+    }
+    if (previous_post && !previous_post_id) {
+      console.warn('[PostDetail] WARNING: previous_post exists but previous_post_id is null!', previous_post);
+    }
+    
+    // Update UI with post data
+    this.setData({
+      currentPost: post,
+      nextPostId: next_post_id,
+      previousPostId: previous_post_id,
+      isLoading: keepLoading ? true : false,  // Keep loading if specified
+    });
+    
+    // Only notify media player of API completion if not keeping loading state
+    if (!keepLoading) {
+      const mediaPlayer = this.selectComponent('#media-player');
+      if (mediaPlayer) {
+        if (mediaPlayer.onApiLoadComplete) {
+          mediaPlayer.onApiLoadComplete();
+        } else {
+        }
+      } else {
+      }
+    }
+
+    // Update preloader context with new API format (full post objects)
+    postPreloaderService.setCurrentPost(post.id, this.data.type, {
+      user_id: this.data.userId,
+      event_id: this.data.eventId,
+      filter: this.data.filter
+    }, {
+      next_post_id,
+      previous_post_id,
+      next_post: next_post,  // Full post object (NEW format)
+      previous_post: previous_post  // Full post object (NEW format)
+    }, post);  // Pass current post data to preloader
+
+    // Note: All media preloading (including current post) is now handled by PostPreloaderService
+    // to ensure centralized management and prevent duplicates. The setCurrentPost call above
+    // handles all media preloading through the postPreloader service to avoid duplication.
+  },
+
+  // Start background preloading of next/previous posts
+  startBackgroundPreloading: async function () {
+    try {
+      const promises = [];
+      
+      // Preload next post if available
+      if (this.data.nextPostId) {
+        promises.push(this.preloadPostAndMedia(this.data.nextPostId, 'next'));
+      }
+      
+      // Preload previous post if available
+      if (this.data.previousPostId) {
+        promises.push(this.preloadPostAndMedia(this.data.previousPostId, 'previous'));
+      }
+      
+      await Promise.allSettled(promises);
+    } catch (error) {
+      console.warn('[PostDetail] Background preloading failed:', error);
+    }
+  },
+
+  // Preload specific post and its media
+  preloadPostAndMedia: async function (postId, direction) {
+    try {
+      const options = {
+        user_id: this.data.userId,
+        event_id: this.data.eventId,
+        filter: this.data.filter
+      };
+      
+      // Check if post is already cached
+      let cachedPost = postCacheService.getPost(postId, this.data.type, options);
+      
+      if (!cachedPost) {
+        // Fetch and cache post data
+        const data = await this.fetchPostFromAPI(postId, this.data.type, options);
+        if (data) {
+          postCacheService.setPost(postId, this.data.type, data, options);
+          cachedPost = data;
+        }
+      }
+      
+      // Media preloading is handled by PostPreloaderService to avoid duplicates
+      
+      // Note: Media preloading is handled when the post data is set via
+      // PostPreloaderService.setCurrentPost() to ensure no duplicates
+    } catch (error) {
+      console.warn(`[PostDetail] Failed to preload ${direction} post:`, error);
+    }
+  },
+
+  // Legacy method for backward compatibility
+  loadPostDetail: function (postId, type, options = {}) {
+    return this.loadPostDetailWithCaching(postId, type, options);
   },
 
   // Load posts for a specific user
@@ -286,36 +443,266 @@ Page({
     });
   },
 
-  handlePreviousPost: function () {
-    // Use web version navigation with previousPostId
-    if (this.data.previousPostId) {
-      const options = {};
-      if (this.data.userId) options.user_id = this.data.userId;
-      if (this.data.eventId) options.event_id = this.data.eventId;
-      if (this.data.filter) options.filter = this.data.filter;
-      this.loadPostDetail(this.data.previousPostId, this.data.type, options);
-    } else {
+  handlePreviousPost: async function () {
+    
+    if (!this.data.previousPostId) {
       wx.showToast({
         title: this.data.messages.navigation.firstPost,
+        icon: "none",
+      });
+      return;
+    }
+
+    try {
+      const targetPostId = this.data.previousPostId;
+      
+      
+      // Set loading state
+      this.setData({ isLoading: true });
+      
+      // Try to get from preloader cache first
+      const cachedData = await postPreloaderService.getPreviousPost();
+      
+      if (cachedData) {
+        // Update post ID
+        this.setData({ postId: targetPostId });
+        
+        // Check if it's a video post
+        const post = cachedData.current || cachedData.post;
+        const isVideoPost = post && post.type === 'video';
+        
+        // For video posts, don't keep loading state since we have full data
+        await this.handlePostDataLoaded(cachedData, true, !isVideoPost); // Only keep loading for image posts
+        
+        // Notify media player of post change for TikTok-style transition
+        const mediaPlayer = this.selectComponent('#media-player');
+        if (mediaPlayer && mediaPlayer.onPostChanged) {
+          mediaPlayer.onPostChanged();
+        }
+        
+        // Only fetch background context for image posts that need it
+        if (!isVideoPost) {
+          // IMPORTANT: Fetch full navigation context in background to enable further navigation
+          const options = {};
+          if (this.data.userId) options.user_id = this.data.userId;
+          if (this.data.eventId) options.event_id = this.data.eventId;
+          if (this.data.filter) options.filter = this.data.filter;
+          
+          // Background API call to get full post with navigation data
+          this.fetchPostFromAPI(targetPostId, this.data.type, options)
+            .then(fullData => {
+              // Update only navigation context without affecting UI
+              this.updateNavigationContext(fullData);
+              // Now hide loading state after API completes
+              this.setData({ isLoading: false });
+              // Notify media player that API is now complete
+              const mp = this.selectComponent('#media-player');
+              if (mp && mp.onApiLoadComplete) {
+                mp.onApiLoadComplete();
+              }
+            })
+            .catch(error => {
+              console.warn('[PostDetail] Failed to load background navigation context:', error);
+              // Hide loading state even on error
+              this.setData({ isLoading: false });
+            });
+        } else {
+          // For video posts, we still need navigation context even though we don't need to wait
+          const options = {};
+          if (this.data.userId) options.user_id = this.data.userId;
+          if (this.data.eventId) options.event_id = this.data.eventId;
+          if (this.data.filter) options.filter = this.data.filter;
+          
+          // Background API call to get navigation context for video posts too
+          this.fetchPostFromAPI(targetPostId, this.data.type, options)
+            .then(fullData => {
+              // Update navigation context
+              this.updateNavigationContext(fullData);
+            })
+            .catch(error => {
+              console.warn('[PostDetail] Failed to load navigation context for video post:', error);
+            });
+          
+          // Immediately notify API complete for video playback
+          if (mediaPlayer && mediaPlayer.onApiLoadComplete) {
+            mediaPlayer.onApiLoadComplete();
+          }
+        }
+      } else {
+        // Update post ID and load from API
+        this.setData({ postId: targetPostId });
+        const options = {};
+        if (this.data.userId) options.user_id = this.data.userId;
+        if (this.data.eventId) options.event_id = this.data.eventId;
+        if (this.data.filter) options.filter = this.data.filter;
+        await this.loadPostDetailWithCaching(targetPostId, this.data.type, options);
+      }
+    } catch (error) {
+      console.error('[PostDetail] Failed to navigate to previous post:', error);
+      this.setData({ isLoading: false });
+      wx.showToast({
+        title: this.data.messages.errors.loadFailed,
         icon: "none",
       });
     }
   },
 
-  handleNextPost: function () {
-    // Use web version navigation with nextPostId
-    if (this.data.nextPostId) {
-      const options = {};
-      if (this.data.userId) options.user_id = this.data.userId;
-      if (this.data.eventId) options.event_id = this.data.eventId;
-      if (this.data.filter) options.filter = this.data.filter;
-      this.loadPostDetail(this.data.nextPostId, this.data.type, options);
-    } else {
+  handleNextPost: async function () {
+    
+    if (!this.data.nextPostId) {
       wx.showToast({
         title: this.data.messages.navigation.lastPost,
         icon: "none",
       });
+      return;
     }
+
+    try {
+      const targetPostId = this.data.nextPostId;
+      
+      
+      // Set loading state
+      this.setData({ isLoading: true });
+      
+      // Try to get from preloader cache first
+      const cachedData = await postPreloaderService.getNextPost();
+      
+      if (cachedData) {
+        // Update post ID
+        this.setData({ postId: targetPostId });
+        
+        // Check if it's a video post
+        const post = cachedData.current || cachedData.post;
+        const isVideoPost = post && post.type === 'video';
+        
+        // For video posts, don't keep loading state since we have full data
+        await this.handlePostDataLoaded(cachedData, true, !isVideoPost); // Only keep loading for image posts
+        
+        // Notify media player of post change for TikTok-style transition
+        const mediaPlayer = this.selectComponent('#media-player');
+        if (mediaPlayer && mediaPlayer.onPostChanged) {
+          mediaPlayer.onPostChanged();
+        }
+        
+        // Only fetch background context for image posts that need it
+        if (!isVideoPost) {
+          // IMPORTANT: Fetch full navigation context in background to enable further navigation
+          const options = {};
+          if (this.data.userId) options.user_id = this.data.userId;
+          if (this.data.eventId) options.event_id = this.data.eventId;
+          if (this.data.filter) options.filter = this.data.filter;
+          
+          // Background API call to get full post with navigation data
+          this.fetchPostFromAPI(targetPostId, this.data.type, options)
+            .then(fullData => {
+              // Update only navigation context without affecting UI
+              this.updateNavigationContext(fullData);
+              // Now hide loading state after API completes
+              this.setData({ isLoading: false });
+              // Notify media player that API is now complete
+              const mp = this.selectComponent('#media-player');
+              if (mp && mp.onApiLoadComplete) {
+                mp.onApiLoadComplete();
+              }
+            })
+            .catch(error => {
+              console.warn('[PostDetail] Failed to load background navigation context:', error);
+              // Hide loading state even on error
+              this.setData({ isLoading: false });
+            });
+        } else {
+          // For video posts, we still need navigation context even though we don't need to wait
+          const options = {};
+          if (this.data.userId) options.user_id = this.data.userId;
+          if (this.data.eventId) options.event_id = this.data.eventId;
+          if (this.data.filter) options.filter = this.data.filter;
+          
+          // Background API call to get navigation context for video posts too
+          this.fetchPostFromAPI(targetPostId, this.data.type, options)
+            .then(fullData => {
+              // Update navigation context
+              this.updateNavigationContext(fullData);
+            })
+            .catch(error => {
+              console.warn('[PostDetail] Failed to load navigation context for video post:', error);
+            });
+          
+          // Immediately notify API complete for video playback
+          if (mediaPlayer && mediaPlayer.onApiLoadComplete) {
+            mediaPlayer.onApiLoadComplete();
+          }
+        }
+      } else {
+        // Update post ID and load from API
+        this.setData({ postId: targetPostId });
+        const options = {};
+        if (this.data.userId) options.user_id = this.data.userId;
+        if (this.data.eventId) options.event_id = this.data.eventId;
+        if (this.data.filter) options.filter = this.data.filter;
+        await this.loadPostDetailWithCaching(targetPostId, this.data.type, options);
+      }
+    } catch (error) {
+      console.error('[PostDetail] Failed to navigate to next post:', error);
+      this.setData({ isLoading: false });
+      wx.showToast({
+        title: this.data.messages.errors.loadFailed,
+        icon: "none",
+      });
+    }
+  },
+
+  // Update only navigation context without affecting current UI
+  updateNavigationContext: function (data) {
+    
+    // NEW: Backend now returns full post objects instead of just IDs
+    const next_post = data.next || data.next_post || null;
+    const previous_post = data.previous || data.previous_post || null;
+    
+    // Extract IDs from full post objects (NEW format)
+    let next_post_id = null;
+    let previous_post_id = null;
+    
+    if (next_post && typeof next_post === 'object') {
+      next_post_id = next_post.id;
+    } else if (data.next_post_id) {
+      // Fallback to old format
+      next_post_id = data.next_post_id;
+    }
+    
+    if (previous_post && typeof previous_post === 'object') {
+      previous_post_id = previous_post.id;
+    } else if (data.previous_post_id) {
+      // Fallback to old format
+      previous_post_id = data.previous_post_id;
+    }
+    
+    
+    // Additional validation check  
+    if (next_post && !next_post_id) {
+      console.warn('[PostDetail] WARNING: next_post exists but next_post_id is null in updateNavigationContext!', next_post);
+    }
+    if (previous_post && !previous_post_id) {
+      console.warn('[PostDetail] WARNING: previous_post exists but previous_post_id is null in updateNavigationContext!', previous_post);
+    }
+    
+    // Update navigation IDs silently
+    this.setData({
+      nextPostId: next_post_id,
+      previousPostId: previous_post_id,
+    });
+
+    // Update preloader context with new navigation data (full post objects)
+    postPreloaderService.setCurrentPost(this.data.postId, this.data.type, {
+      user_id: this.data.userId,
+      event_id: this.data.eventId,
+      filter: this.data.filter
+    }, {
+      next_post_id,
+      previous_post_id,
+      next_post: next_post,  // Full post object (NEW format)
+      previous_post: previous_post  // Full post object (NEW format)
+    }, null);  // No current post data needed for navigation context update
+
   },
 
   closeSidebar: function () {

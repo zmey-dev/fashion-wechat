@@ -24,7 +24,7 @@
         <!-- User Section -->
         <view class="user-section">
           <view class="user-info">
-            <view class="user-row" catchtap="onUserTap" data-username="{{item.user.nickname}}" data-userId="{{item.user.id}}">
+            <view class="user-row" catchtap="onUserTap" data-username="{{item.user.username}}" data-userId="{{item.user.id}}">
               <avatar avatar="{{item.user.avatar}}" name="{{item.user.nickname}}" size="45"></avatar>
               <text class="user-name">{{item.user.nickname}}</text>
             </view>

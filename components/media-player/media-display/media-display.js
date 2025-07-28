@@ -8,6 +8,7 @@ Component({
     isPlaying: { type: Boolean, value: true },
     showPlayIndicator: { type: Boolean, value: false },
     selectedDot: { type: Object, value: null },
+    isWaitingForApi: { type: Boolean, value: false },
     detailPanelState: {
       type: String,
       value: 'closed',
@@ -24,18 +25,18 @@ Component({
     audioMode: 'both', // 'both', 'uploaded', 'video'
     imageLoadingStates: {}, // Track loading state for each image
     currentImageLoading: true, // Current image loading state
-    showImageLoader: false // Show loader overlay
+    showImageLoader: false, // Show loader overlay
+    showVideo: true, // Control video visibility during navigation
+    isNavigatingVideo: false, // Flag to prevent false video ended events during navigation
   },
 
   observers: {
-    'currentMedia, currentSlideIndex, isPlaying': function(currentMedia, currentSlideIndex, isPlaying) {
-      if (currentMedia && currentMedia.length > 0 && !isPlaying) {
-        this.calculateDotPositions();
-      } else {
-        this.setData({ calculatedDots: [] });
-      }
-    },
     'currentMedia, currentSlideIndex': function(currentMedia, currentSlideIndex) {
+      // Clear previous video state to prevent thumbnail artifacts
+      this.clearVideoState();
+      
+      // Always calculate dot positions when media or slide changes, regardless of playing state
+      this.calculateDotPositions();
       // Check if current image is loaded when media or slide changes
       this.checkCurrentImageLoadingState(currentMedia, currentSlideIndex);
     }
@@ -57,6 +58,36 @@ Component({
   },
 
   methods: {
+    /**
+     * Clear video state to prevent thumbnail artifacts during navigation
+     */
+    clearVideoState() {
+      // Set navigation flag to prevent false video ended events
+      this.setData({ 
+        showVideo: false,
+        isNavigatingVideo: true 
+      });
+      
+      const videoContext = wx.createVideoContext('media-video', this);
+      if (videoContext) {
+        // Pause video to prevent playback during navigation
+        videoContext.pause();
+      }
+      
+      // Pause uploaded audio but don't destroy context to avoid reloading
+      if (this.audioContext) {
+        this.audioContext.pause();
+      }
+      
+      // Show video again after a short delay to allow new media to load
+      setTimeout(() => {
+        this.setData({ 
+          showVideo: true,
+          isNavigatingVideo: false  // Reset navigation flag
+        });
+      }, 100);
+    },
+
     /**
      * Check current image loading state
      */
@@ -129,7 +160,6 @@ Component({
      * Calculate actual image size within container (aspectFit mode)
      */
     calculateContainedImageSize(containerWidth, containerHeight, imageWidth, imageHeight) {
-      console.log(containerWidth, containerHeight, imageWidth, imageHeight);
       
       const containerRatio = containerWidth / containerHeight;
       const imageRatio = imageWidth / imageHeight;
@@ -159,7 +189,6 @@ Component({
     getContainerDimensions() {
       const query = this.createSelectorQuery();
       query.select('.media-container').boundingClientRect((rect) => {
-        console.log(rect);
         
         if (rect) {
           this.setData({
@@ -175,14 +204,24 @@ Component({
     calculateDotPositions() {
       const { currentMedia, currentSlideIndex, containerWidth, containerHeight } = this.data;
       
-      if (!currentMedia || !currentMedia[currentSlideIndex] || !currentMedia[currentSlideIndex].dots) {
+      // Enhanced validation - ensure we have valid data
+      if (!currentMedia || currentMedia.length === 0) {
+        this.setData({ calculatedDots: [] });
+        return;
+      }
+      
+      if (currentSlideIndex < 0 || currentSlideIndex >= currentMedia.length) {
+        this.setData({ calculatedDots: [] });
+        return;
+      }
+      
+      const currentItem = currentMedia[currentSlideIndex];
+      if (!currentItem || !currentItem.dots) {
         this.setData({ calculatedDots: [] });
         return;
       }
 
-      const currentItem = currentMedia[currentSlideIndex];
       const dots = currentItem.dots;
-
       if (!dots || dots.length === 0 || !containerWidth || !containerHeight) {
         this.setData({ calculatedDots: [] });
         return;
@@ -210,6 +249,7 @@ Component({
             return {
               ...dot,
               index,
+              slideIndex: currentSlideIndex, // Add slide index to identify which slide these dots belong to
               realLeft: Math.round(realLeft),
               realTop: Math.round(realTop),
               // Calculate percentage relative to container for positioning
@@ -237,6 +277,7 @@ Component({
             return {
               ...dot,
               index,
+              slideIndex: currentSlideIndex, // Add slide index to identify which slide these dots belong to
               realLeft: Math.round(realLeft),
               realTop: Math.round(realTop),
               leftPercent: (realLeft / containerWidth) * 100,
@@ -253,10 +294,11 @@ Component({
 
     onSlideChange(e) {
       this.triggerEvent('slidechange', { current: e.detail.current });
-      // Recalculate dots when slide changes
+      // Immediately clear dots and recalculate for new slide
+      this.setData({ calculatedDots: [] });
       setTimeout(() => {
         this.calculateDotPositions();
-      }, 100);
+      }, 50); // Reduced delay from 100ms to 50ms
     },
 
     onDotTap(e) {
@@ -276,11 +318,8 @@ Component({
     },
     
     onVideoPlay() {
-      console.log('Video started playing');
     },    onVideoPause() {
-      console.log('Video paused');
     },    onVideoEnded() {
-      console.log('Video ended');
       this.triggerEvent('videoended');
     },
 
@@ -288,7 +327,6 @@ Component({
     restartVideo() {
       const videoContext = wx.createVideoContext('media-video', this);
       if (videoContext) {
-        console.log('Restarting video with auto-play');
         videoContext.seek(0);
         setTimeout(() => {
           videoContext.play();

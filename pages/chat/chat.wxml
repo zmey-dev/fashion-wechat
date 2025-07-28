@@ -110,7 +110,6 @@
       show-scrollbar="{{false}}"
       scroll-into-view="{{scrollIntoView}}"
       scroll-with-animation="{{true}}"
-      style="bottom: {{keyboardHeight}}px;"
     >
       <view class="messages-list">
         <view 
@@ -180,7 +179,7 @@
     </scroll-view>
 
     <!-- Emoji Picker -->
-    <view wx:if="{{showEmojiPicker}}" class="emoji-picker" style="bottom: {{keyboardHeight + 80}}px;">
+    <view wx:if="{{showEmojiPicker}}" class="emoji-picker">
       <scroll-view class="emoji-grid" scroll-y enhanced="{{true}}" show-scrollbar="{{false}}">
         <view 
           wx:for="{{emojis}}" 
@@ -196,14 +195,16 @@
       </scroll-view>
     </view>
 
-    <!-- Message Input -->
-    <view class="message-input-container" style="bottom: {{keyboardHeight}}px;">
-      <view class="input-box">        <view class="input-actions-left">
+    <!-- Message Input or Friend Request -->
+    <view class="message-input-container">
+      <!-- Show message input if user is allowed to chat -->
+      <view wx:if="{{selectedUser.is_allow}}" class="input-box">
+        <view class="input-actions-left">
           <view class="input-action-btn {{isSending ? 'disabled' : ''}}" bindtap="toggleEmojiPicker">
             {{showEmojiPicker ? '⌨️' : '😊'}}
           </view>
         </view>
-          <input 
+        <input 
           class="message-input {{isSending ? 'disabled' : ''}}"
           placeholder="{{isSending ? '发送中...' : '消息'}}"
           value="{{inputMessage}}"
@@ -213,16 +214,25 @@
           bindkeyboardheightchange="onKeyboardHeightChange"
           confirm-type="send"
           bindconfirm="onSendMessage"
-          adjust-position="{{false}}"
+          adjust-position="{{true}}"
           hold-keyboard="{{true}}"
           disabled="{{isSending}}"
-        />        <view class="input-actions-right">
+        />
+        <view class="input-actions-right">
           <view wx:if="{{inputMessage.length > 0 && !isSending}}" class="send-btn" bindtap="onSendMessage">
             <view class="send-icon">➤</view>
           </view>
           <view wx:elif="{{isSending}}" class="send-btn disabled">
             <view class="send-icon">⏳</view>
           </view>
+        </view>
+      </view>
+      
+      <!-- Show friend request UI if user is not allowed to chat -->
+      <view wx:else class="friend-request-container">
+        <view class="friend-request-message">你们不是朋友。请在聊天前发送好友请求。</view>
+        <view class="friend-request-btn" bindtap="onSendFriendRequest">
+          发送好友请求
         </view>
       </view>
     </view>

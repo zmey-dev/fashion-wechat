@@ -25,7 +25,8 @@
         bindtap="switchLoginType"
       >
         <span>{{messages.loginTypes.phone}}</span>
-      </view>    
+      </view>
+    
     </view>
 
     <view class="login-forms">      <view class="form-container {{loginType === 'wechat' ? 'active' : ''}}">
@@ -72,36 +73,6 @@
         </view>
       </view>
 
-      <!-- EMAIL LOGIN FORM DISABLED
-      <view class="form-container {{loginType === 'email' ? 'active' : ''}}"><view class="input-group">
-          <input
-            class="form-input {{emailError ? 'error' : ''}}"
-            type="text"
-            placeholder="{{messages.formLabels.email}}"
-            value="{{email}}"
-            bindinput="onEmailInput"
-            disabled="{{loading}}"
-          />
-          <text class="error-text" wx:if="{{emailError}}">{{emailError}}</text>
-        </view>
-        
-        <view class="input-group">
-          <view class="password-wrapper">            <input
-              class="form-input {{passwordError ? 'error' : ''}}"
-              type="text"
-              password="{{!showPassword}}"
-              placeholder="{{messages.formLabels.password}}"
-              value="{{password}}"
-              bindinput="onPasswordInput"
-              disabled="{{loading}}"
-            /><view class="password-toggle" bindtap="togglePassword" data-action="toggle">
-              <text class="toggle-icon">{{showPassword ? '🙈' : '👁'}}</text>
-            </view>
-          </view>
-          <text class="error-text" wx:if="{{passwordError}}">{{passwordError}}</text>
-        </view>
-      </view>
-      -->
 
       <!-- Phone Login -->
       <view class="form-container {{loginType === 'phone' ? 'active' : ''}}">        <view class="input-group">

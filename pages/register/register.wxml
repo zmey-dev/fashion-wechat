@@ -217,8 +217,7 @@
         <text wx:if="{{errors.phone}}" class="error-text">{{errors.phone}}</text>
       </view>
 
-      <!-- EMAIL VERIFICATION DISABLED -->
-      <!--
+      <!-- Email Verification -->
       <view class="form-field">
         <label class="field-label">
           电子邮箱
@@ -229,7 +228,7 @@
             <text>✓ 已验证</text>
           </view>
         </label>
-        <div style="display: flex;">
+        <view style="display: flex;">
           <input 
             class="field-input {{errors.email ? 'error' : ''}}"
             value="{{form.email}}"
@@ -237,10 +236,14 @@
             data-field="email"
             bindinput="onInputChange"
           />
-        </div>
+        </view>
         <view wx:if="{{emailChanged && !emailVerified}}" class="verification-section">
-          <button class="send-code-btn" bindtap="sendEmailVerification">
-            发送验证码
+          <button 
+            class="send-code-btn {{emailCountdown > 0 ? 'disabled' : ''}}" 
+            bindtap="sendEmailVerification"
+            disabled="{{emailCountdown > 0}}"
+          >
+            {{emailCountdown > 0 ? emailCountdown + '秒后重发' : '发送验证码'}}
           </button>
           <view class="otp-input-container">
             <input 
@@ -248,6 +251,7 @@
               placeholder="请输入邮箱验证码"
               value="{{emailOtpCode}}"
               bindinput="onEmailOtpInput"
+              type="number"
             />
             <button class="verify-btn" bindtap="verifyEmailCode">
               验证
@@ -255,11 +259,11 @@
           </view>
         </view>
         
+        <!-- Email verification messages -->
         <text wx:if="{{emailVerificationMessage}}" class="success-text">{{emailVerificationMessage}}</text>
         <text wx:if="{{emailVerificationError}}" class="error-text">{{emailVerificationError}}</text>
         <text wx:if="{{errors.email}}" class="error-text">{{errors.email}}</text>
       </view>
-      -->
 
       <!-- Step 2 Navigation -->
       <view class="step-navigation">

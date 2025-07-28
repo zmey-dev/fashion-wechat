@@ -138,8 +138,8 @@
           
           <!-- Email Verification Section -->
           <view wx:if="{{emailChanged && !emailVerified && isEditingProfile}}" class="verification-section">
-            <view class="profile-action-btn send-code-btn" bindtap="sendEmailVerificationCode">
-              <text class="btn-text">发送验证码</text>
+            <view class="profile-action-btn send-code-btn {{emailCountdown > 0 ? 'disabled' : ''}}" bindtap="sendEmailVerificationCode">
+              <text class="btn-text">{{emailCountdown > 0 ? emailCountdown + '秒后重试' : '发送验证码'}}</text>
             </view>
             <view class="otp-input-container">
               <view class="input-wrapper">
@@ -153,6 +153,14 @@
               <view class="profile-action-btn verify-code-btn" bindtap="verifyEmailCode">
                 <text class="btn-text">验证</text>
               </view>
+            </view>
+            
+            <!-- Email Verification Messages -->
+            <view wx:if="{{emailVerificationMessage}}" class="success-message">
+              <text>{{emailVerificationMessage}}</text>
+            </view>
+            <view wx:if="{{emailVerificationError}}" class="error-message">
+              <text>{{emailVerificationError}}</text>
             </view>
           </view>
           
@@ -274,7 +282,7 @@
         </view>
 
         <!-- Admission Year -->
-        <view class="form-field">
+        <view class="form-field" id="admission-year-field">
           <label class="field-label">入学年份</label>
           <picker 
             mode="date"
@@ -284,10 +292,29 @@
             data-field="admissionYear"
             bindchange="onProfileInputChange"
           >
-            <view class="picker-view">
+            <view class="picker-view {{profileErrors.admissionYear ? 'error' : ''}}">
               <text>{{profileForm.admissionYear}}年</text>
             </view>
           </picker>
+          <text class="error-text" wx:if="{{profileErrors.admissionYear}}">{{profileErrors.admissionYear}}</text>
+        </view>
+
+        <!-- Birthday -->
+        <view class="form-field" id="birthday-field">
+          <label class="field-label">生日</label>
+          <picker 
+            mode="date"
+            value="{{profileForm.birthday}}"
+            disabled="{{!isEditingProfile}}"
+            data-field="birthday"
+            bindchange="onProfileInputChange"
+          >
+            <view class="picker-view {{profileErrors.birthday ? 'error' : ''}}">
+              <text wx:if="{{profileForm.birthday}}">{{profileForm.birthday}}</text>
+              <text wx:else class="placeholder">请选择生日</text>
+            </view>
+          </picker>
+          <text class="error-text" wx:if="{{profileErrors.birthday}}">{{profileErrors.birthday}}</text>
         </view>
       </view>      <!-- WeChat Linking Section -->
       <view class="form-section">

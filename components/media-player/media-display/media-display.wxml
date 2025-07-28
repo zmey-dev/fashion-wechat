@@ -38,7 +38,7 @@ bindtap="onScreenTap"
         />
       </view>
       <view
-        wx:if="{{ calculatedDots && calculatedDots.length > 0 && !isPlaying }}"
+        wx:if="{{ calculatedDots && calculatedDots.length > 0 && !isPlaying && index === currentSlideIndex }}"
         class="dots-overlay"
       >
         <view
@@ -58,18 +58,17 @@ bindtap="onScreenTap"
     </swiper-item>
   </swiper>  <!-- Video display -->
   <video
-    wx:else
+    wx:elif="{{ showVideo }}"
     id="media-video"
     class="media-video"
     controls="{{true}}"
     src="{{ currentMedia[0].url }}"
-    poster="{{ currentMedia[0].preview_url }}"
     controls="{{ true }}"
     show-controls="{{ true }}"
     always-show-controls="{{ true }}"
     enable-progress-gesture="{{ true }}"
     show-play-btn="{{ true }}"
-    autoplay="{{ isPlaying }}"
+    autoplay="{{ isPlaying && !isWaitingForApi }}"
     loop="{{ false }}"
     catch:tap="onVideoTap"
     bindplay="onVideoPlay"

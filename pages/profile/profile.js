@@ -7,7 +7,7 @@ Page({
     // Profile form data
     profileForm: {
       phone: "",
-      // email: "",
+      email: "",
       name: "",
       nickname: "",
       gender: "",
@@ -17,6 +17,7 @@ Page({
       major: "",
       class: "",
       admissionYear: new Date().getFullYear(),
+      birthday: "",
     },
     // University data
     university: null,
@@ -38,14 +39,14 @@ Page({
     avatarUploadError: null,
     avatarUploadUrl: null,
     // Verification states - original values for comparison
-    // originalEmail: "",
+    originalEmail: "",
     originalPhone: "",
-    // emailChanged: false,
+    emailChanged: false,
     phoneChanged: false,
-    // emailVerified: true, // Default to verified
+    emailVerified: true, // Default to verified
     phoneVerified: true, // Default to verified
     // OTP codes for verification
-    // emailOtpCode: "",
+    emailOtpCode: "",
     phoneOtpCode: "",
     // WeChat linking state
     isWechatLinked: false,
@@ -53,6 +54,13 @@ Page({
     
     // Countdown for SMS resend
     phoneCountdown: 0,
+    emailCountdown: 0,
+    
+    // Verification messages
+    emailVerificationMessage: "",
+    emailVerificationError: "",
+    phoneVerificationMessage: "",
+    phoneVerificationError: "",
     // Chinese messages for UI text
     messages: {
       loading: "加载中...",
@@ -111,7 +119,7 @@ Page({
         userInfo?.phone && userInfo.phone.startsWith("+86")
           ? userInfo.phone.substring(3)
           : userInfo?.phone || "",
-      // email: userInfo?.email || "",
+      email: userInfo?.email || "",
       name: userInfo?.name || "",
       nickname: userInfo?.nickname || "",
       gender: userInfo?.gender || "",
@@ -122,17 +130,18 @@ Page({
       class: userInfo?.class || "",
       admissionYear:
         userInfo?.admission_year || userInfo?.admissionYear || currentYear,
+      birthday: userInfo?.birthday || "",
     };
 
     // Store original values for verification comparison
     this.setData({
-      // originalEmail: form.email,
+      originalEmail: form.email,
       originalPhone: form.phone,
-      // emailChanged: false,
+      emailChanged: false,
       phoneChanged: false,
-      // emailVerified: true,
+      emailVerified: true,
       phoneVerified: true,
-      // emailOtpCode: "",
+      emailOtpCode: "",
       phoneOtpCode: "",
     });
 
@@ -208,15 +217,14 @@ Page({
     });
 
     // Check if email or phone changed
-    // if (field === "email") {
-    //   const emailChanged = value !== this.data.originalEmail;
-    //   this.setData({
-    //     emailChanged,
-    //     emailVerified: !emailChanged,
-    //     emailOtpCode: emailChanged ? "" : this.data.emailOtpCode,
-    //   });
-    // } else if (field === "phone") {
-    if (field === "phone") {
+    if (field === "email") {
+      const emailChanged = value !== this.data.originalEmail;
+      this.setData({
+        emailChanged,
+        emailVerified: !emailChanged,
+        emailOtpCode: emailChanged ? "" : this.data.emailOtpCode,
+      });
+    } else if (field === "phone") {
       const phoneChanged = value !== this.data.originalPhone;
       this.setData({
         phoneChanged,
@@ -329,7 +337,10 @@ Page({
     const { profileForm } = this.data;
     let errors = {};
 
+    // All fields are now required
     if (!profileForm.name) errors.name = "姓名为必填项";
+    if (!profileForm.email) errors.email = "邮箱为必填项";
+    if (!profileForm.phone) errors.phone = "手机号为必填项";
     
     // Validate nickname (required field)
     if (!profileForm.nickname) {
@@ -344,19 +355,18 @@ Page({
     if (!profileForm.faculty) errors.faculty = "学院为必填项";
     if (!profileForm.major) errors.major = "专业为必填项";
     if (!profileForm.class) errors.class = "班级为必填项";
+    if (!profileForm.admissionYear) errors.admissionYear = "入学年份为必填项";
+    if (!profileForm.birthday) errors.birthday = "生日为必填项";
 
-    // Only validate changed email/phone if verification is required
-    // if (this.data.emailChanged && !this.data.emailVerified) {
-    //   errors.email = "请验证邮箱";
-    // }
+    // Verify phone if it's been changed
     if (this.data.phoneChanged && !this.data.phoneVerified) {
       errors.phone = "请验证手机号";
     }
 
     // Email validation
-    // if (profileForm.email && !/\S+@\S+\.\S+/.test(profileForm.email)) {
-    //   errors.email = "邮箱格式不正确";
-    // }
+    if (profileForm.email && !/\S+@\S+\.\S+/.test(profileForm.email)) {
+      errors.email = "邮箱格式不正确";
+    }
 
     // Phone validation
     if (profileForm.phone && !/\d{11}$/.test(profileForm.phone)) {
@@ -373,13 +383,15 @@ Page({
       name: 'name-field',
       nickname: 'nickname-field',
       phone: 'phone-field',
-      // email: 'email-field',
+      email: 'email-field',
       gender: 'gender-field',
       id_number: 'id-number-field',
       student_number: 'student-number-field',
       faculty: 'faculty-field',
       major: 'major-field',
-      class: 'class-field'
+      class: 'class-field',
+      admissionYear: 'admission-year-field',
+      birthday: 'birthday-field'
     };
 
     const selector = fieldMap[errorKey];
@@ -458,6 +470,7 @@ Page({
       ...this.data.profileForm,
       phone: "+86" + this.data.profileForm.phone,
       admission_year: this.data.profileForm.admissionYear,
+      birthday: this.data.profileForm.birthday,
     };
     
     // Add avatar URL if uploaded
@@ -570,7 +583,7 @@ Page({
             profileErrors: {},
             avatarFile: null,
             selectedAvatar: updatedUserInfo?.avatar || "",
-            // emailOtpCode: "",
+            emailOtpCode: "",
             phoneOtpCode: "",
           });
 
@@ -666,45 +679,86 @@ Page({
   },
 
   // Send email verification code
-  // sendEmailVerificationCode: function () {
-  //   if (!this.data.emailChanged || !this.data.profileForm.email) return;
+  sendEmailVerificationCode: function () {
+    if (!this.data.emailChanged || !this.data.profileForm.email) return;
 
-  //   wx.showLoading({ title: "发送中..." });
+    // Check if countdown is active
+    if (this.data.emailCountdown > 0) {
+      return;
+    }
 
-  //   wx.request({
-  //     url: `${config.BACKEND_URL}/verification/send_email_code`,
-  //     method: "POST",
-  //     data: {
-  //       email: this.data.profileForm.email,
-  //     },
-  //     header: {
-  //       "Content-Type": "application/json",
-  //       Authorization: `Bearer ${getApp().globalData.userInfo?.token}`,
-  //     },
-  //     success: (res) => {
-  //       if (res.statusCode === 200 && res.data.status === "success") {
-  //         wx.showToast({
-  //           title: this.data.messages.success.otpSent,
-  //           icon: "success",
-  //         });
-  //       } else {
-  //         wx.showToast({
-  //           title: res.data?.msg || this.data.messages.errors.otpSendFailed,
-  //           icon: "none",
-  //         });
-  //       }
-  //     },
-  //     fail: () => {
-  //       wx.showToast({
-  //         title: this.data.messages.errors.networkError,
-  //         icon: "none",
-  //       });
-  //     },
-  //     complete: () => {
-  //       wx.hideLoading();
-  //     },
-  //   });
-  // },
+    wx.showLoading({ title: "发送中..." });
+
+    wx.request({
+      url: `${config.BACKEND_URL}/verification/send_email_code`,
+      method: "POST",
+      data: {
+        email: this.data.profileForm.email,
+      },
+      header: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getApp().globalData.userInfo?.token}`,
+      },
+      success: (res) => {
+        if (res.statusCode === 200 && res.data.status === "success") {
+          // Always start countdown regardless of alert or new code
+          this.startEmailCountdown();
+          
+          // Check if it's an alert (existing code) or new code sent
+          if (res.data.alert) {
+            // Display alert in green
+            this.setData({
+              emailVerificationMessage: res.data.alert,
+              emailVerificationError: ""
+            });
+            // Clear success message after 8 seconds
+            setTimeout(() => {
+              this.setData({ emailVerificationMessage: "" });
+            }, 8000);
+          } else {
+            // Normal success - new code sent
+            this.setData({
+              emailVerificationMessage: res.data?.msg || "验证码已发送到您的邮箱",
+              emailVerificationError: ""
+            });
+            // Clear success message after 5 seconds
+            setTimeout(() => {
+              this.setData({ emailVerificationMessage: "" });
+            }, 5000);
+          }
+        } else {
+          this.setData({
+            emailVerificationError: res.data?.msg || "验证码发送失败，请检查邮箱地址",
+            emailVerificationMessage: ""
+          });
+        }
+      },
+      fail: () => {
+        this.setData({
+          emailVerificationError: "网络错误，请稍后重试",
+          emailVerificationMessage: ""
+        });
+      },
+      complete: () => {
+        wx.hideLoading();
+      },
+    });
+  },
+
+  // Start email countdown timer
+  startEmailCountdown: function() {
+    this.setData({ emailCountdown: 60 });
+
+    const timer = setInterval(() => {
+      const { emailCountdown } = this.data;
+      if (emailCountdown <= 1) {
+        clearInterval(timer);
+        this.setData({ emailCountdown: 0 });
+      } else {
+        this.setData({ emailCountdown: emailCountdown - 1 });
+      }
+    }, 1000);
+  },
 
   // Start countdown timer
   startCountdown: function() {
@@ -789,11 +843,11 @@ Page({
   },
 
   // Handle OTP input for email
-  // onEmailOtpInput: function (e) {
-  //   this.setData({
-  //     emailOtpCode: e.detail.value,
-  //   });
-  // },
+  onEmailOtpInput: function (e) {
+    this.setData({
+      emailOtpCode: e.detail.value,
+    });
+  },
 
   // Handle OTP input for phone
   onPhoneOtpInput: function (e) {
@@ -803,57 +857,58 @@ Page({
   },
 
   // Verify email with OTP code
-  // verifyEmailCode: function () {
-  //   if (!this.data.emailOtpCode || !this.data.profileForm.email) {
-  //     wx.showToast({
-  //       title: "请输入验证码",
-  //       icon: "none",
-  //     });
-  //     return;
-  //   }
+  verifyEmailCode: function () {
+    if (!this.data.emailOtpCode || !this.data.profileForm.email) {
+      wx.showToast({
+        title: "请输入验证码",
+        icon: "none",
+      });
+      return;
+    }
 
-  //   wx.showLoading({ title: "验证中..." });
+    wx.showLoading({ title: "验证中..." });
 
-  //   wx.request({
-  //     url: `${config.BACKEND_URL}/verification/verify_email_code`,
-  //     method: "POST",
-  //     data: {
-  //       email: this.data.profileForm.email,
-  //       code: this.data.emailOtpCode,
-  //     },
-  //     header: {
-  //       "Content-Type": "application/json",
-  //       Authorization: `Bearer ${getApp().globalData.userInfo?.token}`,
-  //     },
-  //     success: (res) => {
-  //       if (res.statusCode === 200 && res.data.status === "success") {
-  //         this.setData({
-  //           // emailVerified: true,
-  //           [`profileErrors.email`]: false,
-  //         });
-  //         wx.showToast({
-  //           title: this.data.messages.success.verificationSuccess,
-  //           icon: "success",
-  //         });
-  //       } else {
-  //         wx.showToast({
-  //           title:
-  //             res.data?.msg || this.data.messages.errors.verificationFailed,
-  //           icon: "none",
-  //         });
-  //       }
-  //     },
-  //     fail: () => {
-  //       wx.showToast({
-  //         title: this.data.messages.errors.networkError,
-  //         icon: "none",
-  //       });
-  //     },
-  //     complete: () => {
-  //       wx.hideLoading();
-  //     },
-  //   });
-  // },
+    wx.request({
+      url: `${config.BACKEND_URL}/verification/verify_email_code`,
+      method: "POST",
+      data: {
+        email: this.data.profileForm.email,
+        code: this.data.emailOtpCode,
+      },
+      header: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getApp().globalData.userInfo?.token}`,
+      },
+      success: (res) => {
+        if (res.statusCode === 200 && res.data.status === "success") {
+          this.setData({
+            emailVerified: true,
+            [`profileErrors.email`]: false,
+            emailVerificationMessage: "邮箱验证成功！",
+            emailVerificationError: ""
+          });
+          // Clear success message after 3 seconds
+          setTimeout(() => {
+            this.setData({ emailVerificationMessage: "" });
+          }, 3000);
+        } else {
+          this.setData({
+            emailVerificationError: res.data?.msg || "验证码错误或已过期",
+            emailVerificationMessage: ""
+          });
+        }
+      },
+      fail: () => {
+        this.setData({
+          emailVerificationError: "网络错误，请稍后重试",
+          emailVerificationMessage: ""
+        });
+      },
+      complete: () => {
+        wx.hideLoading();
+      },
+    });
+  },
 
   // Verify phone with OTP code
   verifyPhoneCode: function () {

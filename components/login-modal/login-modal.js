@@ -3,7 +3,6 @@ const { default: config } = require("../../config");
 Component({
   data: {
     loginType: "wechat",
-    // email: "",
     loginIdentifier: "", // For username/phone login
     phone: "",
     password: "",
@@ -12,7 +11,6 @@ Component({
     countdown: 0,
     loading: false,
     termsAgreed: false,
-    // emailError: "",
     loginIdentifierError: "", // For username/phone login errors
     phoneError: "",
     passwordError: "",
@@ -23,8 +21,8 @@ Component({
     messages: {
       loginTypes: {
         wechat: "微信登录",
-        password: "密码登录", // Changed from email to password
-        phone: "验证码登录",
+        password: "密码登录",
+        phone: "手机验证码",
       },
       formLabels: {
         loginIdentifier: "用户名/电话号码/电子邮件", // Username or phone
@@ -41,16 +39,18 @@ Component({
         wechatLogin: "微信登录",
       },
       errors: {
-        // emailRequired: "请输入邮箱地址",
-        // emailInvalid: "请输入有效的邮箱地址",
+        emailRequired: "请输入邮箱地址",
+        emailInvalid: "请输入有效的邮箱地址",
         phoneRequired: "请输入手机号码",
         phoneInvalid: "请输入有效的手机号码",
         passwordRequired: "请输入密码",
         passwordTooShort: "密码至少需要6个字符",
         codeRequired: "请输入验证码",
         codeInvalid: "验证码必须为6位数字",
+        emailCodeRequired: "请输入邮箱验证码",
+        emailCodeInvalid: "邮箱验证码必须为6位数字",
         wechatLoginFailed: "微信登录失败，请重试",
-        // emailLoginFailed: "邮箱登录失败，请检查凭据",
+        emailLoginFailed: "邮箱登录失败，请检查验证码",
         phoneLoginFailed: "手机登录失败，请检查验证码",
         verificationFailed: "验证失败",
       },
@@ -137,14 +137,16 @@ Component({
       const type = e.currentTarget.dataset.type;
       this.setData({
         loginType: type,
-        // emailError: "",
+        emailError: "",
         loginIdentifierError: "",
         phoneError: "",
         passwordError: "",
         codeError: "",
+        emailCodeError: "",
         wechatError: "",
         generalError: "",
         phoneSuccessMessage: "",
+        emailSuccessMessage: "",
       });
     },
 
@@ -155,6 +157,7 @@ Component({
         generalError: "",
       });
     },
+
 
     onPhoneInput(e) {
       this.setData({
@@ -180,6 +183,7 @@ Component({
         generalError: "",
       });
     },
+
     togglePassword(e) {
       if (e && e.stopPropagation) {
         e.stopPropagation();
@@ -205,10 +209,6 @@ Component({
     },
 
     // Validation methods
-    // validateEmail(email) {
-    //   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    //   return emailRegex.test(email);
-    // },
 
     validatePhone(phone) {
       const phoneRegex = /\d{11}$/;
@@ -257,67 +257,7 @@ Component({
       }
     },
 
-    // async emailLogin() {
-    //   const { email, password } = this.data;
 
-    //   if (!email) {
-    //     this.setData({ emailError: this.data.messages.errors.emailRequired });
-    //     return;
-    //   }
-
-    //   if (!this.validateEmail(email)) {
-    //     this.setData({ emailError: this.data.messages.errors.emailInvalid });
-    //     return;
-    //   }
-
-    //   if (!password) {
-    //     this.setData({
-    //       passwordError: this.data.messages.errors.passwordRequired,
-    //     });
-    //     return;
-    //   }
-
-    //   if (password.length < 6) {
-    //     this.setData({
-    //       passwordError: this.data.messages.errors.passwordTooShort,
-    //     });
-    //     return;
-    //   }
-
-    //   try {
-    //     this.setData({ loading: true });
-
-    //     const authResult = await this.requestLogin({
-    //       email,
-    //       password,
-    //     });
-    //     console.log("Email login result:", authResult);
-
-    //     this.handleLoginSuccess(authResult);
-    //   } catch (error) {
-    //     console.log(error);
-    //     this.setData({
-    //       // emailError: "",
-    //       passwordError: "",
-    //     });
-
-    //     if (error.message && error.message.includes("email")) {
-    //       this.setData({
-    //         emailError: this.data.messages.errors.emailLoginFailed,
-    //       });
-    //     } else if (error.message && error.message.includes("password")) {
-    //       this.setData({
-    //         passwordError: this.data.messages.errors.emailLoginFailed,
-    //       });
-    //     } else {
-    //       this.setData({
-    //         emailError: this.data.messages.errors.emailLoginFailed,
-    //       });
-    //     }
-    //   } finally {
-    //     this.setData({ loading: false });
-    //   }
-    // },
 
     async passwordLogin() {
       const { loginIdentifier, password } = this.data;
@@ -515,6 +455,7 @@ Component({
       }
     },
 
+
     // Start countdown timer
     startCountdown() {
       this.setData({ countdown: 60 });
@@ -529,6 +470,7 @@ Component({
         }
       }, 1000);
     },
+
 
     // Handle login
     handleLogin() {
@@ -677,13 +619,16 @@ Component({
         this.setData({ passwordError: message });
       } else if (fieldType === "code") {
         this.setData({ codeError: message });
+      } else if (fieldType === "email") {
+        this.setData({ emailError: message });
+      } else if (fieldType === "emailCode") {
+        this.setData({ emailCodeError: message });
       } else if (fieldType === "wechat") {
         this.setData({ wechatError: message });
       } else {
-        // For general errors, set general error field or default to email field
+        // For general errors, set general error field
         this.setData({
           generalError: message,
-          // emailError: message, // Fallback to email field for general errors
         });
       }
     },
@@ -763,6 +708,32 @@ Component({
               reject(
                 new Error(
                   res.data.msg || res.data.message || "Failed to send code"
+                )
+              );
+            }
+          },
+          fail: reject,
+        });
+      });
+    },
+
+    // Request email verification code
+    requestEmailVerificationCode(email) {
+      return new Promise((resolve, reject) => {
+        wx.request({
+          url: `${config.BACKEND_URL}/verification/send_email_code`,
+          method: "POST",
+          data: { email, is_login: true },
+          header: {
+            "Content-Type": "application/json",
+          },
+          success: (res) => {
+            if (res.statusCode === 200 && res.data.status === "success") {
+              resolve(res.data);
+            } else {
+              reject(
+                new Error(
+                  res.data.msg || res.data.message || "Failed to send email code"
                 )
               );
             }

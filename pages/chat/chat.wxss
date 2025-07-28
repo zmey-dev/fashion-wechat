@@ -374,7 +374,7 @@ page {
 .messages-container {
   flex: 1;
   background: #0f0f0f;
-  padding: 16px 16px 60px 16px;
+  padding: 16px 16px 80px 16px;
   overflow: hidden;
   box-sizing: border-box;
 }
@@ -541,11 +541,13 @@ page {
 
 /* Emoji Picker */
 .emoji-picker {
-  position: absolute;
+  position: fixed;
   left: 0;
   right: 0;
+  bottom: 80px;
   height: 200px;
   background: #1c1c1e;
+  z-index: 999;
   border-top: 1px solid #2c2c2e;
 }
 
@@ -572,12 +574,14 @@ page {
 
 /* Message Input */
 .message-input-container {
-  position: absolute;
+  position: fixed;
   left: 0;
   right: 0;
+  bottom: 0;
   background: #0f0f0f;
   border-top: 1px solid #1c1c1e;
   padding: 8px 16px;
+  z-index: 1000;
 }
 
 .input-box {
@@ -717,6 +721,41 @@ page {
   height: 1px;
   background: #3a3a3c;
   margin: 8px 16px;
+}
+
+/* Friend Request UI */
+.friend-request-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20rpx 32rpx;
+  border: 2rpx solid #70abff;
+  border-radius: 24rpx;
+  margin: 0 32rpx;
+  background: rgba(112, 171, 255, 0.1);
+}
+
+.friend-request-message {
+  color: white;
+  font-size: 28rpx;
+  margin-right: 20rpx;
+  flex: 1;
+  text-align: center;
+}
+
+.friend-request-btn {
+  color: #70abff;
+  font-size: 28rpx;
+  font-weight: 600;
+  padding: 16rpx 24rpx;
+  border-radius: 16rpx;
+  background: rgba(112, 171, 255, 0.2);
+  transition: all 0.2s ease;
+}
+
+.friend-request-btn:active {
+  background: rgba(112, 171, 255, 0.3);
+  transform: scale(0.95);
 }
 
 /* Animations */

@@ -156,6 +156,12 @@ Page({
             previousPostId: res.data.previous_post_id,
             isLoading: false,
           });
+          
+          // Notify media player that API loading is complete
+          const mediaPlayer = this.selectComponent('.media-player');
+          if (mediaPlayer && mediaPlayer.onApiLoadComplete) {
+            mediaPlayer.onApiLoadComplete();
+          }
         } else {
           this.setData({
             isLoading: false,

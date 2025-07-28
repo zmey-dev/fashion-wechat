@@ -9,39 +9,14 @@
   /* touch-action is not supported in WXSS, use catchtouchmove instead */
 }
 
-/* Main content container with transform capability for vertical swipe */
+/* Main content container - TikTok style with no animations */
 .media-content {
   position: absolute;
   top: 0;
   left: 0;
   height: 100%;
   width: 100%;
-  transition: none; /* No transition during touch */
   z-index: 1;
-  transform-origin: center center;
-}
-
-.media-content.swiping {
-  transition: none !important; /* Ensure no transition during active swipe */
-}
-
-.media-content:not(.swiping):not(.animating) {
-  transition: transform 0.3s ease-out !important; /* Simplified for WXSS compatibility */
-}
-
-/* Professional animation states */
-.media-content.animating {
-  will-change: transform, opacity;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-}
-
-.media-content.animating.slide-up {
-  transform-origin: center bottom;
-}
-
-.media-content.animating.slide-down {
-  transform-origin: center top;
 }
 
 /* Responsive layout when detail panel is open */

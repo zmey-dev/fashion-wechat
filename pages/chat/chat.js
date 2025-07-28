@@ -439,18 +439,21 @@ Page({
       const app = getApp();
       app.clearUnreadForUser(userId);
 
-      // Fetch messages from the database
-      this.getMessagesByUserId(userId);
+      // Only fetch messages and mark as read if allowed to chat
+      if (user.is_allow) {
+        // Fetch messages from the database
+        this.getMessagesByUserId(userId);
 
-      // Mark messages as read after fetching
-      setTimeout(() => {
-        if (
-          this.data.currentView === "chat" &&
-          this.data.selectedUser?.id === userId
-        ) {
-          this.markMessagesAsRead(userId);
-        }
-      }, 500);
+        // Mark messages as read after fetching
+        setTimeout(() => {
+          if (
+            this.data.currentView === "chat" &&
+            this.data.selectedUser?.id === userId
+          ) {
+            this.markMessagesAsRead(userId);
+          }
+        }, 500);
+      }
     }
   },
 
@@ -804,6 +807,9 @@ Page({
             filteredFriends: updatedFriends,
           });
 
+          // Hide keyboard after sending message
+          wx.hideKeyboard();
+          
           this.scrollToBottom();
         }
       },
@@ -1012,19 +1018,24 @@ Page({
     });
   },
 
-  onInputBlur() {},
+  onInputBlur() {
+    // Reset keyboard height when input loses focus
+    this.setData({
+      keyboardHeight: 0,
+      showEmojiPicker: false,
+    });
+  },
 
   onKeyboardHeightChange(e) {
     const keyboardHeight = e.detail.height || 0;
     this.setData({
-      keyboardHeight,
+      keyboardHeight: Math.max(0, keyboardHeight), // Ensure non-negative
     });
 
-    if (keyboardHeight > 0) {
-      setTimeout(() => {
-        this.scrollToBottom();
-      }, 100);
-    }
+    // Scroll to bottom when keyboard appears or disappears
+    setTimeout(() => {
+      this.scrollToBottom();
+    }, 100);
   },
   onEmojiSelect(e) {
     if (this.data.isSending) return; // Prevent emoji selection during sending
@@ -1390,6 +1401,66 @@ Page({
   // - getTabbarComponent
   // - clearTabbarUnreadCountForUser
 
+  // Send friend request
+  onSendFriendRequest: function() {
+    if (!this.data.selectedUser) return;
+    
+    wx.showLoading({ title: "发送中..." });
+    
+    wx.request({
+      url: `${config.BACKEND_URL}/friend/add_friend`,
+      method: "POST",
+      data: {
+        friend_id: this.data.selectedUser.id
+      },
+      header: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${this.data.userInfo.token}`,
+      },
+      success: (res) => {
+        wx.hideLoading();
+        if (res.data && res.data.status === "success") {
+          wx.showToast({
+            title: "好友请求已发送",
+            icon: "success"
+          });
+          
+          // Update selectedUser's is_allow status if it becomes mutual friends
+          // (This happens when both users send friend requests to each other)
+          if (res.data.message && res.data.message.event_type === "accept_friend") {
+            const updatedUser = { ...this.data.selectedUser, is_allow: true };
+            this.setData({ selectedUser: updatedUser });
+            
+            // Also update the friends list
+            const updatedFriends = this.data.friends.map(f => 
+              f.id === this.data.selectedUser.id ? updatedUser : f
+            );
+            const updatedFilteredFriends = this.data.filteredFriends.map(f => 
+              f.id === this.data.selectedUser.id ? updatedUser : f
+            );
+            
+            this.setData({
+              friends: updatedFriends,
+              filteredFriends: updatedFilteredFriends
+            });
+          }
+        } else {
+          wx.showToast({
+            title: res.data.msg || "发送失败",
+            icon: "none"
+          });
+        }
+      },
+      fail: () => {
+        wx.hideLoading();
+        wx.showToast({
+          title: "网络错误",
+          icon: "none"
+        });
+      }
+    });
+  },
+
   // Switch to chat with user
   switchToChat: function (user) {
     this.setData({
@@ -1398,13 +1469,16 @@ Page({
       chatMessages: [],
     });
 
-    // Mark messages as read when entering chat
-    this.markMessagesAsRead(user.id);
+    // Only load messages and mark as read if allowed to chat
+    if (user.is_allow) {
+      // Mark messages as read when entering chat
+      this.markMessagesAsRead(user.id);
 
-    // Load chat messages
-    this.getMessagesByUserId(user.id);
+      // Load chat messages
+      this.getMessagesByUserId(user.id);
 
-    this.scrollToBottom();
+      this.scrollToBottom();
+    }
   },
 
   // Handle friend tap

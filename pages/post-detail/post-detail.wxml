@@ -7,6 +7,7 @@
   <view class="post-viewer-container {{userInfo.role === 'teacher' ? 'teacher-container' : ''}}">
     <!-- Media Player Component -->
     <media-player
+      id="media-player"
       wx:if="{{ currentPost }}"
       selectedPost="{{ currentPost }}"
       selectedPostUser="{{ currentPostUser }}"
@@ -28,8 +29,8 @@
     >
     </media-player>
 
-    <!-- Loading State -->
-    <view wx:if="{{ isLoading }}" class="loading-container">
+    <!-- Loading State - Only show when no currentPost exists -->
+    <view wx:if="{{ isLoading && !currentPost }}" class="loading-container">
       <view class="loading-spinner"></view>
       <text class="loading-text">{{messages.loading}}</text>
     </view>

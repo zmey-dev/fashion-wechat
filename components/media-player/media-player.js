@@ -1,5 +1,6 @@
 const { default: config } = require("../../config");
 const { isEmpty } = require("../../utils/isEmpty");
+const mediaPreloaderService = require('../../services/mediaPreloader');
 
 // components/media-player/media-player.js
 Component({
@@ -32,7 +33,7 @@ Component({
   data: {
     // Media state
     currentSlideIndex: 0,
-    isPlaying: false,
+    isPlaying: true,  // Start playing by default but will be blocked by isWaitingForApi
     isContinue: true,
     isLoading: false,
     showPlayIndicator: false,
@@ -46,8 +47,10 @@ Component({
     currentPost: null,
     currentPostUser: null,
     currentMedia: [],
+    preloadedMedia: [], // Store preloaded media paths
     userComments: [],
     mediaLength: 0,
+    mediaLoadingStates: [], // Track loading state of each media item
 
     // Computed display values
     displayTitle: "",
@@ -81,12 +84,14 @@ Component({
     maxHorizontalThreshold: 100, // Maximum horizontal movement still considered vertical swipe
     maxTransformDistance: 150, // Maximum transform distance for visual feedback
 
-    // Animation states
-    isAnimating: false,
-    animationType: "", // "slide_up", "slide_down", "fade", "zoom"
-    animationOpacity: 1,
-    animationScale: 1,
-    animationBlur: 0,
+    // TikTok-style swipe detection (minimal properties)
+    isSwipeGesture: false,
+    minSwipeDistance: 80,
+    maxSwipeTime: 600,
+    swipeVelocityThreshold: 0.5,
+    
+    // API loading state
+    isWaitingForApi: false,
 
   },
   /**
@@ -140,10 +145,8 @@ Component({
       setTimeout(() => this.getContainerDimensions(), 300);
     },
     isLoading: function (loading) {
-      if (loading) {
-        this.animateLoadingState();
-      } else {
-        this.restoreFromLoadingState();
+      // TikTok-style: no loading animations, instant content display
+      if (!loading) {
       }
     },
   },
@@ -189,17 +192,30 @@ Component({
     },
 
     /**
-     * Load post data and related information
+     * Load post data and related information with media preloading
      */
-    loadPostData() {
+    async loadPostData() {
       const { selectedPost } = this.properties;
-      if (!selectedPost) return;
+      if (!selectedPost) {
+        return;
+      }
 
       const postUser = selectedPost.user || {};
       const comments = selectedPost.comments || [];
+      const media = selectedPost.media || [];
+
+      // Immediately clear dots when loading new post
+      const mediaDisplayComponent = this.selectComponent('media-display');
+      if (mediaDisplayComponent) {
+        mediaDisplayComponent.setData({ calculatedDots: [] });
+      }
+
+      // Initialize media loading states
+      const mediaLoadingStates = media.map(() => ({ loading: true, error: false }));
 
       this.setData({
         isLoading: true,
+        isWaitingForApi: true,  // Set waiting state
         currentSlideIndex: 0,
         selectedDot: null,
         showDetail: false,
@@ -215,7 +231,7 @@ Component({
           is_liked: selectedPost.is_liked || false,
           is_favorited: selectedPost.is_favorited || false,
           event_id: selectedPost.event_id || null,
-          media: selectedPost.media || [],
+          media: media,
           ...selectedPost,
         },
         currentPostUser: {
@@ -227,14 +243,110 @@ Component({
           posts: postUser.posts || [],
           ...postUser,
         },
-        currentMedia: selectedPost.media || [],
-        mediaLength: selectedPost.media ? selectedPost.media.length : 0,
+        currentMedia: media,
+        mediaLength: media.length,
         userComments: comments,
+        mediaLoadingStates: mediaLoadingStates,
+        preloadedMedia: new Array(media.length).fill(null)
       });
 
       this.updateDisplayValues();
+      
+      // Note: Media preloading is handled centrally by PostPreloaderService to prevent duplication
+      // The postPreloader service handles all media preloading for current, next, and previous posts
+      
       this.startAutoPlay();
       this.setData({ isLoading: false });
+    },
+
+    /**
+     * Preload media for current post
+     */
+    async preloadCurrentPostMedia() {
+      const { currentMedia } = this.data;
+      if (!currentMedia || currentMedia.length === 0) {
+        return;
+      }
+
+      
+      try {
+        // Preload all media items with critical priority
+        const preloadPromises = currentMedia.map(async (mediaItem, index) => {
+          try {
+            const preloadedPath = await mediaPreloaderService.getOrPreloadMedia(
+              mediaItem, 
+              { 
+                priority: index === 0 ? mediaPreloaderService.PRIORITY.CRITICAL : mediaPreloaderService.PRIORITY.HIGH,
+                isFirstMedia: index === 0
+              }
+            );
+            
+            // Update preloaded media array
+            const newPreloadedMedia = [...this.data.preloadedMedia];
+            newPreloadedMedia[index] = preloadedPath;
+            
+            // Update loading state
+            const newLoadingStates = [...this.data.mediaLoadingStates];
+            newLoadingStates[index] = { loading: false, error: false };
+            
+            this.setData({
+              preloadedMedia: newPreloadedMedia,
+              mediaLoadingStates: newLoadingStates
+            });
+            
+            return preloadedPath;
+          } catch (error) {
+            console.warn(`[MediaPlayer] Failed to preload media ${index}:`, error);
+            
+            // Update loading state to show error
+            const newLoadingStates = [...this.data.mediaLoadingStates];
+            newLoadingStates[index] = { loading: false, error: true };
+            
+            this.setData({
+              mediaLoadingStates: newLoadingStates
+            });
+            
+            return mediaItem.url; // Fallback to original URL
+          }
+        });
+        
+        await Promise.allSettled(preloadPromises);
+      } catch (error) {
+        console.error('[MediaPlayer] Media preloading failed:', error);
+      }
+    },
+
+    /**
+     * Get optimized media URL (preloaded if available)
+     */
+    getOptimizedMediaUrl(index) {
+      const { preloadedMedia, currentMedia } = this.data;
+      
+      if (preloadedMedia && preloadedMedia[index]) {
+        return preloadedMedia[index];
+      }
+      
+      if (currentMedia && currentMedia[index]) {
+        return currentMedia[index].url;
+      }
+      
+      return null;
+    },
+
+    /**
+     * Check if media is loading
+     */
+    isMediaLoading(index) {
+      const { mediaLoadingStates } = this.data;
+      return mediaLoadingStates && mediaLoadingStates[index] && mediaLoadingStates[index].loading;
+    },
+
+    /**
+     * Check if media has error
+     */
+    hasMediaError(index) {
+      const { mediaLoadingStates } = this.data;
+      return mediaLoadingStates && mediaLoadingStates[index] && mediaLoadingStates[index].error;
     },
 
     /**
@@ -264,6 +376,11 @@ Component({
      * Auto play management
      */
     startAutoPlay() {
+      // Check if we should delay autoplay until API completes
+      if (this.data.isWaitingForApi) {
+        return;
+      }
+      
       this.clearAutoPlayTimer();
       if (
         this.data.isPlaying &&
@@ -274,6 +391,7 @@ Component({
           this.moveToNextSlide();
         }, 5000);
         this.setData({ autoPlayTimer: timer });
+      } else {
       }
     },
 
@@ -289,7 +407,7 @@ Component({
     },
 
     resumeAutoPlay() {
-      if (this.data.currentPost && this.data.currentPost.type === "image") {
+      if (this.data.currentPost && this.data.currentPost.type === "image" && !this.data.isWaitingForApi) {
         this.startAutoPlay();
       }
     },
@@ -339,6 +457,11 @@ Component({
     onSlideChange(e) {
       const newIndex = e.detail.current;
       this.setData({ currentSlideIndex: newIndex });
+      
+      // Restart autoplay timer when slide changes
+      if (this.data.isPlaying && !this.data.isWaitingForApi && this.data.currentPost?.type === 'image') {
+        this.startAutoPlay();
+      }
     },
     onDotTap(e) {
       const { index } = e.detail;
@@ -346,7 +469,6 @@ Component({
       const media = currentMedia[currentSlideIndex];
 
       if (media && media.dots && media.dots[index]) {
-        console.log("onDotTap called, opening detail panel");
         this.setData({
           selectedDot: media.dots[index],
           tabIndex: 2,
@@ -356,7 +478,6 @@ Component({
 
         // Pause auto-play when detail panel opens via dot tap
         if (this.data.isPlaying) {
-          console.log("Pausing auto-play as detail panel opened via dot tap");
           this.pauseAutoPlay();
         }
       }
@@ -372,14 +493,30 @@ Component({
     },
 
     moveToNextSlide() {
-      const { currentSlideIndex, mediaLength, isContinue } = this.data;
+      const { currentSlideIndex, mediaLength, isContinue, currentPost } = this.data;
+      
+      // Safety check: moveToNextSlide should only work for image posts
+      if (currentPost?.type !== 'image') {
+        return;
+      }
+      
       if (currentSlideIndex + 1 < mediaLength) {
-        this.setData({ currentSlideIndex: currentSlideIndex + 1 });
+        const newIndex = currentSlideIndex + 1;
+        this.setData({ currentSlideIndex: newIndex });
+        
+        // Restart autoplay timer after slide change
+        if (this.data.isPlaying && !this.data.isWaitingForApi) {
+          this.startAutoPlay();
+        }
       } else {
         if (isContinue) {
           this.moveToNextPost();
         } else {
           this.setData({ currentSlideIndex: 0 });
+          // Restart autoplay timer
+          if (this.data.isPlaying && !this.data.isWaitingForApi) {
+            this.startAutoPlay();
+          }
         }
       }
     },
@@ -404,12 +541,31 @@ Component({
       this.setData({ currentSlideIndex: index });
     },    // Video ended event handler
     onVideoEnded() {
-      const { isContinue } = this.data;
+      const { isContinue, currentPost, isWaitingForApi, isLoading } = this.data;
+      
+      // Validate that this is a genuine video end, not a navigation artifact
+      
+      // Ignore video ended events during navigation or loading
+      if (isWaitingForApi || isLoading) {
+        return;
+      }
+      
+      // Validate that this is actually a video post
+      if (currentPost?.type !== 'video') {
+        return;
+      }
+      
+      // Check if we're in the middle of navigation (additional safety check)
+      const mediaDisplayComponent = this.selectComponent('media-display');
+      if (mediaDisplayComponent && mediaDisplayComponent.data.isNavigatingVideo) {
+        return;
+      }
+      
+      
       if (isContinue) {
         this.moveToNextPost();
       } else {
         // Restart current video from beginning and auto-play
-        const mediaDisplayComponent = this.selectComponent('media-display');
         if (mediaDisplayComponent && mediaDisplayComponent.restartVideo) {
           mediaDisplayComponent.restartVideo();
           this.setData({ isPlaying: true });
@@ -1077,9 +1233,9 @@ Component({
       const { containerHeight, windowHeight } = this.data;
       const height = containerHeight || windowHeight;
       
-      // Create faster slide animation
+      // Create faster slide animation - only for swipe out
       const animation = wx.createAnimation({
-        duration: 250, // Reduced from 400ms to 250ms
+        duration: 200, // Faster swipe out animation
         timingFunction: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)', // easeOutQuad
       });
 
@@ -1098,17 +1254,30 @@ Component({
         animationScale: 0.95
       });
 
-      // Phase 2: Execute callback immediately without return animation
+      // Phase 2: Execute callback and show new content immediately (no slide-in animation)
       setTimeout(() => {
         if (callback) {
           callback();
           
-          // Phase 3: Slide in new content directly
-          setTimeout(() => {
-            this.animateSlideIn();
-          }, 30);
+          // Phase 3: Show new content immediately without animation
+          this.resetToNormalState();
         }
-      }, 250);
+      }, 200); // Reduced timing
+    },
+
+    /**
+     * Reset to normal state immediately without animation (for faster transitions)
+     */
+    resetToNormalState() {
+      // Immediately reset all animation states without any transition
+      this.setData({
+        slideAnimation: null,
+        verticalTransform: 0,
+        animationOpacity: 1,
+        animationScale: 1,
+        isAnimating: false,
+        animationType: ""
+      });
     },
 
     /**
@@ -1194,7 +1363,7 @@ Component({
     },
 
     /**
-     * Professional spring-back animation when swipe is invalid
+     * Fast spring-back animation when swipe is invalid (no delay)
      */
     animateBackToCenter() {
       if (this.data.isAnimating) return;
@@ -1203,7 +1372,7 @@ Component({
       wx.vibrateShort({ type: 'light' });
 
       const animation = wx.createAnimation({
-        duration: 200, // Reduced from 350ms to 200ms
+        duration: 150, // Further reduced for faster feedback
         timingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)', // easeOutBack
       });
 
@@ -1303,12 +1472,10 @@ Component({
         detailPanelState: state,
       });
 
-      console.log("Updated detailPanelState to:", state);
 
       // Handle auto-play based on panel state
       if (state === "half" || state === "full") {
         if (this.data.isPlaying) {
-          console.log("Pausing auto-play for panel state:", state);
           this.pauseAutoPlay();
         }
       } else if (state === "closed") {
@@ -1319,6 +1486,43 @@ Component({
         ) {
           this.resumeAutoPlay();
         }
+      }
+    },
+    
+    /**
+     * Validate swipe gesture for TikTok-style navigation
+     */
+    isValidSwipe(distance, duration, velocity) {
+      return distance >= this.data.minSwipeDistance && 
+             duration <= this.data.maxSwipeTime && 
+             velocity >= this.data.swipeVelocityThreshold;
+    },
+    
+    /**
+     * Handle post change completion - TikTok style
+     */
+    onPostChanged() {
+      
+      // Clear any existing autoplay timer from previous post
+      this.clearAutoPlayTimer();
+      
+      // Reset any swipe states
+      this.setData({
+        isSwipeGesture: false,
+        isTouching: false,
+        isSwipeActive: false
+      });
+    },
+    
+    /**
+     * Called when API loading is complete
+     */
+    onApiLoadComplete() {
+      this.setData({ isWaitingForApi: false });
+      
+      // Start autoplay now that API is complete
+      if (this.data.isPlaying && this.data.currentPost?.type === 'image') {
+        this.startAutoPlay();
       }
     },
 

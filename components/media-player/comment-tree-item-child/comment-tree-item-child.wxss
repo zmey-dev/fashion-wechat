@@ -7,6 +7,11 @@
   margin-bottom: 24rpx;
 }
 
+/* Reply Comment Username Style - Smaller font for replies */
+.comment-tree-item .username {
+  font-size: 26rpx !important;
+}
+
 /* TikTok Reply Toggle */
 .tiktok-reply-toggle {
   position: relative;

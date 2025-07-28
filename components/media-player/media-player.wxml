@@ -28,9 +28,7 @@
     bind:close="onCloseReportModal"
     bind:submit="onSubmitReport"
   />    <view 
-    class="media-content {{ isVerticalSwiping ? 'swiping' : '' }} {{ detailPanelState === 'half' ? 'detail-half' : '' }} {{ detailPanelState === 'full' ? 'detail-full' : '' }} {{ isAnimating ? 'animating' : '' }}"
-    style="transform: translateY({{ verticalTransform }}px); opacity: {{ animationOpacity }}; transform: translateY({{ verticalTransform }}px) scale({{ animationScale }});"
-    animation="{{ slideAnimation }}"
+    class="media-content {{ detailPanelState === 'half' ? 'detail-half' : '' }} {{ detailPanelState === 'full' ? 'detail-full' : '' }}"
   ><!-- Media Display Component -->
     <media-display
       current-post="{{ currentPost }}"
@@ -41,6 +39,7 @@
       show-play-indicator="{{ showPlayIndicator }}"
       selected-dot="{{ selectedDot }}"
       detailPanelState="{{ detailPanelState }}"
+      is-waiting-for-api="{{ isWaitingForApi }}"
       bind:screentap="onScreenTap"
       bind:slidechange="onSlideChange"
       bind:dottap="onDotTap"
