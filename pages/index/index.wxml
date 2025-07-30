@@ -91,7 +91,7 @@
         <view class="modal-header">
           <text class="modal-title">用户 ID</text>
           <text class="modal-warning">
-            请注意：您当前的 ID 是 {{userInfo.nickname}}。
+            请注意：您当前的 ID 是 {{userInfo.username}}。
             您只能更改一次您的用户 ID！
           </text>
         </view>
