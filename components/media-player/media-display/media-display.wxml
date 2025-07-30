@@ -3,13 +3,13 @@
 class="media-container"
 bindtap="onScreenTap"
 >
-  <!-- Image Loading Overlay -->
-  <view wx:if="{{ showImageLoader && currentPost.type === 'image' }}" class="image-loading-overlay">
+  <!-- Image Loading Overlay - DISABLED to prevent duplicate loading spinner -->
+  <!-- <view wx:if="{{ showImageLoader && currentPost.type === 'image' }}" class="image-loading-overlay">
     <view class="image-loading-container">
       <view class="image-loading-spinner"></view>
       <text class="image-loading-text">加载中...</text>
     </view>
-  </view>
+  </view> -->
   
   <!-- Media content -->
   <swiper
@@ -58,23 +58,32 @@ bindtap="onScreenTap"
     </swiper-item>
   </swiper>  <!-- Video display -->
   <video
-    wx:elif="{{ showVideo }}"
+    wx:elif="{{ showVideo && videoReady }}"
     id="media-video"
     class="media-video"
-    controls="{{true}}"
-    src="{{ currentMedia[0].url }}"
+    src="{{ videoSrc }}"
     controls="{{ true }}"
     show-controls="{{ true }}"
-    always-show-controls="{{ true }}"
     enable-progress-gesture="{{ true }}"
     show-play-btn="{{ true }}"
     autoplay="{{ isPlaying && !isWaitingForApi }}"
-    loop="{{ false }}"
+    loop="{{ !isContinue }}"
+    preload="auto"
+    poster="{{ currentMedia[0].preview_url || currentMedia[0].thumbnail_url || '' }}"
+    show-loading="{{ false }}"
+    show-fullscreen-btn="{{ true }}"
+    show-center-play-btn="{{ true }}"
+    object-fit="contain"
     catch:tap="onVideoTap"
     bindplay="onVideoPlay"
     bindpause="onVideoPause"
     bindended="onVideoEnded"
     binderror="onVideoError"
+    bindloadstart="onVideoLoadStart"
+    bindcanplay="onVideoCanPlay"
+    bindwaiting="onVideoWaiting"
+    bindloadeddata="onVideoLoadedData"
+    bindtimeupdate="onVideoTimeUpdate"
   >
   </video>
 

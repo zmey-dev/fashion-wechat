@@ -5,18 +5,18 @@
   
   <!-- Post Viewer Container -->
   <view class="post-viewer-container {{userInfo.role === 'teacher' ? 'teacher-container' : ''}}">
-    <!-- Media Player Component -->
+    <!-- Media Player Component - Always show when post exists -->
     <media-player
       id="media-player"
-      wx:if="{{ currentPost }}"
-      selectedPost="{{ currentPost }}"
-      selectedPostUser="{{ currentPostUser }}"
+      wx:if="{{ post }}"
+      selectedPost="{{ post }}"
+      selectedPostUser="{{ post.user }}"
       followedUsers="{{ followedUsers }}"
       authUser="{{ userInfo }}"
-      index="{{ currentIndex }}"
-      totalCount="{{ totalPosts }}"
+      index="{{ 0 }}"
+      totalCount="{{ 1 }}"
       event-id="{{ eventId }}"
-      is-loading="{{ isLoading }}"
+      is-loading="{{ false }}"
       bind:postNavigation="handlePostNavigation"
       bind:likeUpdated="handleLikeUpdated"
       bind:favoriteUpdated="handleFavoriteUpdated"
@@ -29,23 +29,30 @@
     >
     </media-player>
 
-    <!-- Loading State - Only show when no currentPost exists -->
-    <view wx:if="{{ isLoading && !currentPost }}" class="loading-container">
+    <!-- Navigation Loading Indicator - Subtle indicator during cached transitions -->
+    <view wx:if="{{ isNavigating }}" class="navigation-loading">
+      <view class="navigation-indicator"></view>
+    </view>
+
+    <!-- Loading State - Show when loading (regardless of post existence) -->
+    <view wx:if="{{ isLoading }}" class="loading-container">
       <view class="loading-spinner"></view>
       <text class="loading-text">{{messages.loading}}</text>
     </view>
     
-    <!-- Error State -->
-    <view wx:elif="{{ loadError }}" class="error-container">
+    <!-- Error State - Show when there's an error after attempting to load -->
+    <view wx:elif="{{ hasError && hasLoadedOnce }}" class="error-container">
       <view class="error-icon">⚠️</view>
       <text class="error-text">{{errorMessage}}</text>
-      <button class="retry-btn" bindtap="retryLoad">重试</button>
+      <button class="retry-btn" bindtap="onRetry">重试</button>
     </view>
     
-    <!-- Empty State -->
-    <view wx:elif="{{ !currentPost }}" class="empty-container">
+    <!-- Empty State - Only show when no post after successful load attempt -->
+    <view wx:elif="{{ !post && !isLoading && !hasError && hasLoadedOnce }}" class="empty-container">
       <view class="empty-icon">📭</view>
-      <text class="empty-text">内容不存在</text>      <button class="back-btn" bindtap="goBack">返回</button>
+      <text class="empty-text">内容不存在</text>
+      <button class="back-btn" bindtap="onRetry">返回</button>
     </view>
+
   </view>
 </app-layout>

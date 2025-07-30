@@ -211,10 +211,7 @@ Component({
       });
 
       // Check if user is teacher and update layout accordingly
-      this.updateLayoutForUserRole(app.globalData.userInfo);      console.log(
-        "App-layout initialized with totalUnreadCount:",
-        app.getTotalUnreadCount()
-      );
+      this.updateLayoutForUserRole(app.globalData.userInfo);
 
       // Start notification polling if user is logged in (but not for teachers)
       if (app.globalData.userInfo && app.globalData.userInfo.token && app.globalData.userInfo.role !== 'teacher') {
@@ -539,9 +536,7 @@ Component({
         dynamicTabStyle: "compact",
       });
 
-      console.log(
-        `Filter pages: ${filterCount}, using compact mode for full text display`
-      );
+      // Filter pages computed for layout
     }
     /**
      * Update layout based on user role
@@ -559,10 +554,7 @@ Component({
         pages: isTeacher ? this.data.teacherPages : this.originalPages,
       });
 
-      console.log(
-        "Layout updated for user role:",
-        isTeacher ? "teacher" : "regular"
-      );
+      // Layout updated for user role
     },
 
     /**

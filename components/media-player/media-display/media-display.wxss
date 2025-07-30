@@ -1,5 +1,17 @@
 /* components/media-display/media-display.wxss */
 
+/* Hide WeChat video native loading spinner */
+.media-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Try to hide native video loading elements */
+.media-video::-webkit-media-controls-loading-panel {
+  display: none !important;
+}
+
 /* Media Container */
 .media-container {
   position: relative;

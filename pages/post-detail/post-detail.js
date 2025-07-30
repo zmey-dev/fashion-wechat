@@ -1,851 +1,649 @@
-import config from "../../config";
-const postCacheService = require('../../services/postCache');
-const postPreloaderService = require('../../services/postPreloader');
-const mediaPreloaderService = require('../../services/mediaPreloader');
+const { default: config } = require("../../config");
 const app = getApp();
 
 Page({
   data: {
-    currentPath: "",
-    showLoginModal: app.globalData.showLoginModal || false,
-    userInfo: app.globalData.userInfo || {},
-    followedUsers: app.globalData.followedUsers || [],
+    // Post information
     postId: null,
     userId: null,
     eventId: null,
-    type: "discover", // Add type like web version
-    userPosts: [],
-    eventPosts: [],
-    currentUserPostIndex: 0,
-    currentEventPostIndex: 0,
-    hasMoreEventPosts: true,
-
-    currentPost: null,
-    currentPostUser: null,
-    currentIndex: 0,
-    totalPosts: 0,
-    // Navigation data from v2 API like web version
+    type: "discover",
+    filter: "",
+    
+    // Post data
+    post: null,
     nextPostId: null,
     previousPostId: null,
-    isLoading: true,
-    loadError: false,
+    
+    // Pre-cached navigation posts for instant display
+    nextPost: null,
+    previousPost: null,
+    
+    // Loading states
+    isLoading: false,
+    hasError: false,
     errorMessage: "",
-
-    touchStartX: 0,
-    touchStartY: 0,
-
-    // Chinese messages for UI text
+    isNavigating: false, // Separate flag for navigation loading
+    hasLoadedOnce: false, // Flag to track if we've attempted to load data at least once
+    
+    // User state
+    userInfo: null,
+    showLoginModal: false,
+    
+    // Media loading flag to prevent duplicates
+    mediaInitialized: false,
+    
+    // UI messages (Chinese for user interface)
     messages: {
       loading: "加载中...",
-      errors: {
-        loadFailed: "内容加载失败",
-        networkError: "网络错误，请稍后重试",
-      },
-      navigation: {
-        firstPost: "已经是第一篇文章了",
-        lastPost: "已经是最后一篇文章了",
-      },
+      loadFailed: "加载失败",
+      networkError: "网络错误",
+      noPostFound: "帖子不存在",
+      firstPost: "已经是第一篇了",
+      lastPost: "已经是最后一篇了",
+      noPostId: "帖子ID不能为空",
     },
   },
 
-  onLoad: function (options) {
-    const postId = options.postId || null;
-    const userId = options.user_id || null;
-    const eventId = options.eventId || options.event_id || null; // Support both formats
-    const type = options.type || "discover"; // Add type parameter like web version
-    const filter = options.filter || ""; // Add filter parameter like web version
+  onLoad: function(options) {
+    const postId = options.postId;
+    const userId = options.user_id;
+    const eventId = options.eventId || options.event_id;
+    const type = options.type || "discover";
+    const filter = options.filter || "";
+    
+    if (!postId) {
+      this.showError(this.data.messages.noPostId);
+      return;
+    }
+    
+    // Initialize loading flags
+    this.isLoadingPost = false;
+    this.loadingPostId = null;
+    
+    // Set initial data
     this.setData({
       postId: postId,
-      userId: userId,
-      eventId: eventId,
+      userId: userId || null,
+      eventId: eventId || null,
       type: type,
       filter: filter,
+      userInfo: app.globalData.userInfo || null,
+      showLoginModal: app.globalData.showLoginModal || false,
     });
-    const app = getApp();
+    
+    // Subscribe to global events
+    this.subscribeToGlobalEvents();
+    
+    // Start loading the post
+    this.loadPostData();
+  },
 
-    // Initialize global config for services
-    if (!app.globalData.config) {
-      app.globalData.config = config;
+  onShow: function() {
+    // Only reload if no post data exists and not currently loading
+    if (!this.data.post && !this.data.isLoading && this.data.postId && !this.data.hasLoadedOnce) {
+      this.loadPostData();
     }
+  },
 
-    // Subscribe to state changes
+  onUnload: function() {
+    this.unsubscribeFromGlobalEvents();
+  },
+
+  // Subscribe to global application events
+  subscribeToGlobalEvents: function() {
     this.userInfoHandler = (userInfo) => {
       this.setData({ userInfo });
     };
-    this.showLoginModalHandler = (showLoginModal) => {
+    
+    this.loginModalHandler = (showLoginModal) => {
       this.setData({ showLoginModal });
     };
-    this.followedUserHandler = (followedUsers) => {
-      this.setData({ followedUsers });
-    };
+    
     app.subscribe("userInfo", this.userInfoHandler);
-    app.subscribe("followedUser", this.followedUserHandler);
-    app.subscribe("showLoginModal", this.showLoginModalHandler);
-    this.setData({
-      showLoginModal: app.globalData.showLoginModal || false,
-      userInfo: app.globalData.userInfo || {},
-      followedUsers: app.globalData.followedUsers || [],
-    });
-    
-    // Load post using enhanced caching and preloading
-    if (postId) {
-      const requestOptions = {};
-      if (userId) requestOptions.user_id = userId;
-      if (eventId) requestOptions.event_id = eventId;
-      if (filter) requestOptions.filter = filter;
-      this.loadPostDetailWithCaching(postId, type, requestOptions);
-    } else {
-      this.setData({
-        isLoading: false,
-        loadError: true,
-        errorMessage: "No post ID provided",
-      });
-    }
-  },
-  onShow: function () {
-    // Only reload if we don't have current post data (avoids unnecessary reloads during navigation)
-    if(this.data.postId && !this.data.currentPost) {
-      const options = {};
-      if (this.data.userId) options.user_id = this.data.userId;
-      if (this.data.eventId) options.event_id = this.data.eventId;
-      if (this.data.filter) options.filter = this.data.filter;
-      this.loadPostDetailWithCaching(this.data.postId, this.data.type, options);
-    }
-  },
-  onUnload: function () {
-    const app = getApp();
-    // Unsubscribe from state changes
-    app.unsubscribe("userInfo", this.userInfoHandler);
-    app.unsubscribe("showLoginModal", this.showLoginModalHandler);
-    app.unsubscribe("followedUser", this.followedUserHandler);
+    app.subscribe("showLoginModal", this.loginModalHandler);
   },
 
-  // Enhanced post loading with caching and preloading
-  loadPostDetailWithCaching: async function (postId, type, options = {}) {
+  // Unsubscribe from global application events
+  unsubscribeFromGlobalEvents: function() {
+    if (this.userInfoHandler) {
+      app.unsubscribe("userInfo", this.userInfoHandler);
+    }
+    if (this.loginModalHandler) {
+      app.unsubscribe("showLoginModal", this.loginModalHandler);
+    }
+  },
+
+  // Main function to load post data from API
+  loadPostData: function() {
+    if (!this.data.postId) {
+      return;
+    }
+    
+    // Simple duplicate prevention - only check if same request is in progress
+    if (this.isLoadingPost && this.loadingPostId === this.data.postId) {
+      return;
+    }
+    
+    // Set loading flags
+    this.isLoadingPost = true;
+    this.loadingPostId = this.data.postId;
+    
     this.setData({
       isLoading: true,
-      loadError: false,
+      hasError: false,
+      errorMessage: "",
+      mediaInitialized: false,
+      hasLoadedOnce: true, // Mark that we've started loading
     });
-
-    try {
-      // Try to get from cache first
-      let cachedData = postCacheService.getPost(postId, type, options);
-      
-      if (cachedData) {
-        await this.handlePostDataLoaded(cachedData, true);
+    
+    // Build query parameters for API request
+    const apiParams = { 
+      type: this.data.type 
+    };
+    
+    if (this.data.userId) {
+      apiParams.user_id = this.data.userId;
+    }
+    if (this.data.eventId) {
+      apiParams.event_id = this.data.eventId;
+    }
+    if (this.data.filter) {
+      apiParams.filter = this.data.filter;
+    }
+    
+    // Build request headers
+    const requestHeaders = {
+      "Content-Type": "application/json"
+    };
+    
+    if (this.data.userInfo && this.data.userInfo.token) {
+      requestHeaders.Authorization = `Bearer ${this.data.userInfo.token}`;
+    }
+    
+    const apiUrl = `${config.BACKEND_URL}/v2/post/detail/${this.data.postId}`;
+    
+    // Execute API request
+    wx.request({
+      url: apiUrl,
+      method: "GET",
+      data: apiParams,
+      header: requestHeaders,
+      success: (response) => {
+        // Immediately stop loading on success
+        this.setData({ isLoading: false });
+        this.handleApiSuccessResponse(response);
+      },
+      fail: (error) => {
+        // Immediately stop loading on failure  
+        this.setData({ isLoading: false });
+        this.handleApiErrorResponse(error);
+      },
+      complete: () => {
+        // Clear loading flags
+        this.isLoadingPost = false;
+        this.loadingPostId = null;
         
-        // Notify media player of post change for TikTok-style transition
-        const mediaPlayer = this.selectComponent('#media-player');
-        if (mediaPlayer && mediaPlayer.onPostChanged) {
-          mediaPlayer.onPostChanged();
-        }
-      } else {
-        const data = await this.fetchPostFromAPI(postId, type, options);
-        if (data) {
-          // Cache the data
-          postCacheService.setPost(postId, type, data, options);
-          await this.handlePostDataLoaded(data, false);
-        }
-      }
-    } catch (error) {
-      console.error("Failed to load post detail:", error);
-      this.setData({
-        isLoading: false,
-        loadError: true,
-        errorMessage: this.data.messages.errors.networkError,
-      });
-    }
-  },
-
-  // Fetch post from API (extracted for reusability)
-  fetchPostFromAPI: function (postId, type, options = {}) {
-    return new Promise((resolve, reject) => {
-      // Build query parameters
-      const params = { type };
-      Object.keys(options).forEach(key => {
-        if (options[key] !== null && options[key] !== undefined) {
-          params[key] = options[key];
-        }
-      });
-
-      wx.request({
-        url: `${config.BACKEND_URL}/v2/post/detail/${postId}`,
-        method: "GET",
-        data: params,
-        header: {
-          "Content-Type": "application/json",
-          Authorization: app.globalData?.userInfo?.token
-            ? `Bearer ${app.globalData?.userInfo?.token}`
-            : "",
-        },
-        success: (res) => {
-          if (res.statusCode === 200 && res.data.status === "success") {
-            resolve(res.data);
-          } else {
-            reject(new Error(res.data?.msg || this.data.messages.errors.loadFailed));
-          }
-        },
-        fail: (err) => {
-          reject(err);
-        },
-      });
+        // Ensure loading is stopped
+        this.setData({ isLoading: false });
+      },
     });
   },
 
-  // Handle loaded post data with media preloading
-  handlePostDataLoaded: async function (data, fromCache = false, keepLoading = false) {
-    
-    // Support both new and old API formats with detailed logging
-    const post = data.current || data.post;
-    
-    // NEW: Backend now returns full post objects instead of just IDs
-    const next_post = data.next || data.next_post || null;
-    const previous_post = data.previous || data.previous_post || null;
-    
-    // Extract IDs from full post objects (NEW format)
-    let next_post_id = null;
-    let previous_post_id = null;
-    
-    if (next_post && typeof next_post === 'object') {
-      next_post_id = next_post.id;
-    } else if (data.next_post_id) {
-      // Fallback to old format
-      next_post_id = data.next_post_id;
+  // Handle successful API response with navigation caching
+  handleApiSuccessResponse: function(response) {
+    if (response.statusCode !== 200) {
+      this.showError(this.data.messages.networkError);
+      return;
     }
     
-    if (previous_post && typeof previous_post === 'object') {
-      previous_post_id = previous_post.id;
-    } else if (data.previous_post_id) {
-      // Fallback to old format
-      previous_post_id = data.previous_post_id;
+    if (!response.data || response.data.status !== "success") {
+      const errorMessage = response.data?.message || this.data.messages.loadFailed;
+      this.showError(errorMessage);
+      return;
     }
     
+    const responseData = response.data;
+    const postData = responseData.current || responseData.post;
     
-    // Additional validation check
-    if (next_post && !next_post_id) {
-      console.warn('[PostDetail] WARNING: next_post exists but next_post_id is null!', next_post);
-    }
-    if (previous_post && !previous_post_id) {
-      console.warn('[PostDetail] WARNING: previous_post exists but previous_post_id is null!', previous_post);
+    if (!postData) {
+      this.showError(this.data.messages.noPostFound);
+      return;
     }
     
-    // Update UI with post data
+    // Extract navigation data
+    const nextPostId = this.extractPostIdFromData(responseData.next || responseData.next_post, responseData.next_post_id);
+    const previousPostId = this.extractPostIdFromData(responseData.previous || responseData.previous_post, responseData.previous_post_id);
+    const nextPost = responseData.next || null;
+    const previousPost = responseData.previous || null;
+    
+    // Update with complete data and cache navigation posts
     this.setData({
-      currentPost: post,
-      nextPostId: next_post_id,
-      previousPostId: previous_post_id,
-      isLoading: keepLoading ? true : false,  // Keep loading if specified
+      post: postData,
+      nextPostId: nextPostId,
+      previousPostId: previousPostId,
+      nextPost: nextPost, // Cache for instant navigation
+      previousPost: previousPost, // Cache for instant navigation
+      hasError: false,
+      errorMessage: "",
+      isLoading: false,
+      isNavigating: false, // Stop navigation indicator
     });
     
-    // Only notify media player of API completion if not keeping loading state
-    if (!keepLoading) {
-      const mediaPlayer = this.selectComponent('#media-player');
-      if (mediaPlayer) {
-        if (mediaPlayer.onApiLoadComplete) {
-          mediaPlayer.onApiLoadComplete();
-        } else {
-        }
-      } else {
-      }
+    // Initialize media player if not already done (for new posts)
+    if (!this.data.mediaInitialized) {
+      setTimeout(() => {
+        this.initializeMediaPlayerForPost();
+      }, 100);
     }
-
-    // Update preloader context with new API format (full post objects)
-    postPreloaderService.setCurrentPost(post.id, this.data.type, {
-      user_id: this.data.userId,
-      event_id: this.data.eventId,
-      filter: this.data.filter
-    }, {
-      next_post_id,
-      previous_post_id,
-      next_post: next_post,  // Full post object (NEW format)
-      previous_post: previous_post  // Full post object (NEW format)
-    }, post);  // Pass current post data to preloader
-
-    // Note: All media preloading (including current post) is now handled by PostPreloaderService
-    // to ensure centralized management and prevent duplicates. The setCurrentPost call above
-    // handles all media preloading through the postPreloader service to avoid duplication.
-  },
-
-  // Start background preloading of next/previous posts
-  startBackgroundPreloading: async function () {
-    try {
-      const promises = [];
-      
-      // Preload next post if available
-      if (this.data.nextPostId) {
-        promises.push(this.preloadPostAndMedia(this.data.nextPostId, 'next'));
-      }
-      
-      // Preload previous post if available
-      if (this.data.previousPostId) {
-        promises.push(this.preloadPostAndMedia(this.data.previousPostId, 'previous'));
-      }
-      
-      await Promise.allSettled(promises);
-    } catch (error) {
-      console.warn('[PostDetail] Background preloading failed:', error);
-    }
-  },
-
-  // Preload specific post and its media
-  preloadPostAndMedia: async function (postId, direction) {
-    try {
-      const options = {
-        user_id: this.data.userId,
-        event_id: this.data.eventId,
-        filter: this.data.filter
-      };
-      
-      // Check if post is already cached
-      let cachedPost = postCacheService.getPost(postId, this.data.type, options);
-      
-      if (!cachedPost) {
-        // Fetch and cache post data
-        const data = await this.fetchPostFromAPI(postId, this.data.type, options);
-        if (data) {
-          postCacheService.setPost(postId, this.data.type, data, options);
-          cachedPost = data;
-        }
-      }
-      
-      // Media preloading is handled by PostPreloaderService to avoid duplicates
-      
-      // Note: Media preloading is handled when the post data is set via
-      // PostPreloaderService.setCurrentPost() to ensure no duplicates
-    } catch (error) {
-      console.warn(`[PostDetail] Failed to preload ${direction} post:`, error);
-    }
-  },
-
-  // Legacy method for backward compatibility
-  loadPostDetail: function (postId, type, options = {}) {
-    return this.loadPostDetailWithCaching(postId, type, options);
-  },
-
-  // Load posts for a specific user
-  loadUserPosts: function (selectedPostId) {
-    this.setData({
-      isLoading: true,
-      loadError: false,
-    });
-
-    // Fetch all posts for the specific user
-    wx.request({
-      url: `${config.BACKEND_URL}/v2/post/by-user-id`,
-      method: "GET",
-      data: {
-        user_id: this.data.userId,
-        limit: 100, // Get many posts at once
-        offset: 0,
-      },
-      header: {
-        Authorization: app.globalData?.userInfo?.token
-          ? `Bearer ${app.globalData?.userInfo?.token}`
-          : "",
-      },
-      success: (res) => {
-        if (res.statusCode === 200 && res.data) {
-          const posts = res.data.posts || [];
-          if (posts.length > 0) {
-            // Find the index of the selected post
-            let currentIndex = 0;
-            if (selectedPostId) {
-              const index = posts.findIndex(post => post.id == selectedPostId);
-              if (index !== -1) {
-                currentIndex = index;
-              }
-            }
-
-            this.setData({
-              userPosts: posts,
-              currentPost: posts[currentIndex],
-              currentUserPostIndex: currentIndex,
-              totalPosts: posts.length,
-              isLoading: false,
-            });
-          } else {
-            this.setData({
-              isLoading: false,
-              loadError: true,
-              errorMessage: "该用户暂无作品",
-            });
-          }
-        } else {
-          this.setData({
-            isLoading: false,
-            loadError: true,
-            errorMessage: this.data.messages.errors.loadFailed,
-          });
-        }
-      },
-      fail: (err) => {
-        console.error("Failed to load user posts:", err);
+    
+    // For video posts, add additional safety net to clear loading
+    if (postData && postData.type === 'video') {
+      setTimeout(() => {
         this.setData({
           isLoading: false,
-          loadError: true,
-          errorMessage: this.data.messages.errors.networkError,
+          isNavigating: false
         });
-      },
-    });
+      }, 1500);
+    }
   },
 
-  loadPostData: function (index, postId) {
-    this.setData({
-      isLoading: true,
-      loadError: false,
-    });
-
-    const data = {};
-    if (index !== null && index !== undefined) {
-      data.index = index;
-    }
-    if (postId) {
-      data.id = postId;
-    }
-
-    // Fetch post data from API
-    wx.request({
-      url: `${config.BACKEND_URL}/v2/post/recommend`,
-      method: "GET",
-      data: data,
-      header: {
-        Authorization: app.globalData?.userInfo?.token
-          ? `Bearer ${app.globalData?.userInfo?.token}`
-          : "",
-      },
-      success: (res) => {
-        if (res.statusCode === 200 && res.data) {
-          // Get post count for navigation
-          const totalPosts = res.data.count || 1;
-
-          this.setData({
-            currentPost: res.data.post,
-            currentIndex: index || 0,
-            totalPosts: totalPosts,
-            isLoading: false,
-          });
-        } else {
-          this.setData({
-            isLoading: false,
-            loadError: true,
-            errorMessage: this.data.messages.errors.loadFailed,
-          });
-        }
-      },
-      fail: (err) => {
-        console.error("Failed to load post:", err);
-        this.setData({
-          isLoading: false,
-          loadError: true,
-          errorMessage: this.data.messages.errors.networkError,
-        });
-      },
-    });
+  // Handle API request error
+  handleApiErrorResponse: function(error) {
+    this.showError(this.data.messages.networkError);
   },
 
-  handlePreviousPost: async function () {
+  // Display error message to user
+  showError: function(message) {
+    // Clear loading states
+    this.isLoadingPost = false;
+    this.loadingPostId = null;
     
+    this.setData({
+      hasError: true,
+      errorMessage: message,
+      isLoading: false,
+      // Don't clear post on error to avoid showing empty state
+    });
+  },
+
+  // Extract post ID from post object or use fallback ID
+  extractPostIdFromData: function(postObject, fallbackId) {
+    if (postObject && typeof postObject === 'object' && postObject.id) {
+      return postObject.id;
+    }
+    return fallbackId || null;
+  },
+
+  // Simplified media player initialization with immediate execution
+  initializeMediaPlayerForPost: function() {
+    if (this.data.mediaInitialized || this.isInitializingMedia) {
+      return;
+    }
+    
+    if (!this.data.post || !this.data.post.id) {
+      return;
+    }
+    
+    // Set initialization flags
+    this.isInitializingMedia = true;
+    
+    // Force ensure loading is stopped
+    this.setData({ 
+      mediaInitialized: true,
+      isLoading: false // Force stop loading during initialization
+    });
+    
+    // Use direct initialization approach
+    this.initializeMediaPlayerDirect();
+  },
+
+  // Direct media player initialization without delays
+  initializeMediaPlayerDirect: function() {
+    // Force stop loading immediately
+    this.setData({ isLoading: false });
+    
+    // Try immediate component selection
+    const component = this.selectComponent('#media-player');
+    if (component) {
+      this.callMediaPlayerMethods(component);
+      return;
+    }
+    
+    // If not found immediately, try once after nextTick
+    wx.nextTick(() => {
+      const componentAfterTick = this.selectComponent('#media-player');
+      if (componentAfterTick) {
+        this.callMediaPlayerMethods(componentAfterTick);
+      } else {
+        this.setData({ mediaInitialized: false });
+        this.isInitializingMedia = false;
+      }
+    });
+  },
+  
+  // Try immediate component initialization
+  tryImmediateComponentInit: function() {
+    const selectors = [
+      '#media-player',
+      '.media-player', 
+      'media-player'
+    ];
+    
+    for (let selector of selectors) {
+      try {
+        const component = this.selectComponent(selector);
+        if (component) {
+                this.callMediaPlayerMethods(component);
+          return true;
+        }
+      } catch (error) {
+        // Error with selector - continue to next
+      }
+    }
+    
+    // No component found immediately
+    return false;
+  },
+  
+  // Try delayed initialization with progressive delays and loading control
+  tryDelayedInit: function(index, delays) {
+    if (index >= delays.length) {
+      // All delayed initialization attempts failed
+      
+      // Ensure loading is stopped even if initialization fails
+      this.setData({ 
+        mediaInitialized: false,
+        isLoading: false // Force stop loading
+      });
+      
+      // Clear initialization flag
+      this.isInitializingMedia = false;
+      return;
+    }
+    
+    const delay = delays[index];
+    // Trying delayed init with delay
+    
+    setTimeout(() => {
+      // Ensure loading is still stopped during retry
+      if (this.data.isLoading) {
+        this.setData({ isLoading: false });
+      }
+      
+      const success = this.tryImmediateComponentInit();
+      if (!success) {
+        this.tryDelayedInit(index + 1, delays);
+      }
+    }, delay);
+  },
+  
+  // Call media player methods with enhanced error handling
+  callMediaPlayerMethods: function(component) {
+    try {
+      // Method 1: Force stop all loading states immediately
+      if (typeof component.setData === 'function') {
+        component.setData({
+          isWaitingForApi: false,
+          isLoading: false
+        });
+      }
+      
+      // Method 2: onPostChanged
+      if (typeof component.onPostChanged === 'function') {
+        component.onPostChanged();
+      }
+      
+      // Method 3: onApiLoadComplete
+      if (typeof component.onApiLoadComplete === 'function') {
+        component.onApiLoadComplete();
+      }
+      
+    } catch (error) {
+      this.setData({ mediaInitialized: false });
+    } finally {
+      // Clear initialization flag
+      this.isInitializingMedia = false;
+    }
+  },
+
+  
+
+  // Navigate to previous post in sequence with instant display
+  handlePreviousPost: function() {
     if (!this.data.previousPostId) {
       wx.showToast({
-        title: this.data.messages.navigation.firstPost,
+        title: this.data.messages.firstPost,
         icon: "none",
       });
       return;
     }
-
-    try {
-      const targetPostId = this.data.previousPostId;
-      
-      
-      // Set loading state
-      this.setData({ isLoading: true });
-      
-      // Try to get from preloader cache first
-      const cachedData = await postPreloaderService.getPreviousPost();
-      
-      if (cachedData) {
-        // Update post ID
-        this.setData({ postId: targetPostId });
-        
-        // Check if it's a video post
-        const post = cachedData.current || cachedData.post;
-        const isVideoPost = post && post.type === 'video';
-        
-        // For video posts, don't keep loading state since we have full data
-        await this.handlePostDataLoaded(cachedData, true, !isVideoPost); // Only keep loading for image posts
-        
-        // Notify media player of post change for TikTok-style transition
-        const mediaPlayer = this.selectComponent('#media-player');
-        if (mediaPlayer && mediaPlayer.onPostChanged) {
-          mediaPlayer.onPostChanged();
-        }
-        
-        // Only fetch background context for image posts that need it
-        if (!isVideoPost) {
-          // IMPORTANT: Fetch full navigation context in background to enable further navigation
-          const options = {};
-          if (this.data.userId) options.user_id = this.data.userId;
-          if (this.data.eventId) options.event_id = this.data.eventId;
-          if (this.data.filter) options.filter = this.data.filter;
-          
-          // Background API call to get full post with navigation data
-          this.fetchPostFromAPI(targetPostId, this.data.type, options)
-            .then(fullData => {
-              // Update only navigation context without affecting UI
-              this.updateNavigationContext(fullData);
-              // Now hide loading state after API completes
-              this.setData({ isLoading: false });
-              // Notify media player that API is now complete
-              const mp = this.selectComponent('#media-player');
-              if (mp && mp.onApiLoadComplete) {
-                mp.onApiLoadComplete();
-              }
-            })
-            .catch(error => {
-              console.warn('[PostDetail] Failed to load background navigation context:', error);
-              // Hide loading state even on error
-              this.setData({ isLoading: false });
-            });
-        } else {
-          // For video posts, we still need navigation context even though we don't need to wait
-          const options = {};
-          if (this.data.userId) options.user_id = this.data.userId;
-          if (this.data.eventId) options.event_id = this.data.eventId;
-          if (this.data.filter) options.filter = this.data.filter;
-          
-          // Background API call to get navigation context for video posts too
-          this.fetchPostFromAPI(targetPostId, this.data.type, options)
-            .then(fullData => {
-              // Update navigation context
-              this.updateNavigationContext(fullData);
-            })
-            .catch(error => {
-              console.warn('[PostDetail] Failed to load navigation context for video post:', error);
-            });
-          
-          // Immediately notify API complete for video playback
-          if (mediaPlayer && mediaPlayer.onApiLoadComplete) {
-            mediaPlayer.onApiLoadComplete();
-          }
-        }
-      } else {
-        // Update post ID and load from API
-        this.setData({ postId: targetPostId });
-        const options = {};
-        if (this.data.userId) options.user_id = this.data.userId;
-        if (this.data.eventId) options.event_id = this.data.eventId;
-        if (this.data.filter) options.filter = this.data.filter;
-        await this.loadPostDetailWithCaching(targetPostId, this.data.type, options);
-      }
-    } catch (error) {
-      console.error('[PostDetail] Failed to navigate to previous post:', error);
-      this.setData({ isLoading: false });
-      wx.showToast({
-        title: this.data.messages.errors.loadFailed,
-        icon: "none",
-      });
-    }
+    
+    this.navigateToPostById(this.data.previousPostId, 'previous');
   },
 
-  handleNextPost: async function () {
-    
+  // Navigate to next post in sequence with instant display
+  handleNextPost: function() {
     if (!this.data.nextPostId) {
       wx.showToast({
-        title: this.data.messages.navigation.lastPost,
+        title: this.data.messages.lastPost,
         icon: "none",
       });
       return;
     }
-
-    try {
-      const targetPostId = this.data.nextPostId;
-      
-      
-      // Set loading state
-      this.setData({ isLoading: true });
-      
-      // Try to get from preloader cache first
-      const cachedData = await postPreloaderService.getNextPost();
-      
-      if (cachedData) {
-        // Update post ID
-        this.setData({ postId: targetPostId });
-        
-        // Check if it's a video post
-        const post = cachedData.current || cachedData.post;
-        const isVideoPost = post && post.type === 'video';
-        
-        // For video posts, don't keep loading state since we have full data
-        await this.handlePostDataLoaded(cachedData, true, !isVideoPost); // Only keep loading for image posts
-        
-        // Notify media player of post change for TikTok-style transition
-        const mediaPlayer = this.selectComponent('#media-player');
-        if (mediaPlayer && mediaPlayer.onPostChanged) {
-          mediaPlayer.onPostChanged();
-        }
-        
-        // Only fetch background context for image posts that need it
-        if (!isVideoPost) {
-          // IMPORTANT: Fetch full navigation context in background to enable further navigation
-          const options = {};
-          if (this.data.userId) options.user_id = this.data.userId;
-          if (this.data.eventId) options.event_id = this.data.eventId;
-          if (this.data.filter) options.filter = this.data.filter;
-          
-          // Background API call to get full post with navigation data
-          this.fetchPostFromAPI(targetPostId, this.data.type, options)
-            .then(fullData => {
-              // Update only navigation context without affecting UI
-              this.updateNavigationContext(fullData);
-              // Now hide loading state after API completes
-              this.setData({ isLoading: false });
-              // Notify media player that API is now complete
-              const mp = this.selectComponent('#media-player');
-              if (mp && mp.onApiLoadComplete) {
-                mp.onApiLoadComplete();
-              }
-            })
-            .catch(error => {
-              console.warn('[PostDetail] Failed to load background navigation context:', error);
-              // Hide loading state even on error
-              this.setData({ isLoading: false });
-            });
-        } else {
-          // For video posts, we still need navigation context even though we don't need to wait
-          const options = {};
-          if (this.data.userId) options.user_id = this.data.userId;
-          if (this.data.eventId) options.event_id = this.data.eventId;
-          if (this.data.filter) options.filter = this.data.filter;
-          
-          // Background API call to get navigation context for video posts too
-          this.fetchPostFromAPI(targetPostId, this.data.type, options)
-            .then(fullData => {
-              // Update navigation context
-              this.updateNavigationContext(fullData);
-            })
-            .catch(error => {
-              console.warn('[PostDetail] Failed to load navigation context for video post:', error);
-            });
-          
-          // Immediately notify API complete for video playback
-          if (mediaPlayer && mediaPlayer.onApiLoadComplete) {
-            mediaPlayer.onApiLoadComplete();
-          }
-        }
-      } else {
-        // Update post ID and load from API
-        this.setData({ postId: targetPostId });
-        const options = {};
-        if (this.data.userId) options.user_id = this.data.userId;
-        if (this.data.eventId) options.event_id = this.data.eventId;
-        if (this.data.filter) options.filter = this.data.filter;
-        await this.loadPostDetailWithCaching(targetPostId, this.data.type, options);
-      }
-    } catch (error) {
-      console.error('[PostDetail] Failed to navigate to next post:', error);
-      this.setData({ isLoading: false });
-      wx.showToast({
-        title: this.data.messages.errors.loadFailed,
-        icon: "none",
-      });
-    }
+    
+    this.navigateToPostById(this.data.nextPostId, 'next');
   },
 
-  // Update only navigation context without affecting current UI
-  updateNavigationContext: function (data) {
-    
-    // NEW: Backend now returns full post objects instead of just IDs
-    const next_post = data.next || data.next_post || null;
-    const previous_post = data.previous || data.previous_post || null;
-    
-    // Extract IDs from full post objects (NEW format)
-    let next_post_id = null;
-    let previous_post_id = null;
-    
-    if (next_post && typeof next_post === 'object') {
-      next_post_id = next_post.id;
-    } else if (data.next_post_id) {
-      // Fallback to old format
-      next_post_id = data.next_post_id;
-    }
-    
-    if (previous_post && typeof previous_post === 'object') {
-      previous_post_id = previous_post.id;
-    } else if (data.previous_post_id) {
-      // Fallback to old format
-      previous_post_id = data.previous_post_id;
-    }
-    
-    
-    // Additional validation check  
-    if (next_post && !next_post_id) {
-      console.warn('[PostDetail] WARNING: next_post exists but next_post_id is null in updateNavigationContext!', next_post);
-    }
-    if (previous_post && !previous_post_id) {
-      console.warn('[PostDetail] WARNING: previous_post exists but previous_post_id is null in updateNavigationContext!', previous_post);
-    }
-    
-    // Update navigation IDs silently
-    this.setData({
-      nextPostId: next_post_id,
-      previousPostId: previous_post_id,
-    });
-
-    // Update preloader context with new navigation data (full post objects)
-    postPreloaderService.setCurrentPost(this.data.postId, this.data.type, {
-      user_id: this.data.userId,
-      event_id: this.data.eventId,
-      filter: this.data.filter
-    }, {
-      next_post_id,
-      previous_post_id,
-      next_post: next_post,  // Full post object (NEW format)
-      previous_post: previous_post  // Full post object (NEW format)
-    }, null);  // No current post data needed for navigation context update
-
-  },
-
-  closeSidebar: function () {
-    this.setState("showSidebar", false);
-  },
-
-  // Load posts for a specific event
-  loadEventPosts: function (selectedPostId) {
-    this.setData({
-      isLoading: true,
-      loadError: false,
-    });
-
-    // Fetch posts for the specific event
-    wx.request({
-      url: `${config.BACKEND_URL}/post/get_posts_event_discover/${this.data.eventId}`,
-      method: "GET",
-      data: {
-        eventId: this.data.eventId,
-        scope: 30, // Get more posts at once for smoother navigation
-        isDiscover: true,
-      },
-      header: {
-        Authorization: app.globalData?.userInfo?.token
-          ? `Bearer ${app.globalData?.userInfo?.token}`
-          : "",
-      },
-      success: (res) => {
-        if (res.statusCode === 200 && res.data) {
-          const posts = res.data.posts || [];
-          if (posts.length > 0) {
-            // Find the index of the selected post
-            let currentIndex = 0;
-            if (selectedPostId) {
-              const index = posts.findIndex(post => post.id == selectedPostId);
-              if (index !== -1) {
-                currentIndex = index;
-              }
-            }
-
-            this.setData({
-              eventPosts: posts,
-              currentPost: posts[currentIndex],
-              currentEventPostIndex: currentIndex,
-              totalPosts: posts.length,
-              isLoading: false,
-              hasMoreEventPosts: res.data.has_more || false,
-            });
-          } else {
-            this.setData({
-              isLoading: false,
-              loadError: true,
-              errorMessage: "该活动暂无作品",
-            });
-          }
-        } else {
-          this.setData({
-            isLoading: false,
-            loadError: true,
-            errorMessage: this.data.messages.errors.loadFailed,
-          });
-        }
-      },
-      fail: (err) => {
-        console.error("Failed to load event posts:", err);
-        this.setData({
-          isLoading: false,
-          loadError: true,
-          errorMessage: this.data.messages.errors.networkError,
-        });
-      },
-    });
-  },
-
-  // Load more event posts when reaching the end
-  loadMoreEventPosts: function () {
-    if (!this.data.hasMoreEventPosts || this.data.isLoading) {
-      wx.showToast({
-        title: this.data.messages.navigation.lastPost,
-        icon: "none",
-      });
+  // Navigate to specific post by ID with instant display and background loading
+  navigateToPostById: function(postId, direction = 'unknown') {
+    // Only prevent if exactly same post ID
+    if (this.data.postId === postId) {
       return;
     }
+    
+    // Get pre-cached post data for instant display
+    let cachedPost = null;
+    if (direction === 'next' && this.data.nextPost) {
+      cachedPost = this.data.nextPost;
+    } else if (direction === 'previous' && this.data.previousPost) {
+      cachedPost = this.data.previousPost;
+    }
+    
+    if (cachedPost) {
+      // Immediately display cached post
+      this.setData({
+        postId: postId,
+        post: cachedPost,
+        nextPostId: null, // Will be updated from API
+        previousPostId: null,
+        nextPost: null, // Clear cache
+        previousPost: null,
+        mediaInitialized: false,
+        hasError: false,
+        errorMessage: "",
+        isNavigating: true, // Show subtle navigation indicator
+        isLoading: false, // Don't show main loading since we have content
+      });
+      
+      // Initialize media player immediately with cached data
+      setTimeout(() => {
+        this.initializeMediaPlayerForPost();
+      }, 50);
+      
+      // Load complete data in background
+      this.loadPostDataInBackground();
+      
+    } else {
+      // Standard loading when no cached data
+      this.isLoadingPost = false;
+      
+      this.setData({
+        postId: postId,
+        mediaInitialized: false,
+        hasError: false,
+        errorMessage: "",
+        isLoading: true,
+        isNavigating: false,
+        hasLoadedOnce: true, // Mark that we're starting a new load
+      });
+      
+      // Load post data normally
+      this.loadPostData();
+    }
+  },
 
-    this.setData({ isLoading: true });
+  // Handle user profile tap event
+  onUserTap: function(event) {
+    const username = event.currentTarget.dataset.username;
+    if (username && app.handleGoUserProfile) {
+      app.handleGoUserProfile(username);
+    }
+  },
 
-    // Get existing post IDs to avoid duplicates
-    const existingPostIds = this.data.eventPosts.map(post => post.id);
+  // Handle login modal close event
+  onLoginClose: function() {
+    if (app.setState) {
+      app.setState("showLoginModal", false);
+    }
+  },
 
+  // Handle successful login event
+  onLoginSuccess: function() {
+    this.setData({
+      userInfo: app.globalData.userInfo,
+    });
+    
+    // Reload current post with authentication if needed
+    if (this.data.postId && !this.data.isLoading) {
+      this.loadPostData();
+    }
+  },
+
+  // Handle retry button tap event
+  onRetry: function() {
+    if (this.data.postId && !this.data.isLoading) {
+      this.loadPostData();
+    }
+  },
+
+  // Handle page refresh event (pull down or manual)
+  onRefresh: function() {
+    if (this.data.postId && !this.data.isLoading) {
+      this.setData({
+        post: null,
+        mediaInitialized: false,
+        hasError: false,
+        errorMessage: "",
+      });
+      this.loadPostData();
+    }
+  },
+
+  // Manual retry for media player initialization (can be called from WXML)
+  retryMediaPlayerInit: function() {
+    if (this.data.post && !this.data.mediaInitialized) {
+      this.setData({ mediaInitialized: false });
+      this.initializeMediaPlayerForPost();
+    }
+  },
+
+  // Handle retry button tap event
+  onRetry: function() {
+    if (this.data.postId && !this.data.isLoading) {
+      this.setData({
+        hasError: false,
+        errorMessage: "",
+        post: null,
+        mediaInitialized: false,
+        hasLoadedOnce: true, // Keep the flag since we're retrying
+      });
+      this.loadPostData();
+    }
+  },
+  
+  
+  // Load post data in background (for cached navigation)
+  loadPostDataInBackground: function() {
+    if (!this.data.postId) {
+      return;
+    }
+    
+    // Build request parameters
+    const apiParams = { 
+      type: this.data.type 
+    };
+    
+    if (this.data.userId) {
+      apiParams.user_id = this.data.userId;
+    }
+    if (this.data.eventId) {
+      apiParams.event_id = this.data.eventId;
+    }
+    if (this.data.filter) {
+      apiParams.filter = this.data.filter;
+    }
+    
+    // Build request headers
+    const requestHeaders = {
+      "Content-Type": "application/json"
+    };
+    
+    if (this.data.userInfo && this.data.userInfo.token) {
+      requestHeaders.Authorization = `Bearer ${this.data.userInfo.token}`;
+    }
+    
+    const apiUrl = `${config.BACKEND_URL}/v2/post/detail/${this.data.postId}`;
+    
+    // Execute background API request
     wx.request({
-      url: `${config.BACKEND_URL}/post/get_posts_event_discover/${this.data.eventId}`,
+      url: apiUrl,
       method: "GET",
-      data: {
-        eventId: this.data.eventId,
-        exist_post_ids: existingPostIds,
-        scope: 15,
-        isDiscover: true,
+      data: apiParams,
+      header: requestHeaders,
+      success: (response) => {
+        this.handleBackgroundApiResponse(response);
       },
-      header: {
-        Authorization: app.globalData?.userInfo?.token
-          ? `Bearer ${app.globalData?.userInfo?.token}`
-          : "",
+      fail: (error) => {
+        // Don't show error for background requests
+        this.setData({ isNavigating: false });
       },
-      success: (res) => {
-        if (res.statusCode === 200 && res.data) {
-          const newPosts = res.data.posts || [];
-          if (newPosts.length > 0) {
-            const updatedPosts = [...this.data.eventPosts, ...newPosts];
-            const newIndex = this.data.currentEventPostIndex + 1;
-            
-            this.setData({
-              eventPosts: updatedPosts,
-              currentEventPostIndex: newIndex,
-              currentPost: updatedPosts[newIndex],
-              totalPosts: updatedPosts.length,
-              hasMoreEventPosts: res.data.has_more || false,
-              isLoading: false,
-            });
-          } else {
-            this.setData({
-              hasMoreEventPosts: false,
-              isLoading: false,
-            });
-            wx.showToast({
-              title: this.data.messages.navigation.lastPost,
-              icon: "none",
-            });
-          }
-        } else {
-          this.setData({ isLoading: false });
-          wx.showToast({
-            title: this.data.messages.errors.loadFailed,
-            icon: "none",
-          });
-        }
-      },
-      fail: () => {
-        this.setData({ isLoading: false });
-        wx.showToast({
-          title: this.data.messages.errors.networkError,
-          icon: "none",
-        });
+      complete: () => {
+        // Background API request completed
       },
     });
   },
+  
+  // Handle background API response (update with complete data)
+  handleBackgroundApiResponse: function(response) {
+    if (response.statusCode !== 200 || !response.data || response.data.status !== "success") {
+      this.setData({ isNavigating: false });
+      return;
+    }
+    
+    const responseData = response.data;
+    const postData = responseData.current || responseData.post;
+    
+    if (!postData || postData.id !== this.data.postId) {
+      this.setData({ isNavigating: false });
+      return;
+    }
+    
+    // Extract navigation data
+    const nextPostId = this.extractPostIdFromData(responseData.next || responseData.next_post, responseData.next_post_id);
+    const previousPostId = this.extractPostIdFromData(responseData.previous || responseData.previous_post, responseData.previous_post_id);
+    const nextPost = responseData.next || null;
+    const previousPost = responseData.previous || null;
+    
+    // Update with complete data
+    this.setData({
+      post: postData, // Update with complete post data
+      nextPostId: nextPostId,
+      previousPostId: previousPostId,
+      nextPost: nextPost,
+      previousPost: previousPost,
+      isNavigating: false,
+    });
+  },
+  
 });

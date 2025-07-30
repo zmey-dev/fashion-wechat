@@ -53,25 +53,29 @@ Page({
     this.initializePage();
     this.checkUserIdModal();
   },
+
   onShow: function () {
-    this.initializePage();
+    // Check if posts need to be refreshed
+    if (app.globalData.refreshPosts) {
+      this.handleRefresh();
+      app.globalData.refreshPosts = false;
+    } else if (!this.data.posts.length && !this.data.loading) {
+      // Only initialize if no posts loaded and not currently loading
+      this.initializePage();
+    }
   },
+
   onUnload: function () {
     // Unsubscribe from events
     app.unsubscribe("userInfo", this.userInfoHandler);
     app.unsubscribe("showLoginModal", this.loginModalHandler);
   },
 
-  onShow: function () {
-    // Refresh posts if needed
-    if (app.globalData.refreshPosts) {
-      this.handleRefresh();
-      app.globalData.refreshPosts = false;
-    }
-  },
-
   initializePage: function () {
-    this.handleRefresh();
+    // Only refresh if not already loading and no posts loaded
+    if (!this.data.loading && this.data.posts.length === 0) {
+      this.handleRefresh();
+    }
   },
 
   checkUserIdModal() {
@@ -216,7 +220,11 @@ Page({
   },
 
   loadPosts: function (refresh = false) {
-    if (this.data.loading) return;
+    // Prevent duplicate loading
+    if (this.data.loading) {
+      console.log('Already loading posts, skipping duplicate request');
+      return;
+    }
 
     this.setData({ loading: true });
 
@@ -279,6 +287,12 @@ Page({
   },
 
   handleRefresh: function () {
+    // Prevent duplicate refresh
+    if (this.data.loading) {
+      console.log('Already refreshing, skipping duplicate refresh');
+      return;
+    }
+
     // Reset pagination state
     this.setData({
       posts: [],
@@ -337,7 +351,10 @@ Page({
     this.setData({
       userInfo: app.globalData.userInfo,
     });
-    this.handleRefresh();
+    // Only refresh if not already loading
+    if (!this.data.loading) {
+      this.handleRefresh();
+    }
   },
 
   onReloadTap: function () {

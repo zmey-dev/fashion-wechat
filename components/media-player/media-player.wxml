@@ -11,25 +11,27 @@
     <image 
       wx:if="{{ currentPost && currentPost.media && currentPost.media.length > 0 }}"
       class="blur-background"
-      src="{{ currentPost.media[currentSlideIndex || 0].preview_url || currentPost.media[currentSlideIndex || 0].url || currentPost.media[0].preview_url || currentPost.media[0].url }}"
+      src="{{ currentPost.media[currentSlideIndex || 0].preview_url || currentPost.media[currentSlideIndex || 0].url }}"
       mode="aspectFill"
     />
     <view class="blur-overlay"></view>
   </view>
   
-  <!-- Loading indicator -->
-  <view wx:if="{{ isLoading }}" class="loading-container">
+  <!-- Loading indicator - DISABLED to prevent duplicate loading spinners -->
+  <!-- <view wx:if="{{ isLoading }}" class="loading-container">
     <view class="loading-spinner"></view>
-  </view>
+  </view> -->
 
   <report-modal
     visible="{{ showReportModal }}"
     postId="{{ currentPost.id }}"
     bind:close="onCloseReportModal"
     bind:submit="onSubmitReport"
-  />    <view 
+  />    
+  <view 
     class="media-content {{ detailPanelState === 'half' ? 'detail-half' : '' }} {{ detailPanelState === 'full' ? 'detail-full' : '' }}"
-  ><!-- Media Display Component -->
+  >
+    <!-- Media Display Component -->
     <media-display
       current-post="{{ currentPost }}"
       current-media="{{ currentMedia }}"
@@ -40,6 +42,7 @@
       selected-dot="{{ selectedDot }}"
       detailPanelState="{{ detailPanelState }}"
       is-waiting-for-api="{{ isWaitingForApi }}"
+      is-continue="{{ isContinue }}"
       bind:screentap="onScreenTap"
       bind:slidechange="onSlideChange"
       bind:dottap="onDotTap"

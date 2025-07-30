@@ -1,6 +1,6 @@
 const { default: config } = require("../../config");
 const { isEmpty } = require("../../utils/isEmpty");
-const mediaPreloaderService = require('../../services/mediaPreloader');
+// const mediaPreloaderService = require('../../services/mediaPreloader'); // DISABLED to prevent duplicate loading
 
 // components/media-player/media-player.js
 Component({
@@ -98,6 +98,9 @@ Component({
    * Component lifecycle
    */
   attached() {
+    // Initialize loading prevention flag
+    this.isCurrentlyLoading = false;
+    
     this.initializeComponent();
 
     // Add resize event listener
@@ -130,8 +133,17 @@ Component({
    * Component observers
    */
   observers: {
-    selectedPost: function (newPost) {
-      if (newPost) {
+    selectedPost: function (newPost, oldPost) {
+      // Add more strict duplicate prevention
+      if (!newPost) {
+        return;
+      }
+      
+      // Check if this is actually a new post
+      const isNewPost = !oldPost || newPost.id !== oldPost.id;
+      const isCurrentPostDifferent = !this.data.currentPost || this.data.currentPost.id !== newPost.id;
+      
+      if (isNewPost && isCurrentPostDifferent) {
         this.loadPostData();
       }
     },
@@ -200,22 +212,35 @@ Component({
         return;
       }
 
+      // Enhanced duplicate prevention
+      if (this.isCurrentlyLoading) {
+        return;
+      }
+      
+      if (this.data.currentPost && this.data.currentPost.id === selectedPost.id) {
+        return;
+      }
+
+      // Set loading flag to prevent concurrent loads
+      this.isCurrentlyLoading = true;
+
       const postUser = selectedPost.user || {};
       const comments = selectedPost.comments || [];
       const media = selectedPost.media || [];
 
-      // Immediately clear dots when loading new post
+      // Clear dots when loading new post
       const mediaDisplayComponent = this.selectComponent('media-display');
       if (mediaDisplayComponent) {
         mediaDisplayComponent.setData({ calculatedDots: [] });
       }
 
       // Initialize media loading states
-      const mediaLoadingStates = media.map(() => ({ loading: true, error: false }));
+      const mediaLoadingStates = media.map(() => ({ loading: false, error: false }));
 
+      // Immediately set data and ensure all loading states are false
       this.setData({
-        isLoading: true,
-        isWaitingForApi: true,  // Set waiting state
+        isLoading: false,
+        isWaitingForApi: false,
         currentSlideIndex: 0,
         selectedDot: null,
         showDetail: false,
@@ -251,69 +276,28 @@ Component({
       });
 
       this.updateDisplayValues();
-      
-      // Note: Media preloading is handled centrally by PostPreloaderService to prevent duplication
-      // The postPreloader service handles all media preloading for current, next, and previous posts
-      
       this.startAutoPlay();
-      this.setData({ isLoading: false });
+      
+      // Clear loading flag
+      this.isCurrentlyLoading = false;
+      
+      // For video posts, ensure loading state is cleared after a short delay
+      if (selectedPost.type === 'video') {
+        setTimeout(() => {
+          this.setData({
+            isLoading: false,
+            isWaitingForApi: false
+          });
+        }, 500);
+      }
     },
 
     /**
-     * Preload media for current post
+     * Preload media for current post - DISABLED to prevent duplicate loading
      */
     async preloadCurrentPostMedia() {
-      const { currentMedia } = this.data;
-      if (!currentMedia || currentMedia.length === 0) {
-        return;
-      }
-
-      
-      try {
-        // Preload all media items with critical priority
-        const preloadPromises = currentMedia.map(async (mediaItem, index) => {
-          try {
-            const preloadedPath = await mediaPreloaderService.getOrPreloadMedia(
-              mediaItem, 
-              { 
-                priority: index === 0 ? mediaPreloaderService.PRIORITY.CRITICAL : mediaPreloaderService.PRIORITY.HIGH,
-                isFirstMedia: index === 0
-              }
-            );
-            
-            // Update preloaded media array
-            const newPreloadedMedia = [...this.data.preloadedMedia];
-            newPreloadedMedia[index] = preloadedPath;
-            
-            // Update loading state
-            const newLoadingStates = [...this.data.mediaLoadingStates];
-            newLoadingStates[index] = { loading: false, error: false };
-            
-            this.setData({
-              preloadedMedia: newPreloadedMedia,
-              mediaLoadingStates: newLoadingStates
-            });
-            
-            return preloadedPath;
-          } catch (error) {
-            console.warn(`[MediaPlayer] Failed to preload media ${index}:`, error);
-            
-            // Update loading state to show error
-            const newLoadingStates = [...this.data.mediaLoadingStates];
-            newLoadingStates[index] = { loading: false, error: true };
-            
-            this.setData({
-              mediaLoadingStates: newLoadingStates
-            });
-            
-            return mediaItem.url; // Fallback to original URL
-          }
-        });
-        
-        await Promise.allSettled(preloadPromises);
-      } catch (error) {
-        console.error('[MediaPlayer] Media preloading failed:', error);
-      }
+      // Disabled to prevent duplicate media loading
+      return;
     },
 
     /**
@@ -382,16 +366,20 @@ Component({
       }
       
       this.clearAutoPlayTimer();
-      if (
-        this.data.isPlaying &&
-        !this.data.showDetail &&
-        this.data.currentPost?.type === "image"
-      ) {
-        const timer = setInterval(() => {
-          this.moveToNextSlide();
-        }, 5000);
-        this.setData({ autoPlayTimer: timer });
-      } else {
+      if (this.data.isPlaying && !this.data.showDetail) {
+        if (this.data.currentPost?.type === "image") {
+          // Auto-advance for image posts
+          const timer = setInterval(() => {
+            this.moveToNextSlide();
+          }, 5000);
+          this.setData({ autoPlayTimer: timer });
+        } else if (this.data.currentPost?.type === "video") {
+          // Auto-start video playback
+          const mediaDisplay = this.selectComponent('media-display');
+          if (mediaDisplay && mediaDisplay.startVideoAutoplay) {
+            mediaDisplay.startVideoAutoplay();
+          }
+        }
       }
     },
 
@@ -639,7 +627,6 @@ Component({
           }
         },
         fail: (err) => {
-          console.error("Like request failed:", err);
           wx.showToast({
             title: "点赞失败",
             icon: "none",
@@ -698,7 +685,6 @@ Component({
           }
         },
         fail: (err) => {
-          console.error("Favorite request failed:", err);
           wx.showToast({
             title: "收藏失败",
             icon: "none",
@@ -726,7 +712,6 @@ Component({
           });
         },
         fail: (err) => {
-          console.error("Copy to clipboard failed:", err);
           wx.showToast({
             title: "复制链接失败",
             icon: "none",
@@ -746,7 +731,7 @@ Component({
           }
         },
         fail: (err) => {
-          console.error("Share request failed:", err);
+          // Share request failed
         },
       });
     },
@@ -799,7 +784,6 @@ Component({
           }
         },
         fail: (err) => {
-          console.error("Follow request failed:", err);
           wx.showToast({
             title: "关注失败",
             icon: "none",
@@ -923,7 +907,6 @@ Component({
           }
         },
         fail: (err) => {
-          console.error("Like request failed:", err);
           wx.showToast({
             title: "点赞评论失败",
             icon: "none",
@@ -1013,7 +996,6 @@ Component({
           }
         },
         fail: (err) => {
-          console.error("Delete request failed:", err);
           wx.showToast({
             title: "删除评论失败",
             icon: "none",
@@ -1503,6 +1485,15 @@ Component({
      */
     onPostChanged() {
       
+      // Force stop all loading states immediately
+      this.setData({
+        isLoading: false,
+        isWaitingForApi: false
+      });
+      
+      // Clear loading prevention flag
+      this.isCurrentlyLoading = false;
+      
       // Clear any existing autoplay timer from previous post
       this.clearAutoPlayTimer();
       
@@ -1512,17 +1503,52 @@ Component({
         isTouching: false,
         isSwipeActive: false
       });
+      
+      // Start autoplay if conditions are met for both image and video
+      if (this.data.currentPost && this.data.isPlaying) {
+        this.startAutoPlay();
+      }
+      
+      // For video posts, ensure loading is cleared with additional delay
+      if (this.data.currentPost && this.data.currentPost.type === 'video') {
+        setTimeout(() => {
+          this.setData({
+            isLoading: false,
+            isWaitingForApi: false
+          });
+          this.isCurrentlyLoading = false;
+        }, 1000);
+      }
     },
     
     /**
      * Called when API loading is complete
      */
     onApiLoadComplete() {
-      this.setData({ isWaitingForApi: false });
       
-      // Start autoplay now that API is complete
-      if (this.data.isPlaying && this.data.currentPost?.type === 'image') {
+      // Force stop all loading indicators and flags
+      this.setData({ 
+        isWaitingForApi: false,
+        isLoading: false
+      });
+      
+      // Clear loading prevention flag
+      this.isCurrentlyLoading = false;
+      
+      // Start autoplay now that API is complete for both image and video
+      if (this.data.isPlaying && this.data.currentPost) {
         this.startAutoPlay();
+      }
+      
+      // For video posts, ensure loading is completely cleared
+      if (this.data.currentPost?.type === 'video') {
+        setTimeout(() => {
+          this.setData({
+            isLoading: false,
+            isWaitingForApi: false
+          });
+          this.isCurrentlyLoading = false;
+        }, 800);
       }
     },
 

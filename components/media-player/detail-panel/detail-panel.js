@@ -40,12 +40,7 @@ Component({
   },
   observers: {
     showDetail: function (show) {
-      console.log(
-        "detail-panel showDetail observer:",
-        show,
-        "current panelState:",
-        this.properties.panelState
-      );
+      // detail-panel showDetail observer
 
       // Only trigger state change events, don't manage state locally
       if (show && this.properties.panelState === "closed") {

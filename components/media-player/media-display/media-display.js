@@ -9,6 +9,7 @@ Component({
     showPlayIndicator: { type: Boolean, value: false },
     selectedDot: { type: Object, value: null },
     isWaitingForApi: { type: Boolean, value: false },
+    isContinue: { type: Boolean, value: true },
     detailPanelState: {
       type: String,
       value: 'closed',
@@ -28,12 +29,28 @@ Component({
     showImageLoader: false, // Show loader overlay
     showVideo: true, // Control video visibility during navigation
     isNavigatingVideo: false, // Flag to prevent false video ended events during navigation
+    videoReady: false, // Flag to control when video src is set
+    videoSrc: '', // Dynamic video source
+    userPausedVideo: false, // Flag to track if user manually paused the video
   },
 
   observers: {
     'currentMedia, currentSlideIndex': function(currentMedia, currentSlideIndex) {
       // Clear previous video state to prevent thumbnail artifacts
       this.clearVideoState();
+      
+      // Set video source dynamically to prevent infinite loading
+      if (currentMedia && currentMedia.length > 0 && currentMedia[0]) {
+        this.setData({
+          videoSrc: currentMedia[0].url || '',
+          videoReady: true
+        });
+        
+        // Auto-start video after a short delay to ensure it's loaded
+        setTimeout(() => {
+          this.startVideoAutoplay();
+        }, 300);
+      }
       
       // Always calculate dot positions when media or slide changes, regardless of playing state
       this.calculateDotPositions();
@@ -62,16 +79,20 @@ Component({
      * Clear video state to prevent thumbnail artifacts during navigation
      */
     clearVideoState() {
-      // Set navigation flag to prevent false video ended events
+      // Clear video source first to stop any loading
       this.setData({ 
         showVideo: false,
-        isNavigatingVideo: true 
+        isNavigatingVideo: true,
+        videoReady: false,
+        videoSrc: '',
+        userPausedVideo: false // Reset user pause flag for new video
       });
       
       const videoContext = wx.createVideoContext('media-video', this);
       if (videoContext) {
-        // Pause video to prevent playback during navigation
-        videoContext.pause();
+        // Stop video completely and reset to clear loading state
+        videoContext.stop();
+        videoContext.seek(0);
       }
       
       // Pause uploaded audio but don't destroy context to avoid reloading
@@ -79,13 +100,30 @@ Component({
         this.audioContext.pause();
       }
       
-      // Show video again after a short delay to allow new media to load
+      // Show video again after a delay with fresh source
       setTimeout(() => {
         this.setData({ 
           showVideo: true,
           isNavigatingVideo: false  // Reset navigation flag
         });
       }, 100);
+    },
+
+    /**
+     * Start video autoplay
+     */
+    startVideoAutoplay() {
+      // Only autoplay if this is a video post and playing is enabled
+      if (this.properties.currentPost && this.properties.currentPost.type === 'video' && this.properties.isPlaying && !this.properties.isWaitingForApi) {
+        const videoContext = wx.createVideoContext('media-video', this);
+        if (videoContext) {
+          // Ensure video starts from beginning and plays
+          videoContext.seek(0);
+          setTimeout(() => {
+            videoContext.play();
+          }, 100);
+        }
+      }
     },
 
     /**
@@ -144,7 +182,7 @@ Component({
           }, 2500); // Increased to 2.5 seconds artificial delay
         },
         fail: (error) => {
-          console.error('Failed to preload image:', error);
+          // Failed to preload image
           // Hide loader even on error after delay
           setTimeout(() => {
             this.setData({ 
@@ -318,24 +356,168 @@ Component({
     },
     
     onVideoPlay() {
-    },    onVideoPause() {
+      // Video started playing - clear any loading states
+      this.triggerEvent('videoplaying');
+      
+      // Clear user pause flag since video is now playing
+      this.setData({ userPausedVideo: false });
+      
+      // Notify parent component that video is ready and playing
+      const parent = this.selectOwnerComponent();
+      if (parent && parent.setData) {
+        parent.setData({
+          isLoading: false,
+          isWaitingForApi: false,
+          isPlaying: true
+        });
+      }
+    },
+
+    onVideoPause() {
+      // Video paused - mark as user paused to prevent auto-loop
+      this.setData({ userPausedVideo: true });
+      this.triggerEvent('videopaused');
     },    onVideoEnded() {
-      this.triggerEvent('videoended');
+      // If auto continue is disabled and user hasn't manually paused the video, loop it
+      if (!this.properties.isContinue && this.properties.currentPost && this.properties.currentPost.type === 'video' && !this.data.userPausedVideo) {
+        this.loopVideo();
+      } else {
+        // Normal behavior - trigger video ended event to move to next post
+        this.triggerEvent('videoended');
+      }
+    },
+
+    // Loop video by restarting from beginning
+    loopVideo() {
+      const videoContext = wx.createVideoContext('media-video', this);
+      if (videoContext) {
+        // First, seek to beginning
+        videoContext.seek(0);
+        
+        // Then play after a short delay
+        setTimeout(() => {
+          videoContext.play();
+          
+          // Backup attempt in case first doesn't work
+          setTimeout(() => {
+            videoContext.play();
+          }, 200);
+        }, 150);
+      }
     },
 
     // Restart video from beginning with auto-play
     restartVideo() {
-      const videoContext = wx.createVideoContext('media-video', this);
-      if (videoContext) {
-        videoContext.seek(0);
-        setTimeout(() => {
-          videoContext.play();
-        }, 100);
-      }
+      this.loopVideo();
     },
 
     onVideoError(e) {
-      console.error('Video error:', e.detail);
+      // Video error occurred - clear loading state
+      const parent = this.selectOwnerComponent();
+      if (parent && parent.setData) {
+        parent.setData({
+          isLoading: false,
+          isWaitingForApi: false
+        });
+      }
+      
+      // Show error to user
+      wx.showToast({
+        title: '视频加载失败',
+        icon: 'none',
+        duration: 2000
+      });
+    },
+
+    // New video loading event handlers
+    onVideoLoadStart() {
+      // Video started loading - this is called when video begins to load
+      // Don't set loading here as it's already managed by parent component
+    },
+
+    onVideoCanPlay() {
+      // Video can start playing - clear loading states
+      const parent = this.selectOwnerComponent();
+      if (parent && parent.setData) {
+        parent.setData({
+          isLoading: false,
+          isWaitingForApi: false
+        });
+      }
+      
+      // Also clear internal loading flags if they exist
+      if (parent && parent.isCurrentlyLoading) {
+        parent.isCurrentlyLoading = false;
+      }
+      
+      // Start autoplay when video is ready
+      this.startVideoAutoplay();
+    },
+
+    onVideoWaiting() {
+      // Video is waiting for more data - this can cause infinite loading
+      // Force clear loading after a timeout to prevent infinite loading
+      setTimeout(() => {
+        const parent = this.selectOwnerComponent();
+        if (parent && parent.setData) {
+          parent.setData({
+            isLoading: false,
+            isWaitingForApi: false
+          });
+        }
+      }, 3000); // 3 second timeout
+    },
+
+    onVideoLoadedData() {
+      // Video data has been loaded - aggressively clear loading states
+      const videoContext = wx.createVideoContext('media-video', this);
+      if (videoContext) {
+        // Multiple attempts to clear the native loading spinner
+        videoContext.seek(0);
+        
+        // Force play briefly to trigger proper initialization
+        videoContext.play();
+        setTimeout(() => {
+          videoContext.pause();
+          videoContext.seek(0);
+          
+          // Second attempt after short delay
+          setTimeout(() => {
+            videoContext.play();
+            setTimeout(() => {
+              if (!this.properties.isPlaying) {
+                videoContext.pause();
+              }
+            }, 50);
+          }, 100);
+        }, 50);
+      }
+      
+      // Clear parent loading states
+      const parent = this.selectOwnerComponent();
+      if (parent && parent.setData) {
+        parent.setData({
+          isLoading: false,
+          isWaitingForApi: false
+        });
+      }
+      
+      // Start autoplay after data is loaded
+      setTimeout(() => {
+        this.startVideoAutoplay();
+      }, 200);
+    },
+
+    onVideoTimeUpdate() {
+      // Video time is updating - means it's playing properly
+      // Clear any lingering loading states
+      const parent = this.selectOwnerComponent();
+      if (parent && parent.setData && parent.data.isLoading) {
+        parent.setData({
+          isLoading: false,
+          isWaitingForApi: false
+        });
+      }
     },
 
     /**
