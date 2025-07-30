@@ -414,71 +414,162 @@ Page({
 
   // Save profile changes
   saveProfile: function () {
-    const errors = this.validateProfileForm();
+    try {
+      // Prevent duplicate saves
+      if (this.isSaving) {
+        wx.showToast({
+          title: "正在保存中，请稍候...",
+          icon: "none",
+          duration: 1500
+        });
+        return;
+      }
 
-    if (Object.keys(errors).length > 0) {
-      this.setData({ profileErrors: errors });
-      
-      // Show error toast
-      const firstError = Object.values(errors)[0];
+      // Validate token first
+      const userInfo = getApp().globalData.userInfo;
+      if (!userInfo || !userInfo.token) {
+        wx.showToast({
+          title: "登录状态已过期，请重新登录",
+          icon: "none",
+          duration: 2000
+        });
+        // Redirect to login or refresh token
+        setTimeout(() => {
+          wx.reLaunch({ url: '/pages/register/register' });
+        }, 2000);
+        return;
+      }
+
+      // Form validation
+      const errors = this.validateProfileForm();
+      if (Object.keys(errors).length > 0) {
+        this.setData({ profileErrors: errors });
+        
+        // Show error toast with detailed message
+        const firstError = Object.values(errors)[0];
+        const firstErrorKey = Object.keys(errors)[0];
+        wx.showToast({
+          title: `保存失败: ${firstError}`,
+          icon: 'none',
+          duration: 3000
+        });
+        
+        // Scroll to first error field
+        this.scrollToErrorField(firstErrorKey);
+        return;
+      }
+
+      // Check required data integrity
+      if (!this.data.profileForm.phone || !this.data.profileForm.name) {
+        wx.showToast({
+          title: "保存失败: 缺少必要信息",
+          icon: "none",
+          duration: 2000
+        });
+        return;
+      }
+
+      // Set saving flag
+      this.isSaving = true;
+
+      // Check if avatar is still uploading
+      if (this.data.avatarUploading) {
+        wx.showLoading({
+          title: "等待头像上传完成...",
+          mask: true,
+        });
+        
+        // Wait for upload to complete with timeout
+        this.waitForAvatarUpload()
+          .then(() => {
+            wx.hideLoading();
+            if (this.data.avatarUploadError) {
+              wx.showToast({
+                title: `头像上传失败: ${this.data.avatarUploadError}`,
+                icon: "none",
+                duration: 2000,
+              });
+              this.isSaving = false;
+            } else if (this.data.avatarUploadUrl) {
+              this.saveProfileWithAvatar();
+            } else {
+              wx.showToast({
+                title: "头像上传失败，请重新选择头像",
+                icon: "none",
+                duration: 2000,
+              });
+              this.isSaving = false;
+            }
+          })
+          .catch((error) => {
+            wx.hideLoading();
+            wx.showToast({
+              title: `头像上传超时: ${error.message || '请重试'}`,
+              icon: "none",
+              duration: 2000,
+            });
+            this.isSaving = false;
+          });
+      } else {
+        this.saveProfileWithAvatar();
+      }
+    } catch (error) {
+      this.isSaving = false;
       wx.showToast({
-        title: firstError,
-        icon: 'none',
+        title: `保存失败: ${error.message || '未知错误'}`,
+        icon: "none",
         duration: 2000
       });
-      
-      // Scroll to first error field
-      const firstErrorKey = Object.keys(errors)[0];
-      this.scrollToErrorField(firstErrorKey);
-      
-      return;
-    }
-
-    // Check if avatar is still uploading
-    if (this.data.avatarUploading) {
-      wx.showLoading({
-        title: "等待头像上传完成...",
-        mask: true,
-      });
-      
-      // Wait for upload to complete
-      this.waitForAvatarUpload().then(() => {
-        wx.hideLoading();
-        if (this.data.avatarUploadUrl) {
-          this.saveProfileWithAvatar();
-        } else {
-          wx.showToast({
-            title: "头像上传失败，请重试",
-            icon: "none",
-            duration: 2000,
-          });
-        }
-      });
-    } else {
-      this.saveProfileWithAvatar();
     }
   },
   
   // Save profile with avatar URL
   saveProfileWithAvatar: function () {
-    wx.showLoading({
-      title: "保存中...",
-    });
+    try {
+      wx.showLoading({
+        title: "保存中...",
+        mask: true
+      });
 
-    // Prepare form data
-    const formData = {
-      ...this.data.profileForm,
-      phone: "+86" + this.data.profileForm.phone,
-      admission_year: this.data.profileForm.admissionYear,
-      birthday: this.data.profileForm.birthday,
-    };
-    
-    // Add avatar URL if uploaded
-    if (this.data.avatarUploadUrl) {
-      formData.avatar_url = this.data.avatarUploadUrl;
+      // Validate data before sending
+      if (!this.data.profileForm.phone) {
+        throw new Error("手机号不能为空");
+      }
+
+      if (!this.data.profileForm.name) {
+        throw new Error("姓名不能为空");
+      }
+
+      // Prepare form data with validation
+      const formData = {
+        ...this.data.profileForm,
+        phone: this.data.profileForm.phone.startsWith("+86") 
+          ? this.data.profileForm.phone 
+          : "+86" + this.data.profileForm.phone,
+        admission_year: this.data.profileForm.admissionYear,
+        birthday: this.data.profileForm.birthday,
+      };
+      
+      // Validate phone format after adding prefix
+      if (!/^\+86\d{11}$/.test(formData.phone)) {
+        throw new Error("手机号格式不正确");
+      }
+      
+      // Add avatar URL if uploaded
+      if (this.data.avatarUploadUrl) {
+        formData.avatar_url = this.data.avatarUploadUrl;
+      }
+
+      this.updateProfile(formData);
+    } catch (error) {
+      wx.hideLoading();
+      this.isSaving = false;
+      wx.showToast({
+        title: `数据准备失败: ${error.message}`,
+        icon: "none",
+        duration: 2000
+      });
     }
-
-    this.updateProfile(formData);
   },
 
   // Background upload avatar to UCloud
@@ -565,6 +656,20 @@ Page({
 
   // Update profile
   updateProfile: function (formData) {
+    const requestTimeout = 15000; // 15 second timeout
+    let timeoutId;
+
+    // Set up timeout
+    timeoutId = setTimeout(() => {
+      wx.hideLoading();
+      this.isSaving = false;
+      wx.showToast({
+        title: "请求超时，请检查网络连接",
+        icon: "none",
+        duration: 3000
+      });
+    }, requestTimeout);
+
     wx.request({
       url: `${config.BACKEND_URL}/user/update_user`,
       method: "POST",
@@ -573,10 +678,65 @@ Page({
         "Content-Type": "application/json",
         Authorization: `Bearer ${getApp().globalData.userInfo?.token}`,
       },
+      timeout: requestTimeout,
       success: (res) => {
-        if (res.statusCode === 200 && res.data.status === "success") {
-          const updatedUserInfo = res.data.user;
+        clearTimeout(timeoutId);
+        
+        try {
+          // Check response status
+          if (res.statusCode === 401) {
+            wx.showToast({
+              title: "登录已过期，请重新登录",
+              icon: "none",
+              duration: 2000
+            });
+            setTimeout(() => {
+              wx.reLaunch({ url: '/pages/register/register' });
+            }, 2000);
+            return;
+          }
 
+          if (res.statusCode === 422) {
+            const errorMsg = res.data?.message || "数据验证失败";
+            wx.showToast({
+              title: `保存失败: ${errorMsg}`,
+              icon: "none",
+              duration: 3000
+            });
+            return;
+          }
+
+          if (res.statusCode !== 200) {
+            wx.showToast({
+              title: `服务器错误 (${res.statusCode}): ${res.data?.message || '请稍后重试'}`,
+              icon: "none",
+              duration: 3000
+            });
+            return;
+          }
+
+          // Check response data
+          if (!res.data || res.data.status !== "success") {
+            wx.showToast({
+              title: `保存失败: ${res.data?.message || res.data?.msg || '服务器返回异常'}`,
+              icon: "none",
+              duration: 3000
+            });
+            return;
+          }
+
+          // Success case
+          const updatedUserInfo = res.data.user;
+          if (!updatedUserInfo) {
+            wx.showToast({
+              title: "保存失败: 服务器未返回用户信息",
+              icon: "none",
+              duration: 2000
+            });
+            return;
+          }
+
+          // Update local state
           this.setData({
             userInfo: { ...this.data.userInfo, ...updatedUserInfo },
             isEditingProfile: false,
@@ -587,35 +747,50 @@ Page({
             phoneOtpCode: "",
           });
 
-          getApp().setState("userInfo", {
-            ...this.data.userInfo,
-            ...updatedUserInfo,
-          });
-          wx.setStorageSync("userInfo", {
-            ...this.data.userInfo,
-            ...updatedUserInfo,
+          // Update global state
+          const mergedUserInfo = { ...this.data.userInfo, ...updatedUserInfo };
+          getApp().setState("userInfo", mergedUserInfo);
+          wx.setStorageSync("userInfo", mergedUserInfo);
+
+          // Show success message
+          wx.showToast({
+            title: "保存成功！",
+            icon: "success",
+            duration: 2000
           });
 
+        } catch (error) {
           wx.showToast({
-            title: this.data.messages.success.profileUpdateSuccess,
-            icon: "success",
-          });
-        } else {
-          wx.showToast({
-            title:
-              res.data?.msg || this.data.messages.errors.profileUpdateFailed,
+            title: `处理响应失败: ${error.message}`,
             icon: "none",
+            duration: 2000
           });
         }
       },
-      fail: () => {
+      fail: (error) => {
+        clearTimeout(timeoutId);
+        
+        let errorMessage = "网络连接失败";
+        if (error.errMsg) {
+          if (error.errMsg.includes("timeout")) {
+            errorMessage = "请求超时，请检查网络";
+          } else if (error.errMsg.includes("fail")) {
+            errorMessage = "网络请求失败，请重试";
+          } else {
+            errorMessage = `网络错误: ${error.errMsg}`;
+          }
+        }
+        
         wx.showToast({
-          title: this.data.messages.errors.networkError,
+          title: errorMessage,
           icon: "none",
+          duration: 3000
         });
       },
       complete: () => {
+        clearTimeout(timeoutId);
         wx.hideLoading();
+        this.isSaving = false;
       },
     });
   },

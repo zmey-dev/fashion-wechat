@@ -29,8 +29,8 @@ Page({
         networkError: "网络错误，请稍后重试",
       },
       navigation: {
-        firstPost: "已经是第一篇文章了",
-        lastPost: "已经是最后一篇文章了",
+        firstPost: "已经是第一个作品了",
+        lastPost: "已经是最后一个作品了",
       },
     },
   },
