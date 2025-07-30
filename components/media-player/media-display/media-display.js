@@ -36,6 +36,9 @@ Component({
 
   observers: {
     'currentMedia, currentSlideIndex': function(currentMedia, currentSlideIndex) {
+      // Clear previous dots immediately when media changes
+      this.setData({ calculatedDots: [] });
+      
       // Clear previous video state to prevent thumbnail artifacts
       this.clearVideoState();
       
@@ -52,8 +55,11 @@ Component({
         }, 300);
       }
       
-      // Always calculate dot positions when media or slide changes, regardless of playing state
-      this.calculateDotPositions();
+      // Calculate dot positions after DOM updates
+      setTimeout(() => {
+        this.calculateDotPositions();
+      }, 50);
+      
       // Check if current image is loaded when media or slide changes
       this.checkCurrentImageLoadingState(currentMedia, currentSlideIndex);
     }
@@ -85,7 +91,8 @@ Component({
         isNavigatingVideo: true,
         videoReady: false,
         videoSrc: '',
-        userPausedVideo: false // Reset user pause flag for new video
+        userPausedVideo: false, // Reset user pause flag for new video
+        calculatedDots: [] // Clear dots when clearing video state
       });
       
       const videoContext = wx.createVideoContext('media-video', this);

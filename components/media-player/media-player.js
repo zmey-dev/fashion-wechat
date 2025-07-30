@@ -144,6 +144,15 @@ Component({
       const isCurrentPostDifferent = !this.data.currentPost || this.data.currentPost.id !== newPost.id;
       
       if (isNewPost && isCurrentPostDifferent) {
+        // Clear dot-related state immediately when new post is detected
+        this.setData({ selectedDot: null });
+        
+        // Clear dots in media-display component immediately
+        const mediaDisplayComponent = this.selectComponent('media-display');
+        if (mediaDisplayComponent) {
+          mediaDisplayComponent.setData({ calculatedDots: [] });
+        }
+        
         this.loadPostData();
       }
     },
@@ -1485,11 +1494,18 @@ Component({
      */
     onPostChanged() {
       
-      // Force stop all loading states immediately
+      // Force stop all loading states immediately and clear dots
       this.setData({
         isLoading: false,
-        isWaitingForApi: false
+        isWaitingForApi: false,
+        selectedDot: null
       });
+      
+      // Clear dots in media-display component
+      const mediaDisplayComponent = this.selectComponent('media-display');
+      if (mediaDisplayComponent) {
+        mediaDisplayComponent.setData({ calculatedDots: [] });
+      }
       
       // Clear loading prevention flag
       this.isCurrentlyLoading = false;
@@ -1526,11 +1542,18 @@ Component({
      */
     onApiLoadComplete() {
       
-      // Force stop all loading indicators and flags
+      // Force stop all loading indicators and flags, clear dots
       this.setData({ 
         isWaitingForApi: false,
-        isLoading: false
+        isLoading: false,
+        selectedDot: null
       });
+      
+      // Clear dots in media-display component
+      const mediaDisplayComponent = this.selectComponent('media-display');
+      if (mediaDisplayComponent) {
+        mediaDisplayComponent.setData({ calculatedDots: [] });
+      }
       
       // Clear loading prevention flag
       this.isCurrentlyLoading = false;
