@@ -1718,4 +1718,25 @@ Page({
 
     console.log("All files upload process completed");
   },
+
+  // Handle download toggle switch
+  onDownloadToggle: function(e) {
+    // Handle both tap event and switch change event
+    let allowDownload;
+    
+    if (e.type === 'tap') {
+      // If it's a tap event, toggle the current value
+      allowDownload = !this.data.allowDownload;
+    } else if (e.detail !== undefined) {
+      // If it's a switch change event, use the detail value
+      allowDownload = e.detail.value;
+    } else {
+      // Fallback: toggle current value
+      allowDownload = !this.data.allowDownload;
+    }
+    
+    this.setData({
+      allowDownload: allowDownload
+    });
+  },
 });

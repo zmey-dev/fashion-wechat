@@ -202,7 +202,7 @@
           <view class="form-group">
             <text class="form-label">⚙️ 其他设置</text>
             <view class="settings-list">
-              <view class="setting-item" bindtap="onDownloadToggle">
+              <view class="setting-item">
                 <view class="setting-info">
                   <text class="setting-title">允许他人保存</text>
                   <text class="setting-desc">其他用户可以保存您的作品到本地</text>
