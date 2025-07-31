@@ -1,6 +1,5 @@
 const { default: config } = require("../../config");
 const { isEmpty } = require("../../utils/isEmpty");
-// const mediaPreloaderService = require('../../services/mediaPreloader'); // DISABLED to prevent duplicate loading
 
 // components/media-player/media-player.js
 Component({

@@ -976,7 +976,6 @@
 /* ===================== MODERN CONTACT SECTION DESIGN ===================== */
 
 .contact-container {
-  min-height: 100vh;
   background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0f0f0f 100%);
   position: relative;
   overflow: hidden;

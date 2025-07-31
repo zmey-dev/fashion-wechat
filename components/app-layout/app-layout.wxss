@@ -9,7 +9,7 @@
 /* Filter Bar Styles */
 .app-layout-header {
   position: fixed;
-  top: 0;
+  top: -2rpx;
   left: 0;
   right: 0;
   z-index: 1000;

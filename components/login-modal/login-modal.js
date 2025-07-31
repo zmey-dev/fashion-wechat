@@ -190,16 +190,10 @@ Component({
       }
 
       const currentState = this.data.showPassword;
-      console.log("Toggle password - current state:", currentState);
 
-      this.setData(
-        {
-          showPassword: !currentState,
-        },
-        () => {
-          console.log("Toggle password - new state:", this.data.showPassword);
-        }
-      );
+      this.setData({
+        showPassword: !currentState,
+      });
 
       if (wx.vibrateShort) {
         wx.vibrateShort({
@@ -221,12 +215,10 @@ Component({
 
         const loginResult = await this.promiseWrapper(wx.login);
 
-        console.log("WeChat login result:", loginResult);
         if (!loginResult.code) {
           throw new Error("Failed to get WeChat login code");
         }
 
-        console.log("Sending code to backend:", loginResult.code);
         const authResult = await this.requestWechatLogin({
           code: loginResult.code,
         });
@@ -300,7 +292,6 @@ Component({
 
         this.handleLoginSuccess(authResult);
       } catch (error) {
-        console.log(error);
         this.setData({
           loginIdentifierError: "",
           passwordError: "",
@@ -413,7 +404,6 @@ Component({
           mask: true,
         });
         const data = await this.requestVerificationCode(this.ensureCountryCode(phone));
-        console.log("Verification code sent:", data);
         // Always start countdown regardless of alert or new code
         this.startCountdown();
         
@@ -571,7 +561,6 @@ Component({
       });
     },    // Handle registration required for WeChat users
     handleRegistrationRequired(result) {
-      console.log("WeChat registration required:", result);
 
       // Show error message immediately in the modal
       this.setData({ 
@@ -666,7 +655,6 @@ Component({
             "Content-Type": "application/json",
           },
           success: (res) => {
-            console.log("WeChat login response:", res.data);
             if (res.statusCode === 200) {
               // Handle both success and registration_required cases
               if (res.data.status === "success" || res.data.status === "registration_required") {

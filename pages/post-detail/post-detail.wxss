@@ -13,6 +13,12 @@
   background-color: #000;
 }
 
+/* Media player smooth transitions */
+media-player {
+  opacity: 1;
+  transition: opacity 0.3s ease-in-out;
+}
+
 /* Teacher specific styles - no bottom padding */
 .post-viewer-container.teacher-container {
   height: calc(100vh - 120rpx);
@@ -31,6 +37,8 @@
   align-items: center;
   background-color: rgba(0, 0, 0, 1);
   z-index: 999;
+  opacity: 1;
+  transition: opacity 0.2s ease-in-out;
 }
 
 /* Navigation loading indicator - subtle indicator during cached transitions */

@@ -245,7 +245,6 @@ Page({
 
   // Handle new message from socket
   handleNewMessage: function(data) {
-    console.log("New message received:", data);
 
     if (
       this.data.currentView === "chat" &&
@@ -291,7 +290,6 @@ Page({
 
   // Handle typing message event from socket - closely follows React implementation
   handleTypingMessage: function(data) {
-    console.log("Typing message received:", data);
 
     const senderId = data.sender_id;
     // Initialize object copy for safety
@@ -329,12 +327,10 @@ Page({
 
   // Handle online/offline status updates
   handleUserOnline: function(userId) {
-    console.log(`User ${userId} came online`);
     this.updateFriendStatus(userId, "online");
   },
 
   handleUserOffline: function(userId) {
-    console.log(`User ${userId} went offline`);
     this.updateFriendStatus(userId, "offline");
   },
 
@@ -696,7 +692,6 @@ Page({
     // Additional duplicate prevention: check if same message was sent recently
     const now = Date.now();
     if (this.lastSentMessage === message && now - this.lastSentTime < 2000) {
-      console.log("Preventing duplicate message send");
       return;
     }
 
@@ -911,7 +906,6 @@ Page({
 
   // Handle read message event from socket
   handleReadMessage(data) {
-    console.log("Read message event received:", data);
 
     // data should contain sender_id (who read the message)
     if (!data || !data.sender_id) return;
@@ -959,9 +953,6 @@ Page({
       this.data.currentView !== "chat" ||
       this.data.selectedUser?.id !== userId
     ) {
-      console.log(
-        "Not marking messages as read - not in chat view with this user"
-      );
       return;
     }
 
@@ -975,7 +966,6 @@ Page({
       },
       success: (res) => {
         if (res.data && res.data.status === "success") {
-          console.log("Messages marked as read");
 
           // Emit socket event to notify sender that messages were read
           socketManager.sendMessage("read_message", {

@@ -5,10 +5,16 @@
   
   <!-- Post Viewer Container -->
   <view class="post-viewer-container {{userInfo.role === 'teacher' ? 'teacher-container' : ''}}">
-    <!-- Media Player Component - Always show when post exists -->
+    <!-- Loading State - Show when loading (highest priority) -->
+    <view wx:if="{{ isLoading }}" class="loading-container">
+      <view class="loading-spinner"></view>
+      <text class="loading-text">{{messages.loading}}</text>
+    </view>
+    
+    <!-- Media Player Component - Show when post exists and not loading -->
     <media-player
       id="media-player"
-      wx:if="{{ post }}"
+      wx:elif="{{ post && !isLoading }}"
       selectedPost="{{ post }}"
       selectedPostUser="{{ post.user }}"
       followedUsers="{{ followedUsers }}"
@@ -33,12 +39,6 @@
     <view wx:if="{{ isNavigating }}" class="navigation-loading">
       <view class="navigation-indicator"></view>
     </view>
-
-    <!-- Loading State - Show when loading (regardless of post existence) -->
-    <view wx:if="{{ isLoading }}" class="loading-container">
-      <view class="loading-spinner"></view>
-      <text class="loading-text">{{messages.loading}}</text>
-    </view>
     
     <!-- Error State - Show when there's an error after attempting to load -->
     <view wx:elif="{{ hasError && hasLoadedOnce }}" class="error-container">
@@ -47,8 +47,8 @@
       <button class="retry-btn" bindtap="onRetry">重试</button>
     </view>
     
-    <!-- Empty State - Only show when no post after successful load attempt -->
-    <view wx:elif="{{ !post && !isLoading && !hasError && hasLoadedOnce }}" class="empty-container">
+    <!-- Empty State - Only show when truly no content and not during any transitions -->
+    <view wx:elif="{{ !post && !isLoading && !hasError && hasLoadedOnce && !isNavigating && !isTransitioning }}" class="empty-container">
       <view class="empty-icon">📭</view>
       <text class="empty-text">内容不存在</text>
       <button class="back-btn" bindtap="onRetry">返回</button>

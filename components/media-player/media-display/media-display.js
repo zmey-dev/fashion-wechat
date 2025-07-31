@@ -24,9 +24,7 @@ Component({
     containerHeight: 0,
     calculatedDots: [],
     audioMode: 'both', // 'both', 'uploaded', 'video'
-    imageLoadingStates: {}, // Track loading state for each image
-    currentImageLoading: true, // Current image loading state
-    showImageLoader: false, // Show loader overlay
+    // Removed image loading states for caching
     showVideo: true, // Control video visibility during navigation
     isNavigatingVideo: false, // Flag to prevent false video ended events during navigation
     videoReady: false, // Flag to control when video src is set
@@ -60,8 +58,7 @@ Component({
         this.calculateDotPositions();
       }, 50);
       
-      // Check if current image is loaded when media or slide changes
-      this.checkCurrentImageLoadingState(currentMedia, currentSlideIndex);
+      // Removed image preloading check
     }
   },
   ready() {
@@ -133,73 +130,7 @@ Component({
       }
     },
 
-    /**
-     * Check current image loading state
-     */
-    checkCurrentImageLoadingState(currentMedia, currentSlideIndex) {
-      if (!currentMedia || !currentMedia[currentSlideIndex]) {
-        this.setData({ 
-          currentImageLoading: false,
-          showImageLoader: false 
-        });
-        return;
-      }
-
-      const currentItem = currentMedia[currentSlideIndex];
-      const imageUrl = currentItem.url;
-      const { imageLoadingStates } = this.data;
-
-      // If image is already loaded, don't show loader
-      if (imageLoadingStates[imageUrl]) {
-        this.setData({ 
-          currentImageLoading: false,
-          showImageLoader: false 
-        });
-        return;
-      }
-
-      // Show loader for unloaded image
-      this.setData({ 
-        currentImageLoading: true,
-        showImageLoader: true 
-      });
-
-      // Start preloading the image
-      this.preloadImage(imageUrl);
-    },
-
-    /**
-     * Preload image and update loading state
-     */
-    preloadImage(imageUrl) {
-      wx.getImageInfo({
-        src: imageUrl,
-        success: () => {
-          // Image loaded successfully, but add artificial delay
-          const { imageLoadingStates } = this.data;
-          imageLoadingStates[imageUrl] = true;
-          
-          // Force longer loading time for better UX
-          setTimeout(() => {
-            this.setData({ 
-              imageLoadingStates,
-              currentImageLoading: false,
-              showImageLoader: false 
-            });
-          }, 2500); // Increased to 2.5 seconds artificial delay
-        },
-        fail: (error) => {
-          // Failed to preload image
-          // Hide loader even on error after delay
-          setTimeout(() => {
-            this.setData({ 
-              currentImageLoading: false,
-              showImageLoader: false 
-            });
-          }, 1500); // Increased error delay to 1.5 seconds
-        }
-      });
-    },
+    // Removed image preloading methods to disable caching
 
     /**
      * Calculate actual image size within container (aspectFit mode)
@@ -272,67 +203,30 @@ Component({
         return;
       }
 
-      // For WeChat Mini Program, we need to handle the image dimensions differently
-      // We'll try to get the image info first
-      wx.getImageInfo({
-        src: currentItem.url,
-        success: (imageInfo) => {
-          const imageWidth = imageInfo.width;
-          const imageHeight = imageInfo.height;
-          
-          const actualImageSize = this.calculateContainedImageSize(
-            containerWidth,
-            containerHeight,
-            imageWidth,
-            imageHeight
-          );
+      // Use fallback dimensions without caching image info
+      const actualImageSize = this.calculateContainedImageSize(
+        containerWidth,
+        containerHeight,
+        1080, // fallback width
+        1080  // fallback height
+      );
 
-          const calculatedDots = dots.map((dot, index) => {
-            const realLeft = dot.x * actualImageSize.width + actualImageSize.left;
-            const realTop = dot.y * actualImageSize.height + actualImageSize.top;
-            
-            return {
-              ...dot,
-              index,
-              slideIndex: currentSlideIndex, // Add slide index to identify which slide these dots belong to
-              realLeft: Math.round(realLeft),
-              realTop: Math.round(realTop),
-              // Calculate percentage relative to container for positioning
-              leftPercent: (realLeft / containerWidth) * 100,
-              topPercent: (realTop / containerHeight) * 100
-            };
-          });
-
-          this.setData({ calculatedDots });
-        },
-        fail: (error) => {
-          console.warn('Failed to get image info, using fallback dimensions:', error);
-          // Fallback to default dimensions if image info fails
-          const actualImageSize = this.calculateContainedImageSize(
-            containerWidth,
-            containerHeight,
-            1080, // fallback width
-            1080  // fallback height
-          );
-
-          const calculatedDots = dots.map((dot, index) => {
-            const realLeft = dot.x * actualImageSize.width + actualImageSize.left;
-            const realTop = dot.y * actualImageSize.height + actualImageSize.top;
-            
-            return {
-              ...dot,
-              index,
-              slideIndex: currentSlideIndex, // Add slide index to identify which slide these dots belong to
-              realLeft: Math.round(realLeft),
-              realTop: Math.round(realTop),
-              leftPercent: (realLeft / containerWidth) * 100,
-              topPercent: (realTop / containerHeight) * 100
-            };
-          });
-
-          this.setData({ calculatedDots });
-        }
+      const calculatedDots = dots.map((dot, index) => {
+        const realLeft = dot.x * actualImageSize.width + actualImageSize.left;
+        const realTop = dot.y * actualImageSize.height + actualImageSize.top;
+        
+        return {
+          ...dot,
+          index,
+          slideIndex: currentSlideIndex, // Add slide index to identify which slide these dots belong to
+          realLeft: Math.round(realLeft),
+          realTop: Math.round(realTop),
+          leftPercent: (realLeft / containerWidth) * 100,
+          topPercent: (realTop / containerHeight) * 100
+        };
       });
+
+      this.setData({ calculatedDots });
     },onScreenTap() {
       this.triggerEvent('screentap');
     },
@@ -531,24 +425,7 @@ Component({
      * Handle image load event to recalculate positions
      */
     onImageLoad(e) {
-      // Get the loaded image URL from the event
-      const loadedImageUrl = e.currentTarget.dataset.src || e.detail.src;
-      
-      if (loadedImageUrl) {
-        // Update loading state for this specific image with artificial delay
-        const { imageLoadingStates } = this.data;
-        imageLoadingStates[loadedImageUrl] = true;
-        
-        // Force longer loading time for better visual feedback
-        setTimeout(() => {
-          this.setData({ 
-            imageLoadingStates,
-            currentImageLoading: false,
-            showImageLoader: false 
-          });
-        }, 2200); // Increased to 2.2 seconds artificial delay
-      }
-
+      // Only recalculate dot positions without caching
       setTimeout(() => {
         this.calculateDotPositions();
       }, 100);

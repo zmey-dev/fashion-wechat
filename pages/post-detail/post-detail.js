@@ -15,15 +15,14 @@ Page({
     nextPostId: null,
     previousPostId: null,
     
-    // Pre-cached navigation posts for instant display
-    nextPost: null,
-    previousPost: null,
+    // Removed pre-cached posts to disable caching
     
     // Loading states
     isLoading: false,
     hasError: false,
     errorMessage: "",
     isNavigating: false, // Separate flag for navigation loading
+    isTransitioning: false, // Flag to prevent empty state during post transitions
     hasLoadedOnce: false, // Flag to track if we've attempted to load data at least once
     
     // User state
@@ -39,8 +38,8 @@ Page({
       loadFailed: "加载失败",
       networkError: "网络错误",
       noPostFound: "帖子不存在",
-      firstPost: "已经是第一篇了",
-      lastPost: "已经是最后一篇了",
+      firstPost: "已经是第一个作品了",
+      lastPost: "已经是最后一个作品了",
       noPostId: "帖子ID不能为空",
     },
   },
@@ -135,6 +134,7 @@ Page({
       errorMessage: "",
       mediaInitialized: false,
       hasLoadedOnce: true, // Mark that we've started loading
+      // Don't change isNavigating here - let navigation flow control it
     });
     
     // Build query parameters for API request
@@ -170,13 +170,11 @@ Page({
       data: apiParams,
       header: requestHeaders,
       success: (response) => {
-        // Immediately stop loading on success
-        this.setData({ isLoading: false });
+        // Let handleApiSuccessResponse manage loading state
         this.handleApiSuccessResponse(response);
       },
       fail: (error) => {
-        // Immediately stop loading on failure  
-        this.setData({ isLoading: false });
+        // Let handleApiErrorResponse manage loading state
         this.handleApiErrorResponse(error);
       },
       complete: () => {
@@ -184,8 +182,7 @@ Page({
         this.isLoadingPost = false;
         this.loadingPostId = null;
         
-        // Ensure loading is stopped
-        this.setData({ isLoading: false });
+        // Don't force loading state here - let success/error handlers manage it
       },
     });
   },
@@ -217,17 +214,17 @@ Page({
     const nextPost = responseData.next || null;
     const previousPost = responseData.previous || null;
     
-    // Update with complete data and cache navigation posts
+    // Update with complete data without caching
     this.setData({
       post: postData,
       nextPostId: nextPostId,
       previousPostId: previousPostId,
-      nextPost: nextPost, // Cache for instant navigation
-      previousPost: previousPost, // Cache for instant navigation
+      // Removed cached posts to disable instant navigation
       hasError: false,
       errorMessage: "",
       isLoading: false,
       isNavigating: false, // Stop navigation indicator
+      isTransitioning: false, // Clear transition flag
     });
     
     // Initialize media player if not already done (for new posts)
@@ -263,6 +260,8 @@ Page({
       hasError: true,
       errorMessage: message,
       isLoading: false,
+      isNavigating: false, // Clear navigation flag on error
+      isTransitioning: false, // Clear transition flag on error
       // Don't clear post on error to avoid showing empty state
     });
   },
@@ -435,62 +434,40 @@ Page({
     this.navigateToPostById(this.data.nextPostId, 'next');
   },
 
-  // Navigate to specific post by ID with instant display and background loading
+  // Navigate to specific post by ID without caching
   navigateToPostById: function(postId, direction = 'unknown') {
     // Only prevent if exactly same post ID
     if (this.data.postId === postId) {
       return;
     }
     
-    // Get pre-cached post data for instant display
-    let cachedPost = null;
-    if (direction === 'next' && this.data.nextPost) {
-      cachedPost = this.data.nextPost;
-    } else if (direction === 'previous' && this.data.previousPost) {
-      cachedPost = this.data.previousPost;
-    }
+    // Always load fresh data without caching
+    this.isLoadingPost = false;
     
-    if (cachedPost) {
-      // Immediately display cached post
+    // Immediately show loading and set transition flags
+    this.setData({
+      isLoading: true,
+      isNavigating: true, // Set navigation flag to prevent empty state
+      isTransitioning: true, // Prevent empty state during transition
+    });
+    
+    // Use setTimeout to ensure UI updates before clearing post data
+    setTimeout(() => {
       this.setData({
         postId: postId,
-        post: cachedPost,
-        nextPostId: null, // Will be updated from API
-        previousPostId: null,
-        nextPost: null, // Clear cache
-        previousPost: null,
+        post: null, // Clear current post to prevent flickering
         mediaInitialized: false,
         hasError: false,
         errorMessage: "",
-        isNavigating: true, // Show subtle navigation indicator
-        isLoading: false, // Don't show main loading since we have content
-      });
-      
-      // Initialize media player immediately with cached data
-      setTimeout(() => {
-        this.initializeMediaPlayerForPost();
-      }, 50);
-      
-      // Load complete data in background
-      this.loadPostDataInBackground();
-      
-    } else {
-      // Standard loading when no cached data
-      this.isLoadingPost = false;
-      
-      this.setData({
-        postId: postId,
-        mediaInitialized: false,
-        hasError: false,
-        errorMessage: "",
-        isLoading: true,
-        isNavigating: false,
         hasLoadedOnce: true, // Mark that we're starting a new load
+        isLoading: true, // Ensure loading state is maintained
+        isNavigating: true, // Keep navigation flag during transition
+        isTransitioning: true, // Maintain transition flag
       });
       
       // Load post data normally
       this.loadPostData();
-    }
+    }, 30); // Reduced delay for faster response
   },
 
   // Handle user profile tap event

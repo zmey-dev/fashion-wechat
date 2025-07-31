@@ -118,10 +118,6 @@ Page({
 
     // Check device info for better compatibility
     const systemInfo = wx.getSystemInfoSync();
-    console.log("System info:", systemInfo);
-    console.log("Platform:", systemInfo.platform);
-    console.log("System:", systemInfo.system);
-    console.log("WeChat version:", systemInfo.version);
   },
 
   onUnload: function () {
@@ -357,7 +353,6 @@ Page({
         // Start background upload sequentially
         this.startSequentialUploads(newFiles, files.length);
 
-        console.log("Files added and upload started:", newFiles.length);
       },
       fail: () => {
         this.setData({ imageLoading: false });
@@ -401,31 +396,16 @@ Page({
           return;
         }
 
-        console.log("Video file selected:", videoFile);
-        console.log("Video file keys:", Object.keys(videoFile));
-        console.log("Thumb temp file path:", videoFile.thumbTempFilePath);
-        console.log("Video duration:", videoFile.duration);
-        console.log("Video size:", videoFile.size);
 
         let thumbnailPath = null;
 
         if (videoFile.thumbTempFilePath) {
           thumbnailPath = videoFile.thumbTempFilePath;
-          console.log(
-            "Found thumbnail path from wx.chooseMedia:",
-            thumbnailPath
-          );
 
           wx.getFileInfo({
             filePath: thumbnailPath,
             success: (fileInfo) => {
-              console.log(
-                "Thumbnail file verified - size:",
-                fileInfo.size,
-                "bytes"
-              );
               if (fileInfo.size === 0) {
-                console.warn("Thumbnail file is empty");
                 thumbnailPath = null;
               }
             },
@@ -435,7 +415,6 @@ Page({
             },
           });
         } else {
-          console.warn("No thumbTempFilePath provided by wx.chooseMedia");
         }
 
         const newFile = {
@@ -464,7 +443,6 @@ Page({
         });
 
         if (thumbnailPath) {
-          console.log("Video added with thumbnail successfully");
         } else {
           console.log(
             "Video added without thumbnail - will generate placeholder"
@@ -477,7 +455,6 @@ Page({
         );
         this.startSequentialUploads([newFile], 0);
 
-        console.log("Video file added and upload started");
       },
       fail: (error) => {
         console.error("Video selection failed:", error);
@@ -1385,10 +1362,24 @@ Page({
             });
 
             setTimeout(() => {
-              // Navigate to me page instead of going back
-              wx.redirectTo({
-                url: `/pages/me/me`,
-              });
+              // Debug: Check values
+              console.log('eventId:', this.data.eventId);
+              console.log('mediaCreateType:', this.data.mediaCreateType);
+              console.log('requestData.event_id:', requestData.event_id);
+              
+              // Check if this is an event post - use multiple conditions to be sure
+              if (this.data.eventId || requestData.event_id) {
+                // Navigate back to the event detail page
+                const eventId = this.data.eventId || requestData.event_id;
+                wx.redirectTo({
+                  url: `/pages/event-detail/event-detail?eventId=${eventId}`,
+                });
+              } else {
+                // Navigate to me page for regular posts
+                wx.redirectTo({
+                  url: `/pages/me/me`,
+                });
+              }
             }, 500);
           } else {
             wx.showToast({

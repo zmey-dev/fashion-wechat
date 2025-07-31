@@ -121,14 +121,6 @@ Page({
               currentEventIndex: 0,
               selectedEvent: processedEvent,
             });
-
-            console.log("Selected event:", activeEvents[0]);
-            console.log("Event owner ID:", activeEvents[0].user?.id);
-            console.log("Current user ID:", this.data.userInfo?.id);
-            console.log(
-              "Can manage event:",
-              this.canManageEvent(activeEvents[0])
-            );
           } else {
             // Reset selected event and index if no active events
             this.setData({

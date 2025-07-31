@@ -212,17 +212,14 @@ Page({
 
     this.handleChangeUserId(userId)
       .then(() => {
-        console.log("User ID updated successfully");
       })
       .catch((error) => {
-        console.error("Update user ID failed:", error);
       });
   },
 
   loadPosts: function (refresh = false) {
     // Prevent duplicate loading
     if (this.data.loading) {
-      console.log('Already loading posts, skipping duplicate request');
       return;
     }
 
@@ -289,7 +286,6 @@ Page({
   handleRefresh: function () {
     // Prevent duplicate refresh
     if (this.data.loading) {
-      console.log('Already refreshing, skipping duplicate refresh');
       return;
     }
 
@@ -313,14 +309,8 @@ Page({
 
   // Handle reaching bottom of page for infinite scroll
   onReachBottom: function() {
-    console.log('onReachBottom triggered', {
-      hasMore: this.data.hasMore,
-      loading: this.data.loading,
-      postsLength: this.data.posts.length
-    });
     
     if (this.data.hasMore && !this.data.loading) {
-      console.log('Loading more posts...');
       this.loadPosts(false);
     }
   },

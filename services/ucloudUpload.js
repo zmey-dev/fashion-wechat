@@ -738,13 +738,10 @@ const uploadVideo = async (filePath, onProgress = null, videoFolder = 'videos', 
     
     // Process and upload thumbnail
     let thumbnailUrl = null;
-    console.log('Processing video thumbnail...');
-    console.log('Provided thumbnail path:', providedThumbnailPath);
     
     try {
       // Check if we have a real thumbnail from wx.chooseMedia
       if (providedThumbnailPath) {
-        console.log('Processing real thumbnail from wx.chooseMedia');
         
         // Verify thumbnail file exists and is valid
         try {
@@ -756,11 +753,9 @@ const uploadVideo = async (filePath, onProgress = null, videoFolder = 'videos', 
             });
           });
           
-          console.log('Real thumbnail file info:', thumbFileInfo);
           
           if (thumbFileInfo.size > 0) {
             const thumbnailName = `${thumbnailFolder}/${fileName.split('/').pop().replace(/\.[^.]+$/, '_thumb.jpg')}`;
-            console.log('Uploading real thumbnail with name:', thumbnailName);
             
             // Optimize the real thumbnail before upload
             let optimizedThumbnailPath = providedThumbnailPath;

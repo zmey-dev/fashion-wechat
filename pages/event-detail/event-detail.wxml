@@ -60,15 +60,7 @@
         </view>
       </view>
 
-      <!-- Event Description -->
-      <view wx:if="{{event.description}}" class="description-section">
-        <view class="section-header">
-          <image class="section-icon" src="/images/icons/document-text.svg"></image>
-          <text class="section-title">活动说明</text>
-        </view>        <view class="description-content">
-          <rich-text class="description-html" nodes="{{event.description}}"></rich-text>
-        </view>
-      </view>
+      <!-- Event Description section removed -->
 
       <!-- Posts Content Area -->
       <view class="content-area">

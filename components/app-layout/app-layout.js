@@ -173,28 +173,16 @@ Component({
 
       // Subscribe to centralized unread count changes
       this.totalUnreadCountHandler = (totalUnreadCount) => {
-        console.log(
-          "App-layout received totalUnreadCount update:",
-          totalUnreadCount
-        );
         this.setData({ totalUnreadCount });
       };
 
       // Subscribe to legacy unreadMessageCount for backward compatibility
       this.unreadMessageCountHandler = (unreadMessageCount) => {
-        console.log(
-          "App-layout received unreadMessageCount update:",
-          unreadMessageCount
-        );
         this.setData({ totalUnreadCount: unreadMessageCount });
       };
 
       // Subscribe to notification count changes
       this.notificationCountHandler = (notificationCount) => {
-        console.log(
-          "App-layout received notificationCount update:",
-          notificationCount
-        );
         this.setData({ notificationCount });
       };
 
@@ -290,8 +278,10 @@ Component({
 
       // Navigate to the page
       if (pageConfig.path) {
-        // For discover page, use redirectTo; for others, use navigateTo
-        if (page === "discover") {
+        // Special handling for upload page when coming from event pages
+        if (page === "upload") {
+          this.handleUploadNavigation();
+        } else if (page === "discover") {
           this.redirectToPage(pageConfig.path);
         } else {
           this.navigateToPage(pageConfig.path);
@@ -330,6 +320,38 @@ Component({
     redirectToPage: function (path) {
       wx.redirectTo({
         url: path,
+        fail: () => {
+          this.showToast(this.data.messages.navigationError);
+        },
+      });
+    },
+
+    /**
+     * Handle upload navigation with context awareness
+     */
+    handleUploadNavigation: function () {
+      // Get current pages from navigation stack
+      const pages = getCurrentPages();
+      const currentPage = pages[pages.length - 1];
+      
+      let uploadUrl = "/pages/upload/upload";
+      
+      // Check if we're coming from an event detail page
+      if (currentPage && currentPage.route === "pages/event-detail/event-detail") {
+        const eventId = currentPage.options?.eventId;
+        if (eventId) {
+          uploadUrl = `/pages/upload/upload?eventId=${eventId}&mediaCreateType=event`;
+        }
+      }
+      // Check if we're coming from an event list page
+      else if (currentPage && (currentPage.route === "pages/event/event" || this.data.currentPage === "event")) {
+        // For general event page, we can't determine specific eventId
+        // User will need to select event during upload process
+        uploadUrl = "/pages/upload/upload";
+      }
+      
+      wx.redirectTo({
+        url: uploadUrl,
         fail: () => {
           this.showToast(this.data.messages.navigationError);
         },
@@ -395,7 +417,6 @@ Component({
      * Start notification polling every 10 seconds
      */
     startNotificationPolling: function () {
-      console.log("Starting notification polling");
 
       // Clear existing timer if any
       if (this.notificationTimer) {
@@ -415,7 +436,6 @@ Component({
      * Stop notification polling
      */
     stopNotificationPolling: function () {
-      console.log("Stopping notification polling");
       if (this.notificationTimer) {
         clearInterval(this.notificationTimer);
         this.notificationTimer = null;
@@ -426,7 +446,6 @@ Component({
       const userInfo = this.data.userInfo;
 
       if (!userInfo || !userInfo.token) {
-        console.log("No user token available for fetching notifications");
         return;
       }
 
@@ -443,10 +462,6 @@ Component({
               const notifications =
                 res.data.message || res.data.notifications || [];
               const notificationCount = notifications.length;
-
-              console.log("Fetched notifications:", notificationCount);
-
-              // Update local state
               this.setData({
                 notificationCount: notificationCount,
               });
@@ -495,7 +510,6 @@ Component({
       const app = getApp();
       const currentCount = app.getTotalUnreadCount();
       this.setData({ totalUnreadCount: currentCount });
-      console.log("App-layout manually refreshed unread count:", currentCount);
     },
 
     /**
@@ -520,7 +534,6 @@ Component({
         this.startNotificationPolling();
       }
 
-      console.log("User logged in successfully:", userInfo);
     }
     /**
      * Calculate and set optimal page tab widths
