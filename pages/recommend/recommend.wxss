@@ -2,14 +2,16 @@
 .page-container {
   position: relative;
   width: 100vw;
-  height: 100vh;
+  height: calc(100vh - env(safe-area-inset-bottom));
+  height: calc(100vh - constant(safe-area-inset-bottom)); /* iOS 11.0 fallback */
   background-color: #000;
 }
 
 .post-viewer-container {
   position: relative;
   width: 100%;
-  height: calc(100vh - 240rpx);
+  height: calc(100vh - 240rpx - env(safe-area-inset-bottom));
+  height: calc(100vh - 240rpx - constant(safe-area-inset-bottom)); /* iOS 11.0 fallback */
   background-color: #000;
 }
 

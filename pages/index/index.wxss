@@ -1,6 +1,7 @@
 /* Page Container */
 .page-container {
-  min-height: 100vh;
+  min-height: calc(100vh - env(safe-area-inset-bottom));
+  min-height: calc(100vh - constant(safe-area-inset-bottom)); /* iOS 11.0 fallback */
   background: linear-gradient(180deg, #0a0a0a 0%, #1a1a1a 100%);
   color: #ffffff;
   display: flex;

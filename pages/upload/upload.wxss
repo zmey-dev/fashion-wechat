@@ -3,7 +3,8 @@
 /* Container styles */
 .upload-container {
   width: 100%;
-  height: calc(100vh - 240rpx);
+  height: calc(100vh - 240rpx - env(safe-area-inset-bottom));
+  height: calc(100vh - 240rpx - constant(safe-area-inset-bottom)); /* iOS 11.0 fallback */
   display: flex;
   flex-direction: column;
   position: relative;
@@ -12,7 +13,8 @@
 }
 
 .container {
-  height: 100vh;
+  height: calc(100vh - env(safe-area-inset-bottom));
+  height: calc(100vh - constant(safe-area-inset-bottom)); /* iOS 11.0 fallback */
   background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
   display: flex;
   padding-bottom: 60rpx; 
