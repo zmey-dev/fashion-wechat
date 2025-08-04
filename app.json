@@ -25,7 +25,9 @@
     "navigationBarBackgroundColor": "#111111",
     "navigationBarTitleText": "学校秀",
     "navigationBarTextStyle": "white",
-    "backgroundColor": "#111111"
+    "backgroundColor": "#000000",
+    "enablePullDownRefresh": false,
+    "onReachBottomDistance": 50
   },
   "usingComponents": {
     "avatar": "/components/avatar/avatar",

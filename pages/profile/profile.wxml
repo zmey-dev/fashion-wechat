@@ -114,6 +114,14 @@
                 <text class="btn-text">验证</text>
               </view>
             </view>
+            
+            <!-- Phone Verification Messages -->
+            <view wx:if="{{phoneVerificationMessage}}" class="success-message">
+              <text>{{phoneVerificationMessage}}</text>
+            </view>
+            <view wx:if="{{phoneVerificationError}}" class="error-message">
+              <text>{{phoneVerificationError}}</text>
+            </view>
           </view>
           
           <text class="error-text" wx:if="{{profileErrors.phone}}">{{profileErrors.phone}}</text>

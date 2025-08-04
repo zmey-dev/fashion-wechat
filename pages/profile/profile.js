@@ -697,7 +697,7 @@ Page({
           }
 
           if (res.statusCode === 422) {
-            const errorMsg = res.data?.message || "数据验证失败";
+            const errorMsg = res.data?.message || res.data?.msg || res.data?.error || "数据验证失败";
             wx.showToast({
               title: `保存失败: ${errorMsg}`,
               icon: "none",
@@ -708,7 +708,7 @@ Page({
 
           if (res.statusCode !== 200) {
             wx.showToast({
-              title: `服务器错误 (${res.statusCode}): ${res.data?.message || '请稍后重试'}`,
+              title: `服务器错误 (${res.statusCode}): ${res.data?.message || res.data?.msg || res.data?.error || '请稍后重试'}`,
               icon: "none",
               duration: 3000
             });
@@ -718,7 +718,7 @@ Page({
           // Check response data
           if (!res.data || res.data.status !== "success") {
             wx.showToast({
-              title: `保存失败: ${res.data?.message || res.data?.msg || '服务器返回异常'}`,
+              title: `保存失败: ${res.data?.message || res.data?.msg || res.data?.error || '服务器返回异常'}`,
               icon: "none",
               duration: 3000
             });
@@ -803,8 +803,12 @@ Page({
       profileErrors: {},
       selectedAvatar: this.data.userInfo?.avatar || "",
       avatarFile: null,
-      // emailOtpCode: "",
+      emailOtpCode: "",
       phoneOtpCode: "",
+      emailVerificationMessage: "",
+      emailVerificationError: "",
+      phoneVerificationMessage: "",
+      phoneVerificationError: "",
     });
   },
 
@@ -893,7 +897,7 @@ Page({
           } else {
             // Normal success - new code sent
             this.setData({
-              emailVerificationMessage: res.data?.msg || "验证码已发送到您的邮箱",
+              emailVerificationMessage: res.data?.msg || res.data?.error || "验证码已发送到您的邮箱",
               emailVerificationError: ""
             });
             // Clear success message after 5 seconds
@@ -903,7 +907,7 @@ Page({
           }
         } else {
           this.setData({
-            emailVerificationError: res.data?.msg || "验证码发送失败，请检查邮箱地址",
+            emailVerificationError: res.data?.msg || res.data?.error || "验证码发送失败，请检查邮箱地址",
             emailVerificationMessage: ""
           });
         }
@@ -980,35 +984,35 @@ Page({
           if (res.data.alert) {
             // Display alert in green
             this.setData({
-              phoneSuccessMessage: res.data.alert,
-              phoneErrorMessage: ""
+              phoneVerificationMessage: res.data.alert,
+              phoneVerificationError: ""
             });
             // Clear success message after 8 seconds
             setTimeout(() => {
-              this.setData({ phoneSuccessMessage: "" });
+              this.setData({ phoneVerificationMessage: "" });
             }, 8000);
           } else {
             // Normal success - new code sent
             this.setData({
-              phoneSuccessMessage: res.data?.msg || this.data.messages.success.otpSent,
-              phoneErrorMessage: ""
+              phoneVerificationMessage: res.data?.msg || res.data?.error || this.data.messages.success.otpSent,
+              phoneVerificationError: ""
             });
             // Clear success message after 5 seconds
             setTimeout(() => {
-              this.setData({ phoneSuccessMessage: "" });
+              this.setData({ phoneVerificationMessage: "" });
             }, 5000);
           }
         } else {
           this.setData({
-            phoneErrorMessage: res.data?.msg || this.data.messages.errors.otpSendFailed,
-            phoneSuccessMessage: ""
+            phoneVerificationError: res.data?.msg || res.data?.error || this.data.messages.errors.otpSendFailed,
+            phoneVerificationMessage: ""
           });
         }
       },
       fail: () => {
         this.setData({
-          phoneErrorMessage: this.data.messages.errors.networkError,
-          phoneSuccessMessage: ""
+          phoneVerificationError: this.data.messages.errors.networkError,
+          phoneVerificationMessage: ""
         });
       },
       complete: () => {
@@ -1059,7 +1063,7 @@ Page({
           this.setData({
             emailVerified: true,
             [`profileErrors.email`]: false,
-            emailVerificationMessage: "邮箱验证成功！",
+            emailVerificationMessage: res.data?.msg || res.data?.error || "邮箱验证成功！",
             emailVerificationError: ""
           });
           // Clear success message after 3 seconds
@@ -1068,7 +1072,7 @@ Page({
           }, 3000);
         } else {
           this.setData({
-            emailVerificationError: res.data?.msg || "验证码错误或已过期",
+            emailVerificationError: res.data?.msg || res.data?.error || "验证码错误或已过期",
             emailVerificationMessage: ""
           });
         }
@@ -1113,23 +1117,24 @@ Page({
           this.setData({
             phoneVerified: true,
             [`profileErrors.phone`]: false,
+            phoneVerificationMessage: res.data?.msg || res.data?.error || "手机号验证成功！",
+            phoneVerificationError: ""
           });
-          wx.showToast({
-            title: this.data.messages.success.verificationSuccess,
-            icon: "success",
-          });
+          // Clear success message after 3 seconds
+          setTimeout(() => {
+            this.setData({ phoneVerificationMessage: "" });
+          }, 3000);
         } else {
-          wx.showToast({
-            title:
-              res.data?.msg || this.data.messages.errors.verificationFailed,
-            icon: "none",
+          this.setData({
+            phoneVerificationError: res.data?.msg || res.data?.error || this.data.messages.errors.verificationFailed,
+            phoneVerificationMessage: ""
           });
         }
       },
       fail: () => {
-        wx.showToast({
-          title: this.data.messages.errors.networkError,
-          icon: "none",
+        this.setData({
+          phoneVerificationError: this.data.messages.errors.networkError,
+          phoneVerificationMessage: ""
         });
       },
       complete: () => {
@@ -1167,7 +1172,7 @@ Page({
           icon: 'success'
         });
       } else {
-        throw new Error(response.msg || '绑定失败');
+        throw new Error(response.msg || response.error || '绑定失败');
       }
     } catch (error) {
       console.error('WeChat linking error:', error);
@@ -1210,7 +1215,7 @@ Page({
           icon: 'success'
         });
       } else {
-        throw new Error(response.msg || '解除绑定失败');
+        throw new Error(response.msg || response.error || '解除绑定失败');
       }
     } catch (error) {
       console.error('WeChat unlinking error:', error);
@@ -1236,7 +1241,7 @@ Page({
           if (res.statusCode === 200) {
             resolve(res.data);
           } else {
-            reject(new Error(res.data?.msg || '请求失败'));
+            reject(new Error(res.data?.msg || res.data?.error || '请求失败'));
           }
         },
         fail: reject
@@ -1257,7 +1262,7 @@ Page({
           if (res.statusCode === 200) {
             resolve(res.data);
           } else {
-            reject(new Error(res.data?.msg || '请求失败'));
+            reject(new Error(res.data?.msg || res.data?.error || '请求失败'));
           }
         },
         fail: reject

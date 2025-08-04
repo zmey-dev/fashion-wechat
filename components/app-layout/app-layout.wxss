@@ -4,6 +4,9 @@
   flex-direction: column;
   min-height: 100vh;
   background-color: #000;
+  /* Ensure black background extends to edges */
+  width: 100vw;
+  overflow-x: hidden;
 }
 
 /* Filter Bar Styles */
@@ -133,7 +136,8 @@
   flex: 1;
   position: relative;
   padding-top: 120rpx; /* Space for fixed filter bar */
-  padding-bottom: 120rpx; /* Space for fixed tab bar */
+  padding-bottom: calc(120rpx + env(safe-area-inset-bottom)); /* Space for fixed tab bar + safe area */
+  padding-bottom: calc(120rpx + constant(safe-area-inset-bottom)); /* iOS 11.0 fallback */
 }
 
 /* Teacher layout - no bottom tab bar, so no bottom padding needed */
@@ -153,6 +157,9 @@
   width: 100vw;
   max-width: 100%;
   overflow: hidden;
+  /* Add safe area padding for iPhone */
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-bottom: constant(safe-area-inset-bottom); /* iOS 11.0 fallback */
 }
 
 .tab-container {
@@ -470,4 +477,34 @@
 
 .filter-tab:active {
   transform: scale(0.98);
+}
+
+/* Safe area support for different devices */
+@supports (padding: max(0px)) {
+  .app-layout-footer {
+    padding-bottom: max(env(safe-area-inset-bottom), 20rpx);
+  }
+  
+  .app-layout-content {
+    padding-bottom: calc(120rpx + max(env(safe-area-inset-bottom), 20rpx));
+  }
+}
+
+/* Additional Android system bar handling */
+@media (orientation: portrait) {
+  .app-layout {
+    padding-bottom: env(keyboard-inset-height, 0);
+  }
+}
+
+/* Ensure no white space at bottom on Android */
+.app-layout::after {
+  content: '';
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: env(safe-area-inset-bottom, 0);
+  background-color: #000;
+  z-index: 999;
 }
