@@ -1,5 +1,6 @@
 <!-- app-layout.wxml -->
-<view class="app-layout {{isTeacher ? 'teacher-layout' : ''}}">  <!-- Top Filter Bar -->
+<view class="app-layout {{isTeacher ? 'teacher-layout' : ''}} {{currentPage === 'discover' ? 'discover-page' : ''}}">  
+  <!-- Top Filter Bar -->
   <view class="app-layout-header">
     <scroll-view class="filter-scroll" scroll-x="true" scroll-left="{{filterScrollLeft}}">
       <view class="filter-tabs {{dynamicTabStyle === 'compact' ? 'compact-mode' : 'expanded-mode'}}">        
@@ -16,6 +17,12 @@
       </view>
     </scroll-view>
   </view>
+
+  <!-- Search Bar -->
+  <search-bar 
+    current-page="{{currentPage}}" 
+    bind:search="onSearch"
+  ></search-bar>
 
   <!-- Main Content Area -->
   <view class="app-layout-content">

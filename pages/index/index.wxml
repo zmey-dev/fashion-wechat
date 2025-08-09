@@ -1,4 +1,4 @@
-<app-layout current-page="discover">
+<app-layout current-page="discover" bind:search="onSearch">
   <!-- Main Content Area -->
   <view class="content-area" id="contentArea">
     <!-- Posts Grid -->

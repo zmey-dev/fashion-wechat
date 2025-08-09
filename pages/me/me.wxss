@@ -207,6 +207,31 @@
   padding: 24rpx;
 }
 
+/* Blocked post indicator - same as web version */
+.blocked-indicator {
+  position: absolute;
+  top: 16rpx;
+  left: 16rpx;
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+  padding: 8rpx 16rpx;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 16rpx;
+  z-index: 10;
+}
+
+.blocked-icon {
+  font-size: 32rpx;
+  line-height: 1;
+}
+
+.blocked-text {
+  font-size: 24rpx;
+  color: #ef4444;
+  font-weight: 600;
+}
+
 .post-stats {
   display: flex;
   gap: 20rpx;

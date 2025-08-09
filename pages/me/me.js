@@ -9,6 +9,7 @@ Page({  data: {
     currentTab: 0,
     tabs: ["作品", "喜欢", "收藏", "历史", "联系我们"], // Added contact tab
     age: 0,
+    isFirstLoad: true, // Add flag to track first load
     // WeChat linking state
     isWechatLinked: false,
     wechatLinking: false,
@@ -96,22 +97,91 @@ Page({  data: {
     };
     app.subscribe("userInfo", this.userInfoHandler);
 
-    const userInfo = app.globalData.userInfo || {};
-    this.setData({
-      userInfo,
-      profileForm: this.initializeProfileForm(userInfo),
-      selectedAvatar: userInfo?.avatar || "",
-    });
-
-    this.calculateAge();
-    this.loadPosts();
     this.loadUniversityInfo(); // Load university info including faculties
-    this.checkWechatLinkStatus(); // Check WeChat link status
+    this.fetchUserInfo(); // Fetch fresh user info from API
+    this.setData({ isFirstLoad: false });
+  },
+
+  onShow: function () {
+    // Only refresh user info if not first load
+    if (!this.data.isFirstLoad) {
+      this.fetchUserInfo();
+    }
   },
 
   onUnload: function () {
     const app = getApp();
     app.unsubscribe("userInfo", this.userInfoHandler);
+  },
+
+  // Fetch fresh user info from API
+  fetchUserInfo: function () {
+    const app = getApp();
+    const currentToken = app.globalData.userInfo?.token;
+    
+    if (!currentToken) {
+      // No token, redirect to login
+      wx.reLaunch({
+        url: "/pages/index/index",
+      });
+      return;
+    }
+
+    wx.request({
+      url: `${config.BACKEND_URL}/get_my_profile`,
+      method: "GET",
+      header: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${currentToken}`,
+      },
+      success: (res) => {
+        console.log("fetchUserInfo API response:", res.data);
+        if (res.statusCode === 200 && res.data.status === "success") {
+          const userInfo = { ...res.data.profile, token: currentToken };
+          console.log("Updated userInfo:", userInfo);
+          
+          // Update global state using setUserInfo method
+          app.setUserInfo(userInfo);
+          
+          // Update page state
+          this.setData({
+            userInfo,
+            profileForm: this.initializeProfileForm(userInfo),
+            selectedAvatar: userInfo?.avatar || "",
+          });
+
+          this.calculateAge();
+          this.loadPosts();
+          this.checkWechatLinkStatus();
+        } else {
+          // Invalid token or other error, redirect to login
+          app.globalData.userInfo = null;
+          wx.removeStorageSync("userInfo");
+          wx.reLaunch({
+            url: "/pages/index/index",
+          });
+        }
+      },
+      fail: () => {
+        // Network error, use cached data if available
+        const cachedUserInfo = app.globalData.userInfo;
+        if (cachedUserInfo) {
+          this.setData({
+            userInfo: cachedUserInfo,
+            profileForm: this.initializeProfileForm(cachedUserInfo),
+            selectedAvatar: cachedUserInfo?.avatar || "",
+          });
+          this.calculateAge();
+          this.loadPosts();
+          this.checkWechatLinkStatus();
+        } else {
+          wx.showToast({
+            title: "网络错误，请重试",
+            icon: "none",
+          });
+        }
+      },
+    });
   },
   onReachBottom() {
     if (this.data.hasMore && !this.data.loading) {

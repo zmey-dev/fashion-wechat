@@ -1,6 +1,7 @@
 {
   "component": true,
   "usingComponents": {
-    "login-modal": "../login-modal/login-modal"
+    "login-modal": "../login-modal/login-modal",
+    "search-bar": "../search-bar/search-bar"
   }
 }

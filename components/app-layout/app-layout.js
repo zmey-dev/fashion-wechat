@@ -232,6 +232,15 @@ Component({
    */,
   methods: {
     /**
+     * Search event handler
+     */
+    onSearch: function(e) {
+      const searchParams = e.detail;
+      // Emit search event to parent page
+      this.triggerEvent('search', searchParams);
+    },
+
+    /**
      * Page click event handler (unified for both filters and tabs)
      */
     onPageTap: function (e) {

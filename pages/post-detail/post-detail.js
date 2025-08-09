@@ -9,6 +9,8 @@ Page({
     eventId: null,
     type: "discover",
     filter: "",
+    search: "",
+    universityId: "",
     
     // Post data
     post: null,
@@ -50,6 +52,8 @@ Page({
     const eventId = options.eventId || options.event_id;
     const type = options.type || "discover";
     const filter = options.filter || "";
+    const search = options.search || "";
+    const universityId = options.university_id || "";
     
     if (!postId) {
       this.showError(this.data.messages.noPostId);
@@ -67,6 +71,8 @@ Page({
       eventId: eventId || null,
       type: type,
       filter: filter,
+      search: search,
+      universityId: universityId,
       userInfo: app.globalData.userInfo || null,
       showLoginModal: app.globalData.showLoginModal || false,
     });
@@ -150,6 +156,12 @@ Page({
     }
     if (this.data.filter) {
       apiParams.filter = this.data.filter;
+    }
+    if (this.data.search) {
+      apiParams.search = this.data.search;
+    }
+    if (this.data.universityId) {
+      apiParams.university_id = this.data.universityId;
     }
     
     // Build request headers

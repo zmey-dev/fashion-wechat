@@ -1,0 +1,239 @@
+/* search-bar.wxss */
+.search-bar-container {
+  position: fixed;
+  top: 120rpx; /* Position below filter bar */
+  left: 0;
+  right: 0;
+  z-index: 999;
+  padding: 10rpx 20rpx;
+  background: #000;
+  border-bottom: 1rpx solid #333;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  background: #1a1a1a;
+  border: 2rpx solid #666;
+  border-radius: 24rpx;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.search-bar.active {
+  border-color: #999;
+}
+
+.search-bar.active:hover {
+  border-color: #fff;
+  background: #2a2a2a;
+}
+
+.search-bar.disabled {
+  border-color: #444;
+  background: #0f0f0f;
+}
+
+/* University Dropdown */
+.university-dropdown {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.dropdown-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24rpx;
+  background: #1a1a1a;
+  border-right: 2rpx solid #666;
+  min-width: 160rpx;
+  height: 66rpx;
+  box-sizing: border-box;
+}
+
+.dropdown-button.disabled {
+  background: #0f0f0f;
+  color: #666;
+  cursor: not-allowed;
+}
+
+.dropdown-text {
+  font-size: 26rpx;
+  color: #fff;
+  max-width: 120rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-right: 8rpx;
+  line-height: 66rpx;
+  height: 66rpx;
+  display: flex;
+  align-items: center;
+}
+
+.dropdown-button.disabled .dropdown-text {
+  color: #666;
+}
+
+.dropdown-icon {
+  width: 24rpx;
+  height: 24rpx;
+  margin-left: 8rpx;
+  flex-shrink: 0;
+}
+
+.dropdown-icon image {
+  width: 100%;
+  height: 100%;
+  filter: invert(1);
+}
+
+.dropdown-button.disabled .dropdown-icon image {
+  filter: invert(0.4);
+}
+
+.dropdown-menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+}
+
+.dropdown-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: transparent;
+}
+
+.dropdown-content {
+  position: absolute;
+  top: 240rpx; /* Adjusted for new position */
+  left: 20rpx;
+  background: #2a2a2a;
+  border: 2rpx solid #666;
+  border-radius: 16rpx;
+  max-height: 480rpx;
+  overflow-y: auto;
+  min-width: 300rpx;
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.5);
+}
+
+.dropdown-item {
+  padding: 24rpx 32rpx;
+  border-bottom: 1rpx solid #444;
+}
+
+.dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.dropdown-item:active {
+  background: #3a3a3a;
+}
+
+.dropdown-item text {
+  font-size: 28rpx;
+  color: #fff;
+}
+
+/* Search Input */
+.search-input {
+  flex: 1;
+  padding: 16rpx 24rpx;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 28rpx;
+  color: #fff;
+  height: 66rpx;
+  box-sizing: border-box;
+}
+
+.search-input.disabled {
+  color: #666;
+  cursor: not-allowed;
+}
+
+.search-input::placeholder {
+  color: #999;
+}
+
+.search-input.disabled::placeholder {
+  color: #666;
+}
+
+/* Clear Button */
+.clear-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48rpx;
+  height: 48rpx;
+  margin: 0 8rpx;
+  flex-shrink: 0;
+}
+
+.clear-button image {
+  width: 32rpx;
+  height: 32rpx;
+  filter: invert(0.6);
+}
+
+.clear-button:active image {
+  filter: invert(0.8);
+}
+
+/* Search Button */
+.search-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  padding: 16rpx 24rpx;
+  background: transparent;
+  min-width: 120rpx;
+  height: 66rpx;
+  box-sizing: border-box;
+  border-radius: 0 20rpx 20rpx 0;
+}
+
+.search-button.disabled {
+  cursor: not-allowed;
+}
+
+.search-button image {
+  width: 32rpx;
+  height: 32rpx;
+  filter: invert(0.6);
+}
+
+.search-button text {
+  font-size: 28rpx;
+  color: #999;
+}
+
+.search-button:not(.disabled):active {
+  background: #333;
+}
+
+.search-button:not(.disabled):active image {
+  filter: invert(0.8);
+}
+
+.search-button:not(.disabled):active text {
+  color: #fff;
+}
+
+.search-button.disabled image {
+  filter: invert(0.4);
+}
+
+.search-button.disabled text {
+  color: #666;
+}

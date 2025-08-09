@@ -1,0 +1,71 @@
+<!-- search-bar.wxml -->
+<view class="search-bar-container" wx:if="{{currentPage === 'discover'}}">
+  <view class="search-bar {{isDiscoverPage ? 'active' : 'disabled'}}">
+    <!-- University Dropdown -->
+    <view class="university-dropdown">
+      <view 
+        class="dropdown-button {{isDiscoverPage ? '' : 'disabled'}}" 
+        bindtap="onUniversityTap"
+      >
+        <view class="dropdown-text">
+          {{selectedUniversityName}}
+        </view>
+        <view class="dropdown-icon">
+          <image src="/images/icons/chevron-down.svg" mode="aspectFit" />
+        </view>
+      </view>
+      
+      <!-- Dropdown Menu -->
+      <view wx:if="{{showDropdown && isDiscoverPage}}" class="dropdown-menu">
+        <view class="dropdown-mask" bindtap="onDropdownMaskTap"></view>
+        <view class="dropdown-content">
+          <view 
+            class="dropdown-item" 
+            data-id="" 
+            bindtap="onUniversitySelect"
+          >
+            <text>所有大学</text>
+          </view>
+          <view 
+            wx:for="{{universities}}" 
+            wx:key="id"
+            class="dropdown-item" 
+            data-id="{{item.id}}" 
+            bindtap="onUniversitySelect"
+          >
+            <text>{{item.name}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- Search Input -->
+    <input 
+      class="search-input {{isDiscoverPage ? '' : 'disabled'}}"
+      type="text"
+      placeholder="搜索你感兴趣的内容"
+      value="{{filter}}"
+      bindinput="onFilterInput"
+      bindconfirm="onKeyboardConfirm"
+      disabled="{{!isDiscoverPage}}"
+    />
+
+    <!-- Clear Button -->
+    <view 
+      wx:if="{{hasFilters && isDiscoverPage}}" 
+      class="clear-button" 
+      bindtap="onClearTap"
+    >
+      <image src="/images/icons/X.svg" mode="aspectFit" />
+    </view>
+
+    <!-- Search Button -->
+    <view 
+      class="search-button {{isDiscoverPage ? '' : 'disabled'}}" 
+      bindtap="onSearchTap"
+    >
+      <image src="/images/icons/search.svg" mode="aspectFit" />
+      <text>搜索</text>
+    </view>
+  </view>
+</view>

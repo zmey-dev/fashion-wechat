@@ -12,7 +12,7 @@
 /* Filter Bar Styles */
 .app-layout-header {
   position: fixed;
-  top: -2rpx;
+  top: 0;
   left: 0;
   right: 0;
   z-index: 1000;
@@ -135,14 +135,29 @@
 .app-layout-content {
   flex: 1;
   position: relative;
-  padding-top: 120rpx; /* Space for fixed filter bar */
   padding-bottom: calc(120rpx + env(safe-area-inset-bottom)); /* Space for fixed tab bar + safe area */
   padding-bottom: calc(120rpx + constant(safe-area-inset-bottom)); /* iOS 11.0 fallback */
 }
 
+/* Different padding based on search bar visibility */
+.app-layout-content {
+  padding-top: 120rpx; /* Default: only filter bar */
+}
+
+/* When on discover page (search bar visible) */
+.app-layout.discover-page .app-layout-content {
+  padding-top: 200rpx; /* Filter bar + search bar */
+}
+
 /* Teacher layout - no bottom tab bar, so no bottom padding needed */
 .app-layout.teacher-layout .app-layout-content {
+  padding-top: 120rpx; /* Default: only filter bar */
   padding-bottom: 0; /* Remove bottom padding for teacher layout */
+}
+
+/* Teacher layout on discover page */
+.app-layout.teacher-layout.discover-page .app-layout-content {
+  padding-top: 200rpx; /* Filter bar + search bar */
 }
 
 /* Tab Bar Styles */

@@ -17,6 +17,8 @@ Page({
     userId: "",
     inputError: "",
     submitLoading: false,
+    // Search parameters
+    searchParams: {},
     messages: {
       loading: "加载中...",
       errors: {
@@ -230,6 +232,15 @@ Page({
       offset: refresh ? 0 : this.data.posts.length,
     };
 
+    // Add search parameters if they exist
+    const { searchParams } = this.data;
+    if (searchParams.search) {
+      requestData.search = searchParams.search;
+    }
+    if (searchParams.university_id) {
+      requestData.university_id = searchParams.university_id;
+    }
+
     wx.request({
       url: `${config.BACKEND_URL}/v2/post/discover`,
       method: "GET",
@@ -300,10 +311,34 @@ Page({
     this.loadPosts(true);
   },
 
+  onSearch: function(e) {
+    const searchParams = e.detail;
+    
+    // Store search parameters
+    this.setData({
+      searchParams: searchParams
+    });
+    
+    // Refresh posts with search parameters
+    this.handleRefresh();
+  },
+
   onPostTap: function (e) {
     const postId = e.currentTarget.dataset.postId;
+    
+    // Build URL with search parameters if they exist
+    let url = `/pages/post-detail/post-detail?postId=${postId}&type=discover`;
+    
+    const { searchParams } = this.data;
+    if (searchParams.search) {
+      url += `&search=${encodeURIComponent(searchParams.search)}`;
+    }
+    if (searchParams.university_id) {
+      url += `&university_id=${searchParams.university_id}`;
+    }
+    
     wx.navigateTo({
-      url: `/pages/post-detail/post-detail?postId=${postId}&type=discover`,
+      url: url,
     });
   },
 

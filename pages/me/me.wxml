@@ -65,6 +65,12 @@
       >
         <image class="post-image" src="{{item.type=='video'?item.media[0].preview_url:item.media[0].url}}" mode="aspectFill" />
         
+        <!-- Blocked indicator -->
+        <view wx:if="{{item.active == false}}" class="blocked-indicator">
+          <text class="blocked-icon">🚫</text>
+          <text class="blocked-text">已阻止</text>
+        </view>
+        
         <view class="post-overlay">
           <view class="post-stats">
             <view class="stat">
