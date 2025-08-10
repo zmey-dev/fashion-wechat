@@ -16,7 +16,6 @@ Page({  data: {
     // Profile form data
     profileForm: {
       phone: "",
-      // email: "",
       name: "",
       gender: "",
       id_number: "",
@@ -51,14 +50,10 @@ Page({  data: {
       description: ""
     },
     // Verification states - original values for comparison
-    // originalEmail: "",
     originalPhone: "",
-    // emailChanged: false,
     phoneChanged: false,
-    // emailVerified: true, // Default to verified
     phoneVerified: true, // Default to verified
     // OTP codes for verification
-    // emailOtpCode: ""
     phoneOtpCode: "",
     // Chinese messages for UI text
     messages: {

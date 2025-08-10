@@ -187,9 +187,13 @@ Page({
     }
 
     wx.request({
-      url: `${config.BACKEND_URL}/post/get_posts_event_discover/${this.data.eventId}`,
+      url: `${config.BACKEND_URL}/v2/post/by-event-id`,
       method: 'GET',
-      data: requestData,
+      data: {
+        event_id: this.data.eventId,
+        limit: requestData.limit || 20,
+        offset: requestData.offset || 0
+      },
       header: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${this.data.userInfo.token}`
