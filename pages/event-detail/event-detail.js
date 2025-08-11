@@ -123,10 +123,12 @@ Page({
             return;
           }
           
-          // Process HTML content for rich-text display
+          // Process HTML content for rich-text display and format dates
           const processedEvent = {
             ...event,
-            description: this.processHtmlContent(event.description)
+            description: this.processHtmlContent(event.description),
+            formatted_start_date: this.formatEventDate(event.start_date),
+            formatted_end_date: this.formatEventDate(event.end_date)
           };
           
           const canJoin = this.checkCanJoinEvent(event);
@@ -361,16 +363,36 @@ Page({
     // Add inline styles to common HTML elements for rich-text component
     let processedHtml = htmlString;
     
-    // Style headings
+    // Style headings with different sizes
     processedHtml = processedHtml.replace(
-      /<h([1-6])([^>]*)>/g, 
-      '<h$1$2 style="color: #ff6b6b; font-weight: 700; margin: 24rpx 0 16rpx 0;">'
+      /<h1([^>]*)>/g, 
+      '<h1$1 style="color: #ff6b6b; font-weight: 700; margin: 24rpx 0 16rpx 0; font-size: 40rpx; line-height: 1.4;">'
+    );
+    processedHtml = processedHtml.replace(
+      /<h2([^>]*)>/g, 
+      '<h2$1 style="color: #ff6b6b; font-weight: 700; margin: 24rpx 0 16rpx 0; font-size: 36rpx; line-height: 1.4;">'
+    );
+    processedHtml = processedHtml.replace(
+      /<h3([^>]*)>/g, 
+      '<h3$1 style="color: #ff6b6b; font-weight: 700; margin: 24rpx 0 16rpx 0; font-size: 32rpx; line-height: 1.4;">'
+    );
+    processedHtml = processedHtml.replace(
+      /<h4([^>]*)>/g, 
+      '<h4$1 style="color: #ff6b6b; font-weight: 700; margin: 24rpx 0 16rpx 0; font-size: 30rpx; line-height: 1.4;">'
+    );
+    processedHtml = processedHtml.replace(
+      /<h5([^>]*)>/g, 
+      '<h5$1 style="color: #ff6b6b; font-weight: 700; margin: 24rpx 0 16rpx 0; font-size: 28rpx; line-height: 1.4;">'
+    );
+    processedHtml = processedHtml.replace(
+      /<h6([^>]*)>/g, 
+      '<h6$1 style="color: #ff6b6b; font-weight: 700; margin: 24rpx 0 16rpx 0; font-size: 26rpx; line-height: 1.4;">'
     );
     
-    // Style paragraphs
+    // Style paragraphs - changed color to light for dark background
     processedHtml = processedHtml.replace(
       /<p([^>]*)>/g, 
-      '<p$1 style="margin: 0 0 16rpx 0; line-height: 1.6; color: #2d1810;">'
+      '<p$1 style="margin: 0 0 24rpx 0; line-height: 1.8; color: rgba(255, 255, 255, 0.9); font-size: 28rpx;">'
     );
     
     // Style strong/bold text
@@ -394,24 +416,36 @@ Page({
     // Style blockquotes
     processedHtml = processedHtml.replace(
       /<blockquote([^>]*)>/g, 
-      '<blockquote$1 style="background: rgba(255, 107, 107, 0.1); border-left: 4rpx solid #ff6b6b; margin: 16rpx 0; padding: 16rpx 24rpx; border-radius: 8rpx;">'
+      '<blockquote$1 style="background: rgba(255, 107, 107, 0.1); border-left: 4rpx solid #ff6b6b; margin: 24rpx 0; padding: 24rpx; border-radius: 8rpx; color: rgba(255, 255, 255, 0.85); font-style: italic;">'
     );
     
     // Style code
     processedHtml = processedHtml.replace(
       /<code([^>]*)>/g, 
-      '<code$1 style="background: rgba(255, 159, 67, 0.2); color: #8B4513; padding: 4rpx 8rpx; border-radius: 4rpx; font-family: monospace;">'
+      '<code$1 style="background: rgba(255, 159, 67, 0.2); color: #ffab3d; padding: 4rpx 8rpx; border-radius: 4rpx; font-family: monospace; font-size: 24rpx;">'
     );
     
-    // Style lists
+    // Style lists - changed color to light for dark background
     processedHtml = processedHtml.replace(
       /<(ul|ol)([^>]*)>/g, 
-      '<$1$2 style="margin: 16rpx 0; padding-left: 32rpx; color: #2d1810;">'
+      '<$1$2 style="margin: 16rpx 0; padding-left: 32rpx; color: rgba(255, 255, 255, 0.9);">'
     );
     
     processedHtml = processedHtml.replace(
       /<li([^>]*)>/g, 
-      '<li$1 style="margin: 8rpx 0; line-height: 1.5;">'
+      '<li$1 style="margin: 8rpx 0; line-height: 1.6; color: rgba(255, 255, 255, 0.9); font-size: 28rpx;">'
+    );
+    
+    // Style divs (for better general content support)
+    processedHtml = processedHtml.replace(
+      /<div([^>]*)>/g, 
+      '<div$1 style="color: rgba(255, 255, 255, 0.9); font-size: 28rpx; line-height: 1.8;">'
+    );
+    
+    // Style spans (preserve inline formatting)
+    processedHtml = processedHtml.replace(
+      /<span([^>]*)>/g, 
+      '<span$1 style="color: rgba(255, 255, 255, 0.9);">'
     );
     
     return processedHtml;

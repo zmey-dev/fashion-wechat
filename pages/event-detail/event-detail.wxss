@@ -600,3 +600,47 @@
 .float-btn {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+/* Event Description Section */
+.event-description-section {
+  margin: 32rpx 20rpx;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 24rpx;
+  overflow: hidden;
+  border: 1rpx solid rgba(255, 255, 255, 0.1);
+}
+
+.description-header {
+  display: flex;
+  align-items: center;
+  padding: 24rpx 32rpx;
+  background: rgba(255, 107, 107, 0.1);
+  border-bottom: 1rpx solid rgba(255, 255, 255, 0.1);
+}
+
+.header-icon {
+  width: 32rpx;
+  height: 32rpx;
+  margin-right: 16rpx;
+  filter: invert(1) sepia(1) saturate(1) hue-rotate(320deg) brightness(1.2);
+}
+
+.header-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #ff6b6b;
+  letter-spacing: 0.5rpx;
+}
+
+.description-content {
+  padding: 32rpx;
+}
+
+.rich-text-content {
+  font-size: 28rpx;
+  line-height: 1.8;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Rich Text Styling - Styles are applied via JS processHtmlContent function */
+/* The styles below are for reference and applied inline in the JS */

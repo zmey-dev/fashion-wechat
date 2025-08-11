@@ -145,14 +145,16 @@
 /* Search Input */
 .search-input {
   flex: 1;
-  padding: 16rpx 24rpx;
+  padding: 0 24rpx;
   background: transparent;
   border: none;
   outline: none;
   font-size: 28rpx;
   color: #fff;
   height: 66rpx;
+  line-height: 66rpx;
   box-sizing: border-box;
+  vertical-align: middle;
 }
 
 .search-input.disabled {

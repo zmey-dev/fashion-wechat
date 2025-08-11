@@ -35,7 +35,7 @@
               <!-- Date Info -->
               <view wx:if="{{event.start_date && event.end_date}}" class="meta-item">
                 <image class="meta-icon calendar" src="/images/icons/calendar.svg"></image>
-                <text class="meta-text">{{formatEventDate(event.start_date)}} - {{formatEventDate(event.end_date)}}</text>
+                <text class="meta-text">{{event.formatted_start_date}} - {{event.formatted_end_date}}</text>
               </view>
               
               <!-- Current Time -->
@@ -60,7 +60,16 @@
         </view>
       </view>
 
-      <!-- Event Description section removed -->
+      <!-- Event Description Section -->
+      <view wx:if="{{event.description}}" class="event-description-section">
+        <view class="description-header">
+          <image class="header-icon" src="/images/icons/document-text.svg"></image>
+          <text class="header-title">活动详情</text>
+        </view>
+        <view class="description-content">
+          <rich-text class="rich-text-content" nodes="{{event.description}}"></rich-text>
+        </view>
+      </view>
 
       <!-- Posts Content Area -->
       <view class="content-area">
