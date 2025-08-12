@@ -1,5 +1,5 @@
 <wxs src="../../utils/userDisplayName.wxs" module="userUtils" />
-<app-layout current-page="discover" bind:search="onSearch">
+<app-layout current-page="index" search-params="{{searchParams}}" bind:search="onSearch">
   <!-- Main Content Area -->
   <view class="content-area" id="contentArea">
     <!-- Posts Grid -->
@@ -79,53 +79,4 @@
   <!-- Login Modal -->
   <login-modal wx:if="{{showLoginModal}}" bind:close="onLoginClose" bind:success="onLoginSuccess" />
   
-  <!-- User ID Modal -->
-  <view wx:if="{{showUserIdModal}}" class="user-id-modal-backdrop">
-    <view class="user-id-modal-dialog" catchtap="">
-      <view class="user-id-modal-content">
-        <!-- Close button -->
-        <div class="modal-close-btn" bindtap="onCloseUserIdModal">
-          <image class="close-icon" src="/images/icons/X.svg" mode="aspectFit"></image>
-        </div>
-
-        <!-- Header -->
-        <view class="modal-header">
-          <text class="modal-title">用户 ID</text>
-          <text class="modal-warning">
-            请注意：您当前的 ID 是 {{userInfo.username}}。
-            您只能更改一次您的用户 ID！
-          </text>
-        </view>
-
-        <!-- Form -->
-        <view class="modal-form">
-          <view class="form-group">
-            <text class="form-label">用户 ID</text>
-            <input 
-              class="form-input {{inputError ? 'error' : ''}}"
-              type="text"
-              value="{{userId}}"
-              bindinput="onUserIdInput"
-              placeholder="输入您的用户 ID (仅限英文)"
-              maxlength="30"
-            />
-            <text wx:if="{{inputError}}" class="error-message">{{inputError}}</text>
-            <text class="form-hint">只能使用英文字母、数字、下划线(_)、连字符(-)和点(.)</text>
-          </view>
-
-          <!-- Buttons -->
-          <view class="modal-actions">
-            <button class="modal-btn secondary" bindtap="onSkipUserIdModal">
-              跳过
-            </button>
-            <button class="modal-btn primary" bindtap="onSubmitUserId" disabled="{{submitLoading}}">
-              <view wx:if="{{submitLoading}}" class="btn-loading">
-                <view class="loading-spinner"></view>
-              </view>
-              <text wx:else>提交</text>
-            </button>
-          </view>
-        </view>
-      </view>    </view>
-  </view>
 </app-layout>

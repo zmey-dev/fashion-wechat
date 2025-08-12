@@ -244,3 +244,82 @@
 .search-button.disabled text {
   color: #666;
 }
+
+/* University Search Container */
+.university-search-container {
+  padding: 20rpx;
+  border-bottom: 1rpx solid #444;
+  background: #222;
+}
+
+.university-search-box {
+  display: flex;
+  align-items: center;
+  background: #1a1a1a;
+  border: 1rpx solid #666;
+  border-radius: 20rpx;
+  overflow: hidden;
+  height: 60rpx;
+}
+
+.university-search-box .search-icon {
+  padding: 0 16rpx;
+  font-size: 24rpx;
+  color: #999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 60rpx;
+}
+
+.university-search-input {
+  flex: 1;
+  padding: 0 16rpx;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 26rpx;
+  color: #fff;
+  height: 60rpx;
+  line-height: 60rpx;
+  box-sizing: border-box;
+}
+
+.university-search-input::placeholder {
+  color: #666;
+}
+
+.university-search-box .clear-icon {
+  padding: 0 16rpx;
+  font-size: 24rpx;
+  color: #999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 60rpx;
+  cursor: pointer;
+}
+
+.university-search-box .clear-icon:active {
+  color: #fff;
+}
+
+/* No Results and Limited Results Messages */
+.no-results-message,
+.limited-results-message {
+  padding: 20rpx 32rpx;
+  text-align: center;
+  color: #666;
+  font-size: 24rpx;
+  border-bottom: 1rpx solid #444;
+}
+
+.limited-results-message {
+  color: #ff6b6b;
+  font-size: 22rpx;
+}
+
+/* Adjust dropdown content max height to accommodate search */
+.dropdown-content {
+  max-height: 600rpx; /* Increased to accommodate search box */
+}

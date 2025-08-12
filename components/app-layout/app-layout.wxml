@@ -1,5 +1,5 @@
 <!-- app-layout.wxml -->
-<view class="app-layout {{isTeacher ? 'teacher-layout' : ''}} {{currentPage === 'discover' ? 'discover-page' : ''}}" data-layout-type="{{isTeacher ? 'teacher' : 'user'}}">  
+<view class="app-layout {{isTeacher ? 'teacher-layout' : ''}} {{currentPage === 'index' ? 'discover-page' : ''}}" data-layout-type="{{isTeacher ? 'teacher' : 'user'}}">  
   <!-- Top Filter Bar -->
   <view class="app-layout-header">
     <scroll-view class="filter-scroll" scroll-x="true" scroll-left="{{filterScrollLeft}}">
@@ -21,6 +21,7 @@
   <!-- Search Bar -->
   <search-bar 
     current-page="{{currentPage}}" 
+    search-params="{{effectiveSearchParams}}"
     bind:search="onSearch"
   ></search-bar>
 

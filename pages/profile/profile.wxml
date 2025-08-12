@@ -5,17 +5,18 @@
     <view class="avatar-section-horizontal">
       <view class="avatar-container-horizontal" bindtap="selectAvatar">
         <avatar class="avatar-medium" avatar="{{selectedAvatar || userInfo.avatar}}" user="{{userInfo}}" size="120" mode="aspectFill" />
-        <view class="avatar-overlay" wx:if="{{isEditingProfile}}">
+        <view class="avatar-overlay" wx:if="{{isEditingProfile || userInfo.role === 'company'}}">
           <text class="avatar-edit-icon">📷</text>
         </view>
       </view>
       <view class="user-info-horizontal">
         <text class="user-name-horizontal">{{userUtils.getDisplayName(userInfo)}}</text>
+        <text class="user-id-horizontal">ID: {{userInfo.username}}</text>
         <text class="user-university-horizontal">{{university.name || '未设置大学'}}</text>
       </view>
       
-      <!-- Edit/Cancel Buttons moved here -->
-      <view class="avatar-right-buttons">
+      <!-- Edit/Cancel Buttons (Hidden for company users) -->
+      <view class="avatar-right-buttons" wx:if="{{userInfo.role !== 'company'}}">
         <!-- Edit Mode: Show Save and Cancel buttons -->
         <view class="action-buttons-container" wx:if="{{isEditingProfile}}">
           <view class="action-button save-button" bindtap="saveProfile">
@@ -40,8 +41,95 @@
 
     <!-- Profile Form -->
     <view class="profile-form">
-      <!-- Basic Information -->
-      <view class="form-section">
+      <!-- Company Profile (Read-only except avatar and username) -->
+      <view wx:if="{{userInfo.role === 'company'}}" class="form-section">
+        <view class="section-title">企业信息</view>
+        
+        <!-- Username/User ID for Company -->
+        <view class="form-field" id="company-username-field" wx:if="{{userInfo.is_id_changed === false}}">
+          <label class="field-label">用户ID (仅能修改一次)</label>
+          <view class="input-wrapper">
+            <!-- View mode -->
+            <view wx:if="{{!isEditingUsername}}" class="username-display">
+              <text class="username-text">{{userInfo.username}}</text>
+              <view class="username-edit-btn" bindtap="startEditUsername">
+                <text class="edit-btn-text">编辑</text>
+              </view>
+            </view>
+            <!-- Edit mode -->
+            <view wx:else class="username-edit-container">
+              <input 
+                class="field-input {{usernameError ? 'error' : ''}}"
+                value="{{tempUsername}}"
+                placeholder="输入用户ID (仅限英文)"
+                bindinput="onUsernameInput"
+                maxlength="30"
+              />
+              <view class="username-actions">
+                <view class="username-action-btn save-btn" bindtap="submitUsernameChange">
+                  <text>保存</text>
+                </view>
+                <view class="username-action-btn cancel-btn" bindtap="cancelUsernameEdit">
+                  <text>取消</text>
+                </view>
+              </view>
+            </view>
+          </view>
+          <text class="error-text" wx:if="{{usernameError}}">{{usernameError}}</text>
+          <text class="hint-text">只能使用英文字母、数字、下划线(_)、连字符(-)和点(.)</text>
+        </view>
+
+        <!-- Company Name (Read-only) -->
+        <view class="form-field" id="company-name-field">
+          <label class="field-label">企业名称</label>
+          <view class="input-wrapper">
+            <view class="readonly-field">{{userInfo.company_name || '未设置'}}</view>
+          </view>
+        </view>
+
+        <!-- Email (Read-only) -->
+        <view class="form-field" id="company-email-field">
+          <label class="field-label">邮箱</label>
+          <view class="input-wrapper">
+            <view class="readonly-field">{{userInfo.email || '未设置'}}</view>
+          </view>
+        </view>
+
+        <!-- Phone (Read-only) -->
+        <view class="form-field" id="company-phone-field">
+          <label class="field-label">手机号</label>
+          <view class="input-wrapper">
+            <view class="readonly-field">{{userInfo.phone || '未设置'}}</view>
+          </view>
+        </view>
+
+        <!-- Company Address (Read-only) -->
+        <view class="form-field" id="company-address-field" wx:if="{{userInfo.company_address}}">
+          <label class="field-label">企业地址</label>
+          <view class="input-wrapper">
+            <view class="readonly-field">{{userInfo.company_address}}</view>
+          </view>
+        </view>
+
+        <!-- Business License (Read-only) -->
+        <view class="form-field" id="company-license-field" wx:if="{{userInfo.business_license}}">
+          <label class="field-label">营业执照号</label>
+          <view class="input-wrapper">
+            <view class="readonly-field">{{userInfo.business_license}}</view>
+          </view>
+        </view>
+
+        <!-- Registration Date (Read-only) -->
+        <view class="form-field" id="company-registration-field" wx:if="{{userInfo.created_at}}">
+          <label class="field-label">注册时间</label>
+          <view class="input-wrapper">
+            <view class="readonly-field">{{userInfo.created_at}}</view>
+          </view>
+        </view>
+      </view>
+
+      <!-- Student/Teacher Profile (Original form for non-company users) -->
+      <view wx:else class="form-section">
         <view class="section-title">基本信息</view>
           <!-- Name -->
         <view class="form-field" id="name-field">
@@ -73,6 +161,40 @@
             />
           </view>
           <text class="error-text" wx:if="{{profileErrors.nickname}}">{{profileErrors.nickname}}</text>
+        </view>
+
+        <!-- Username/User ID -->
+        <view class="form-field" id="username-field" wx:if="{{userInfo.is_id_changed === false}}">
+          <label class="field-label">用户ID (仅能修改一次)</label>
+          <view class="input-wrapper">
+            <!-- View mode -->
+            <view wx:if="{{!isEditingUsername}}" class="username-display">
+              <text class="username-text">{{userInfo.username}}</text>
+              <view class="username-edit-btn" bindtap="startEditUsername">
+                <text class="edit-btn-text">编辑</text>
+              </view>
+            </view>
+            <!-- Edit mode -->
+            <view wx:else class="username-edit-container">
+              <input 
+                class="field-input {{usernameError ? 'error' : ''}}"
+                value="{{tempUsername}}"
+                placeholder="输入用户ID (仅限英文)"
+                bindinput="onUsernameInput"
+                maxlength="30"
+              />
+              <view class="username-actions">
+                <view class="username-action-btn save-btn" bindtap="submitUsernameChange">
+                  <text>保存</text>
+                </view>
+                <view class="username-action-btn cancel-btn" bindtap="cancelUsernameEdit">
+                  <text>取消</text>
+                </view>
+              </view>
+            </view>
+          </view>
+          <text class="error-text" wx:if="{{usernameError}}">{{usernameError}}</text>
+          <text class="hint-text">只能使用英文字母、数字、下划线(_)、连字符(-)和点(.)</text>
         </view>
 
         <!-- Phone -->

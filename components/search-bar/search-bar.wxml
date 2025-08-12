@@ -4,7 +4,7 @@
     <!-- University Dropdown -->
     <view class="university-dropdown">
       <view 
-        class="dropdown-button {{isDiscoverPage ? '' : 'disabled'}}" 
+        class="dropdown-button" 
         bindtap="onUniversityTap"
       >
         <view class="dropdown-text">
@@ -16,9 +16,30 @@
       </view>
       
       <!-- Dropdown Menu -->
-      <view wx:if="{{showDropdown && isDiscoverPage}}" class="dropdown-menu">
+      <view wx:if="{{showDropdown}}" class="dropdown-menu">
         <view class="dropdown-mask" bindtap="onDropdownMaskTap"></view>
         <view class="dropdown-content">
+          <!-- University Search Input -->
+          <view class="university-search-container">
+            <view class="university-search-box">
+              <view class="search-icon">🔍</view>
+              <input 
+                class="university-search-input" 
+                type="text" 
+                placeholder="搜索大学名称" 
+                value="{{universitySearchText}}"
+                bindinput="onUniversitySearchInput"
+                confirm-type="search"
+              />
+              <view 
+                wx:if="{{universitySearchText}}" 
+                class="clear-icon" 
+                bindtap="onClearUniversitySearch"
+              >✕</view>
+            </view>
+          </view>
+          
+          <!-- All Universities Option -->
           <view 
             class="dropdown-item" 
             data-id="" 
@@ -26,14 +47,26 @@
           >
             <text>所有大学</text>
           </view>
+          
+          <!-- Filtered University List (Top 5) -->
           <view 
-            wx:for="{{universities}}" 
+            wx:for="{{filteredUniversities}}" 
             wx:key="id"
             class="dropdown-item" 
             data-id="{{item.id}}" 
             bindtap="onUniversitySelect"
           >
             <text>{{item.name}}</text>
+          </view>
+          
+          <!-- Show message when search has results -->
+          <view wx:if="{{universitySearchText && filteredUniversities.length === 0}}" class="no-results-message">
+            <text>未找到匹配的大学</text>
+          </view>
+          
+          <!-- Show message when showing limited results -->
+          <view wx:if="{{universitySearchText && filteredUniversities.length === 5}}" class="limited-results-message">
+            <text>显示前5个结果</text>
           </view>
         </view>
       </view>

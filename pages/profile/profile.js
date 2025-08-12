@@ -61,6 +61,10 @@ Page({
     emailVerificationError: "",
     phoneVerificationMessage: "",
     phoneVerificationError: "",
+    // Username editing state
+    isEditingUsername: false,
+    tempUsername: "",
+    usernameError: "",
     // Chinese messages for UI text
     messages: {
       loading: "加载中...",
@@ -279,7 +283,8 @@ Page({
 
   // Handle avatar selection with background upload
   selectAvatar: function () {
-    if (!this.data.isEditingProfile) return;
+    // Allow avatar selection for company users and users in editing mode
+    if (!this.data.isEditingProfile && this.data.userInfo.role !== 'company') return;
 
     wx.chooseMedia({
       count: 1,
@@ -602,11 +607,16 @@ Page({
           avatarUploadError: null
         });
         
-        wx.showToast({
-          title: "头像上传成功",
-          icon: "success",
-          duration: 1500
-        });
+        // For company users, automatically save avatar to server
+        if (this.data.userInfo.role === 'company') {
+          await this.saveCompanyAvatar(uploadResult.url);
+        } else {
+          wx.showToast({
+            title: "头像上传成功",
+            icon: "success",
+            duration: 1500
+          });
+        }
       } else {
         throw new Error("上传结果无效");
       }
@@ -809,6 +819,184 @@ Page({
       emailVerificationError: "",
       phoneVerificationMessage: "",
       phoneVerificationError: "",
+    });
+  },
+
+  // Save company avatar to server
+  saveCompanyAvatar: async function (avatarUrl) {
+    try {
+      wx.showLoading({
+        title: "保存头像中...",
+      });
+
+      const formData = new FormData();
+      formData.append("avatar_url", avatarUrl);
+
+      const response = await new Promise((resolve, reject) => {
+        wx.request({
+          url: `${config.BACKEND_URL}/update_profile`,
+          method: "POST",
+          header: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${this.data.userInfo.token}`,
+          },
+          data: {
+            avatar_url: avatarUrl
+          },
+          success: resolve,
+          fail: reject,
+        });
+      });
+
+      wx.hideLoading();
+
+      if (response.statusCode === 200 && response.data.status === "success") {
+        // Update user info
+        const updatedUserInfo = {
+          ...this.data.userInfo,
+          avatar: avatarUrl,
+        };
+
+        // Update global state
+        getApp().setState("userInfo", updatedUserInfo);
+        wx.setStorageSync("userInfo", updatedUserInfo);
+
+        // Update local state
+        this.setData({
+          userInfo: updatedUserInfo,
+          selectedAvatar: avatarUrl,
+        });
+
+        wx.showToast({
+          title: "头像保存成功",
+          icon: "success",
+          duration: 1500,
+        });
+      } else {
+        throw new Error(response.data.message || "保存失败");
+      }
+    } catch (error) {
+      wx.hideLoading();
+      console.error("Save company avatar failed:", error);
+      wx.showToast({
+        title: "头像保存失败",
+        icon: "none",
+        duration: 2000,
+      });
+    }
+  },
+
+  // Username editing functions
+  isEnglishOnly: function (text) {
+    // Allow letters, numbers, underscore, hyphen, and dot
+    const englishPattern = /^[a-zA-Z0-9._-]*$/;
+    return englishPattern.test(text);
+  },
+
+  onUsernameInput: function (e) {
+    const value = e.detail.value;
+    
+    // Only update if the input contains English characters only
+    if (this.isEnglishOnly(value)) {
+      this.setData({
+        tempUsername: value,
+        usernameError: "",
+      });
+    } else {
+      this.setData({
+        usernameError: "用户ID只能包含英文字母、数字、下划线(_)、连字符(-)和点(.)",
+      });
+    }
+  },
+
+  startEditUsername: function () {
+    this.setData({
+      isEditingUsername: true,
+      tempUsername: this.data.userInfo.username || "",
+      usernameError: "",
+    });
+  },
+
+  cancelUsernameEdit: function () {
+    this.setData({
+      isEditingUsername: false,
+      tempUsername: "",
+      usernameError: "",
+    });
+  },
+
+  submitUsernameChange: function () {
+    const { tempUsername } = this.data;
+
+    if (tempUsername.trim() === "") {
+      this.setData({
+        usernameError: "请输入用户ID",
+      });
+      return;
+    }
+
+    // Double check for English-only characters before submitting
+    if (!this.isEnglishOnly(tempUsername)) {
+      this.setData({
+        usernameError: "用户ID只能包含英文字母、数字、下划线(_)、连字符(-)和点(.)",
+      });
+      return;
+    }
+
+    wx.showLoading({
+      title: "更新中...",
+    });
+
+    wx.request({
+      url: `${config.BACKEND_URL}/update_user_id`,
+      method: "POST",
+      header: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${this.data.userInfo.token}`,
+      },
+      data: {
+        id: tempUsername,
+      },
+      success: (res) => {
+        wx.hideLoading();
+        if (res.statusCode === 200 && res.data.status === "success") {
+          // Update user info
+          const updatedUserInfo = {
+            ...this.data.userInfo,
+            is_id_changed: true,
+            username: tempUsername,
+          };
+
+          // Update global state
+          getApp().setState("userInfo", updatedUserInfo);
+          wx.setStorageSync("userInfo", updatedUserInfo);
+
+          // Update local state
+          this.setData({
+            userInfo: updatedUserInfo,
+            isEditingUsername: false,
+            tempUsername: "",
+            usernameError: "",
+          });
+
+          wx.showToast({
+            title: "用户ID更新成功",
+            icon: "success",
+          });
+        } else {
+          const errorMsg = res.data.message || "更新失败，请重试";
+          this.setData({
+            usernameError: errorMsg,
+          });
+        }
+      },
+      fail: (err) => {
+        wx.hideLoading();
+        const errorMsg = "网络错误，请重试";
+        this.setData({
+          usernameError: errorMsg,
+        });
+      },
     });
   },
 

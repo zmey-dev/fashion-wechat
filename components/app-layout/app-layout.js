@@ -9,8 +9,21 @@ Component({
     currentPage: {
       type: String,
       value: "",
-      observer: function (newVal) {
+      observer: function (newVal, oldVal) {
+        console.log('currentPage changed from', oldVal, 'to', newVal);
         this.scrollToCurrentPage();
+        // effectiveSearchParams update is handled by the 'currentPage, searchParams' observer
+      },
+    },
+    // Search parameters from parent page (e.g., index page)
+    searchParams: {
+      type: Object,
+      value: {},
+      observer: function (newParams, oldParams) {
+        console.log('=== app-layout searchParams observer ===');
+        console.log('newParams:', newParams);
+        console.log('oldParams:', oldParams);
+        // The actual logic is handled by the 'currentPage, searchParams' observer
       },
     },
   },
@@ -26,7 +39,7 @@ Component({
     pages: [
       // Filter pages (top navigation)
       {
-        key: "discover",
+        key: "index",
         name: "精选",
         path: "/pages/index/index",
         type: "filter",
@@ -92,8 +105,8 @@ Component({
     ], // Teacher pages configuration - only filter pages (top bar only)
     teacherPages: [
       {
-        key: "discover",
-        name: "精选",
+        key: "index",
+        name: "精선",
         path: "/pages/index/index",
         type: "filter",
       },
@@ -135,6 +148,12 @@ Component({
     // Computed properties for template
     filterPages: [],
     tabPages: [],
+    
+    // Search parameters for search-bar component
+    searchParams: {},
+    
+    // Computed effective search parameters (only for index page)
+    effectiveSearchParams: {},
   },
 
   /**
@@ -146,6 +165,15 @@ Component({
       this.setData({
         filterPages: pages.filter((page) => page.type === "filter"),
         tabPages: pages.filter((page) => page.type === "tab"),
+      });
+    },
+    
+    'currentPage, searchParams': function(currentPage, searchParams) {
+      // Update effective search parameters based on current page
+      const effectiveParams = currentPage === 'index' ? (searchParams || {}) : {};
+      console.log('Updating effectiveSearchParams:', effectiveParams, 'for page:', currentPage);
+      this.setData({
+        effectiveSearchParams: effectiveParams
       });
     },
   },
@@ -232,12 +260,76 @@ Component({
    */,
   methods: {
     /**
-     * Search event handler
+     * Search event handler - unified for all pages
      */
     onSearch: function(e) {
       const searchParams = e.detail;
-      // Emit search event to parent page
-      this.triggerEvent('search', searchParams);
+      const currentPage = this.data.currentPage;
+      
+      console.log('=== app-layout onSearch START ===');
+      console.log('Received searchParams:', searchParams);
+      console.log('searchParams type:', typeof searchParams);
+      console.log('searchParams keys:', Object.keys(searchParams || {}));
+      console.log('currentPage:', currentPage);
+      console.log('=====================================');
+      
+      if (currentPage === 'index') {
+        // If on index page, emit search event to parent page
+        console.log('Current page is index, emitting search to parent');
+        this.triggerEvent('search', searchParams);
+      } else {
+        // If on other pages, navigate to index page with search params
+        console.log('Current page is not index (', currentPage, '), navigating to index');
+        this.navigateToIndexWithSearch(searchParams);
+      }
+    },
+
+    /**
+     * Navigate to index page with search parameters
+     */
+    navigateToIndexWithSearch: function(searchParams) {
+      console.log('navigateToIndexWithSearch called with params:', searchParams);
+      console.log('searchParams type:', typeof searchParams);
+      console.log('searchParams keys:', Object.keys(searchParams));
+      
+      // Build URL with query parameters
+      let url = '/pages/index/index';
+      const queryParams = [];
+      
+      if (searchParams.search) {
+        const encodedSearch = encodeURIComponent(searchParams.search);
+        queryParams.push(`search=${encodedSearch}`);
+        console.log('Added search param:', searchParams.search, '-> encoded:', encodedSearch);
+      }
+      if (searchParams.university_id) {
+        queryParams.push(`university_id=${searchParams.university_id}`);
+        console.log('Added university_id param:', searchParams.university_id);
+      }
+      
+      if (queryParams.length > 0) {
+        url += '?' + queryParams.join('&');
+      }
+      
+      console.log('Final URL:', url);
+      console.log('Query params array:', queryParams);
+      
+      wx.redirectTo({
+        url: url,
+        success: () => {
+          console.log('Successfully navigated to index page with URL params');
+          // Don't set pendingSearch when URL params are used successfully
+          // URL params have higher priority than pendingSearch
+          console.log('URL params used, not setting pendingSearch');
+        },
+        fail: (err) => {
+          console.error('Failed to navigate to index page:', err);
+          // Only set pendingSearch as fallback if URL navigation fails
+          if (searchParams.search || searchParams.university_id) {
+            console.log('Navigation failed, setting pendingSearch as fallback:', searchParams);
+            getApp().globalData.pendingSearch = searchParams;
+          }
+        }
+      });
     },
 
     /**
@@ -249,7 +341,7 @@ Component({
 
       // Find page configuration
       const pageConfig = this.data.pages.find((item) => item.key === page);
-      if (!pageConfig) return;      // Pages that require login authentication (except discover)
+      if (!pageConfig) return;      // Pages that require login authentication (except index)
       const needLoginPages = [
         "recommend",
         "follow",
@@ -274,9 +366,9 @@ Component({
       }
 
       // Check if clicking on currently active page
-      // Only allow redirection for "discover" page when already active
-      if (this.data.currentPage === page && page !== "discover") {
-        // Don't navigate if it's the same page and not discover page
+      // Only allow redirection for "index" page when already active
+      if (this.data.currentPage === page && page !== "index") {
+        // Don't navigate if it's the same page and not index page
         return;
       }
 
@@ -290,7 +382,7 @@ Component({
         // Special handling for upload page when coming from event pages
         if (page === "upload") {
           this.handleUploadNavigation();
-        } else if (page === "discover") {
+        } else if (page === "index") {
           this.redirectToPage(pageConfig.path);
         } else {
           this.navigateToPage(pageConfig.path);
@@ -324,7 +416,7 @@ Component({
     },
 
     /**
-     * Page redirect handler (for discover page)
+     * Page redirect handler (for index page)
      */
     redirectToPage: function (path) {
       wx.redirectTo({

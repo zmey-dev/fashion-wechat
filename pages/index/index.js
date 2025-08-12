@@ -13,10 +13,6 @@ Page({
     showScrollTop: false,
     scrollTopAnimating: false,
     existPostIds: [],
-    showUserIdModal: false,
-    userId: "",
-    inputError: "",
-    submitLoading: false,
     // Search parameters
     searchParams: {},
     messages: {
@@ -51,19 +47,49 @@ Page({
     };
     app.subscribe("showLoginModal", this.loginModalHandler);
 
+    // Check if there are search parameters in URL
+    if (options.search || options.university_id) {
+      const searchParams = {};
+      if (options.search) searchParams.search = decodeURIComponent(options.search);
+      if (options.university_id) searchParams.university_id = options.university_id;
+      
+      console.log('onLoad - URL search params:', searchParams);
+      console.log('onLoad - Raw options:', options);
+      this.setData({ searchParams });
+      
+      // Clear any existing pendingSearch since URL params take priority
+      if (app.globalData.pendingSearch) {
+        console.log('onLoad - Clearing pendingSearch due to URL params:', app.globalData.pendingSearch);
+        app.globalData.pendingSearch = null;
+      }
+    }
+
     // Initial post loading
     this.initializePage();
-    this.checkUserIdModal();
   },
 
   onShow: function () {
-    // Check for pending search from other pages
-    if (app.globalData.pendingSearch) {
+    // Check if we already have searchParams from URL (onLoad)
+    // If so, don't process pendingSearch to avoid overriding URL params
+    const hasUrlParams = this.data.searchParams && (this.data.searchParams.search || this.data.searchParams.university_id);
+    
+    console.log('onShow - hasUrlParams:', hasUrlParams);
+    console.log('onShow - current searchParams:', this.data.searchParams);
+    console.log('onShow - pendingSearch:', app.globalData.pendingSearch);
+    
+    if (!hasUrlParams && app.globalData.pendingSearch) {
+      // Only use pendingSearch if we don't have URL params
       const searchParams = app.globalData.pendingSearch;
+      console.log('Processing pendingSearch:', searchParams);
       this.setData({ searchParams });
       this.handleRefresh();
       // Clear the pending search
       app.globalData.pendingSearch = null;
+    } else if (hasUrlParams) {
+      // URL params take priority, clear pendingSearch and refresh
+      console.log('URL params found, clearing pendingSearch and refreshing');
+      app.globalData.pendingSearch = null;
+      this.handleRefresh();
     }
     // Check if posts need to be refreshed
     else if (app.globalData.refreshPosts) {
@@ -88,144 +114,6 @@ Page({
     }
   },
 
-  checkUserIdModal() {
-    const userInfo = getApp().globalData.userInfo;
-    if (
-      userInfo &&
-      (userInfo.role === "teacher" || userInfo.role === "user") &&
-      userInfo.is_id_changed === false
-    ) {
-      this.setData({
-        showUserIdModal: true,
-      });
-    }
-  },
-
-  isEnglishOnly(text) {
-    // Allow letters, numbers, underscore, hyphen, and dot
-    const englishPattern = /^[a-zA-Z0-9._-]*$/;
-    return englishPattern.test(text);
-  },
-
-  onUserIdInput(e) {
-    const value = e.detail.value;
-
-    // Only update if the input contains English characters only
-    if (this.isEnglishOnly(value)) {
-      this.setData({
-        userId: value,
-        inputError: "",
-      });
-    } else {
-      this.setData({
-        inputError: "用户ID只能包含英文字母、数字、下划线(_)、连字符(-)和点(.)",
-      });
-    }
-  },
-
-  onCloseUserIdModal() {
-    this.setData({
-      showUserIdModal: false,
-      userId: "",
-      inputError: "",
-    });
-  },
-
-  // Skip user ID modal
-  onSkipUserIdModal() {
-    this.onCloseUserIdModal();
-  },
-
-  // Handle user ID change request
-  handleChangeUserId: function (id) {
-    return new Promise((resolve, reject) => {
-      this.setData({ submitLoading: true });
-
-      wx.request({
-        url: `${config.BACKEND_URL}/update_user_id`,
-        method: "POST",
-        header: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${getApp().globalData.userInfo.token}`,
-        },
-        data: {
-          id: id,
-        },
-        success: (res) => {
-          if (res.statusCode === 200 && res.data.status === "success") {
-            // Update user info
-            const updatedUserInfo = {
-              ...getApp().globalData.userInfo,
-              is_id_changed: true,
-              username: id,
-            };
-
-            getApp().globalData.userInfo = updatedUserInfo;
-
-            // Update local storage
-            wx.setStorageSync("userInfo", updatedUserInfo);
-
-            // Close modal
-            this.setData({
-              showUserIdModal: false,
-              userId: "",
-              inputError: "",
-              userInfo: updatedUserInfo,
-            });
-
-            wx.showToast({
-              title: "用户ID更新成功",
-              icon: "success",
-            });
-
-            resolve(res.data);
-          } else {
-            const errorMsg = res.data.message || "更新失败，请重试";
-            this.setData({
-              inputError: errorMsg,
-            });
-            reject(new Error(errorMsg));
-          }
-        },
-        fail: (err) => {
-          const errorMsg = "网络错误，请重试";
-          this.setData({
-            inputError: errorMsg,
-          });
-          reject(new Error(`${errorMsg}: ${err.errMsg}`));
-        },
-        complete: () => {
-          this.setData({ submitLoading: false });
-        },
-      });
-    });
-  },
-
-  // Submit user ID
-  onSubmitUserId() {
-    const { userId } = this.data;
-
-    if (userId.trim() === "") {
-      this.setData({
-        inputError: "请输入用户 ID 或点击跳过",
-      });
-      return;
-    }
-
-    // Double check for English-only characters before submitting
-    if (!this.isEnglishOnly(userId)) {
-      this.setData({
-        inputError: "用户ID只能包含英文字母、数字、下划线(_)、连字符(-)和点(.)",
-      });
-      return;
-    }
-
-    this.handleChangeUserId(userId)
-      .then(() => {
-      })
-      .catch((error) => {
-      });
-  },
 
   loadPosts: function (refresh = false) {
     // Prevent duplicate loading

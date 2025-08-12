@@ -218,4 +218,5 @@ Page({
   closeSidebar: function () {
     this.setState("showSidebar", false);
   },
+
 });
