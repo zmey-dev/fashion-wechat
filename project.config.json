@@ -1,5 +1,5 @@
 {
-  "description": "Fashion Show Platform - WeChat Mini App",
+  "description": "XiaoShow Platform - WeChat Mini App",
   "setting": {
     "urlCheck": false,
     "es6": true,
@@ -41,7 +41,7 @@
   "compileType": "miniprogram",
   "libVersion": "3.8.9",
   "appid": "wx5247084ab8d78608",
-  "projectname": "fashion-show-platform",
+  "projectname": "XiaoShow-platform",
   "condition": {
     "search": {
       "list": []

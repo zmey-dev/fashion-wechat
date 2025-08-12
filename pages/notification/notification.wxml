@@ -1,6 +1,6 @@
 <!-- pages/notification/notification.wxml -->
 <app-layout current-page="notification">
-  <view class="notification-container">
+  <view class="notification-container {{userInfo.role === 'teacher' ? 'teacher-layout' : ''}}">
   <!-- Header -->
   <view class="header">
     <text class="header-title">通知</text>

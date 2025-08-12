@@ -1,12 +1,13 @@
+<wxs src="../../utils/userDisplayName.wxs" module="userUtils" />
 <app-layout current-page="">
   <!-- User Profile Container -->
-  <view class="user-profile-container" wx:if="{{currentUser && !error}}">
+  <view class="user-profile-container {{userInfo.role === 'teacher' ? 'teacher-layout' : ''}}" wx:if="{{currentUser && !error}}">
     <!-- User Profile Header -->
     <view class="profile-header">
       <view class="profile-info">
-        <avatar class="profile-avatar" avatar="{{currentUser.avatar}}" name="{{currentUser.nickname}}" size="{{80}}" mode="aspectFill"></avatar>
+        <avatar class="profile-avatar" avatar="{{currentUser.avatar}}" user="{{currentUser}}" size="{{80}}" mode="aspectFill"></avatar>
         <view class="profile-details">
-          <text class="profile-username">@{{currentUser.nickname}}</text>
+          <text class="profile-username">@{{userUtils.getDisplayName(currentUser)}}</text>
           <text class="profile-university">{{(currentUser.university && currentUser.university.name) || '未设置大学'}}</text>
           <text class="profile-faculty">{{currentUser.faculty || '未设置学院'}}</text>
         </view>

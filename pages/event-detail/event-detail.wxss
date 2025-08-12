@@ -3,12 +3,17 @@
 /* Event Detail Container */
 .event-detail-container {
   width: 100%;
-  height: calc(100vh - 240rpx);
+  height: calc(100vh - 320rpx);
   position: relative;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   background: #0d0d0d;
+}
+
+/* Teacher layout - smaller container height */
+.event-detail-container.teacher-layout {
+  height: calc(100vh - 200rpx);
 }
 
 .content-wrapper {
@@ -22,7 +27,7 @@
 /* Base Container */
 .page-container {
   width: 100%;
-  min-height: 100vh;
+  min-height: calc(100vh - 80rpx);
   background: #0d0d0d;
   color: #ffffff;
   overflow-x: hidden;

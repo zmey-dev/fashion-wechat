@@ -1,0 +1,70 @@
+/**
+ * WXS 유틸리티 - 사용자 유형에 따른 이름 표시
+ */
+
+/**
+ * 사용자 유형에 따라 표시할 이름을 반환
+ * @param {Object} user - 사용자 객체
+ * @returns {string} - 표시할 이름
+ */
+function getDisplayName(user) {
+  if (!user) {
+    return '';
+  }
+
+  // company 역할인 경우 company_name 우선 사용
+  if (user.role === 'company') {
+    // Check all possible name fields for company
+    if (user.company_name && user.company_name.length > 0) {
+      return user.company_name;
+    }
+    if (user.nickname && user.nickname.length > 0) {
+      return user.nickname;
+    }
+    if (user.name && user.name.length > 0) {
+      return user.name;
+    }
+    // If all are empty, return a default
+    return 'Company';
+  }
+
+  // user, teacher 및 기타 역할인 경우 nickname 우선 사용
+  return user.nickname || user.name || 'User';
+}
+
+/**
+ * 짧은 이름 표시 (최대 길이 제한)
+ * @param {Object} user - 사용자 객체
+ * @param {number} maxLength - 최대 길이 (기본값: 12)
+ * @returns {string} - 잘린 이름
+ */
+function getShortDisplayName(user, maxLength) {
+  if (!maxLength) {
+    maxLength = 12;
+  }
+
+  var name = getDisplayName(user);
+  if (name.length > maxLength) {
+    return name.substring(0, maxLength) + '...';
+  }
+  return name;
+}
+
+/**
+ * 이름의 첫 글자 또는 이니셜 반환 (아바타 등에서 사용)
+ * @param {Object} user - 사용자 객체
+ * @returns {string} - 이름의 첫 글자
+ */
+function getNameInitial(user) {
+  var name = getDisplayName(user);
+  if (name && name.length > 0) {
+    return name.substring(0, 1).toUpperCase();
+  }
+  return '';
+}
+
+module.exports = {
+  getDisplayName: getDisplayName,
+  getShortDisplayName: getShortDisplayName,
+  getNameInitial: getNameInitial
+};

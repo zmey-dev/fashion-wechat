@@ -1,5 +1,5 @@
 .register-container {
-  min-height: 100vh;
+  min-height: calc(100vh - 80rpx);
   background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
   padding: 40rpx 30rpx;
   color: #fff;

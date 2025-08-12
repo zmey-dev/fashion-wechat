@@ -99,8 +99,6 @@ Component({
     },
 
     onFilterInput(e) {
-      if (!this.data.isDiscoverPage) return;
-      
       this.setData({
         filter: e.detail.value
       });
@@ -137,39 +135,54 @@ Component({
     },
 
     onSearchTap() {
-      if (!this.data.isDiscoverPage) return;
       this.handleSearch();
     },
 
     onClearTap() {
-      if (!this.data.isDiscoverPage) return;
-      
       this.setData({
         filter: "",
         selectedUniversity: ""
       });
       
-      // Trigger search with cleared parameters
-      this.triggerEvent('search', {
-        search: "",
-        university_id: ""
-      });
+      // Only trigger search if on discover page
+      if (this.data.isDiscoverPage) {
+        this.triggerEvent('search', {
+          search: "",
+          university_id: ""
+        });
+      }
     },
 
     handleSearch() {
-      const { filter, selectedUniversity } = this.data;
+      const { filter, selectedUniversity, isDiscoverPage } = this.data;
       
       // Build search parameters
       const params = {};
       if (filter) params.search = filter;
       if (selectedUniversity) params.university_id = selectedUniversity;
       
-      // Emit search event to parent
-      this.triggerEvent('search', params);
+      if (isDiscoverPage) {
+        // If on discover page, emit search event to parent
+        this.triggerEvent('search', params);
+      } else {
+        // If on other pages, navigate to discover page with search params
+        this.navigateToDiscover(params);
+      }
+    },
+
+    navigateToDiscover(params) {
+      wx.switchTab({
+        url: '/pages/index/index',
+        success: () => {
+          // Store search params for the discover page to pick up
+          if (params.search || params.university_id) {
+            getApp().globalData.pendingSearch = params;
+          }
+        }
+      });
     },
 
     onKeyboardConfirm() {
-      if (!this.data.isDiscoverPage) return;
       this.handleSearch();
     }
   }

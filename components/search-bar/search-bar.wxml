@@ -1,6 +1,6 @@
 <!-- search-bar.wxml -->
-<view class="search-bar-container" wx:if="{{currentPage === 'discover'}}">
-  <view class="search-bar {{isDiscoverPage ? 'active' : 'disabled'}}">
+<view class="search-bar-container">
+  <view class="search-bar {{isDiscoverPage ? 'active' : 'other-page'}}">
     <!-- University Dropdown -->
     <view class="university-dropdown">
       <view 
@@ -41,18 +41,17 @@
 
     <!-- Search Input -->
     <input 
-      class="search-input {{isDiscoverPage ? '' : 'disabled'}}"
+      class="search-input"
       type="text"
       placeholder="搜索你感兴趣的内容"
       value="{{filter}}"
       bindinput="onFilterInput"
       bindconfirm="onKeyboardConfirm"
-      disabled="{{!isDiscoverPage}}"
     />
 
     <!-- Clear Button -->
     <view 
-      wx:if="{{hasFilters && isDiscoverPage}}" 
+      wx:if="{{hasFilters}}" 
       class="clear-button" 
       bindtap="onClearTap"
     >
@@ -61,7 +60,7 @@
 
     <!-- Search Button -->
     <view 
-      class="search-button {{isDiscoverPage ? '' : 'disabled'}}" 
+      class="search-button" 
       bindtap="onSearchTap"
     >
       <image src="/images/icons/search.svg" mode="aspectFit" />

@@ -1,5 +1,5 @@
 <app-layout current-page="upload" background="#1a1a1a">
-  <view class="upload-container">
+  <view class="upload-container {{userInfo.role === 'teacher' ? 'teacher-layout' : ''}}">
     <view class="main-content">
       <view class="tab-nav" wx:if="{{activeTab !== 'annotation'}}">
         <view 

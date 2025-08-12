@@ -3,13 +3,19 @@
 /* Container styles */
 .upload-container {
   width: 100%;
-  height: calc(100vh - 240rpx - env(safe-area-inset-bottom));
-  height: calc(100vh - 240rpx - constant(safe-area-inset-bottom)); /* iOS 11.0 fallback */
+  height: calc(100vh - 320rpx - env(safe-area-inset-bottom));
+  height: calc(100vh - 320rpx - constant(safe-area-inset-bottom)); /* iOS 11.0 fallback */
   display: flex;
   flex-direction: column;
   position: relative;
   overflow: hidden;
   background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+}
+
+/* Teacher layout - smaller container height */
+.upload-container.teacher-layout {
+  height: calc(100vh - 200rpx - env(safe-area-inset-bottom));
+  height: calc(100vh - 200rpx - constant(safe-area-inset-bottom)); /* iOS 11.0 fallback */
 }
 
 .container {

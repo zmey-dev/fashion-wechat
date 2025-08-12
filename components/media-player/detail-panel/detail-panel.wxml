@@ -1,4 +1,5 @@
 <!-- components/detail-panel/detail-panel.wxml -->
+<wxs src="../../../utils/userDisplayName.wxs" module="userUtils" />
 <view 
   class="detail-panel {{ panelState }} {{ isDragging ? 'dragging' : '' }}" 
   wx:if="{{ currentPost && currentPostUser }}"
@@ -28,7 +29,7 @@
         data-index="0"
         bindtap="onTabChange"
       >
-        <text>{{ currentPostUser.nickname || 'User' }}的作品</text>
+        <text>{{ userUtils.getDisplayName(currentPostUser) || 'User' }}的作品</text>
       </view>
       <view
         class="tab-item {{ tabIndex === 1 ? 'active' : '' }}"

@@ -1,5 +1,5 @@
 <!-- app-layout.wxml -->
-<view class="app-layout {{isTeacher ? 'teacher-layout' : ''}} {{currentPage === 'discover' ? 'discover-page' : ''}}">  
+<view class="app-layout {{isTeacher ? 'teacher-layout' : ''}} {{currentPage === 'discover' ? 'discover-page' : ''}}" data-layout-type="{{isTeacher ? 'teacher' : 'user'}}">  
   <!-- Top Filter Bar -->
   <view class="app-layout-header">
     <scroll-view class="filter-scroll" scroll-x="true" scroll-left="{{filterScrollLeft}}">

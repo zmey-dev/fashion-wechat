@@ -18,13 +18,19 @@ page {
 
 /* Chat Container */
 .chat-container {
-  height: calc(100vh - 240rpx - env(safe-area-inset-bottom));
-  height: calc(100vh - 240rpx - constant(safe-area-inset-bottom)); /* iOS 11.0 fallback */
+  height: calc(100vh - 320rpx - env(safe-area-inset-bottom)); /* 240rpx (tab bar) + 80rpx (search bar) */
+  height: calc(100vh - 320rpx - constant(safe-area-inset-bottom)); /* iOS 11.0 fallback */
   width: 100%;
   position: relative;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+}
+
+/* Teacher layout - smaller container height (now includes search bar) */
+.chat-container.teacher-layout {
+  height: calc(100vh - 200rpx - env(safe-area-inset-bottom)); /* 120rpx (filter bar) + 80rpx (search bar) */
+  height: calc(100vh - 200rpx - constant(safe-area-inset-bottom)); /* iOS 11.0 fallback */
 }
 
 /* View States */

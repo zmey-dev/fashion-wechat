@@ -6,7 +6,7 @@
     <view class="user-avatar">
       <avatar
         avatar="{{ currentPostUser.avatar }}"
-        name="{{ currentPostUser.nickname }}"
+        user="{{ currentPostUser }}"
         size="80"
       ></avatar>
       <view

@@ -29,6 +29,11 @@
   background: #2a2a2a;
 }
 
+.search-bar.other-page {
+  border-color: #555;
+  background: #1a1a1a;
+}
+
 .search-bar.disabled {
   border-color: #444;
   background: #0f0f0f;

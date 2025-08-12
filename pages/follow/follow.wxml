@@ -1,7 +1,8 @@
 <!--pages/follow/follow.wxml-->
+<wxs src="../../utils/userDisplayName.wxs" module="userUtils" />
 <app-layout current-page="follow">
   <!-- Main content container -->
-  <view class="content-container">
+  <view class="content-container {{userInfo.role === 'teacher' ? 'teacher-layout' : ''}}">
     <!-- User List View -->
     <view class="user-list" wx:if="{{!showUserMedia}}">
       <!-- Search Bar -->
@@ -27,9 +28,9 @@
       
       <!-- User list items -->
       <view class="user-item" wx:for="{{filteredUserList}}" wx:key="id" bindtap="selectUser" data-id="{{item.id}}">
-        <avatar class="user-avatar" avatar="{{item.avatar}}" name="{{item.nickname}}" size="{{70}}" mode="aspectFill"></avatar>
+        <avatar class="user-avatar" avatar="{{item.avatar}}" user="{{item}}" size="{{70}}" mode="aspectFill"></avatar>
         <view class="user-info">
-          <text class="user-nickname">{{item.nickname}}</text>
+          <text class="user-nickname">{{userUtils.getShortDisplayName(item, 10)}}</text>
           <text class="user-followers">粉丝 {{item.followers}}人</text>
         </view>
         <view class="user-arrow">
@@ -47,9 +48,9 @@
         </view>
         <view class="user-profile-header">
           <view class="profile-info">
-            <avatar class="profile-avatar" avatar="{{currentUser.avatar}}" name="{{currentUser.nickname}}" size="{{80}}" mode="aspectFill"></avatar>
+            <avatar class="profile-avatar" avatar="{{currentUser.avatar}}" user="{{currentUser}}" size="{{80}}" mode="aspectFill"></avatar>
             <view class="profile-details">
-              <text class="profile-username">{{currentUser.name || currentUser.nickname}}</text>
+              <text class="profile-username">{{userUtils.getDisplayName(currentUser)}}</text>
               <text class="profile-university">{{(currentUser.university && currentUser.university.name) || '未设置大学'}}</text>
               <text class="profile-faculty">{{currentUser.faculty || '未设置学院'}}</text>
             </view>

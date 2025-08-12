@@ -2,14 +2,20 @@
 
 .notification-container {
   width: 100%;
-  height: calc(100vh - 240rpx - env(safe-area-inset-bottom));
-  height: calc(100vh - 240rpx - constant(safe-area-inset-bottom)); /* iOS 11.0 fallback */
+  height: calc(100vh - 320rpx - env(safe-area-inset-bottom));
+  height: calc(100vh - 320rpx - constant(safe-area-inset-bottom)); /* iOS 11.0 fallback */
   display: flex;
   flex-direction: column;
   position: relative;
   overflow: hidden;
   background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
   color: #ffffff;
+}
+
+/* Teacher layout - smaller container height */
+.notification-container.teacher-layout {
+  height: calc(100vh - 200rpx - env(safe-area-inset-bottom));
+  height: calc(100vh - 200rpx - constant(safe-area-inset-bottom)); /* iOS 11.0 fallback */
 }
 
 /* Header Styles */

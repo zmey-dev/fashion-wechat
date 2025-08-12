@@ -1,6 +1,5 @@
 /* app-layout.wxss */
 .app-layout {
-  display: flex;
   flex-direction: column;
   min-height: 100vh;
   background-color: #000;
@@ -133,31 +132,26 @@
 
 /* Content Area */
 .app-layout-content {
+  box-sizing: border-box;
   flex: 1;
-  position: relative;
+  position: fixed;
+  overflow-y: auto;
+  height:100vh;
+  width:100vw;
   padding-bottom: calc(120rpx + env(safe-area-inset-bottom)); /* Space for fixed tab bar + safe area */
   padding-bottom: calc(120rpx + constant(safe-area-inset-bottom)); /* iOS 11.0 fallback */
 }
 
-/* Different padding based on search bar visibility */
+/* Content area padding - now includes search bar on all pages */
 .app-layout-content {
-  padding-top: 120rpx; /* Default: only filter bar */
+  padding-top: 200rpx; /* Filter bar + search bar (now visible on all pages) */
 }
 
-/* When on discover page (search bar visible) */
-.app-layout.discover-page .app-layout-content {
-  padding-top: 200rpx; /* Filter bar + search bar */
-}
-
-/* Teacher layout - no bottom tab bar, so no bottom padding needed */
+/* Teacher layout - no bottom padding since no tab bar */
 .app-layout.teacher-layout .app-layout-content {
-  padding-top: 120rpx; /* Default: only filter bar */
-  padding-bottom: 0; /* Remove bottom padding for teacher layout */
-}
-
-/* Teacher layout on discover page */
-.app-layout.teacher-layout.discover-page .app-layout-content {
   padding-top: 200rpx; /* Filter bar + search bar */
+  padding-bottom: env(safe-area-inset-bottom); /* Only safe area for teacher layout */
+  padding-bottom: constant(safe-area-inset-bottom); /* iOS 11.0 fallback */
 }
 
 /* Tab Bar Styles */
@@ -502,6 +496,12 @@
   
   .app-layout-content {
     padding-bottom: calc(120rpx + max(env(safe-area-inset-bottom), 20rpx));
+  }
+  
+  /* Teacher layout - no bottom padding, only safe area */
+  .app-layout.teacher-layout .app-layout-content {
+    padding-top: 200rpx; /* Filter bar + search bar */
+    padding-bottom: max(env(safe-area-inset-bottom), 20rpx);
   }
 }
 

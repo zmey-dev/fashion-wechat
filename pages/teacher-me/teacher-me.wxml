@@ -1,3 +1,4 @@
+<wxs src="../../utils/userDisplayName.wxs" module="userUtils" />
 <app-layout current-page="me">
   <view class="container">
     <!-- Page header with tabs -->
@@ -82,12 +83,12 @@
           <avatar 
             class="student-avatar-large" 
             avatar="{{selectedStudent.avatar}}"
-            name="{{selectedStudent.name}}"
+            user="{{selectedStudent}}"
             mode="aspectFill"
             size="160"
           ></avatar>
-          <view class="student-name-large">{{selectedStudent.name}}</view>
-          <view class="student-username">@{{selectedStudent.nickname}}</view>
+          <view class="student-name-large">{{userUtils.getDisplayName(selectedStudent)}}</view>
+          <view class="student-username">@{{userUtils.getDisplayName(selectedStudent)}}</view>
         </view>
         
         <view class="student-details">
@@ -499,7 +500,7 @@
           </view>
         </view>
         <view class="avatar-info">
-          <text class="avatar-name">{{teacherProfile.name || teacherProfile.nickname}}</text>
+          <text class="avatar-name">{{userUtils.getDisplayName(teacherProfile)}}</text>
           <text class="avatar-university">{{university.name || '未设置大学'}}</text>
         </view>
       </view>

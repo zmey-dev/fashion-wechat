@@ -150,6 +150,11 @@
 .username-text {
   font-size: 26rpx;
   border-bottom: 2rpx solid rgba(255, 255, 255, 0.8);
+  max-width: 100rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
 }
 
 /* Action buttons */

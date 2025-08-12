@@ -1,6 +1,7 @@
 <!-- pages/chat/chat.wxml -->
+<wxs src="../../utils/userDisplayName.wxs" module="userUtils" />
 <app-layout current-page="chat">
-  <view class="chat-container">
+  <view class="chat-container {{userInfo.role === 'teacher' ? 'teacher-layout' : ''}}">
     <!-- Chat List View -->
     <view class="chat-list-view {{currentView === 'list' ? 'active' : 'hidden'}}">
     <!-- Search Bar -->
@@ -32,7 +33,7 @@
           <avatar 
             class="friend-avatar" 
             avatar="{{item.avatar}}"
-            name="{{item.nickname}}"
+            user="{{item}}"
             size="{{70}}"
             mode="aspectFill"
           />
@@ -46,7 +47,7 @@
         
         <view class="friend-content">
           <view class="friend-main">
-            <view class="friend-name">{{item.nickname}}</view>
+            <view class="friend-name">{{userUtils.getShortDisplayName(item, 8)}}</view>
             <view class="timestamp">{{item.timestamp || ''}}</view>
           </view>
           
@@ -79,14 +80,14 @@
           <avatar 
             class="user-avatar" 
             avatar="{{selectedUser.avatar}}"
-            name="{{selectedUser.nickname}}"
+            user="{{selectedUser}}"
             size="{{70}}"
             mode="aspectFill"
           />
           <view wx:if="{{selectedUser.status === 'online'}}" class="online-dot"></view>
         </view>
         <view class="user-info">
-          <view class="user-name">{{selectedUser.nickname}}</view>
+          <view class="user-name">{{userUtils.getDisplayName(selectedUser)}}</view>
           <!-- Show typing indicator in header when user is typing -->
           <view wx:if="{{friendsTyping[selectedUser.id]}}" class="header-typing">
             <text class="header-typing-text">正在输入</text>
@@ -125,7 +126,7 @@
               <avatar 
                 class="message-avatar" 
                 avatar="{{selectedUser.avatar}}"
-                name="{{selectedUser.nickname}}"
+                user="{{selectedUser}}"
                 size="{{70}}"
                 mode="aspectFill"
               />
@@ -147,7 +148,7 @@
               <avatar 
                 class="message-avatar" 
                 avatar="{{userInfo.avatar}}"
-                name="{{userInfo.nickname}}"
+                user="{{userInfo}}"
                 size="{{70}}"
                 mode="aspectFill"
               />

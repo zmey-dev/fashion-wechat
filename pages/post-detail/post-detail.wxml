@@ -4,7 +4,7 @@
   <login-modal wx:if="{{ showLoginModal }}" class="login-modal" />
   
   <!-- Post Viewer Container -->
-  <view class="post-viewer-container {{userInfo.role === 'teacher' ? 'teacher-container' : ''}}">
+  <view class="post-viewer-container {{userInfo.role === 'teacher' ? 'teacher-layout' : ''}}">
     <!-- Loading State - Show when loading (highest priority) -->
     <view wx:if="{{ isLoading }}" class="loading-container">
       <view class="loading-spinner"></view>

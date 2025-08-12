@@ -57,8 +57,16 @@ Page({
   },
 
   onShow: function () {
+    // Check for pending search from other pages
+    if (app.globalData.pendingSearch) {
+      const searchParams = app.globalData.pendingSearch;
+      this.setData({ searchParams });
+      this.handleRefresh();
+      // Clear the pending search
+      app.globalData.pendingSearch = null;
+    }
     // Check if posts need to be refreshed
-    if (app.globalData.refreshPosts) {
+    else if (app.globalData.refreshPosts) {
       this.handleRefresh();
       app.globalData.refreshPosts = false;
     } else if (!this.data.posts.length && !this.data.loading) {

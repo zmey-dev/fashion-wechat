@@ -3,7 +3,7 @@
 .page-container {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  min-height: calc(100vh - 80rpx);
   padding-top: 88rpx;
   padding-bottom: 110rpx;
 }
@@ -11,8 +11,12 @@
 .content-container {
   flex: 1;
   width: 100%;
-  height: calc(100vh - 240rpx);
   overflow-y: auto;
+}
+
+/* Teacher layout - smaller container height (now includes search bar) */
+.content-container.teacher-layout {
+  height: calc(100vh - 200rpx); /* 120rpx (filter bar) + 80rpx (search bar) */
 }
 
 .container {

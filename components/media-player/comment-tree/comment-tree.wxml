@@ -1,4 +1,5 @@
 <!-- comment-tree.wxml -->
+<wxs src="../../../utils/userDisplayName.wxs" module="userUtils" />
 <view class="comment-tree-container">
   <!-- Post Info Section -->
   <view wx:if="{{selectedPost.title || selectedPost.content}}" class="post-info-section">
@@ -45,11 +46,11 @@
           <avatar 
             class="reply-avatar" 
             src="{{replyToComment.sender.avatar || ''}}" 
-            name="{{replyToComment.sender.nickname || ''}}" 
+            user="{{replyToComment.sender}}" 
             mode="aspectFill"
           />
         </view>
-        <text class="reply-username">{{replyToComment.sender.nickname}}:</text>
+        <text class="reply-username">{{userUtils.getDisplayName(replyToComment.sender)}}:</text>
         <text wx:if="{{replyToComment.comment_text}}" class="reply-preview">
           {{replyToComment.comment_text}}
         </text>

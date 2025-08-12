@@ -1,3 +1,4 @@
+<wxs src="../../utils/userDisplayName.wxs" module="userUtils" />
 <app-layout current-page="discover" bind:search="onSearch">
   <!-- Main Content Area -->
   <view class="content-area" id="contentArea">
@@ -25,8 +26,8 @@
         <view class="user-section">
           <view class="user-info">
             <view class="user-row" catchtap="onUserTap" data-username="{{item.user.username}}" data-userId="{{item.user.id}}">
-              <avatar avatar="{{item.user.avatar}}" name="{{item.user.nickname}}" size="45"></avatar>
-              <text class="user-name">{{item.user.nickname}}</text>
+              <avatar avatar="{{item.user.avatar}}" user="{{item.user}}" size="45"></avatar>
+              <text class="user-name">{{userUtils.getShortDisplayName(item.user, 8)}}</text>
             </view>
           </view>
           <view class="like-display">

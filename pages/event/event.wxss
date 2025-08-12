@@ -3,8 +3,8 @@
 /* Reset and Base Styles */
 .app-container {
   width: 100%;
-  min-height: calc(100vh - env(safe-area-inset-bottom));
-  min-height: calc(100vh - constant(safe-area-inset-bottom)); /* iOS 11.0 fallback */
+  min-height: calc(100vh - 80rpx - env(safe-area-inset-bottom));
+  min-height: calc(100vh - 80rpx - constant(safe-area-inset-bottom)); /* iOS 11.0 fallback */
   background: #0d0d0d;
   color: #e0e0e0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
@@ -12,20 +12,25 @@
 
 .event-container {
   width: 100%;
-  height: calc(100vh - 240rpx - env(safe-area-inset-bottom));
-  height: calc(100vh - 240rpx - constant(safe-area-inset-bottom)); /* iOS 11.0 fallback */
+  height: calc(100vh - 320rpx - env(safe-area-inset-bottom)); /* 240rpx (tab bar) + 80rpx (search bar) */
+  height: calc(100vh - 320rpx - constant(safe-area-inset-bottom)); /* iOS 11.0 fallback */
   display: flex;
   flex-direction: column;
   position: relative;
   overflow-y: auto;
-  background: #0d0d0d;
+}
+
+/* Teacher layout - smaller container height (now includes search bar) */
+.event-container.teacher-layout {
+  height: calc(100vh - 200rpx - env(safe-area-inset-bottom)); /* 120rpx (filter bar) + 80rpx (search bar) */
+  height: calc(100vh - 200rpx - constant(safe-area-inset-bottom)); /* iOS 11.0 fallback */
 }
 
 .page-container {
   display: flex;
   flex-direction: column;
-  min-height: calc(100vh - env(safe-area-inset-bottom));
-  min-height: calc(100vh - constant(safe-area-inset-bottom)); /* iOS 11.0 fallback */
+  min-height: calc(100vh - 80rpx - env(safe-area-inset-bottom));
+  min-height: calc(100vh - 80rpx - constant(safe-area-inset-bottom)); /* iOS 11.0 fallback */
   padding-top: 88rpx; 
   padding-bottom: 110rpx;
   background: #0d0d0d;

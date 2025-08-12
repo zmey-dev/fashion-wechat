@@ -1,4 +1,5 @@
 <!-- comment-item.wxml -->
+<wxs src="../../../utils/userDisplayName.wxs" module="userUtils" />
 <view class="comment-container" wx:key="comment-{{index}}">
   <view class="comment-header">
     <view wx:if="{{item && item.sender}}" class="user-info">
@@ -11,11 +12,11 @@
           <avatar
             class="avatar" 
             avatar="{{item.sender.avatar||''}}" 
-            name="{{item.sender.nickname}}"
+            user="{{item.sender}}"
             mode="aspectFill"
           />
         </view>
-        <text class="username">@{{eventId ? (item.sender && item.sender.nickname ? item.sender.nickname : (item.sender && item.sender.nickname ? item.sender.nickname : '')) : (item.sender && item.sender.nickname ? item.sender.nickname : '')}}</text>
+        <text class="username">@{{userUtils.getDisplayName(item.sender)}}</text>
       </navigator>
     </view>
     <text class="timestamp">{{createdTime}}</text>
