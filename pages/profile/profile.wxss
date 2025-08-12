@@ -948,3 +948,585 @@
     font-size: 22rpx;
   }
 }
+
+/* Company Profile Specific Styles */
+.edit-hint {
+  font-size: 24rpx;
+  color: #888;
+  font-weight: normal;
+}
+
+.changed-hint {
+  font-size: 24rpx;
+  color: #666;
+  font-weight: normal;
+}
+
+.username-display-readonly {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.username-text-readonly {
+  color: #ccc;
+  font-size: 32rpx;
+  font-family: monospace;
+}
+
+.readonly-hint {
+  font-size: 24rpx;
+  color: #888;
+  font-style: italic;
+}
+
+.description-field {
+  min-height: 80rpx;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.credit-code {
+  font-family: monospace;
+  letter-spacing: 2rpx;
+  font-size: 28rpx;
+}
+
+/* Enhanced Company Profile Styles */
+.company-profile-container {
+  display: flex;
+  flex-direction: column;
+  gap: 30rpx;
+  padding: 0;
+}
+
+/* Company Header Card */
+.company-header-card {
+  background: linear-gradient(135deg, rgba(255, 50, 50, 0.1), rgba(255, 107, 107, 0.05));
+  backdrop-filter: blur(20rpx);
+  border-radius: 24rpx;
+  padding: 40rpx 30rpx;
+  border: 2rpx solid rgba(255, 50, 50, 0.2);
+  box-shadow: 0 8rpx 32rpx rgba(255, 50, 50, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.company-header-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3rpx;
+  background: linear-gradient(90deg, transparent, #ff3232, transparent);
+}
+
+.company-logo-section {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+}
+
+.company-logo-placeholder {
+  width: 100rpx;
+  height: 100rpx;
+  background: linear-gradient(135deg, #ff3232, #ff6b6b);
+  border-radius: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6rpx 20rpx rgba(255, 50, 50, 0.3);
+}
+
+.logo-icon {
+  font-size: 48rpx;
+  color: white;
+}
+
+.company-basic-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.company-title {
+  font-size: 42rpx;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 1rpx;
+  line-height: 1.2;
+}
+
+.company-subtitle {
+  font-size: 28rpx;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+}
+
+.company-status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #10b981, #059669);
+  border-radius: 20rpx;
+  padding: 8rpx 16rpx;
+  align-self: flex-start;
+  margin-top: 8rpx;
+}
+
+.status-text {
+  font-size: 20rpx;
+  color: white;
+  font-weight: 600;
+  letter-spacing: 0.5rpx;
+}
+
+/* Enhanced Section Titles */
+.section-title-enhanced {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin-bottom: 40rpx;
+  padding-bottom: 20rpx;
+  border-bottom: 2rpx solid rgba(255, 50, 50, 0.2);
+}
+
+.section-icon {
+  font-size: 36rpx;
+  filter: drop-shadow(0 2rpx 8rpx rgba(255, 50, 50, 0.3));
+}
+
+.section-text {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 1rpx;
+}
+
+/* Enhanced Username Section */
+.company-username-section {
+  background: rgba(25, 25, 25, 0.8);
+}
+
+.form-field-enhanced {
+  margin-bottom: 0;
+}
+
+.field-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16rpx;
+}
+
+.field-label-enhanced {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #e2e8f0;
+  letter-spacing: 0.5rpx;
+}
+
+.edit-hint-enhanced {
+  font-size: 22rpx;
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.1);
+  padding: 4rpx 12rpx;
+  border-radius: 12rpx;
+  font-weight: 500;
+}
+
+.changed-hint-enhanced {
+  font-size: 22rpx;
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+  padding: 4rpx 12rpx;
+  border-radius: 12rpx;
+  font-weight: 500;
+}
+
+.input-wrapper-enhanced {
+  position: relative;
+  width: 100%;
+}
+
+.username-display-enhanced {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(30, 30, 30, 0.8);
+  border: 2rpx solid rgba(255, 255, 255, 0.1);
+  border-radius: 16rpx;
+  padding: 20rpx;
+  transition: all 0.3s ease;
+}
+
+.username-text-enhanced {
+  font-size: 32rpx;
+  color: #fff;
+  font-family: monospace;
+  letter-spacing: 1rpx;
+}
+
+.username-edit-btn-enhanced {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  padding: 12rpx 20rpx;
+  border-radius: 12rpx;
+  font-size: 24rpx;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4rpx 12rpx rgba(102, 126, 234, 0.3);
+}
+
+.username-edit-btn-enhanced:active {
+  transform: scale(0.95);
+}
+
+.edit-btn-icon {
+  font-size: 20rpx;
+}
+
+.username-display-readonly-enhanced {
+  background: rgba(20, 20, 20, 0.8);
+  border: 2rpx solid rgba(16, 185, 129, 0.3);
+  border-radius: 16rpx;
+  padding: 20rpx;
+}
+
+.username-text-readonly-enhanced {
+  font-size: 32rpx;
+  color: #e2e8f0;
+  font-family: monospace;
+  letter-spacing: 1rpx;
+  margin-bottom: 12rpx;
+  display: block;
+}
+
+.readonly-hint-enhanced {
+  font-size: 24rpx;
+  color: #10b981;
+  font-weight: 500;
+}
+
+.username-edit-container-enhanced {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.field-input-enhanced {
+  width: 100%;
+  height: 80rpx;
+  padding: 20rpx;
+  background: rgba(20, 20, 20, 0.8);
+  border: 2rpx solid rgba(255, 255, 255, 0.1);
+  border-radius: 16rpx;
+  color: #fff;
+  font-size: 30rpx;
+  transition: all 0.3s ease;
+}
+
+.field-input-enhanced:focus {
+  border-color: #ff3232;
+  background: rgba(25, 25, 25, 0.9);
+  box-shadow: 0 4rpx 20rpx rgba(255, 50, 50, 0.2);
+}
+
+.username-actions-enhanced {
+  display: flex;
+  gap: 12rpx;
+}
+
+.username-action-btn-enhanced {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  padding: 16rpx 20rpx;
+  border-radius: 12rpx;
+  font-size: 26rpx;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.username-action-btn-enhanced.save-btn {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  box-shadow: 0 4rpx 12rpx rgba(16, 185, 129, 0.3);
+}
+
+.username-action-btn-enhanced.cancel-btn {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  box-shadow: 0 4rpx 12rpx rgba(239, 68, 68, 0.3);
+}
+
+.username-action-btn-enhanced:active {
+  transform: scale(0.95);
+}
+
+.btn-icon {
+  font-size: 20rpx;
+}
+
+.hint-text-enhanced {
+  font-size: 22rpx;
+  color: #64748b;
+  margin-top: 12rpx;
+  padding: 12rpx 16rpx;
+  background: rgba(100, 116, 139, 0.1);
+  border-radius: 12rpx;
+  border-left: 4rpx solid #64748b;
+}
+
+/* Company Details Section */
+.company-details-section {
+  background: rgba(25, 25, 25, 0.8);
+}
+
+.company-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20rpx;
+  margin-bottom: 30rpx;
+}
+
+.company-info-card {
+  background: rgba(30, 30, 30, 0.6);
+  border: 2rpx solid rgba(255, 255, 255, 0.05);
+  border-radius: 16rpx;
+  padding: 24rpx;
+  transition: all 0.3s ease;
+}
+
+.company-info-card:hover {
+  border-color: rgba(255, 50, 50, 0.2);
+  background: rgba(35, 35, 35, 0.8);
+}
+
+.info-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-bottom: 16rpx;
+}
+
+.info-icon {
+  font-size: 28rpx;
+  filter: drop-shadow(0 2rpx 8rpx rgba(255, 50, 50, 0.2));
+}
+
+.info-label {
+  font-size: 24rpx;
+  color: #94a3b8;
+  font-weight: 600;
+  letter-spacing: 0.5rpx;
+}
+
+.info-value {
+  font-size: 28rpx;
+  color: #e2e8f0;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* Address and Description Sections */
+.company-address-section,
+.company-description-section {
+  background: rgba(30, 30, 30, 0.6);
+  border: 2rpx solid rgba(255, 255, 255, 0.05);
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-top: 20rpx;
+}
+
+.address-header,
+.description-header {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-bottom: 16rpx;
+}
+
+.address-icon,
+.description-icon {
+  font-size: 28rpx;
+  filter: drop-shadow(0 2rpx 8rpx rgba(255, 50, 50, 0.2));
+}
+
+.address-label,
+.description-label {
+  font-size: 26rpx;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.address-content,
+.description-content {
+  padding: 16rpx 20rpx;
+  background: rgba(20, 20, 20, 0.5);
+  border-radius: 12rpx;
+  border-left: 4rpx solid #ff3232;
+}
+
+.address-text,
+.description-text {
+  font-size: 28rpx;
+  color: #e2e8f0;
+  line-height: 1.6;
+  font-weight: 400;
+}
+
+/* Legal Information Section */
+.company-legal-section {
+  background: rgba(25, 25, 25, 0.8);
+}
+
+.legal-info-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+}
+
+.legal-info-item {
+  background: rgba(30, 30, 30, 0.6);
+  border: 2rpx solid rgba(255, 255, 255, 0.05);
+  border-radius: 16rpx;
+  padding: 24rpx;
+}
+
+.legal-item-header {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-bottom: 16rpx;
+}
+
+.legal-icon {
+  font-size: 28rpx;
+  filter: drop-shadow(0 2rpx 8rpx rgba(255, 50, 50, 0.2));
+}
+
+.legal-label {
+  font-size: 26rpx;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.credit-code-display {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(20, 20, 20, 0.8);
+  border-radius: 12rpx;
+  padding: 16rpx 20rpx;
+}
+
+.credit-code-text {
+  font-family: monospace;
+  font-size: 26rpx;
+  color: #e2e8f0;
+  letter-spacing: 2rpx;
+}
+
+.verification-badge {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  background: linear-gradient(135deg, #10b981, #059669);
+  padding: 6rpx 12rpx;
+  border-radius: 20rpx;
+}
+
+.verify-icon {
+  font-size: 18rpx;
+}
+
+.verify-text {
+  font-size: 20rpx;
+  color: white;
+  font-weight: 600;
+}
+
+.legal-value {
+  font-size: 28rpx;
+  color: #e2e8f0;
+  font-weight: 500;
+}
+
+/* Company Stats Section */
+.company-stats-section {
+  background: rgba(25, 25, 25, 0.8);
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16rpx;
+}
+
+.stat-card {
+  background: rgba(30, 30, 30, 0.6);
+  border: 2rpx solid rgba(255, 255, 255, 0.05);
+  border-radius: 16rpx;
+  padding: 24rpx 16rpx;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  border-color: rgba(255, 50, 50, 0.2);
+  transform: translateY(-4rpx);
+  box-shadow: 0 8rpx 24rpx rgba(255, 50, 50, 0.1);
+}
+
+.stat-icon {
+  font-size: 36rpx;
+  margin-bottom: 12rpx;
+  display: block;
+  filter: drop-shadow(0 2rpx 8rpx rgba(255, 50, 50, 0.2));
+}
+
+.stat-label {
+  font-size: 22rpx;
+  color: #94a3b8;
+  font-weight: 600;
+  margin-bottom: 8rpx;
+  display: block;
+}
+
+.stat-value {
+  font-size: 24rpx;
+  color: #fff;
+  font-weight: 700;
+  display: block;
+}
+
+/* Responsive Design for Company Profile */
+@media screen and (max-width: 600rpx) {
+  .company-info-grid {
+    grid-template-columns: 1fr;
+    gap: 16rpx;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 12rpx;
+  }
+  
+  .company-logo-section {
+    flex-direction: column;
+    text-align: center;
+    gap: 20rpx;
+  }
+  
+  .company-basic-info {
+    align-items: center;
+  }
+}

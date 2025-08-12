@@ -42,94 +42,207 @@
     <!-- Profile Form -->
     <view class="profile-form">
       <!-- Company Profile (Read-only except avatar and username) -->
-      <view wx:if="{{userInfo.role === 'company'}}" class="form-section">
-        <view class="section-title">企业信息</view>
-        
-        <!-- Username/User ID for Company -->
-        <view class="form-field" id="company-username-field" wx:if="{{userInfo.is_id_changed === false}}">
-          <label class="field-label">用户ID (仅能修改一次)</label>
-          <view class="input-wrapper">
-            <!-- View mode -->
-            <view wx:if="{{!isEditingUsername}}" class="username-display">
-              <text class="username-text">{{userInfo.username}}</text>
-              <view class="username-edit-btn" bindtap="startEditUsername">
-                <text class="edit-btn-text">编辑</text>
-              </view>
+      <view wx:if="{{userInfo.role === 'company'}}" class="company-profile-container">
+        <!-- Company Header Card -->
+        <view class="company-header-card">
+          <view class="company-logo-section">
+            <view class="company-logo-placeholder">
+              <text class="logo-icon">🏢</text>
             </view>
-            <!-- Edit mode -->
-            <view wx:else class="username-edit-container">
-              <input 
-                class="field-input {{usernameError ? 'error' : ''}}"
-                value="{{tempUsername}}"
-                placeholder="输入用户ID (仅限英文)"
-                bindinput="onUsernameInput"
-                maxlength="30"
-              />
-              <view class="username-actions">
-                <view class="username-action-btn save-btn" bindtap="submitUsernameChange">
-                  <text>保存</text>
-                </view>
-                <view class="username-action-btn cancel-btn" bindtap="cancelUsernameEdit">
-                  <text>取消</text>
-                </view>
+            <view class="company-basic-info">
+              <text class="company-title">{{userInfo.company_name || '企业名称'}}</text>
+              <text class="company-subtitle">{{userInfo.legal_representative || '法定代表人'}}</text>
+              <view class="company-status-badge">
+                <text class="status-text">已认证企业</text>
               </view>
             </view>
           </view>
-          <text class="error-text" wx:if="{{usernameError}}">{{usernameError}}</text>
-          <text class="hint-text">只能使用英文字母、数字、下划线(_)、连字符(-)和点(.)</text>
         </view>
 
-        <!-- Company Name (Read-only) -->
-        <view class="form-field" id="company-name-field">
-          <label class="field-label">企业名称</label>
-          <view class="input-wrapper">
-            <view class="readonly-field">{{userInfo.company_name || '未设置'}}</view>
+        <!-- Username Section - Enhanced -->
+        <view class="form-section company-username-section">
+          <view class="section-title-enhanced">
+            <text class="section-icon">👤</text>
+            <text class="section-text">用户信息</text>
+          </view>
+          
+          <view class="form-field-enhanced" id="company-username-field">
+            <view class="field-header">
+              <label class="field-label-enhanced">用户ID</label>
+              <text wx:if="{{!userInfo.is_id_changed}}" class="edit-hint-enhanced">(仅能修改一次)</text>
+              <text wx:else class="changed-hint-enhanced">(已修改)</text>
+            </view>
+            <view class="input-wrapper-enhanced">
+              <!-- View mode for company when editing is allowed -->
+              <view wx:if="{{!isEditingUsername && !userInfo.is_id_changed}}" class="username-display-enhanced">
+                <text class="username-text-enhanced">{{userInfo.username || '未设置'}}</text>
+                <view class="username-edit-btn-enhanced" bindtap="startEditUsername">
+                  <text class="edit-btn-icon">✏️</text>
+                  <text class="edit-btn-text">编辑</text>
+                </view>
+              </view>
+              <!-- View mode for company when editing is not allowed (already changed) -->
+              <view wx:elif="{{!isEditingUsername && userInfo.is_id_changed}}" class="username-display-readonly-enhanced">
+                <text class="username-text-readonly-enhanced">{{userInfo.username || '未设置'}}</text>
+                <text class="readonly-hint-enhanced">✅ 已修改，不可再次更改</text>
+              </view>
+              <!-- Edit mode -->
+              <view wx:else class="username-edit-container-enhanced">
+                <input 
+                  class="field-input-enhanced {{usernameError ? 'error' : ''}}"
+                  value="{{tempUsername}}"
+                  placeholder="输入用户ID (仅限英文)"
+                  bindinput="onUsernameInput"
+                  maxlength="30"
+                />
+                <view class="username-actions-enhanced">
+                  <view class="username-action-btn-enhanced save-btn" bindtap="submitUsernameChange">
+                    <text class="btn-icon">✅</text>
+                    <text>保存</text>
+                  </view>
+                  <view class="username-action-btn-enhanced cancel-btn" bindtap="cancelUsernameEdit">
+                    <text class="btn-icon">❌</text>
+                    <text>取消</text>
+                  </view>
+                </view>
+              </view>
+            </view>
+            <text class="error-text" wx:if="{{usernameError}}">{{usernameError}}</text>
+            <text class="hint-text-enhanced" wx:if="{{!userInfo.is_id_changed}}">💡 只能使用英文字母、数字、下划线(_)、连字符(-)和点(.)</text>
           </view>
         </view>
 
-        <!-- Email (Read-only) -->
-        <view class="form-field" id="company-email-field">
-          <label class="field-label">邮箱</label>
-          <view class="input-wrapper">
-            <view class="readonly-field">{{userInfo.email || '未设置'}}</view>
+        <!-- Company Details Section -->
+        <view class="form-section company-details-section">
+          <view class="section-title-enhanced">
+            <text class="section-icon">🏛️</text>
+            <text class="section-text">企业详情</text>
+          </view>
+
+          <view class="company-info-grid">
+            <!-- Company Name -->
+            <view class="company-info-card">
+              <view class="info-card-header">
+                <text class="info-icon">🏢</text>
+                <text class="info-label">企业名称</text>
+              </view>
+              <text class="info-value">{{userInfo.company_name || '未设置'}}</text>
+            </view>
+
+            <!-- Legal Representative -->
+            <view class="company-info-card" wx:if="{{userInfo.legal_representative}}">
+              <view class="info-card-header">
+                <text class="info-icon">👤</text>
+                <text class="info-label">法定代表人</text>
+              </view>
+              <text class="info-value">{{userInfo.legal_representative}}</text>
+            </view>
+
+            <!-- Phone -->
+            <view class="company-info-card">
+              <view class="info-card-header">
+                <text class="info-icon">📞</text>
+                <text class="info-label">联系电话</text>
+              </view>
+              <text class="info-value">{{userInfo.phone || '未设置'}}</text>
+            </view>
+
+            <!-- Email -->
+            <view class="company-info-card">
+              <view class="info-card-header">
+                <text class="info-icon">📧</text>
+                <text class="info-label">企业邮箱</text>
+              </view>
+              <text class="info-value">{{userInfo.email || '未设置'}}</text>
+            </view>
+          </view>
+
+          <!-- Address Section -->
+          <view class="company-address-section" wx:if="{{userInfo.address}}">
+            <view class="address-header">
+              <text class="address-icon">📍</text>
+              <text class="address-label">企业地址</text>
+            </view>
+            <view class="address-content">
+              <text class="address-text">{{userInfo.address}}</text>
+            </view>
+          </view>
+
+          <!-- Description Section -->
+          <view class="company-description-section" wx:if="{{userInfo.description}}">
+            <view class="description-header">
+              <text class="description-icon">📝</text>
+              <text class="description-label">企业描述</text>
+            </view>
+            <view class="description-content">
+              <text class="description-text">{{userInfo.description}}</text>
+            </view>
           </view>
         </view>
 
-        <!-- Phone (Read-only) -->
-        <view class="form-field" id="company-phone-field">
-          <label class="field-label">手机号</label>
-          <view class="input-wrapper">
-            <view class="readonly-field">{{userInfo.phone || '未设置'}}</view>
+        <!-- Legal Information Section -->
+        <view class="form-section company-legal-section" wx:if="{{userInfo.unified_credit_code || userInfo.created_at}}">
+          <view class="section-title-enhanced">
+            <text class="section-icon">📋</text>
+            <text class="section-text">法律信息</text>
+          </view>
+
+          <view class="legal-info-container">
+            <!-- Credit Code -->
+            <view class="legal-info-item" wx:if="{{userInfo.unified_credit_code}}">
+              <view class="legal-item-header">
+                <text class="legal-icon">🔢</text>
+                <text class="legal-label">统一社会信用代码</text>
+              </view>
+              <view class="credit-code-display">
+                <text class="credit-code-text">{{userInfo.unified_credit_code}}</text>
+                <view class="verification-badge">
+                  <text class="verify-icon">✅</text>
+                  <text class="verify-text">已验证</text>
+                </view>
+              </view>
+            </view>
+
+            <!-- Registration Date -->
+            <view class="legal-info-item" wx:if="{{userInfo.created_at}}">
+              <view class="legal-item-header">
+                <text class="legal-icon">📅</text>
+                <text class="legal-label">注册时间</text>
+              </view>
+              <text class="legal-value">{{userInfo.created_at}}</text>
+            </view>
           </view>
         </view>
 
-        <!-- Company Address (Read-only) -->
-        <view class="form-field" id="company-address-field" wx:if="{{userInfo.company_address}}">
-          <label class="field-label">企业地址</label>
-          <view class="input-wrapper">
-            <view class="readonly-field">{{userInfo.company_address}}</view>
+        <!-- Company Stats/Highlights -->
+        <view class="company-stats-section">
+          <view class="section-title-enhanced">
+            <text class="section-icon">📊</text>
+            <text class="section-text">企业概览</text>
           </view>
-        </view>
-
-        <!-- Business License (Read-only) -->
-        <view class="form-field" id="company-license-field" wx:if="{{userInfo.business_license}}">
-          <label class="field-label">营业执照号</label>
-          <view class="input-wrapper">
-            <view class="readonly-field">{{userInfo.business_license}}</view>
-          </view>
-        </view>
-
-        <!-- Registration Date (Read-only) -->
-        <view class="form-field" id="company-registration-field" wx:if="{{userInfo.created_at}}">
-          <label class="field-label">注册时间</label>
-          <view class="input-wrapper">
-            <view class="readonly-field">{{userInfo.created_at}}</view>
+          
+          <view class="stats-grid">
+            <view class="stat-card">
+              <text class="stat-icon">🎯</text>
+              <text class="stat-label">企业类型</text>
+              <text class="stat-value">认证企业</text>
+            </view>
+            <view class="stat-card">
+              <text class="stat-icon">⭐</text>
+              <text class="stat-label">认证状态</text>
+              <text class="stat-value">已认证</text>
+            </view>
+            <view class="stat-card">
+              <text class="stat-icon">🔐</text>
+              <text class="stat-label">账户安全</text>
+              <text class="stat-value">高级</text>
+            </view>
           </view>
         </view>
       </view>
 
       <!-- Student/Teacher Profile (Original form for non-company users) -->
-      <view wx:else class="form-section">
+      <view wx:elif="{{userInfo.role !== 'company'}}" class="form-section">
         <view class="section-title">基本信息</view>
           <!-- Name -->
         <view class="form-field" id="name-field">
@@ -270,7 +383,7 @@
           <!-- Email Verification Section -->
           <view wx:if="{{emailChanged && !emailVerified && isEditingProfile}}" class="verification-section">
             <view class="profile-action-btn send-code-btn {{emailCountdown > 0 ? 'disabled' : ''}}" bindtap="sendEmailVerificationCode">
-              <text class="btn-text">{{emailCountdown > 0 ? emailCountdown + '秒后重试' : '发送验证码'}}</text>
+              <text class="btn-text">{{emailCountdown > 0 ? emailCountdown + '秒后重试' : '발송 코드'}}</text>
             </view>
             <view class="otp-input-container">
               <view class="input-wrapper">
@@ -321,10 +434,8 @@
           </view>
           <text class="error-text" wx:if="{{profileErrors.gender}}">{{profileErrors.gender}}</text>
         </view>
-      </view>
 
-      <!-- Academic Information -->
-      <view class="form-section">
+        <!-- Academic Information for non-company users only -->
         <view class="section-title">学术信息</view>
           <!-- ID Number -->
         <view class="form-field" id="id-number-field">
