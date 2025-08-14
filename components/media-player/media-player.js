@@ -972,8 +972,6 @@ Component({
       wx.request({
         url: `${config.BACKEND_URL}/post/delete_comment`,
         method: "DELETE",
-        loading: true,
-        showLoading: true,
         data: { id: commentId },
         header: {
           "Content-Type": "application/json",

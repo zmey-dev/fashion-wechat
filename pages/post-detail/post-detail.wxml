@@ -35,10 +35,7 @@
     >
     </media-player>
 
-    <!-- Navigation Loading Indicator - Subtle indicator during cached transitions -->
-    <view wx:if="{{ isNavigating }}" class="navigation-loading">
-      <view class="navigation-indicator"></view>
-    </view>
+    
     
     <!-- Error State - Show when there's an error after attempting to load -->
     <view wx:elif="{{ hasError && hasLoadedOnce }}" class="error-container">

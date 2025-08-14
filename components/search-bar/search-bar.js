@@ -26,6 +26,10 @@ Component({
           console.log('No search params to apply, keeping current user input');
         }
       }
+    },
+    autoFocus: {
+      type: Boolean,
+      value: false
     }
   },
 

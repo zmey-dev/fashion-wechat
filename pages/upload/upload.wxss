@@ -3,8 +3,8 @@
 /* Container styles */
 .upload-container {
   width: 100%;
-  height: calc(100vh - 320rpx - env(safe-area-inset-bottom));
-  height: calc(100vh - 320rpx - constant(safe-area-inset-bottom)); /* iOS 11.0 fallback */
+  height: calc(100vh - 240rpx - env(safe-area-inset-bottom));
+  height: calc(100vh - 240rpx - constant(safe-area-inset-bottom)); /* iOS 11.0 fallback */
   display: flex;
   flex-direction: column;
   position: relative;

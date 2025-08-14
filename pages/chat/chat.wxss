@@ -18,8 +18,8 @@ page {
 
 /* Chat Container */
 .chat-container {
-  height: calc(100vh - 320rpx - env(safe-area-inset-bottom)); /* 240rpx (tab bar) + 80rpx (search bar) */
-  height: calc(100vh - 320rpx - constant(safe-area-inset-bottom)); /* iOS 11.0 fallback */
+  height: calc(100vh - 240rpx - env(safe-area-inset-bottom)); /* 240rpx (tab bar) + 80rpx (search bar) */
+  height: calc(100vh - 240rpx - constant(safe-area-inset-bottom)); /* iOS 11.0 fallback */
   width: 100%;
   position: relative;
   overflow: hidden;

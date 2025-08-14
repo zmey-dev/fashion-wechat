@@ -80,6 +80,7 @@
       value="{{filter}}"
       bindinput="onFilterInput"
       bindconfirm="onKeyboardConfirm"
+      focus="{{autoFocus}}"
     />
 
     <!-- Clear Button -->

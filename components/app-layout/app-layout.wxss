@@ -18,12 +18,90 @@
   background-color: #000;
   padding: 20rpx 0;
   border-bottom: 1rpx solid #333;
+  display: flex;
+  align-items: center;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+}
+
+/* Header hidden state */
+.app-layout-header.header-hidden {
+  transform: translateX(-100%);
+  opacity: 0;
+}
+
+/* Search Icon Button */
+.search-icon-button {
+  position: absolute;
+  right: 30rpx;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 50rpx;
+  height: 50rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.search-icon-button:active {
+  transform: translateY(-50%) scale(0.9);
+  opacity: 0.7;
+}
+
+.search-icon {
+  width: 36rpx;
+  height: 36rpx;
+  filter: brightness(0) saturate(100%) invert(84%) sepia(44%) saturate(379%) hue-rotate(350deg) brightness(101%) contrast(95%);
 }
 
 .filter-scroll {
   height: 80rpx;
   white-space: nowrap;
-  width: 100%;
+  width: calc(100% - 80rpx); /* Leave space for search icon */
+}
+
+/* Animated Search Bar Wrapper */
+.search-bar-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1001;
+  background-color: #000;
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-bottom: 1rpx solid #333;
+}
+
+.search-bar-wrapper.search-visible {
+  transform: translateX(0);
+}
+
+.search-bar-header {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 0;
+  height: 80rpx;
+  box-sizing: content-box; /* Total height will be 120rpx with padding */
+}
+
+/* Back Button */
+.search-back-button {
+  width: 80rpx;
+  height: 80rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 10rpx;
+}
+
+.search-back-button:active {
+  opacity: 0.7;
+}
+
+.back-icon {
+  width: 40rpx;
+  height: 40rpx;
 }
 
 .filter-tabs {
@@ -142,14 +220,14 @@
   padding-bottom: calc(120rpx + constant(safe-area-inset-bottom)); /* iOS 11.0 fallback */
 }
 
-/* Content area padding - now includes search bar on all pages */
+/* Content area padding - only filter bar now, search is animated */
 .app-layout-content {
-  padding-top: 200rpx; /* Filter bar + search bar (now visible on all pages) */
+  padding-top: 120rpx; /* Filter bar height with padding */
 }
 
 /* Teacher layout - no bottom padding since no tab bar */
 .app-layout.teacher-layout .app-layout-content {
-  padding-top: 200rpx; /* Filter bar + search bar */
+  padding-top: 120rpx !important; /* Filter bar height with padding */
   padding-bottom: env(safe-area-inset-bottom); /* Only safe area for teacher layout */
   padding-bottom: constant(safe-area-inset-bottom); /* iOS 11.0 fallback */
 }

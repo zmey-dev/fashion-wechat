@@ -603,6 +603,40 @@ App({
   },
 
   onLaunch() {
+    // Hide all loading indicators
+    wx.hideNavigationBarLoading();
+    wx.hideLoading();
+    
+    // Override wx.request to disable loading
+    const originalRequest = wx.request;
+    wx.request = function(options) {
+      // Hide any loading before request
+      wx.hideLoading();
+      wx.hideNavigationBarLoading();
+      
+      return originalRequest.call(this, {
+        ...options,
+        success: function(res) {
+          // Hide loading after success
+          wx.hideLoading();
+          wx.hideNavigationBarLoading();
+          if (options.success) options.success(res);
+        },
+        fail: function(err) {
+          // Hide loading after fail
+          wx.hideLoading();
+          wx.hideNavigationBarLoading();
+          if (options.fail) options.fail(err);
+        },
+        complete: function(res) {
+          // Always hide loading
+          wx.hideLoading();
+          wx.hideNavigationBarLoading();
+          if (options.complete) options.complete(res);
+        }
+      });
+    };
+    
     // Load sidebar state from storage on app launch
     try {
       const sidebarState = wx.getStorageSync("showSidebar");
@@ -617,6 +651,18 @@ App({
     } catch (e) {
       // Handle launch error silently
     }
+  },
+
+  onShow() {
+    // Hide navigation bar loading when app becomes visible
+    wx.hideNavigationBarLoading();
+    // Hide any loading indicators
+    wx.hideLoading();
+  },
+
+  onHide() {
+    // Hide loading when app goes to background
+    wx.hideLoading();
   },
 
   onTabItemTap(item) {

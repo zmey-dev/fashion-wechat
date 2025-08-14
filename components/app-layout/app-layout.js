@@ -35,6 +35,7 @@ Component({
     filterScrollLeft: 0,
     dynamicTabStyle: "expanded", // 'expanded' or 'compact'
     isTeacher: false, // Flag to determine if current user is a teacher
+    showSearch: false, // Flag to control search UI visibility
     // All pages list - unified structure for regular users
     pages: [
       // Filter pages (top navigation)
@@ -171,10 +172,19 @@ Component({
     'currentPage, searchParams': function(currentPage, searchParams) {
       // Update effective search parameters based on current page
       const effectiveParams = currentPage === 'index' ? (searchParams || {}) : {};
-      console.log('Updating effectiveSearchParams:', effectiveParams, 'for page:', currentPage);
       this.setData({
         effectiveSearchParams: effectiveParams
       });
+      
+      // Check if we should show search UI after navigation
+      const app = getApp();
+      if (currentPage === 'index' && app.globalData.shouldShowSearchAfterNavigation) {
+        this.setData({ showSearch: true });
+        app.globalData.shouldShowSearchAfterNavigation = false;
+      } else if (currentPage === 'index' && (effectiveParams.search || effectiveParams.university_id)) {
+        // If there are search params, also show search UI
+        this.setData({ showSearch: true });
+      }
     },
   },
   /**
@@ -260,26 +270,35 @@ Component({
    */,
   methods: {
     /**
+     * Search icon tap handler - show search UI with animation
+     */
+    onSearchIconTap: function() {
+      this.setData({ 
+        showSearch: true 
+      });
+    },
+
+    /**
+     * Search back button handler - hide search UI with animation
+     */
+    onSearchBackTap: function() {
+      this.setData({ 
+        showSearch: false 
+      });
+    },
+
+    /**
      * Search event handler - unified for all pages
      */
     onSearch: function(e) {
       const searchParams = e.detail;
       const currentPage = this.data.currentPage;
       
-      console.log('=== app-layout onSearch START ===');
-      console.log('Received searchParams:', searchParams);
-      console.log('searchParams type:', typeof searchParams);
-      console.log('searchParams keys:', Object.keys(searchParams || {}));
-      console.log('currentPage:', currentPage);
-      console.log('=====================================');
-      
       if (currentPage === 'index') {
         // If on index page, emit search event to parent page
-        console.log('Current page is index, emitting search to parent');
         this.triggerEvent('search', searchParams);
       } else {
         // If on other pages, navigate to index page with search params
-        console.log('Current page is not index (', currentPage, '), navigating to index');
         this.navigateToIndexWithSearch(searchParams);
       }
     },
@@ -288,10 +307,6 @@ Component({
      * Navigate to index page with search parameters
      */
     navigateToIndexWithSearch: function(searchParams) {
-      console.log('navigateToIndexWithSearch called with params:', searchParams);
-      console.log('searchParams type:', typeof searchParams);
-      console.log('searchParams keys:', Object.keys(searchParams));
-      
       // Build URL with query parameters
       let url = '/pages/index/index';
       const queryParams = [];
@@ -299,33 +314,29 @@ Component({
       if (searchParams.search) {
         const encodedSearch = encodeURIComponent(searchParams.search);
         queryParams.push(`search=${encodedSearch}`);
-        console.log('Added search param:', searchParams.search, '-> encoded:', encodedSearch);
       }
       if (searchParams.university_id) {
         queryParams.push(`university_id=${searchParams.university_id}`);
-        console.log('Added university_id param:', searchParams.university_id);
       }
       
       if (queryParams.length > 0) {
         url += '?' + queryParams.join('&');
       }
       
-      console.log('Final URL:', url);
-      console.log('Query params array:', queryParams);
-      
+      // Hide any loading indicators before navigation
+      wx.hideLoading();
       wx.redirectTo({
         url: url,
         success: () => {
-          console.log('Successfully navigated to index page with URL params');
-          // Don't set pendingSearch when URL params are used successfully
-          // URL params have higher priority than pendingSearch
-          console.log('URL params used, not setting pendingSearch');
+          // Hide loading after successful navigation
+          wx.hideLoading();
+          // Set a flag to show search UI after navigation
+          getApp().globalData.shouldShowSearchAfterNavigation = true;
         },
         fail: (err) => {
-          console.error('Failed to navigate to index page:', err);
+          wx.hideLoading();
           // Only set pendingSearch as fallback if URL navigation fails
           if (searchParams.search || searchParams.university_id) {
-            console.log('Navigation failed, setting pendingSearch as fallback:', searchParams);
             getApp().globalData.pendingSearch = searchParams;
           }
         }
@@ -401,13 +412,23 @@ Component({
      * Page navigation handler
      */,
     navigateToPage: function (path) {
+      // Hide any loading indicators before navigation
+      wx.hideLoading();
       wx.redirectTo({
         url: path,
+        success: () => {
+          // Hide loading after successful navigation
+          wx.hideLoading();
+        },
         fail: () => {
           // If navigateTo fails, try redirectTo
           wx.redirectTo({
             url: path,
+            success: () => {
+              wx.hideLoading();
+            },
             fail: () => {
+              wx.hideLoading();
               this.showToast(this.data.messages.navigationError);
             },
           });
@@ -419,9 +440,16 @@ Component({
      * Page redirect handler (for index page)
      */
     redirectToPage: function (path) {
+      // Hide any loading indicators before navigation
+      wx.hideLoading();
       wx.redirectTo({
         url: path,
+        success: () => {
+          // Hide loading after successful navigation
+          wx.hideLoading();
+        },
         fail: () => {
+          wx.hideLoading();
           this.showToast(this.data.messages.navigationError);
         },
       });
@@ -451,9 +479,15 @@ Component({
         uploadUrl = "/pages/upload/upload";
       }
       
+      // Hide any loading indicators before navigation
+      wx.hideLoading();
       wx.redirectTo({
         url: uploadUrl,
+        success: () => {
+          wx.hideLoading();
+        },
         fail: () => {
+          wx.hideLoading();
           this.showToast(this.data.messages.navigationError);
         },
       });

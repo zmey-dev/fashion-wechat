@@ -27,7 +27,14 @@
     "navigationBarTextStyle": "white",
     "backgroundColor": "#000000",
     "enablePullDownRefresh": false,
-    "onReachBottomDistance": 50
+    "onReachBottomDistance": 50,
+    "navigationBarLoading": false,
+    "backgroundColorTop": "#000000",
+    "backgroundColorBottom": "#000000"
+  },
+  "networkTimeout": {
+    "request": 60000,
+    "downloadFile": 60000
   },
   "usingComponents": {
     "avatar": "/components/avatar/avatar",
