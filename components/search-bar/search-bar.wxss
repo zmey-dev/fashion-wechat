@@ -43,10 +43,10 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24rpx;
+  padding: 0 16rpx;
   background: #1a1a1a;
   border-right: 2rpx solid #666;
-  min-width: 160rpx;
+  min-width: 200rpx;
   height: 66rpx;
   box-sizing: border-box;
 }
@@ -58,9 +58,9 @@
 }
 
 .dropdown-text {
-  font-size: 26rpx;
+  font-size: 20rpx;
   color: #fff;
-  max-width: 120rpx;
+  max-width: 180rpx;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -116,15 +116,15 @@
   left: 20rpx;
   background: #2a2a2a;
   border: 2rpx solid #666;
-  border-radius: 16rpx;
-  max-height: 480rpx;
+  border-radius: 12rpx;
+  max-height: 500rpx;
   overflow-y: auto;
-  min-width: 300rpx;
-  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.5);
+  min-width: 280rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.5);
 }
 
 .dropdown-item {
-  padding: 24rpx 32rpx;
+  padding: 12rpx 20rpx;
   border-bottom: 1rpx solid #444;
 }
 
@@ -137,7 +137,7 @@
 }
 
 .dropdown-item text {
-  font-size: 28rpx;
+  font-size: 22rpx;
   color: #fff;
 }
 
@@ -148,7 +148,7 @@
   background: transparent;
   border: none;
   outline: none;
-  font-size: 28rpx;
+  font-size: 22rpx;
   color: #fff;
   height: 66rpx;
   line-height: 66rpx;
@@ -215,7 +215,7 @@
 }
 
 .search-button text {
-  font-size: 28rpx;
+  font-size: 22rpx;
   color: #999;
 }
 
@@ -241,7 +241,7 @@
 
 /* University Search Container */
 .university-search-container {
-  padding: 20rpx;
+  padding: 12rpx;
   border-bottom: 1rpx solid #444;
   background: #222;
 }
@@ -251,31 +251,31 @@
   align-items: center;
   background: #1a1a1a;
   border: 1rpx solid #666;
-  border-radius: 20rpx;
+  border-radius: 16rpx;
   overflow: hidden;
-  height: 60rpx;
+  height: 50rpx;
 }
 
 .university-search-box .search-icon {
-  padding: 0 16rpx;
-  font-size: 24rpx;
+  padding: 0 12rpx;
+  font-size: 20rpx;
   color: #999;
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 60rpx;
+  height: 50rpx;
 }
 
 .university-search-input {
   flex: 1;
-  padding: 0 16rpx;
+  padding: 0 12rpx;
   background: transparent;
   border: none;
   outline: none;
-  font-size: 26rpx;
+  font-size: 20rpx;
   color: #fff;
-  height: 60rpx;
-  line-height: 60rpx;
+  height: 50rpx;
+  line-height: 50rpx;
   box-sizing: border-box;
 }
 
@@ -284,13 +284,13 @@
 }
 
 .university-search-box .clear-icon {
-  padding: 0 16rpx;
-  font-size: 24rpx;
+  padding: 0 12rpx;
+  font-size: 20rpx;
   color: #999;
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 60rpx;
+  height: 50rpx;
   cursor: pointer;
 }
 
@@ -301,10 +301,10 @@
 /* No Results and Limited Results Messages */
 .no-results-message,
 .limited-results-message {
-  padding: 20rpx 32rpx;
+  padding: 12rpx 20rpx;
   text-align: center;
   color: #666;
-  font-size: 24rpx;
+  font-size: 20rpx;
   border-bottom: 1rpx solid #444;
 }
 

@@ -53,15 +53,30 @@
   gap: 12rpx;
 }
 
+.username-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 12rpx;
+  min-width: 0;
+  flex-direction: row;
+}
+
+.company-icon {
+  width: 48rpx;
+  height: 48rpx;
+  flex-shrink: 0;
+  margin-top: 2rpx;
+}
+
 .profile-username {
   font-size: 30rpx;
   font-weight: 700;
   color: #ffffff;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  flex-shrink: 0;
+  flex: 1;
+  line-height: 1.4;
   letter-spacing: 0.5rpx;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .profile-university {
@@ -169,10 +184,14 @@
   background-color: #854d0e;
 }
 
+.media-grid-container {
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+}
+
 .media-grid {
   padding: 10rpx;
-  overflow-y: auto;
-  height: 100%;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 6rpx;

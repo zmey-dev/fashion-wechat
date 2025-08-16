@@ -7,9 +7,17 @@
       <view class="profile-info">
         <avatar class="profile-avatar" avatar="{{currentUser.avatar}}" user="{{currentUser}}" size="{{80}}" mode="aspectFill"></avatar>
         <view class="profile-details">
-          <text class="profile-username">@{{userUtils.getDisplayName(currentUser)}}</text>
-          <text class="profile-university">{{(currentUser.university && currentUser.university.name) || '未设置大学'}}</text>
-          <text class="profile-faculty">{{currentUser.faculty || '未设置学院'}}</text>
+          <view class="username-container">
+            <image 
+              wx:if="{{userUtils.isCompany(currentUser)}}"
+              class="company-icon" 
+              src="/images/icons/company.svg" 
+              mode="aspectFit"
+            />
+            <text class="profile-username">{{userUtils.getFormattedDisplayName(currentUser)}}</text>
+          </view>
+          <text wx:if="{{!userUtils.isCompany(currentUser)}}" class="profile-university">{{(currentUser.university && currentUser.university.name) || '未设置大学'}}</text>
+          <text wx:if="{{!userUtils.isCompany(currentUser)}}" class="profile-faculty">{{currentUser.faculty || '未设置学院'}}</text>
         </view>
       </view>
     </view>
@@ -39,33 +47,40 @@
       </button>
     </view>
 
-    <!-- Media grid displaying user's posts -->
-    <view class="media-grid">
-      <view class="media-item" wx:for="{{userMediaList}}" wx:key="id" bindtap="previewImage" data-id="{{item.id}}">
-        <view class="media-container">
-          <image wx:if="{{item.type=='image'}}" class="media-image" src="{{item.media[0].url}}" mode="aspectFill"></image>
-          <image wx:else class="media-image" src="{{item.media[0].preview_url}}" mode="aspectFill"></image>
-          <view class="media-overlay">
-            <text class="likes-count">♥ {{item.likes}}</text>
+    <!-- Media grid displaying user's posts with Scroll View -->
+    <scroll-view 
+      class="media-grid-container"
+      scroll-y="{{true}}"
+      bindscrolltolower="onReachBottom"
+      lower-threshold="80"
+    >
+      <view class="media-grid">
+        <view class="media-item" wx:for="{{userMediaList}}" wx:key="id" bindtap="previewImage" data-id="{{item.id}}">
+          <view class="media-container">
+            <image wx:if="{{item.type=='image'}}" class="media-image" src="{{item.media[0].url}}" mode="aspectFill"></image>
+            <image wx:else class="media-image" src="{{item.media[0].preview_url}}" mode="aspectFill"></image>
+            <view class="media-overlay">
+              <text class="likes-count">♥ {{item.likes}}</text>
+            </view>
           </view>
         </view>
       </view>
-    </view>
+      
+      <!-- Loading indicator -->
+      <view class="loading-indicator" wx:if="{{loading}}">
+        <text>{{messages.loading}}</text>
+      </view>
+      
+      <!-- No more content message -->
+      <view class="no-more" wx:if="{{!hasMore && userMediaList.length > 0}}">
+        <text>没有更多内容</text>
+      </view>
 
-    <!-- Loading indicator -->
-    <view class="loading-indicator" wx:if="{{loading}}">
-      <text>{{messages.loading}}</text>
-    </view>
-    
-    <!-- No more content message -->
-    <view class="no-more" wx:if="{{!hasMore && userMediaList.length > 0}}">
-      <text>没有更多内容</text>
-    </view>
-
-    <!-- No posts message -->
-    <view class="no-posts" wx:if="{{!loading && userMediaList.length === 0 && !error}}">
-      <text>该用户还没有发布任何内容</text>
-    </view>
+      <!-- No posts message -->
+      <view class="no-posts" wx:if="{{!loading && userMediaList.length === 0 && !error}}">
+        <text>该用户还没有发布任何内容</text>
+      </view>
+    </scroll-view>
   </view>
 
   <!-- Error Message -->

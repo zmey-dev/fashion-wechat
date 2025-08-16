@@ -31,7 +31,15 @@
         <view class="avatar-container">
           <avatar avatar="{{item.user.avatar}}" user="{{item.user}}" mode="aspectFill" />
         </view>
-        <text class="username-text">@{{userUtils.getShortDisplayName(item.user, 6)}}</text>
+        <view class="username-container">
+          <image 
+            wx:if="{{userUtils.isCompany(item.user)}}"
+            class="company-icon" 
+            src="/images/icons/company.svg" 
+            mode="aspectFit"
+          />
+          <text class="username-text">{{userUtils.getFormattedShortDisplayName(item.user, 6)}}</text>
+        </view>
       </view>
 
       <!-- Action buttons -->

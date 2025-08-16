@@ -46,11 +46,19 @@
         </view>
         <view class="user-profile-header">
           <view class="profile-info">
-            <avatar class="profile-avatar" avatar="{{currentUser.avatar}}" user="{{currentUser}}" size="{{80}}" mode="aspectFill"></avatar>
+            <avatar class="profile-avatar" avatar="{{currentUser.avatar}}" user="{{currentUser}}" size="{{80}}" mode="aspectFit"></avatar>
             <view class="profile-details">
-              <text class="profile-username">@{{userUtils.getDisplayName(currentUser)}}</text>
-              <text class="profile-university">{{(currentUser.university && currentUser.university.name) || '未设置大学'}}</text>
-              <text class="profile-faculty">{{currentUser.faculty || '未设置学院'}}</text>
+              <view class="username-container">
+                <image 
+                  wx:if="{{userUtils.isCompany(currentUser)}}"
+                  class="company-icon" 
+                  src="/images/icons/company.svg" 
+                  mode="aspectFit"
+                />
+                <text class="profile-username">{{userUtils.getFormattedDisplayName(currentUser)}}</text>
+              </view>
+              <text wx:if="{{!userUtils.isCompany(currentUser)}}" class="profile-university">{{(currentUser.university && currentUser.university.name) || '未设置大学'}}</text>
+              <text wx:if="{{!userUtils.isCompany(currentUser)}}" class="profile-faculty">{{currentUser.faculty || '未设置学院'}}</text>
             </view>
           </view>
         </view>

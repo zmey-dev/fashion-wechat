@@ -188,7 +188,7 @@ Page({
         Authorization: `Bearer ${getApp().globalData.userInfo.token}`,
       },
       success: (res) => {
-        if (res.statusCode === 200) {
+        if (res.statusCode === 200 && res.data.status === "success") {
           const newMedia = res.data.posts || [];
           this.setData({
             userMediaList: this.data.userMediaList.concat(newMedia),
@@ -215,7 +215,7 @@ Page({
   },
   // Handle reaching bottom of page for infinite scroll
   onReachBottom: function () {
-    if (this.data.showUserMedia && this.data.currentUser) {
+    if (this.data.showUserMedia && this.data.currentUser && this.data.hasMore && !this.data.loading) {
       this.loadUserMedia(this.data.currentUser.id);
     }
   },

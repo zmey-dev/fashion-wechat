@@ -1,7 +1,13 @@
 <wxs src="../../utils/userDisplayName.wxs" module="userUtils" />
 <app-layout current-page="index" search-params="{{searchParams}}" bind:search="onSearch">
-  <!-- Main Content Area -->
-  <view class="content-area" id="contentArea">
+  <!-- Main Content Area with Scroll View for infinite scroll -->
+  <scroll-view 
+    class="content-area" 
+    id="contentArea"
+    scroll-y="{{true}}"
+    bindscrolltolower="onReachBottom"
+    lower-threshold="80"
+  >
     <!-- Posts Grid -->
     <view class="posts-grid">
       <view 
@@ -61,7 +67,7 @@
     <view class="end-message" wx:if="{{!hasMore && posts.length > 0}}">
       <text class="end-text">已经到底了</text>
     </view>
-  </view>
+  </scroll-view>
 
   <!-- Scroll To Top Button -->
   <view 

@@ -50,8 +50,14 @@
     </view>
   </view>
 
-  <!-- Posts Grid (for tabs 0-3) -->
-  <view class="posts-container" wx:if="{{currentTab !== 4}}">
+  <!-- Posts Grid (for tabs 0-3) with Scroll View -->
+  <scroll-view 
+    class="posts-container" 
+    wx:if="{{currentTab !== 4}}"
+    scroll-y="{{true}}"
+    bindscrolltolower="onReachBottom"
+    lower-threshold="80"
+  >
     <view wx:if="{{!loading && posts.length === 0}}" class="empty-state">
       <text class="empty-text">暂无内容</text>
     </view>
@@ -102,7 +108,7 @@
       <view class="loading-spinner"></view>
       <text class="loading-text">{{messages.loading}}</text>
     </view>
-  </view>
+  </scroll-view>
 
   <!-- Contact Tab Content (tab 4) -->
   <view class="contact-container" wx:if="{{currentTab === 4}}">

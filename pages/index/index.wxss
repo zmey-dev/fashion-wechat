@@ -83,9 +83,10 @@
   font-size: 36rpx;
 }
 
-/* Content Area */
+/* Content Area - Scroll View for infinite scroll */
 .content-area {
-  flex: 1;
+  height: 100%;
+  width: 100%;
   box-sizing: border-box;
 }
 

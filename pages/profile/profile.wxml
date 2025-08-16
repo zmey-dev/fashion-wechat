@@ -12,7 +12,7 @@
       <view class="user-info-horizontal">
         <text class="user-name-horizontal">{{userUtils.getDisplayName(userInfo)}}</text>
         <text class="user-id-horizontal">ID: {{userInfo.username}}</text>
-        <text class="user-university-horizontal">{{university.name || '未设置大学'}}</text>
+        <text wx:if="{{userInfo.role !== 'company'}}" class="user-university-horizontal">{{university.name || '未设置大学'}}</text>
       </view>
       
       <!-- Edit/Cancel Buttons (Hidden for company users) -->

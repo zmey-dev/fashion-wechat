@@ -16,7 +16,15 @@
             mode="aspectFill"
           />
         </view>
-        <text class="username">@{{userUtils.getDisplayName(item.sender)}}</text>
+        <view class="username-container">
+          <image 
+            wx:if="{{userUtils.isCompany(item.sender)}}"
+            class="company-icon" 
+            src="/images/icons/company.svg" 
+            mode="aspectFit"
+          />
+          <text class="username">{{userUtils.getFormattedDisplayName(item.sender)}}</text>
+        </view>
       </navigator>
     </view>
     <text class="timestamp">{{createdTime}}</text>

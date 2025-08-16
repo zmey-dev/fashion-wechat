@@ -88,7 +88,15 @@
             size="160"
           ></avatar>
           <view class="student-name-large">{{userUtils.getDisplayName(selectedStudent)}}</view>
-          <view class="student-username">@{{userUtils.getDisplayName(selectedStudent)}}</view>
+          <view class="student-username-container">
+            <image 
+              wx:if="{{userUtils.isCompany(selectedStudent)}}"
+              class="company-icon" 
+              src="/images/icons/company.svg" 
+              mode="aspectFit"
+            />
+            <text class="student-username">{{userUtils.getFormattedDisplayName(selectedStudent)}}</text>
+          </view>
         </view>
         
         <view class="student-details">

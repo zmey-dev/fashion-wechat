@@ -45,7 +45,7 @@
             data-id="" 
             bindtap="onUniversitySelect"
           >
-            <text>所有大学</text>
+            <text>全部学校</text>
           </view>
           
           <!-- Filtered University List (Top 5) -->
@@ -85,7 +85,7 @@
 
     <!-- Clear Button -->
     <view 
-      wx:if="{{hasFilters}}" 
+      wx:if="{{filter}}" 
       class="clear-button" 
       bindtap="onClearTap"
     >

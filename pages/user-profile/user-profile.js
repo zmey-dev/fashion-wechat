@@ -181,7 +181,7 @@ Page({
 
   // Handle reaching bottom of page for infinite scroll
   onReachBottom: function () {
-    if (this.data.currentUser) {
+    if (this.data.currentUser && this.data.hasMore && !this.data.loading) {
       this.loadUserMedia(this.data.currentUser.id);
     }
   },

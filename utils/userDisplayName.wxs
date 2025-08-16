@@ -63,8 +63,80 @@ function getNameInitial(user) {
   return '';
 }
 
+/**
+ * 사용자가 회사 역할인지 확인
+ * @param {Object} user - 사용자 객체
+ * @returns {boolean} - 회사 역할 여부
+ */
+function isCompany(user) {
+  return user && user.role === 'company';
+}
+
+/**
+ * 표시할 사용자 이름 (회사는 @ 없이, 일반 사용자는 @ 포함)
+ * @param {Object} user - 사용자 객체
+ * @returns {string} - 표시할 이름
+ */
+function getFormattedDisplayName(user) {
+  if (!user) {
+    return '';
+  }
+  
+  var name = getDisplayName(user);
+  
+  // 회사 역할인 경우 @ 기호 없이 반환
+  if (user.role === 'company') {
+    return name;
+  }
+  
+  // 일반 사용자는 @ 기호와 함께 반환
+  return '@' + name;
+}
+
+/**
+ * 짧은 형식의 사용자 이름 (회사는 @ 없이, 일반 사용자는 @ 포함)
+ * @param {Object} user - 사용자 객체  
+ * @param {number} maxLength - 최대 길이 (기본값: 12)
+ * @returns {string} - 잘린 이름
+ */
+function getFormattedShortDisplayName(user, maxLength) {
+  if (!user) {
+    return '';
+  }
+  
+  if (!maxLength) {
+    maxLength = 12;
+  }
+  
+  var name = getDisplayName(user);
+  
+  // 회사 역할인 경우 @ 기호 없이 처리
+  if (user.role === 'company') {
+    if (name.length > maxLength) {
+      return name.substring(0, maxLength) + '...';
+    }
+    return name;
+  }
+  
+  // 일반 사용자는 @ 기호 포함해서 길이 계산
+  var fullName = '@' + name;
+  if (fullName.length > maxLength) {
+    // @ 기호를 고려하여 자르기
+    var availableLength = maxLength - 1; // @ 기호 공간 제외
+    if (availableLength > 3) { // ...을 위한 공간 확보
+      return '@' + name.substring(0, availableLength - 3) + '...';
+    } else {
+      return '@' + name.substring(0, availableLength);
+    }
+  }
+  return fullName;
+}
+
 module.exports = {
   getDisplayName: getDisplayName,
   getShortDisplayName: getShortDisplayName,
-  getNameInitial: getNameInitial
+  getNameInitial: getNameInitial,
+  isCompany: isCompany,
+  getFormattedDisplayName: getFormattedDisplayName,
+  getFormattedShortDisplayName: getFormattedShortDisplayName
 };

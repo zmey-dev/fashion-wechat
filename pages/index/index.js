@@ -238,9 +238,8 @@ Page({
     });
   },
 
-  // Handle reaching bottom of page for infinite scroll
+  // Handle reaching bottom of scroll-view for infinite scroll
   onReachBottom: function() {
-    
     if (this.data.hasMore && !this.data.loading) {
       this.loadPosts(false);
     }

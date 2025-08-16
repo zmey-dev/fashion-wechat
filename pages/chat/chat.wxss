@@ -129,7 +129,7 @@ page {
   background: transparent;
   border: none;
   color: white;
-  font-size: 17px;
+  font-size: 14px;
 }
 
 .search-input::placeholder {

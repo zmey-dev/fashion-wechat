@@ -36,7 +36,7 @@ Component({
   data: {
     filter: "",
     selectedUniversity: "",
-    selectedUniversityName: "所有大学",
+    selectedUniversityName: "全部学校",
     universities: [],
     filteredUniversities: [], // Filtered university list for display
     universitySearchText: "", // Search text for filtering universities
@@ -95,7 +95,7 @@ Component({
 
     updateSelectedUniversityName() {
       const { selectedUniversity, universities } = this.data;
-      let selectedUniversityName = "所有大学";
+      let selectedUniversityName = "全部学校";
       
       if (selectedUniversity && universities.length > 0) {
         const university = universities.find(u => u.id == selectedUniversity);
@@ -200,9 +200,7 @@ Component({
 
     onClearTap() {
       this.setData({
-        filter: "",
-        selectedUniversity: "",
-        selectedUniversityName: "所有大学"
+        filter: ""
       });
     },
 
@@ -261,7 +259,7 @@ Component({
               console.log('Found university name:', university.name);
             } else {
               console.log('University not found in list for ID:', params.university_id);
-              updateData.selectedUniversityName = "所有大学";
+              updateData.selectedUniversityName = "全部学校";
             }
           } else {
             // If universities not loaded yet, set a flag to update name later
@@ -269,7 +267,7 @@ Component({
             console.log('Universities not loaded, setting pendingUniversityId:', params.university_id);
           }
         } else {
-          updateData.selectedUniversityName = "所有大学";
+          updateData.selectedUniversityName = "全部学校";
         }
       }
       

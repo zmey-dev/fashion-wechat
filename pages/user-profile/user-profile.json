@@ -1,5 +1,6 @@
 {
   "navigationBarTitleText": "用户资料",
   "enablePullDownRefresh": true,
+  "onReachBottomDistance": 80,
   "usingComponents": {}
 }

@@ -98,10 +98,12 @@
   background: #fff;
 }
 
-/* Posts Container */
+/* Posts Container - Scroll View for infinite scroll */
 .posts-container {
-  flex: 1;
+  height: 100%;
+  width: 100%;
   padding: 20rpx;
+  box-sizing: border-box;
 }
 
 .empty-state {

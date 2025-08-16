@@ -11,11 +11,11 @@
   position: sticky;
   top: 0;
   z-index: 1000;
-  backdrop-filter: blur(20rpx);
+  /* backdrop-filter removed for compatibility */
   border-bottom: 1rpx solid rgba(255, 50, 50, 0.15);
   padding: 30rpx 40rpx;
-  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.1);
-  background: rgba(15, 15, 15, 0.95);
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
+  background: #0f0f0f;
 }
 
 .action-buttons-container {
@@ -88,8 +88,8 @@
 
 .edit-button:active {
   background: linear-gradient(135deg, #5a6fd8, #6a4190);
-  transform: scale(0.98) translateY(2rpx);
-  box-shadow: 0 4rpx 15rpx rgba(102, 126, 234, 0.5);
+  transform: scale(0.98);
+  box-shadow: 0 2rpx 8rpx rgba(102, 126, 234, 0.5);
 }
 
 /* Save Button - Enhanced Professional Green */
@@ -101,8 +101,8 @@
 
 .save-button:active {
   background: linear-gradient(135deg, #0f877c, #32d672);
-  transform: scale(0.98) translateY(2rpx);
-  box-shadow: 0 4rpx 15rpx rgba(17, 153, 142, 0.5);
+  transform: scale(0.98);
+  box-shadow: 0 2rpx 8rpx rgba(17, 153, 142, 0.5);
 }
 
 /* Cancel Button - Enhanced Professional Gray */
@@ -114,8 +114,8 @@
 
 .cancel-button:active {
   background: linear-gradient(135deg, #3a3a3a, #1a1a1a);
-  transform: scale(0.98) translateY(2rpx);
-  box-shadow: 0 4rpx 15rpx rgba(67, 67, 67, 0.5);
+  transform: scale(0.98);
+  box-shadow: 0 2rpx 8rpx rgba(67, 67, 67, 0.5);
 }
 
 /* Logout Button - Enhanced Professional Orange */
@@ -127,8 +127,8 @@
 
 .logout-button:active {
   background: linear-gradient(135deg, #e6395f, #e6421f);
-  transform: scale(0.98) translateY(2rpx);
-  box-shadow: 0 4rpx 15rpx rgba(255, 65, 108, 0.5);
+  transform: scale(0.98);
+  box-shadow: 0 2rpx 8rpx rgba(255, 65, 108, 0.5);
 }
 
 /* Responsive Design for Header Bar */
@@ -207,8 +207,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 40rpx 40rpx 30rpx;
-  background: rgba(30, 30, 30, 0.6);
-  backdrop-filter: blur(20rpx);
+  background: #1e1e1e;
+  /* backdrop-filter removed for compatibility */
   margin: 20rpx;
   border-radius: 24rpx;
   border: 1px solid rgba(255, 255, 255, 0.05);
@@ -295,13 +295,13 @@
 }
 
 .form-section {
-  background: rgba(30, 30, 30, 0.8);
-  backdrop-filter: blur(20rpx);
+  background: #1e1e1e;
+  /* backdrop-filter removed for compatibility */
   margin: 0 20rpx 30rpx 20rpx;
   border-radius: 24rpx;
   padding: 40rpx 30rpx;
   border: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.4);
   position: relative;
   overflow: hidden;
 }
@@ -359,13 +359,13 @@
 .field-div {
   width: 100%;
   padding: 12rpx 10rpx;
-  background: rgba(20, 20, 20, 0.8);
+  background: #141414;
   border: 2px solid rgba(255, 255, 255, 0.1);
   border-radius: 16rpx;
   color: #fff;
   font-size: 30rpx;
   transition: all 0.3s ease;
-  backdrop-filter: blur(10rpx);
+  /* backdrop-filter removed for compatibility */
   display: flex;
 }
 
@@ -373,20 +373,20 @@
   width: 100%;
   height: 70rpx;
   padding: 10rpx 20rpx;
-  background: rgba(20, 20, 20, 0.8);
+  background: #141414;
   border: 2px solid rgba(255, 255, 255, 0.1);
   border-radius: 16rpx;
   color: #fff;
   font-size: 30rpx;
   transition: all 0.3s ease;
-  backdrop-filter: blur(10rpx);
+  /* backdrop-filter removed for compatibility */
 }
 
 .field-input:focus {
   border-color: #ff3232;
-  background: rgba(25, 25, 25, 0.9);
-  transform: translateY(-2rpx);
-  box-shadow: 0 4rpx 20rpx rgba(255, 50, 50, 0.2);
+  background: #191919;
+  /* transform removed for compatibility */
+  box-shadow: 0 2rpx 10rpx rgba(255, 50, 50, 0.2);
 }
 
 .field-input.error {
@@ -513,7 +513,7 @@
   font-weight: 600;
   border: 2px solid rgba(255, 255, 255, 0.1);
   border-radius: 16rpx;
-  backdrop-filter: blur(10rpx);
+  /* backdrop-filter removed for compatibility */
 }
 
 .phone-number {
@@ -546,12 +546,12 @@
   align-items: center;
   justify-content: center;
   gap: 12rpx;
-  background: rgba(20, 20, 20, 0.8);
+  background: #141414;
   border: 2px solid rgba(255, 255, 255, 0.1);
   border-radius: 50rpx;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  backdrop-filter: blur(10rpx);
+  transition: all 0.3s ease;
+  /* backdrop-filter removed for compatibility */
   flex: 1;
   min-height: 80rpx;
 }
@@ -562,13 +562,9 @@
 
 .gender-option.selected {
   border-color: #ff3232;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 50, 50, 0.2),
-    rgba(255, 107, 107, 0.1)
-  );
-  box-shadow: 0 4rpx 20rpx rgba(255, 50, 50, 0.3);
-  transform: translateY(-2rpx);
+  background: rgba(255, 50, 50, 0.15);
+  box-shadow: 0 2rpx 10rpx rgba(255, 50, 50, 0.3);
+  /* transform removed for compatibility */
 }
 
 .gender-option.disabled {
@@ -584,7 +580,7 @@
 
 .gender-option.selected .gender-icon {
   color: #ff3232;
-  filter: drop-shadow(0 2rpx 8rpx rgba(255, 50, 50, 0.5));
+  /* filter removed for compatibility */
 }
 
 .gender-text {
@@ -597,7 +593,7 @@
 /* Picker Styling */
 .picker-view {
   padding: 10rpx 20rpx;
-  background: rgba(20, 20, 20, 0.8);
+  background: #141414;
   border: 2px solid rgba(255, 255, 255, 0.1);
   border-radius: 16rpx;
   color: #fff;
@@ -606,7 +602,7 @@
   display: flex;
   align-items: center;
   transition: all 0.3s ease;
-  backdrop-filter: blur(10rpx);
+  /* backdrop-filter removed for compatibility */
   position: relative;
 }
 
@@ -621,8 +617,8 @@
 
 .picker-view:active {
   border-color: #ff3232;
-  background: rgba(25, 25, 25, 0.9);
-  transform: translateY(-2rpx);
+  background: #191919;
+  /* transform removed for compatibility */
 }
 
 .picker-view.error {
@@ -669,12 +665,12 @@
   transition: all 0.3s ease;
   cursor: pointer;
   text-align: center;
-  backdrop-filter: blur(10rpx);
-  box-shadow: 0 4rpx 12rpx rgba(102, 126, 234, 0.3);
+  /* backdrop-filter removed for compatibility */
+  box-shadow: 0 2rpx 6rpx rgba(102, 126, 234, 0.3);
 }
 
 .send-code-btn:active {
-  transform: scale(0.96) translateY(2rpx);
+  transform: scale(0.96);
   opacity: 0.9;
 }
 
@@ -692,18 +688,18 @@
   width: 100%;
   height: 40rpx;
   padding: 10rpx 20rpx;
-  background: rgba(20, 20, 20, 0.8);
+  background: #141414;
   border: 2px solid rgba(255, 255, 255, 0.1);
   border-radius: 16rpx;
   color: #fff;
   font-size: 30rpx;
   transition: all 0.3s ease;
-  backdrop-filter: blur(10rpx);
+  /* backdrop-filter removed for compatibility */
 }
 
 .otp-input:focus {
   border-color: #ff3232;
-  background: rgba(35, 35, 35, 0.9);
+  background: #232323;
   box-shadow: 0 2rpx 10rpx rgba(255, 50, 50, 0.2);
 }
 
@@ -719,8 +715,8 @@
   transition: all 0.3s ease;
   cursor: pointer;
   text-align: center;
-  backdrop-filter: blur(10rpx);
-  box-shadow: 0 4rpx 12rpx rgba(16, 185, 129, 0.3);
+  /* backdrop-filter removed for compatibility */
+  box-shadow: 0 2rpx 6rpx rgba(16, 185, 129, 0.3);
 }
 
 .verify-code-btn:active {
@@ -1002,12 +998,12 @@
 
 /* Company Header Card */
 .company-header-card {
-  background: linear-gradient(135deg, rgba(255, 50, 50, 0.1), rgba(255, 107, 107, 0.05));
-  backdrop-filter: blur(20rpx);
+  background: #1e1e1e;
+  /* backdrop-filter removed for compatibility */
   border-radius: 24rpx;
   padding: 40rpx 30rpx;
   border: 2rpx solid rgba(255, 50, 50, 0.2);
-  box-shadow: 0 8rpx 32rpx rgba(255, 50, 50, 0.1);
+  box-shadow: 0 4rpx 16rpx rgba(255, 50, 50, 0.1);
   position: relative;
   overflow: hidden;
 }
@@ -1095,7 +1091,7 @@
 
 .section-icon {
   font-size: 36rpx;
-  filter: drop-shadow(0 2rpx 8rpx rgba(255, 50, 50, 0.3));
+  /* filter removed for compatibility */
 }
 
 .section-text {
@@ -1319,7 +1315,7 @@
 
 .info-icon {
   font-size: 28rpx;
-  filter: drop-shadow(0 2rpx 8rpx rgba(255, 50, 50, 0.2));
+  /* filter removed for compatibility */
 }
 
 .info-label {
@@ -1357,7 +1353,7 @@
 .address-icon,
 .description-icon {
   font-size: 28rpx;
-  filter: drop-shadow(0 2rpx 8rpx rgba(255, 50, 50, 0.2));
+  /* filter removed for compatibility */
 }
 
 .address-label,
@@ -1410,7 +1406,7 @@
 
 .legal-icon {
   font-size: 28rpx;
-  filter: drop-shadow(0 2rpx 8rpx rgba(255, 50, 50, 0.2));
+  /* filter removed for compatibility */
 }
 
 .legal-label {
@@ -1482,15 +1478,15 @@
 
 .stat-card:hover {
   border-color: rgba(255, 50, 50, 0.2);
-  transform: translateY(-4rpx);
-  box-shadow: 0 8rpx 24rpx rgba(255, 50, 50, 0.1);
+  /* transform removed for compatibility */
+  box-shadow: 0 4rpx 12rpx rgba(255, 50, 50, 0.1);
 }
 
 .stat-icon {
   font-size: 36rpx;
   margin-bottom: 12rpx;
   display: block;
-  filter: drop-shadow(0 2rpx 8rpx rgba(255, 50, 50, 0.2));
+  /* filter removed for compatibility */
 }
 
 .stat-label {

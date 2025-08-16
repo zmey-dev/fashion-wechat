@@ -244,9 +244,12 @@ Page({  data: {
   },  // Handle tab change
   onTabChange(e) {
     const index = e.currentTarget.dataset.index;
+    
     this.setData({
       currentTab: parseInt(index),
       posts: [],
+      hasMore: true,  // Reset hasMore flag when changing tabs
+      loading: false  // Reset loading flag
     });
 
     // Load posts for all tabs since profile tab is removed
