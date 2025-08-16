@@ -166,4 +166,21 @@
       </view>    
     </view>
   </view>
+
+  <!-- Custom Description Modal -->
+  <view wx:if="{{showDescriptionModal}}" class="description-modal-overlay" bindtap="hideDescriptionModal">
+    <view class="description-modal" catchtap="stopPropagation">
+      <view class="modal-header">
+        <text class="modal-title">活动规则</text>
+        <view class="modal-close" bindtap="hideDescriptionModal">✕</view>
+      </view>
+      <scroll-view class="modal-content" scroll-y="{{true}}" enhanced="{{true}}">
+        <rich-text class="modal-rich-text" nodes="{{modalDescriptionNodes}}"></rich-text>
+      </scroll-view>
+      <view class="modal-footer">
+        <button class="modal-btn cancel" bindtap="hideDescriptionModal">取消</button>
+        <button class="modal-btn confirm" bindtap="confirmJoinEvent">确认参加</button>
+      </view>
+    </view>
+  </view>
 </app-layout>

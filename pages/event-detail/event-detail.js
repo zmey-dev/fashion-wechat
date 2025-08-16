@@ -14,6 +14,9 @@ Page({
     currentTime: '',
     canJoinEvent: false,
     viewOnly: false,
+    showDescriptionModal: false,
+    modalDescription: '',
+    modalDescriptionNodes: [],
     messages: {
       loading: "加载中...",
       errors: {
@@ -245,19 +248,10 @@ Page({
 
     // Show event rules before proceeding
     if (this.data.event?.description) {
-      wx.showModal({
-        title: '活动规则',
-        content: this.data.event.description.replace(/<[^>]*>/g, '').substring(0, 200) + (this.data.event.description.length > 200 ? '...' : ''),
-        confirmText: '确认参加',
-        cancelText: '取消',
-        success: (res) => {
-          if (res.confirm) {
-            // Navigate to create post for event
-            wx.navigateTo({
-              url: `/pages/upload/upload?eventId=${this.data.eventId}&type=event`
-            });
-          }
-        }
+      this.setData({
+        showDescriptionModal: true,
+        modalDescription: this.data.event.description.replace(/<[^>]*>/g, ''),
+        modalDescriptionNodes: this.data.event.description
       });
     } else {
       // Navigate to create post for event directly if no description
@@ -265,6 +259,25 @@ Page({
         url: `/pages/upload/upload?eventId=${this.data.eventId}&type=event`
       });
     }
+  },
+
+  hideDescriptionModal: function () {
+    this.setData({
+      showDescriptionModal: false,
+      modalDescription: ''
+    });
+  },
+
+  confirmJoinEvent: function () {
+    this.hideDescriptionModal();
+    // Navigate to create post for event
+    wx.navigateTo({
+      url: `/pages/upload/upload?eventId=${this.data.eventId}&type=event`
+    });
+  },
+
+  stopPropagation: function () {
+    // Prevent modal from closing when clicking inside modal content
   },
 
   onPostTap: function (e) {
