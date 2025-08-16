@@ -518,7 +518,7 @@
 /* Floating Action Buttons */
 .floating-actions {
   position: absolute;
-  bottom: 50rpx;
+  bottom: 100rpx;
   right: 32rpx;
   z-index: 999;
   display: flex;
@@ -527,20 +527,21 @@
 }
 
 .float-btn {
-  width: 96rpx;
-  height: 96rpx;
+  width: 88rpx;
+  height: 88rpx;
   border-radius: 50%;
   border: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8rpx 32rpx rgba(0, 215, 99, 0.4);
-  transition: all 0.3s ease;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10rpx);
 }
 
 .float-btn.refresh {
-  background: linear-gradient(135deg, #ffffff, #00d763);
-  border: 1rpx solid rgba(0, 215, 99, 0.5);
+  background: rgba(255, 255, 255, 0.95);
+  border: 1rpx solid rgba(0, 0, 0, 0.1);
 }
 
 .float-btn.scroll-top {
@@ -549,16 +550,17 @@
 }
 
 .float-btn:active {
-  transform: scale(0.9);
+  transform: scale(0.95);
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.2);
 }
 
 .btn-icon {
-  width: 48rpx;
-  height: 48rpx;
+  width: 40rpx;
+  height: 40rpx;
 }
 
 .float-btn.refresh .btn-icon {
-  filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(7500%) hue-rotate(0deg) brightness(100%) contrast(100%);
+  filter: brightness(0) saturate(100%) invert(20%) sepia(10%) saturate(500%) hue-rotate(0deg) brightness(95%) contrast(85%);
 }
 
 .float-btn.scroll-top .btn-icon {
