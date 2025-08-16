@@ -1544,11 +1544,17 @@ page {
   flex-direction: row;
 }
 
-.company-icon {
-  width: 40rpx;
-  height: 40rpx;
+.company-badge {
+  display: inline-block;
+  background-color: #3b82f6;
+  color: white;
+  font-size: 20rpx;
+  font-weight: 600;
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+  margin-left: 12rpx;
+  line-height: 1;
   flex-shrink: 0;
-  margin-top: 2rpx;
 }
 
 .student-username {

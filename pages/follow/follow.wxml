@@ -51,13 +51,7 @@
             <avatar class="profile-avatar" avatar="{{currentUser.avatar}}" user="{{currentUser}}" size="{{80}}" mode="aspectFill"></avatar>
             <view class="profile-details">
               <view class="username-container">
-                <image 
-                  wx:if="{{userUtils.isCompany(currentUser)}}"
-                  class="company-icon" 
-                  src="/images/icons/company.svg" 
-                  mode="aspectFit"
-                />
-                <text class="profile-username">{{userUtils.getFormattedDisplayName(currentUser)}}</text>
+                <text class="profile-username">{{userUtils.getFormattedDisplayName(currentUser)}}<text wx:if="{{userUtils.isCompany(currentUser)}}" class="company-badge">企业</text></text>
               </view>
               <text wx:if="{{!userUtils.isCompany(currentUser)}}" class="profile-university">{{(currentUser.university && currentUser.university.name) || '未设置大学'}}</text>
               <text wx:if="{{!userUtils.isCompany(currentUser)}}" class="profile-faculty">{{currentUser.faculty || '未设置学院'}}</text>
