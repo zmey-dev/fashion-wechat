@@ -305,6 +305,65 @@
             <text>{{passwordError}}</text>
           </view>
         </view>
+
+        <!-- WeChat Linking Section for Company -->
+        <view class="form-section">
+          <view class="section-title">微信绑定</view>
+          
+          <view class="form-field">
+            <label class="field-label">微信账号</label>
+            <view class="wechat-status-container">
+              <view class="wechat-status-row">
+                <view class="wechat-status {{isWechatLinked ? 'linked' : 'unlinked'}}">
+                  <view class="wechat-status-icon">
+                    <text wx:if="{{isWechatLinked}}">✅</text>
+                    <text wx:else>❌</text>
+                  </view>
+                  <view class="wechat-status-text">
+                    <text wx:if="{{isWechatLinked}}">已绑定微信</text>
+                    <text wx:else>未绑定微信</text>
+                  </view>
+                </view>
+                
+                <!-- WeChat Action Button moved next to status -->
+                <view class="wechat-actions-inline">
+                  <view 
+                    wx:if="{{!isWechatLinked}}"
+                    class="action-button wechat-link-btn link-btn"
+                    bindtap="linkWechat"
+                  >
+                    <text class="button-label" wx:if="{{!wechatLinking}}">绑定</text>
+                    <text class="button-label" wx:else>绑定中</text>
+                  </view>
+                  
+                  <view 
+                    wx:if="{{isWechatLinked}}"
+                    class="action-button wechat-link-btn unlink-btn"
+                    bindtap="unlinkWechat"
+                  >
+                    <text class="button-label" wx:if="{{!wechatLinking}}">解除</text>
+                    <text class="button-label" wx:else>处理中</text>
+                  </view>
+                </view>
+              </view>
+            </view>
+            
+            <view class="wechat-description">
+              <text wx:if="{{!isWechatLinked}}">绑定微信后可使用微信快捷登录</text>
+              <text wx:else>您可以使用微信登录或解除绑定</text>
+            </view>
+          </view>
+          
+          <!-- Logout Button moved here -->
+          <view class="form-field logout-section">
+            <view class="logout-button-container">
+              <view class="action-button logout-button" bindtap="handleLogout">
+                <image class="image-icon" src="/images/icons/logout.svg"></image>
+                <text class="button-label">退出登录</text>
+              </view>
+            </view>
+          </view>
+        </view>
       </view>
 
       <!-- Student/Teacher Profile (Original form for non-company users) -->
@@ -626,8 +685,8 @@
         </view>
       </view>
       
-      <!-- Password Change Section -->
-      <view class="form-section">
+      <!-- Password Change Section for non-company users -->
+      <view wx:if="{{userInfo.role !== 'company'}}" class="form-section">
         <view class="section-title">密码管理</view>
         
         <view class="form-field">
@@ -692,8 +751,8 @@
         </view>
       </view>
 
-      <!-- WeChat Linking Section -->
-      <view class="form-section">
+      <!-- WeChat Linking Section for non-company users -->
+      <view wx:if="{{userInfo.role !== 'company'}}" class="form-section">
         <view class="section-title">微信绑定</view>
         
         <view class="form-field">
