@@ -62,7 +62,14 @@ Component({
         name: "校秀",
         path: "/pages/event/event",
         type: "filter",
-      },      {
+      },
+      {
+        key: "company",
+        name: "企业",
+        path: "/pages/company-posts/company-posts",
+        type: "filter",
+      },
+      {
         key: "chat",
         name: "聊天",
         icon: "/images/icons/message.svg",
@@ -128,7 +135,14 @@ Component({
         name: "校秀",
         path: "/pages/event/event",
         type: "filter",
-      },      {
+      },
+      {
+        key: "company",
+        name: "企业",
+        path: "/pages/company-posts/company-posts",
+        type: "filter",
+      },
+      {
         key: "me",
         name: "我的",
         icon: "/images/icons/me.png",
@@ -278,14 +292,6 @@ Component({
       });
     },
 
-    /**
-     * Company button handler - navigate to company posts page
-     */
-    onCompanyButtonTap: function() {
-      wx.navigateTo({
-        url: '/pages/company-posts/company-posts'
-      });
-    },
 
     /**
      * Search back button handler - hide search UI with animation
@@ -366,6 +372,7 @@ Component({
         "recommend",
         "follow",
         "event",
+        "company",
         "contact",
         "profile",
         "chat",

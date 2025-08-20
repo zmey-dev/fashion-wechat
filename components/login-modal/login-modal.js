@@ -315,7 +315,7 @@ Component({
           });
         } else {
           this.setData({
-            loginIdentifierError: "用户名或手机号不存在",
+            loginIdentifierError: "用户名和密码不匹配 请重新输入。",
           });
         }
       } finally {

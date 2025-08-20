@@ -53,8 +53,6 @@
               <view class="username-container">
                 <text class="profile-username">{{userUtils.getDisplayName(currentUser)}}<text class="company-badge">企业</text></text>
               </view>
-              <text wx:if="{{currentUser.company_name}}" class="profile-university">{{currentUser.company_name}}</text>
-              <text wx:if="{{currentUser.company_description}}" class="profile-faculty">{{currentUser.company_description}}</text>
             </view>
           </view>
         </view>

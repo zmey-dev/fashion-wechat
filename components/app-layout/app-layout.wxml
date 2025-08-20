@@ -14,10 +14,6 @@
         >
           <text class="filter-text">{{item.name}}</text>
         </view>
-        <!-- Company Button as Filter Tab -->
-        <view class="filter-tab company-tab" bindtap="onCompanyButtonTap">
-          <text class="filter-text">企业</text>
-        </view>
       </view>
     </scroll-view>
     <!-- Search Icon -->
