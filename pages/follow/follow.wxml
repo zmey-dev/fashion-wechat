@@ -30,7 +30,7 @@
       <view class="user-item" wx:for="{{filteredUserList}}" wx:key="id" bindtap="selectUser" data-id="{{item.id}}">
         <avatar class="user-avatar" avatar="{{item.avatar}}" user="{{item}}" size="{{70}}" mode="aspectFill"></avatar>
         <view class="user-info">
-          <text class="user-nickname">{{userUtils.getShortDisplayName(item, 10)}}</text>
+          <text class="user-nickname">{{userUtils.getShortDisplayName(item, 10)}}<text wx:if="{{userUtils.isCompany(item)}}" class="company-badge-small">企业</text></text>
           <text class="user-followers">粉丝 {{item.followers}}人</text>
         </view>
         <view class="user-arrow">
@@ -51,7 +51,7 @@
             <avatar class="profile-avatar" avatar="{{currentUser.avatar}}" user="{{currentUser}}" size="{{80}}" mode="aspectFill"></avatar>
             <view class="profile-details">
               <view class="username-container">
-                <text class="profile-username">{{userUtils.getFormattedDisplayName(currentUser)}}<text wx:if="{{userUtils.isCompany(currentUser)}}" class="company-badge">企业</text></text>
+                <text class="profile-username">{{userUtils.getDisplayName(currentUser)}}<text wx:if="{{userUtils.isCompany(currentUser)}}" class="company-badge">企业</text></text>
               </view>
               <text wx:if="{{!userUtils.isCompany(currentUser)}}" class="profile-university">{{(currentUser.university && currentUser.university.name) || '未设置大学'}}</text>
               <text wx:if="{{!userUtils.isCompany(currentUser)}}" class="profile-faculty">{{currentUser.faculty || '未设置学院'}}</text>
@@ -99,8 +99,12 @@
       </view>
 
       <!-- Loading indicator -->
-      <view class="loading-indicator" wx:if="{{loading}}">
-        <text>{{messages.loading}}</text>
+      <view class="loading-container" wx:if="{{loading}}">
+        <image class="loading-logo" src="/images/logo.png" mode="aspectFit"></image>
+        <view class="loading-progress-bar">
+          <view class="loading-progress-fill"></view>
+        </view>
+        <text class="loading-text">{{messages.loading}}</text>
       </view>
       
       <!-- No more content message -->

@@ -16,6 +16,181 @@ page {
   flex-direction: column;
 }
 
+/* Filter Styles */
+.filter-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  padding: 20rpx 32rpx;
+  margin: 20rpx;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16rpx;
+  color: white;
+  font-size: 28rpx;
+  font-weight: 500;
+}
+
+.filter-icon {
+  width: 32rpx;
+  height: 32rpx;
+  filter: brightness(0) invert(1);
+}
+
+.filter-section {
+  background: #1a1a1a;
+  margin: 0 20rpx 20rpx;
+  padding: 24rpx;
+  border-radius: 16rpx;
+  border: 1px solid #333;
+}
+
+.filter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24rpx;
+}
+
+.filter-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #fff;
+}
+
+.clear-all-btn {
+  padding: 8rpx 16rpx;
+  background: rgba(239, 68, 68, 0.2);
+  border-radius: 8rpx;
+  color: #ef4444;
+  font-size: 24rpx;
+}
+
+.filter-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.filter-dropdown {
+  position: relative;
+}
+
+.dropdown-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16rpx 20rpx;
+  background: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 12rpx;
+}
+
+.dropdown-label {
+  font-size: 24rpx;
+  color: #999;
+  margin-right: 16rpx;
+}
+
+.dropdown-value {
+  flex: 1;
+  font-size: 28rpx;
+  color: #fff;
+  text-align: right;
+  margin-right: 12rpx;
+}
+
+.dropdown-arrow {
+  width: 24rpx;
+  height: 24rpx;
+  transition: transform 0.3s;
+  filter: brightness(0) invert(0.8);
+}
+
+.dropdown-arrow.rotate {
+  transform: rotate(180deg);
+}
+
+.dropdown-content {
+  position: absolute;
+  top: calc(100% + 8rpx);
+  left: 0;
+  right: 0;
+  background: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 12rpx;
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.4);
+  z-index: 100;
+  overflow: hidden;
+}
+
+.dropdown-search {
+  padding: 16rpx;
+  border-bottom: 1px solid #444;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12rpx 16rpx;
+  background: #1a1a1a;
+  border: 1px solid #555;
+  border-radius: 8rpx;
+  color: #fff;
+  font-size: 26rpx;
+}
+
+.dropdown-options {
+  max-height: 400rpx;
+}
+
+.dropdown-option {
+  padding: 16rpx 20rpx;
+  font-size: 28rpx;
+  color: #ccc;
+  border-bottom: 1px solid #333;
+}
+
+.dropdown-option:last-child {
+  border-bottom: none;
+}
+
+.dropdown-option.selected {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+.active-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-top: 20rpx;
+}
+
+.filter-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 8rpx 16rpx;
+  background: rgba(99, 102, 241, 0.2);
+  border: 1px solid rgba(99, 102, 241, 0.4);
+  border-radius: 20rpx;
+  font-size: 24rpx;
+  color: #a5b4fc;
+}
+
+.tag-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28rpx;
+  height: 28rpx;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  color: #fff;
+  font-size: 20rpx;
+  cursor: pointer;
+}
+
 /* Header & Tabs */
 .header {
   position: sticky;
@@ -2207,5 +2382,70 @@ page {
 .delete-btn-top text {
   font-size: 26rpx;
   color: #f44336;
+  font-weight: 500;
+}
+
+/* Password Change Styles */
+.password-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 32rpx;
+}
+
+.change-password-btn {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10rpx;
+  padding: 20rpx 28rpx;
+  border-radius: 50rpx;
+  border: none;
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+  color: white;
+  box-shadow: 0 4rpx 15rpx rgba(76, 175, 80, 0.4);
+  min-width: 200rpx;
+  transition: all 0.3s ease;
+}
+
+.change-password-btn:active {
+  transform: scale(0.96) translateY(2rpx);
+  background: linear-gradient(135deg, #45a049, #388e3c);
+}
+
+.change-password-btn .button-label {
+  font-size: 26rpx;
+  letter-spacing: 0.5rpx;
+  filter: drop-shadow(0 2rpx 4rpx rgba(0, 0, 0, 0.3));
+}
+
+/* Success and Error Messages */
+.success-message {
+  background: rgba(76, 175, 80, 0.1);
+  border: 2rpx solid #4CAF50;
+  border-radius: 12rpx;
+  padding: 16rpx;
+  margin-top: 16rpx;
+  text-align: center;
+}
+
+.success-message text {
+  color: #4CAF50;
+  font-size: 26rpx;
+  font-weight: 500;
+}
+
+.error-message {
+  background: rgba(244, 67, 54, 0.1);
+  border: 2rpx solid #f44336;
+  border-radius: 12rpx;
+  padding: 16rpx;
+  margin-top: 16rpx;
+  text-align: center;
+}
+
+.error-message text {
+  color: #f44336;
+  font-size: 26rpx;
   font-weight: 500;
 }

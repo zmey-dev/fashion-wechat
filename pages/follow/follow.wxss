@@ -230,6 +230,18 @@
   flex-shrink: 0;
 }
 
+.company-badge-small {
+  display: inline-block;
+  background-color: #3b82f6;
+  color: white;
+  font-size: 18rpx;
+  font-weight: 600;
+  padding: 2rpx 8rpx;
+  border-radius: 6rpx;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
 .profile-username {
   font-size: 30rpx;
   font-weight: 700;

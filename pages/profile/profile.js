@@ -52,6 +52,17 @@ Page({
     isWechatLinked: false,
     wechatLinking: false,
     
+    // Password change state
+    passwordForm: {
+      old_password: "",
+      new_password: "",
+      new_password_confirmation: ""
+    },
+    passwordErrors: {},
+    passwordChanging: false,
+    passwordMessage: "",
+    passwordError: "",
+    
     // Countdown for SMS resend
     phoneCountdown: 0,
     emailCountdown: 0,
@@ -1479,7 +1490,167 @@ Page({
     });
   },
 
-  // Check WeChat link status on load
+  // Password change input handler
+  onPasswordInputChange: function (e) {
+    const { field } = e.currentTarget.dataset;
+    const value = e.detail.value;
+    
+    this.setData({
+      [`passwordForm.${field}`]: value,
+      [`passwordErrors.${field}`]: "",
+      passwordMessage: "",
+      passwordError: ""
+    });
+  },
+
+  // Password validation
+  validatePassword: function() {
+    const { old_password, new_password, new_password_confirmation } = this.data.passwordForm;
+    const errors = {};
+
+    if (!old_password) {
+      errors.old_password = "请输入当前密码";
+    }
+
+    if (!new_password) {
+      errors.new_password = "请输入新密码";
+    } else if (new_password.length < 6) {
+      errors.new_password = "密码长度至少为6位";
+    }
+
+    if (!new_password_confirmation) {
+      errors.new_password_confirmation = "请确认新密码";
+    } else if (new_password !== new_password_confirmation) {
+      errors.new_password_confirmation = "两次输入的密码不一致";
+    }
+
+    this.setData({ passwordErrors: errors });
+    return Object.keys(errors).length === 0;
+  },
+
+  // Change password
+  changePassword: function() {
+    if (this.data.passwordChanging) return;
+
+    // Clear previous messages
+    this.setData({
+      passwordMessage: "",
+      passwordError: ""
+    });
+
+    if (!this.validatePassword()) {
+      return;
+    }
+
+    this.setData({ passwordChanging: true });
+
+    const { old_password, new_password, new_password_confirmation } = this.data.passwordForm;
+    const userInfo = getApp().globalData.userInfo;
+    
+    console.log('Token for password change:', userInfo?.token);
+    
+    // Make API request using web version API
+    wx.request({
+      url: `${config.BACKEND_URL}/auth/update_password`,
+      method: 'POST',
+      header: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${userInfo?.token}`
+      },
+      data: {
+        old_password,
+        new_password,
+        new_password_confirmation
+      },
+      success: (response) => {
+        console.log('Password change response:', response);
+        
+        if (response.statusCode === 200 && response.data.status === 'success') {
+          this.setData({
+            passwordMessage: response.data.msg || "密码修改成功",
+            passwordForm: {
+              old_password: "",
+              new_password: "",
+              new_password_confirmation: ""
+            }
+          });
+          
+          wx.showToast({
+            title: '密码修改成功',
+            icon: 'success',
+            duration: 2000
+          });
+        } else {
+          // Handle different HTTP status codes
+          let errorMessage = "";
+          
+          if (response.statusCode === 401) {
+            errorMessage = "认证失败，请重新登录";
+          } else if (response.statusCode === 422) {
+            // Validation errors
+            const errors = response.data.errors;
+            if (errors && typeof errors === 'object') {
+              const errorMessages = [];
+              for (const field in errors) {
+                if (Array.isArray(errors[field])) {
+                  errorMessages.push(...errors[field]);
+                } else {
+                  errorMessages.push(errors[field]);
+                }
+              }
+              errorMessage = errorMessages.join('; ');
+            } else {
+              errorMessage = response.data.msg || response.data.message || "验证失败";
+            }
+          } else if (response.statusCode === 400) {
+            errorMessage = response.data.msg || response.data.message || "请求参数错误";
+          } else if (response.statusCode === 500) {
+            errorMessage = "服务器内部错误，请稍后重试";
+          } else {
+            errorMessage = response.data.msg || response.data.message || response.data.error || `请求失败 (状态码: ${response.statusCode})`;
+          }
+          
+          this.setData({
+            passwordError: errorMessage
+          });
+          
+          wx.showToast({
+            title: errorMessage,
+            icon: 'none',
+            duration: 3000
+          });
+        }
+      },
+      fail: (error) => {
+        console.error('Password change network error:', error);
+        let errorMessage = "网络连接失败";
+        
+        if (error.errMsg) {
+          if (error.errMsg.includes('timeout')) {
+            errorMessage = "请求超时，请检查网络连接";
+          } else if (error.errMsg.includes('fail')) {
+            errorMessage = "网络请求失败，请检查网络设置";
+          } else {
+            errorMessage = `网络错误: ${error.errMsg}`;
+          }
+        }
+        
+        this.setData({
+          passwordError: errorMessage
+        });
+        
+        wx.showToast({
+          title: errorMessage,
+          icon: 'none',
+          duration: 3000
+        });
+      },
+      complete: () => {
+        this.setData({ passwordChanging: false });
+      }
+    });
+  },
+
   checkWechatLinkStatus() {
     const { userInfo } = this.data;
     const isLinked = !!(userInfo?.wechat_openid);

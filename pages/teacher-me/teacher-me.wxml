@@ -25,6 +25,165 @@
       <!-- Student Management Tab -->
       <block wx:if="{{currentTab === 0}}">
     <block wx:if="{{!selectedStudent}}">
+      <!-- Filter Toggle Button -->
+      <view class="filter-toggle-btn" bindtap="toggleFilters">
+        <image src="../../images/icons/filter.svg" mode="aspectFit" class="filter-icon"></image>
+        <text>{{showFilters ? '隐藏筛选' : '显示筛选'}}</text>
+      </view>
+      
+      <!-- Filter Section -->
+      <view wx:if="{{showFilters}}" class="filter-section">
+        <view class="filter-header">
+          <text class="filter-title">筛选学生</text>
+          <view wx:if="{{activeFilters.faculty_id || activeFilters.major_id || activeFilters.attend_year}}" 
+                class="clear-all-btn" 
+                bindtap="clearAllFilters">
+            <text>清除所有</text>
+          </view>
+        </view>
+        
+        <!-- Filter Dropdowns -->
+        <view class="filter-controls">
+          <!-- Faculty Filter -->
+          <view class="filter-dropdown">
+            <view class="dropdown-header" bindtap="toggleFilterDropdown" data-type="faculty">
+              <text class="dropdown-label">学院</text>
+              <text class="dropdown-value">{{filterDisplayValues.faculty}}</text>
+              <image src="../../images/icons/chevron-down.svg" 
+                     mode="aspectFit" 
+                     class="dropdown-arrow {{filterDropdowns.faculty ? 'rotate' : ''}}"></image>
+            </view>
+            
+            <view wx:if="{{filterDropdowns.faculty}}" class="dropdown-content">
+              <view class="dropdown-search">
+                <input type="text" 
+                       placeholder="搜索学院..." 
+                       value="{{filterSearchTerms.faculty}}"
+                       bindinput="onFilterSearchInput"
+                       data-type="faculty"
+                       class="search-input" />
+              </view>
+              
+              <scroll-view class="dropdown-options" scroll-y="true">
+                <view class="dropdown-option {{!activeFilters.faculty ? 'selected' : ''}}"
+                      bindtap="selectFilterOption"
+                      data-type="faculty"
+                      data-value="">
+                  全部学院
+                </view>
+                <block wx:for="{{filters.faculties}}" wx:key="value">
+                  <view wx:if="{{!filterSearchTerms.faculty || item.name.toLowerCase().indexOf(filterSearchTerms.faculty.toLowerCase()) !== -1}}"
+                        class="dropdown-option {{activeFilters.faculty === item.value ? 'selected' : ''}}"
+                        bindtap="selectFilterOption"
+                        data-type="faculty"
+                        data-value="{{item.value}}"
+                        data-name="{{item.name}}">
+                    {{item.name}}
+                  </view>
+                </block>
+              </scroll-view>
+            </view>
+          </view>
+          
+          <!-- Major Filter -->
+          <view class="filter-dropdown">
+            <view class="dropdown-header" bindtap="toggleFilterDropdown" data-type="major">
+              <text class="dropdown-label">专业</text>
+              <text class="dropdown-value">{{filterDisplayValues.major}}</text>
+              <image src="../../images/icons/chevron-down.svg" 
+                     mode="aspectFit" 
+                     class="dropdown-arrow {{filterDropdowns.major ? 'rotate' : ''}}"></image>
+            </view>
+            
+            <view wx:if="{{filterDropdowns.major}}" class="dropdown-content">
+              <view class="dropdown-search">
+                <input type="text" 
+                       placeholder="搜索专业..." 
+                       value="{{filterSearchTerms.major}}"
+                       bindinput="onFilterSearchInput"
+                       data-type="major"
+                       class="search-input" />
+              </view>
+              
+              <scroll-view class="dropdown-options" scroll-y="true">
+                <view class="dropdown-option {{!activeFilters.major ? 'selected' : ''}}"
+                      bindtap="selectFilterOption"
+                      data-type="major"
+                      data-value="">
+                  全部专业
+                </view>
+                <block wx:for="{{filters.majors}}" wx:key="value">
+                  <view wx:if="{{!filterSearchTerms.major || item.name.toLowerCase().indexOf(filterSearchTerms.major.toLowerCase()) !== -1}}"
+                        class="dropdown-option {{activeFilters.major === item.value ? 'selected' : ''}}"
+                        bindtap="selectFilterOption"
+                        data-type="major"
+                        data-value="{{item.value}}"
+                        data-name="{{item.name}}">
+                    {{item.name}}
+                  </view>
+                </block>
+              </scroll-view>
+            </view>
+          </view>
+          
+          <!-- Attend Year Filter -->
+          <view class="filter-dropdown">
+            <view class="dropdown-header" bindtap="toggleFilterDropdown" data-type="year">
+              <text class="dropdown-label">入学年份</text>
+              <text class="dropdown-value">{{filterDisplayValues.year}}</text>
+              <image src="../../images/icons/chevron-down.svg" 
+                     mode="aspectFit" 
+                     class="dropdown-arrow {{filterDropdowns.year ? 'rotate' : ''}}"></image>
+            </view>
+            
+            <view wx:if="{{filterDropdowns.year}}" class="dropdown-content">
+              <view class="dropdown-search">
+                <input type="text" 
+                       placeholder="搜索年份..." 
+                       value="{{filterSearchTerms.year}}"
+                       bindinput="onFilterSearchInput"
+                       data-type="year"
+                       class="search-input" />
+              </view>
+              
+              <scroll-view class="dropdown-options" scroll-y="true">
+                <view class="dropdown-option {{!activeFilters.attend_year ? 'selected' : ''}}"
+                      bindtap="selectFilterOption"
+                      data-type="year"
+                      data-value="">
+                  全部年份
+                </view>
+                <block wx:for="{{filters.attend_years}}" wx:key="*this">
+                  <view wx:if="{{!filterSearchTerms.year || item.toString().indexOf(filterSearchTerms.year) !== -1}}"
+                        class="dropdown-option {{activeFilters.attend_year === item ? 'selected' : ''}}"
+                        bindtap="selectFilterOption"
+                        data-type="year"
+                        data-value="{{item}}">
+                    {{item}}
+                  </view>
+                </block>
+              </scroll-view>
+            </view>
+          </view>
+        </view>
+        
+        <!-- Active Filters Tags -->
+        <view wx:if="{{activeFilters.faculty || activeFilters.major || activeFilters.attend_year}}" class="active-filters">
+          <view wx:if="{{activeFilters.faculty}}" class="filter-tag">
+            <text>{{filterDisplayValues.faculty}}</text>
+            <view class="tag-close" bindtap="clearFilter" data-type="faculty">×</view>
+          </view>
+          <view wx:if="{{activeFilters.major}}" class="filter-tag">
+            <text>{{filterDisplayValues.major}}</text>
+            <view class="tag-close" bindtap="clearFilter" data-type="major">×</view>
+          </view>
+          <view wx:if="{{activeFilters.attend_year}}" class="filter-tag">
+            <text>{{filterDisplayValues.year}}</text>
+            <view class="tag-close" bindtap="clearFilter" data-type="year">×</view>
+          </view>
+        </view>
+      </view>
+      
       <!-- Student List -->
       <view class="card section-title">
         <text>我校学生</text>
@@ -713,6 +872,72 @@
               <text>支持PDF、Word文档或图片格式</text>
             </view>
           </view>
+        </view>
+      </view>
+      
+      <!-- Password Change Section -->
+      <view class="form-section">
+        <view class="section-title">密码管理</view>
+        
+        <view class="form-field">
+          <label class="field-label">当前密码</label>
+          <view class="input-wrapper">
+            <input 
+              class="field-input {{passwordErrors.old_password ? 'error' : ''}}"
+              password="{{true}}"
+              value="{{passwordForm.old_password}}"
+              placeholder="请输入当前密码"
+              data-field="old_password"
+              bindinput="onPasswordInputChange"
+            />
+          </view>
+          <text class="error-text" wx:if="{{passwordErrors.old_password}}">{{passwordErrors.old_password}}</text>
+        </view>
+
+        <view class="form-field">
+          <label class="field-label">新密码</label>
+          <view class="input-wrapper">
+            <input 
+              class="field-input {{passwordErrors.new_password ? 'error' : ''}}"
+              password="{{true}}"
+              value="{{passwordForm.new_password}}"
+              placeholder="请输入新密码 (6-20位)"
+              data-field="new_password"
+              bindinput="onPasswordInputChange"
+            />
+          </view>
+          <text class="error-text" wx:if="{{passwordErrors.new_password}}">{{passwordErrors.new_password}}</text>
+        </view>
+
+        <view class="form-field">
+          <label class="field-label">确认新密码</label>
+          <view class="input-wrapper">
+            <input 
+              class="field-input {{passwordErrors.new_password_confirmation ? 'error' : ''}}"
+              password="{{true}}"
+              value="{{passwordForm.new_password_confirmation}}"
+              placeholder="请再次输入新密码"
+              data-field="new_password_confirmation"
+              bindinput="onPasswordInputChange"
+            />
+          </view>
+          <text class="error-text" wx:if="{{passwordErrors.new_password_confirmation}}">{{passwordErrors.new_password_confirmation}}</text>
+        </view>
+
+        <!-- Change Password Button -->
+        <view class="password-actions">
+          <view class="action-button change-password-btn" bindtap="changePassword">
+            <text class="button-label" wx:if="{{!passwordChanging}}">修改密码</text>
+            <text class="button-label" wx:else>修改中...</text>
+          </view>
+        </view>
+
+        <!-- Success/Error Messages -->
+        <view wx:if="{{passwordMessage}}" class="success-message">
+          <text>{{passwordMessage}}</text>
+        </view>
+        <view wx:if="{{passwordError}}" class="error-message">
+          <text>{{passwordError}}</text>
         </view>
       </view>
       

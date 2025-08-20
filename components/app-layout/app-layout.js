@@ -107,7 +107,7 @@ Component({
     teacherPages: [
       {
         key: "index",
-        name: "精선",
+        name: "精选",
         path: "/pages/index/index",
         type: "filter",
       },
@@ -275,6 +275,15 @@ Component({
     onSearchIconTap: function() {
       this.setData({ 
         showSearch: true 
+      });
+    },
+
+    /**
+     * Company button handler - navigate to company posts page
+     */
+    onCompanyButtonTap: function() {
+      wx.navigateTo({
+        url: '/pages/company-posts/company-posts'
       });
     },
 

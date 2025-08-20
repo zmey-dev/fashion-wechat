@@ -239,6 +239,72 @@
             </view>
           </view>
         </view>
+        
+        <!-- Password Change Section for Company -->
+        <view class="form-section">
+          <view class="section-title">密码管理</view>
+          
+          <view class="form-field">
+            <label class="field-label">当前密码</label>
+            <view class="input-wrapper">
+              <input 
+                class="field-input {{passwordErrors.old_password ? 'error' : ''}}"
+                password="{{true}}"
+                value="{{passwordForm.old_password}}"
+                placeholder="请输入当前密码"
+                data-field="old_password"
+                bindinput="onPasswordInputChange"
+              />
+            </view>
+            <text class="error-text" wx:if="{{passwordErrors.old_password}}">{{passwordErrors.old_password}}</text>
+          </view>
+
+          <view class="form-field">
+            <label class="field-label">新密码</label>
+            <view class="input-wrapper">
+              <input 
+                class="field-input {{passwordErrors.new_password ? 'error' : ''}}"
+                password="{{true}}"
+                value="{{passwordForm.new_password}}"
+                placeholder="请输入新密码 (6-20位)"
+                data-field="new_password"
+                bindinput="onPasswordInputChange"
+              />
+            </view>
+            <text class="error-text" wx:if="{{passwordErrors.new_password}}">{{passwordErrors.new_password}}</text>
+          </view>
+
+          <view class="form-field">
+            <label class="field-label">确认新密码</label>
+            <view class="input-wrapper">
+              <input 
+                class="field-input {{passwordErrors.new_password_confirmation ? 'error' : ''}}"
+                password="{{true}}"
+                value="{{passwordForm.new_password_confirmation}}"
+                placeholder="请再次输入新密码"
+                data-field="new_password_confirmation"
+                bindinput="onPasswordInputChange"
+              />
+            </view>
+            <text class="error-text" wx:if="{{passwordErrors.new_password_confirmation}}">{{passwordErrors.new_password_confirmation}}</text>
+          </view>
+
+          <!-- Change Password Button -->
+          <view class="password-actions">
+            <view class="action-button change-password-btn" bindtap="changePassword">
+              <text class="button-label" wx:if="{{!passwordChanging}}">修改密码</text>
+              <text class="button-label" wx:else>修改中...</text>
+            </view>
+          </view>
+
+          <!-- Success/Error Messages -->
+          <view wx:if="{{passwordMessage}}" class="success-message">
+            <text>{{passwordMessage}}</text>
+          </view>
+          <view wx:if="{{passwordError}}" class="error-message">
+            <text>{{passwordError}}</text>
+          </view>
+        </view>
       </view>
 
       <!-- Student/Teacher Profile (Original form for non-company users) -->
@@ -558,7 +624,75 @@
           </picker>
           <text class="error-text" wx:if="{{profileErrors.birthday}}">{{profileErrors.birthday}}</text>
         </view>
-      </view>      <!-- WeChat Linking Section -->
+      </view>
+      
+      <!-- Password Change Section -->
+      <view class="form-section">
+        <view class="section-title">密码管理</view>
+        
+        <view class="form-field">
+          <label class="field-label">当前密码</label>
+          <view class="input-wrapper">
+            <input 
+              class="field-input {{passwordErrors.old_password ? 'error' : ''}}"
+              password="{{true}}"
+              value="{{passwordForm.old_password}}"
+              placeholder="请输入当前密码"
+              data-field="old_password"
+              bindinput="onPasswordInputChange"
+            />
+          </view>
+          <text class="error-text" wx:if="{{passwordErrors.old_password}}">{{passwordErrors.old_password}}</text>
+        </view>
+
+        <view class="form-field">
+          <label class="field-label">新密码</label>
+          <view class="input-wrapper">
+            <input 
+              class="field-input {{passwordErrors.new_password ? 'error' : ''}}"
+              password="{{true}}"
+              value="{{passwordForm.new_password}}"
+              placeholder="请输入新密码 (6-20位)"
+              data-field="new_password"
+              bindinput="onPasswordInputChange"
+            />
+          </view>
+          <text class="error-text" wx:if="{{passwordErrors.new_password}}">{{passwordErrors.new_password}}</text>
+        </view>
+
+        <view class="form-field">
+          <label class="field-label">确认新密码</label>
+          <view class="input-wrapper">
+            <input 
+              class="field-input {{passwordErrors.new_password_confirmation ? 'error' : ''}}"
+              password="{{true}}"
+              value="{{passwordForm.new_password_confirmation}}"
+              placeholder="请再次输入新密码"
+              data-field="new_password_confirmation"
+              bindinput="onPasswordInputChange"
+            />
+          </view>
+          <text class="error-text" wx:if="{{passwordErrors.new_password_confirmation}}">{{passwordErrors.new_password_confirmation}}</text>
+        </view>
+
+        <!-- Change Password Button -->
+        <view class="password-actions">
+          <view class="action-button change-password-btn" bindtap="changePassword">
+            <text class="button-label" wx:if="{{!passwordChanging}}">修改密码</text>
+            <text class="button-label" wx:else>修改中...</text>
+          </view>
+        </view>
+
+        <!-- Success/Error Messages -->
+        <view wx:if="{{passwordMessage}}" class="success-message">
+          <text>{{passwordMessage}}</text>
+        </view>
+        <view wx:if="{{passwordError}}" class="error-message">
+          <text>{{passwordError}}</text>
+        </view>
+      </view>
+
+      <!-- WeChat Linking Section -->
       <view class="form-section">
         <view class="section-title">微信绑定</view>
         

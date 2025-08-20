@@ -99,10 +99,14 @@ Component({
       
       // Check if terms are agreed
       if (!termsAgreed) {
-        wx.showToast({
-          title: "请先同意用户协议和隐私政策",
-          icon: "none",
-          duration: 2000
+        wx.showModal({
+          title: "用户协议和隐私政策",
+          content: '请阅读并同意"用户协议"和"隐私政策"后进行登录。',
+          showCancel: false,
+          confirmText: "确认",
+          success: (res) => {
+            // User clicked confirm - just close the modal
+          }
         });
         return;
       }
@@ -110,6 +114,13 @@ Component({
       this.closeModal();
       wx.navigateTo({
         url: "/pages/register/register",
+      });
+    },
+
+    goToForgotPassword() {
+      this.closeModal();
+      wx.navigateTo({
+        url: "/pages/forgot-password/forgot-password",
       });
     },
 
@@ -468,10 +479,14 @@ Component({
 
       // Check if terms are agreed
       if (!termsAgreed) {
-        wx.showToast({
-          title: "请先同意用户协议和隐私政策",
-          icon: "none",
-          duration: 2000
+        wx.showModal({
+          title: "用户协议和隐私政策",
+          content: '请阅读并同意"用户协议"和"隐私政策"后进行登录。',
+          showCancel: false,
+          confirmText: "确认",
+          success: (res) => {
+            // User clicked confirm - just close the modal
+          }
         });
         return;
       }

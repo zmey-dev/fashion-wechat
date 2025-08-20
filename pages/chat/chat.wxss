@@ -213,10 +213,28 @@ page {
   margin-bottom: 4px;
 }
 
+.friend-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
 .friend-name {
   font-size: 32rpx;
   font-weight: 500;
   color: #fff;
+}
+
+.company-badge-small {
+  display: inline-block;
+  background-color: #3b82f6;
+  color: white;
+  font-size: 18rpx;
+  font-weight: 600;
+  padding: 2rpx 8rpx;
+  border-radius: 6rpx;
+  line-height: 1;
+  flex-shrink: 0;
 }
 
 .timestamp {
@@ -334,11 +352,29 @@ page {
   min-width: 0;
 }
 
+.user-name-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  margin-bottom: 2px;
+}
+
 .user-name {
   font-size: 32rpx;
   font-weight: 600;
   color: white;
-  margin-bottom: 2px;
+}
+
+.company-badge {
+  display: inline-block;
+  background-color: #3b82f6;
+  color: white;
+  font-size: 20rpx;
+  font-weight: 600;
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+  line-height: 1;
+  flex-shrink: 0;
 }
 
 .user-status {

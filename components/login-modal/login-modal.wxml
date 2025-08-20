@@ -121,9 +121,9 @@
     <!-- Login Button -->
     <view class="login-button-wrapper">
       <button
-        class="login-btn {{loading ? 'loading' : ''}} {{!termsAgreed ? 'disabled' : ''}}"
+        class="login-btn {{loading ? 'loading' : ''}}"
         bindtap="handleLogin"
-        disabled="{{loading || !termsAgreed}}"
+        disabled="{{loading}}"
       >
         <span wx:if="{{!loading}}">
           {{loginType === 'wechat' ? '微信登录' : messages.buttons.login}}
@@ -137,6 +137,9 @@
       <view class="register-link" bindtap="goToRegister">
         <text class="register-text">还没有账号？</text>
         <text class="register-btn-text">{{messages.buttons.register}}</text>
+      </view>
+      <view class="forgot-password-link" bindtap="goToForgotPassword">
+        <text class="forgot-password-text">忘记密码？</text>
       </view>
     </view>
 

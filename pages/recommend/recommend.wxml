@@ -25,7 +25,11 @@
 
     <!-- Loading indicator -->
     <view wx:if="{{ isLoading }}" class="loading-container">
-      <view class="loading-spinner"></view>
-      <text class="loading-text">加载中...</text>    </view>
+      <image class="loading-logo" src="/images/logo.png" mode="aspectFit"></image>
+      <view class="loading-progress-bar">
+        <view class="loading-progress-fill"></view>
+      </view>
+      <text class="loading-text">加载中...</text>
+    </view>
   </view>
 </app-layout>

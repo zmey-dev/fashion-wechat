@@ -878,6 +878,55 @@
   border-radius: 8rpx;
 }
 
+/* Password Change Styles */
+.password-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 32rpx;
+}
+
+.change-password-btn {
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+  border: 2rpx solid #66bb6a;
+  min-width: 200rpx;
+}
+
+.change-password-btn:active {
+  background: linear-gradient(135deg, #45a049, #388e3c);
+  border-color: #4CAF50;
+}
+
+/* Success and Error Messages */
+.success-message {
+  background: rgba(76, 175, 80, 0.1);
+  border: 2rpx solid #4CAF50;
+  border-radius: 12rpx;
+  padding: 16rpx;
+  margin-top: 16rpx;
+  text-align: center;
+}
+
+.success-message text {
+  color: #4CAF50;
+  font-size: 26rpx;
+  font-weight: 500;
+}
+
+.error-message {
+  background: rgba(244, 67, 54, 0.1);
+  border: 2rpx solid #f44336;
+  border-radius: 12rpx;
+  padding: 16rpx;
+  margin-top: 16rpx;
+  text-align: center;
+}
+
+.error-message text {
+  color: #f44336;
+  font-size: 26rpx;
+  font-weight: 500;
+}
+
 /* Logout Section */
 .logout-section {
   border-top: 1px solid rgba(255, 255, 255, 0.1);

@@ -176,7 +176,7 @@
 
 .event-swiper {
   width: 100%;
-  height: 650rpx;
+  height: 850rpx;
 }
 
 swiper-item {
@@ -190,7 +190,7 @@ swiper-item {
 .event-slide {
   width: 95%;
   max-width: 700rpx;
-  height: 630rpx;
+  height: 830rpx;
   display: flex;
   flex-direction: column;
   background: #1a1a1a;
@@ -204,14 +204,15 @@ swiper-item {
 .slide-image-container {
   position: relative;
   width: 100%;
-  height: 500rpx;
+  height: 680rpx;
   overflow: hidden;
+  background-color: #000;
 }
 
 .slide-image {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .slide-content {
@@ -372,6 +373,7 @@ swiper-item {
 .item-image {
   width: 100%;
   height: 100%;
+  object-fit: cover;
 }
 
 .nav-item-content {
@@ -433,12 +435,14 @@ swiper-item {
 .past-image-wrapper {
   position: relative;
   width: 100%;
-  height: 200rpx;
+  overflow: hidden;
+  border-radius: 16rpx 16rpx 0 0;
 }
 
 .past-image {
   width: 100%;
-  height: 100%;
+  height: auto;
+  display: block;
   border-radius: 16rpx 16rpx 0 0;
 }
 
@@ -774,14 +778,13 @@ swiper-item {
 .info-image-container {
   position: relative;
   width: 100%;
-  height: 350rpx;
   overflow: hidden;
 }
 
 .info-image {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  height: auto;
+  display: block;
 }
 
 .image-gradient {

@@ -110,7 +110,7 @@ Page({
         email: "电子邮箱",
         phone: "手机号码",
         id_number: "身份证号码",
-        password: "密码（至少8个字符）",
+        password: "密码（至少6个字符）",
         password_confirmation: "确认密码",
         school: "学校名称",
         student_number: "学号",
@@ -123,7 +123,7 @@ Page({
         required: "不能为空",
         emailFormat: "请输入有效的电子邮箱地址",
         phoneFormat: "手机号码格式不正确",
-        passwordLength: "密码长度必须至少为8个字符",
+        passwordLength: "密码长度必须至少为6个字符",
         passwordMismatch: "两次输入的密码不一致",
         yearInvalid: "请输入有效的年份",
         networkError: "网络错误",
@@ -633,8 +633,8 @@ Page({
       // Password validation
       if (!form.password) {
         errors.password = "密码不能为空";
-      } else if (form.password.length < 8) {
-        errors.password = "密码长度必须至少为8个字符";
+      } else if (form.password.length < 6) {
+        errors.password = "密码长度必须至少为6个字符";
       }
       
       if (form.password !== form.password_confirmation) {
@@ -671,8 +671,8 @@ Page({
     // Password
     if (!form.password) {
       errors.password = "密码不能为空";
-    } else if (form.password.length < 8) {
-      errors.password = "密码长度必须至少为8个字符";
+    } else if (form.password.length < 6) {
+      errors.password = "密码长度必须至少为6个字符";
     }
 
     if (form.password !== form.password_confirmation) {

@@ -47,7 +47,9 @@
         
         <view class="friend-content">
           <view class="friend-main">
-            <view class="friend-name">{{userUtils.getShortDisplayName(item, 8)}}</view>
+            <view class="friend-name-row">
+              <text class="friend-name">{{userUtils.getShortDisplayName(item, 8)}}<text wx:if="{{userUtils.isCompany(item)}}" class="company-badge-small">企业</text></text>
+            </view>
             <view class="timestamp">{{item.timestamp || ''}}</view>
           </view>
           
@@ -87,7 +89,9 @@
           <view wx:if="{{selectedUser.status === 'online'}}" class="online-dot"></view>
         </view>
         <view class="user-info">
-          <view class="user-name">{{userUtils.getDisplayName(selectedUser)}}</view>
+          <view class="user-name-wrapper">
+            <text class="user-name">{{userUtils.getDisplayName(selectedUser)}}<text wx:if="{{userUtils.isCompany(selectedUser)}}" class="company-badge">企业</text></text>
+          </view>
           <!-- Show typing indicator in header when user is typing -->
           <view wx:if="{{friendsTyping[selectedUser.id]}}" class="header-typing">
             <text class="header-typing-text">正在输入</text>

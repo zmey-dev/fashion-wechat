@@ -1,6 +1,6 @@
-<!--pages/friend/friend.wxml-->
+<!--pages/company-posts/company-posts.wxml-->
 <wxs src="../../utils/userDisplayName.wxs" module="userUtils" />
-<app-layout current-page="friend">
+<app-layout current-page="company">
   <!-- Main content container -->
   <view class="content-container {{userInfo.role === 'teacher' ? 'teacher-layout' : ''}}">
     <!-- User List View -->
@@ -12,7 +12,7 @@
           <input 
             class="search-input" 
             type="text" 
-            placeholder="搜索好友" 
+            placeholder="搜索企业" 
             value="{{searchValue}}"
             bindinput="searchUsers"
             confirm-type="search"
@@ -23,21 +23,23 @@
       
       <!-- No results message -->
       <view class="no-results" wx:if="{{filteredUserList.length === 0}}">
-        <text>未找到匹配的用户</text>
+        <text>未找到匹配的企业</text>
       </view>
       
       <!-- User list items -->
       <view class="user-item" wx:for="{{filteredUserList}}" wx:key="id" bindtap="selectUser" data-id="{{item.id}}">
-        <avatar class="user-avatar" avatar="{{item.avatar}}" user="{{item}}" size="{{70}}"></avatar>
+        <avatar class="user-avatar" avatar="{{item.avatar}}" user="{{item}}" size="{{70}}" mode="aspectFill"></avatar>
         <view class="user-info">
-          <text class="user-nickname">{{userUtils.getShortDisplayName(item, 10)}}<text wx:if="{{userUtils.isCompany(item)}}" class="company-badge-small">企业</text></text>
+          <text class="user-nickname">{{userUtils.getShortDisplayName(item, 10)}}<text class="company-badge-small">企业</text></text>
           <text class="user-followers">粉丝 {{item.followers}}人</text>
         </view>
         <view class="user-arrow">
           <image class="back-icon" src="/images/icons/chevron-right.svg"></image>
         </view>
-      </view>    
-    </view>  
+      </view>
+    </view>
+
+    <!-- User Media View -->
     <view class="user-media-container" wx:if="{{showUserMedia}}">
       <!-- Media header with back button and user profile -->
       <view class="media-header">
@@ -46,13 +48,13 @@
         </view>
         <view class="user-profile-header">
           <view class="profile-info">
-            <avatar class="profile-avatar" avatar="{{currentUser.avatar}}" user="{{currentUser}}" size="{{80}}" mode="aspectFit"></avatar>
+            <avatar class="profile-avatar" avatar="{{currentUser.avatar}}" user="{{currentUser}}" size="{{80}}" mode="aspectFill"></avatar>
             <view class="profile-details">
               <view class="username-container">
-                <text class="profile-username">{{userUtils.getDisplayName(currentUser)}}<text wx:if="{{userUtils.isCompany(currentUser)}}" class="company-badge">企业</text></text>
+                <text class="profile-username">{{userUtils.getDisplayName(currentUser)}}<text class="company-badge">企业</text></text>
               </view>
-              <text wx:if="{{!userUtils.isCompany(currentUser)}}" class="profile-university">{{(currentUser.university && currentUser.university.name) || '未设置大学'}}</text>
-              <text wx:if="{{!userUtils.isCompany(currentUser)}}" class="profile-faculty">{{currentUser.faculty || '未设置学院'}}</text>
+              <text wx:if="{{currentUser.company_name}}" class="profile-university">{{currentUser.company_name}}</text>
+              <text wx:if="{{currentUser.company_description}}" class="profile-faculty">{{currentUser.company_description}}</text>
             </view>
           </view>
         </view>
@@ -82,6 +84,8 @@
           <text class="btn-text">留言</text>
         </button>
       </view>
+
+      <!-- Media grid displaying user's posts -->
       <view class="media-grid">
         <view class="media-item" wx:for="{{userMediaList}}" wx:key="id" bindtap="previewImage" data-id="{{item.id}}">
           <view class="media-container">
@@ -95,8 +99,12 @@
       </view>
 
       <!-- Loading indicator -->
-      <view class="loading-indicator" wx:if="{{loading}}">
-        <text>{{messages.loading}}</text>
+      <view class="loading-container" wx:if="{{loading}}">
+        <image class="loading-logo" src="/images/logo.png" mode="aspectFit"></image>
+        <view class="loading-progress-bar">
+          <view class="loading-progress-fill"></view>
+        </view>
+        <text class="loading-text">{{messages.loading}}</text>
       </view>
       
       <!-- No more content message -->

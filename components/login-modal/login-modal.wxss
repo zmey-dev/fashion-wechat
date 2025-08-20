@@ -351,6 +351,9 @@
   padding: 0 24px 20px;
   text-align: center;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .register-link {
@@ -378,6 +381,28 @@
 
 .register-link:active .register-btn-text {
   color: #ec407a;
+}
+
+/* Forgot Password Link */
+.forgot-password-link {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.forgot-password-link:active {
+  transform: scale(0.98);
+}
+
+.forgot-password-text {
+  font-size: 14px;
+  color: #667eea;
+  font-weight: 600;
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+.forgot-password-link:active .forgot-password-text {
+  color: #764ba2;
 }
 
 /* Footer */

@@ -72,6 +72,11 @@
       >
         <image class="post-image" src="{{item.type=='video'?item.media[0].preview_url:item.media[0].url}}" mode="aspectFill" />
         
+        <!-- Event post indicator -->
+        <view wx:if="{{item.event_id}}" class="event-post-indicator">
+          <text class="event-post-text">比赛: {{item.event.title || '未命名'}}</text>
+        </view>
+        
         <!-- Blocked indicator -->
         <view wx:if="{{item.active == false}}" class="blocked-indicator">
           <text class="blocked-icon">🚫</text>
@@ -105,7 +110,10 @@
 
     <!-- Loading Indicator -->
     <view wx:if="{{loading}}" class="loading-container">
-      <view class="loading-spinner"></view>
+      <image class="loading-logo" src="/images/logo.png" mode="aspectFit"></image>
+      <view class="loading-progress-bar">
+        <view class="loading-progress-fill"></view>
+      </view>
       <text class="loading-text">{{messages.loading}}</text>
     </view>
   </scroll-view>

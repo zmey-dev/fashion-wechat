@@ -7,9 +7,39 @@ Page({
 
     // Data states
     students: [],
+    filteredStudents: [],
     selectedStudent: null,
     studentPosts: [],
     university: null,
+    
+    // Filter states
+    filters: {
+      faculties: [],
+      majors: [],
+      attend_years: []
+    },
+    activeFilters: {
+      faculty: "",
+      major: "",
+      attend_year: ""
+    },
+    // Display values for filters
+    filterDisplayValues: {
+      faculty: '全部学院',
+      major: '全部专业',
+      year: '全部年份'
+    },
+    showFilters: false,
+    filterDropdowns: {
+      faculty: false,
+      major: false,
+      year: false
+    },
+    filterSearchTerms: {
+      faculty: "",
+      major: "",
+      year: ""
+    },
 
     // UI states
     currentTab: 0, // 0: students, 1: university, 2: profile, 3: contact
@@ -72,6 +102,17 @@ Page({
     // WeChat linking state
     isWechatLinked: false,
     wechatLinking: false,
+    
+    // Password change state
+    passwordForm: {
+      old_password: "",
+      new_password: "",
+      new_password_confirmation: ""
+    },
+    passwordErrors: {},
+    passwordChanging: false,
+    passwordMessage: "",
+    passwordError: "",
 
     // Verification states
     // emailCodeSent: false,
@@ -202,8 +243,19 @@ Page({
   loadStudents: function () {
     this.setData({ loading: true });
 
+    // Build query parameters with filters
+    const params = { ...this.data.activeFilters };
+    const queryString = Object.keys(params)
+      .filter(key => params[key])
+      .map(key => `${key}=${params[key]}`)
+      .join('&');
+    
+    const url = queryString 
+      ? `${config.BACKEND_URL}/teacher/students?${queryString}`
+      : `${config.BACKEND_URL}/teacher/students`;
+
     wx.request({
-      url: `${config.BACKEND_URL}/teacher/students`,
+      url: url,
       method: "GET",
       header: {
         Authorization: `Bearer ${getApp().globalData.userInfo.token}`,
@@ -212,8 +264,16 @@ Page({
         if (res.data.status === "success" && res.data.students) {
           this.setData({
             students: res.data.students,
+            filteredStudents: res.data.students,
             loading: false,
           });
+          
+          // Set filters if provided
+          if (res.data.filters) {
+            this.setData({
+              filters: res.data.filters
+            });
+          }
         } else {
           wx.showToast({
             title: this.data.messages.errors.loadFailed,
@@ -230,6 +290,122 @@ Page({
         this.setData({ loading: false });
       },
     });
+  },
+
+  // ======= Filter Functions =======
+  
+  toggleFilters: function() {
+    this.setData({
+      showFilters: !this.data.showFilters
+    });
+  },
+  
+  toggleFilterDropdown: function(e) {
+    const type = e.currentTarget.dataset.type;
+    const dropdowns = { ...this.data.filterDropdowns };
+    
+    // Close all other dropdowns
+    Object.keys(dropdowns).forEach(key => {
+      if (key !== type) {
+        dropdowns[key] = false;
+      }
+    });
+    
+    dropdowns[type] = !dropdowns[type];
+    
+    this.setData({
+      filterDropdowns: dropdowns
+    });
+  },
+  
+  onFilterSearchInput: function(e) {
+    const type = e.currentTarget.dataset.type;
+    const value = e.detail.value;
+    const searchTerms = { ...this.data.filterSearchTerms };
+    searchTerms[type] = value;
+    
+    this.setData({
+      filterSearchTerms: searchTerms
+    });
+  },
+  
+  selectFilterOption: function(e) {
+    const type = e.currentTarget.dataset.type;
+    const value = e.currentTarget.dataset.value;
+    const name = e.currentTarget.dataset.name || '';
+    const activeFilters = { ...this.data.activeFilters };
+    const filterDisplayValues = { ...this.data.filterDisplayValues };
+    
+    if (type === 'faculty') {
+      activeFilters.faculty = value;
+      activeFilters.major = ""; // Reset major when faculty changes
+      filterDisplayValues.faculty = value ? name : '全部学院';
+      filterDisplayValues.major = '全部专业'; // Reset major display
+    } else if (type === 'major') {
+      activeFilters.major = value;
+      filterDisplayValues.major = value ? name : '全部专业';
+    } else if (type === 'year') {
+      activeFilters.attend_year = value;
+      filterDisplayValues.year = value || '全部年份';
+    }
+    
+    this.setData({
+      activeFilters: activeFilters,
+      filterDisplayValues: filterDisplayValues,
+      filterDropdowns: {
+        faculty: false,
+        major: false,
+        year: false
+      }
+    });
+    
+    // Reload students with new filters
+    this.loadStudents();
+  },
+  
+  clearFilter: function(e) {
+    const type = e.currentTarget.dataset.type;
+    const activeFilters = { ...this.data.activeFilters };
+    const filterDisplayValues = { ...this.data.filterDisplayValues };
+    
+    if (type === 'faculty') {
+      activeFilters.faculty = "";
+      activeFilters.major = ""; // Also clear major
+      filterDisplayValues.faculty = '全部学院';
+      filterDisplayValues.major = '全部专业';
+    } else if (type === 'major') {
+      activeFilters.major = "";
+      filterDisplayValues.major = '全部专业';
+    } else if (type === 'year') {
+      activeFilters.attend_year = "";
+      filterDisplayValues.year = '全部年份';
+    }
+    
+    this.setData({
+      activeFilters: activeFilters,
+      filterDisplayValues: filterDisplayValues
+    });
+    
+    // Reload students
+    this.loadStudents();
+  },
+  
+  clearAllFilters: function() {
+    this.setData({
+      activeFilters: {
+        faculty: "",
+        major: "",
+        attend_year: ""
+      },
+      filterDisplayValues: {
+        faculty: '全部学院',
+        major: '全部专业',
+        year: '全部年份'
+      }
+    });
+    
+    // Reload students
+    this.loadStudents();
   },
 
   selectStudent: function (e) {
@@ -2100,5 +2276,148 @@ Page({
     } finally {
       wx.hideLoading();
     }
+  },
+
+  onPasswordInputChange(e) {
+    const { field } = e.currentTarget.dataset;
+    const value = e.detail.value;
+    
+    this.setData({
+      [`passwordForm.${field}`]: value,
+      [`passwordErrors.${field}`]: "",
+      passwordMessage: "",
+      passwordError: ""
+    });
+  },
+
+  validatePassword() {
+    const { old_password, new_password, new_password_confirmation } = this.data.passwordForm;
+    const errors = {};
+
+    if (!old_password) {
+      errors.old_password = "请输入当前密码";
+    }
+
+    if (!new_password) {
+      errors.new_password = "请输入新密码";
+    } else if (new_password.length < 6) {
+      errors.new_password = "密码长度至少为6位";
+    }
+
+    if (!new_password_confirmation) {
+      errors.new_password_confirmation = "请确认新密码";
+    } else if (new_password !== new_password_confirmation) {
+      errors.new_password_confirmation = "两次输入的密码不一致";
+    }
+
+    this.setData({ passwordErrors: errors });
+    return Object.keys(errors).length === 0;
+  },
+
+  changePassword() {
+    if (this.data.passwordChanging) return;
+
+    this.setData({
+      passwordMessage: "",
+      passwordError: ""
+    });
+
+    if (!this.validatePassword()) {
+      return;
+    }
+
+    this.setData({ passwordChanging: true });
+
+    const { old_password, new_password, new_password_confirmation } = this.data.passwordForm;
+    const userInfo = getApp().globalData.userInfo;
+    
+    wx.request({
+      url: `${config.BACKEND_URL}/auth/update_password`,
+      method: 'POST',
+      header: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${userInfo?.token}`
+      },
+      data: {
+        old_password,
+        new_password,
+        new_password_confirmation
+      },
+      success: (response) => {
+        if (response.statusCode === 200 && response.data.status === 'success') {
+          this.setData({
+            passwordMessage: response.data.msg || "密码修改成功",
+            passwordForm: {
+              old_password: "",
+              new_password: "",
+              new_password_confirmation: ""
+            }
+          });
+          
+          wx.showToast({
+            title: '密码修改成功',
+            icon: 'success',
+            duration: 2000
+          });
+        } else {
+          let errorMessage = "";
+          
+          if (response.statusCode === 401) {
+            errorMessage = "认证失败，请重新登录";
+          } else if (response.statusCode === 422) {
+            const errors = response.data.errors;
+            if (errors && typeof errors === 'object') {
+              const errorMessages = [];
+              for (const field in errors) {
+                if (Array.isArray(errors[field])) {
+                  errorMessages.push(...errors[field]);
+                } else {
+                  errorMessages.push(errors[field]);
+                }
+              }
+              errorMessage = errorMessages.join('; ');
+            } else {
+              errorMessage = response.data.msg || response.data.message || "验证失败";
+            }
+          } else if (response.statusCode === 400) {
+            errorMessage = response.data.msg || response.data.message || "请求参数错误";
+          } else if (response.statusCode === 500) {
+            errorMessage = "服务器内部错误，请稍后重试";
+          } else {
+            errorMessage = response.data.msg || response.data.message || response.data.error || `请求失败 (状态码: ${response.statusCode})`;
+          }
+          
+          this.setData({ passwordError: errorMessage });
+          wx.showToast({
+            title: errorMessage,
+            icon: 'none',
+            duration: 3000
+          });
+        }
+      },
+      fail: (error) => {
+        let errorMessage = "网络连接失败";
+        
+        if (error.errMsg) {
+          if (error.errMsg.includes('timeout')) {
+            errorMessage = "请求超时，请检查网络连接";
+          } else if (error.errMsg.includes('fail')) {
+            errorMessage = "网络请求失败，请检查网络设置";
+          } else {
+            errorMessage = `网络错误: ${error.errMsg}`;
+          }
+        }
+        
+        this.setData({ passwordError: errorMessage });
+        wx.showToast({
+          title: errorMessage,
+          icon: 'none',
+          duration: 3000
+        });
+      },
+      complete: () => {
+        this.setData({ passwordChanging: false });
+      }
+    });
   },
 });

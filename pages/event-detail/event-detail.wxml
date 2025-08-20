@@ -4,23 +4,25 @@
     <view class="content-wrapper">
       <!-- Event Header with Poster -->
       <view wx:if="{{event.poster_image}}" class="event-header">
-        <image class="header-image" src="{{event.poster_image}}" mode="aspectFill"></image>
-        <view class="header-overlay"></view>
-    
+        <image class="header-image" src="{{event.poster_image}}" mode="widthFix"></image>
+      </view>
+
+      <!-- Join Event Button and Warnings (moved below poster) -->
+      <view class="event-actions-section">
         <!-- Join Event Button (User Role Only) -->
-        <view wx:if="{{userInfo.role === 'user' && canJoinEvent}}" class="header-actions">
+        <view wx:if="{{userInfo.role === 'user' && canJoinEvent}}" class="join-actions">
           <button class="join-btn" bindtap="onJoinEvent">
             参加活动
           </button>
         </view>
         
         <!-- Warning for other schools -->
-        <view wx:if="{{userInfo.role === 'user' && !event.allow_other_school && userInfo.university_id !== event.user.university_id}}" class="header-warning">
+        <view wx:if="{{userInfo.role === 'user' && !event.allow_other_school && userInfo.university_id !== event.user.university_id}}" class="join-warning">
           <text class="warning-text">该活动不允许外校报名</text>
         </view>
         
         <!-- Full capacity warning -->
-        <view wx:if="{{event.allow_limit && event.students_count >= event.limit}}" class="header-warning">
+        <view wx:if="{{event.allow_limit && event.students_count >= event.limit}}" class="join-warning">
           <text class="warning-text">该活动已满员</text>
         </view>
       </view>

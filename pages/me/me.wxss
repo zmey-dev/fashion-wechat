@@ -164,6 +164,29 @@
   font-size: 24rpx;
 }
 
+/* Event post indicator */
+.event-post-indicator {
+  position: absolute;
+  top: 10rpx;
+  left: 10rpx;
+  right: 80rpx; /* Leave space for delete button */
+  background: rgba(0, 215, 99, 0.9);
+  border-radius: 6rpx;
+  padding: 6rpx 12rpx;
+  z-index: 10;
+  max-width: calc(100% - 100rpx);
+}
+
+.event-post-text {
+  color: white;
+  font-size: 20rpx;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
 .blocked-indicator {
   position: absolute;
   top: 0;
@@ -191,6 +214,7 @@
   position: absolute;
   top: 12rpx;
   right: 12rpx;
+  z-index: 15; /* Higher than event indicator */
 }
 
 .action-btn {

@@ -17,8 +17,10 @@
     "pages/terms/terms",
     "pages/privacy/privacy",
     "pages/register/register",
+    "pages/forgot-password/forgot-password",
     "pages/event-detail/event-detail",
-    "pages/event-create/event-create"
+    "pages/event-create/event-create",
+    "pages/company-posts/company-posts"
   ],
   "window": {
     "backgroundTextStyle": "light",

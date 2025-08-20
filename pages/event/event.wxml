@@ -37,7 +37,7 @@
               <view class="event-slide">
                 <!-- Full poster image without overlay -->
                 <view class="slide-image-container">
-                  <image class="slide-image" src="{{item.poster_image}}" mode="aspectFill"></image>
+                  <image class="slide-image" src="{{item.poster_image}}" mode="aspectFit"></image>
                 </view>
                 
                 <!-- Event information moved below the image -->
@@ -113,7 +113,7 @@
       <view wx:if="{{pastEvents.length > 0}}" class="past-grid">
         <view wx:for="{{pastEvents}}" wx:key="id" class="past-card" data-id="{{item.id}}" bindtap="onPastEventClick">
           <view class="past-image-wrapper">
-            <image class="past-image" src="{{item.poster_image}}" mode="aspectFill"></image>
+            <image class="past-image" src="{{item.poster_image}}" mode="widthFix"></image>
             <view class="past-status">已结束</view>
           </view>
           <view class="past-info">
@@ -137,7 +137,10 @@
 
   <!-- Loading state -->
   <view wx:if="{{loading && !events.length}}" class="loading-container">
-    <view class="loading-spinner"></view>
+    <image class="loading-logo" src="/images/logo.png" mode="aspectFit"></image>
+    <view class="loading-progress-bar">
+      <view class="loading-progress-fill"></view>
+    </view>
     <text class="loading-text">{{messages.loading}}</text>
   </view>
 
@@ -181,7 +184,7 @@
             <view class="event-info-content">
               <view class="event-info-card">
                 <view class="info-image-container">
-                  <image class="info-image" src="{{selectedEvent.poster_image}}" mode="aspectFill"></image>
+                  <image class="info-image" src="{{selectedEvent.poster_image}}" mode="widthFix"></image>
                   <view class="image-gradient"></view>
                 </view>
               </view>
