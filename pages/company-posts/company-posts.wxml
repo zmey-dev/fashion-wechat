@@ -106,9 +106,9 @@
           <!-- User Section -->
           <view class="user-section">
             <view class="user-info">
-              <view class="user-row">
-                <avatar avatar="{{currentUser.avatar}}" user="{{currentUser}}" size="45"></avatar>
-                <text class="user-name">{{userUtils.getShortDisplayName(currentUser, 8)}}</text>
+              <view class="user-row" catchtap="onUserTap" data-username="{{item.user.username}}" data-userId="{{item.user.id}}">
+                <avatar avatar="{{item.user.avatar}}" user="{{item.user}}" size="45"></avatar>
+                <text class="user-name">{{userUtils.getShortDisplayName(item.user, 8)}}</text>
               </view>
             </view>
             <view class="like-display">

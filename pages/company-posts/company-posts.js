@@ -232,6 +232,12 @@ Page({
     });
   },
 
+  // Handle user tap - navigate to user profile (index style)
+  onUserTap: function (e) {
+    const username = e.currentTarget.dataset.username;
+    getApp().handleGoUserProfile(username);
+  },
+
   // Handle pull down refresh
   onPullDownRefresh: function () {
     if (this.data.showUserMedia && this.data.currentUser) {
