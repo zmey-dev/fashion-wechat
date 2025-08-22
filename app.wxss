@@ -206,6 +206,11 @@ page {
   align-items: center;
   justify-content: center;
   padding: 120rpx 0;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
 }
 
 /* Fullscreen loading overlay for navigation */
@@ -228,14 +233,20 @@ page {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 /* Logo-based loading */
 .loading-logo {
-  width: 120rpx;
-  height: 120rpx;
+  width: 320rpx;
+  height: 320rpx;
   margin-bottom: 40rpx;
   animation: pulse 2s ease-in-out infinite;
+  position: relative;
+  z-index: 10000;
 }
 
 .loading-spinner {
@@ -357,12 +368,12 @@ page {
 @keyframes pulse {
   0%,
   100% {
-    transform: scale(0.5);
-    opacity: 0.3;
+    transform: scale(0.9);
+    opacity: 0.7;
   }
 
   50% {
-    transform: scale(1);
+    transform: scale(1.1);
     opacity: 1;
   }
 }
