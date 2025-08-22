@@ -221,12 +221,14 @@ Page({
     });
   },
 
-  // Preview image by navigating to post detail
-  previewImage: function (e) {
-    const current = e.currentTarget.dataset.id;
+  // Handle post tap - navigate to post detail with index style
+  onPostTap: function (e) {
+    const postId = e.currentTarget.dataset.postId;
     const userId = this.data.currentUser.id;
+    
+    // Navigate with type=company to distinguish from regular discover
     wx.navigateTo({
-      url: `/pages/post-detail/post-detail?postId=${current}&user_id=${userId}&type=by_user_id`,
+      url: `/pages/post-detail/post-detail?postId=${postId}&user_id=${userId}&type=company`,
     });
   },
 

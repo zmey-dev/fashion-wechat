@@ -1,5 +1,5 @@
 <!-- components/user-posts-tab/user-posts-tab.wxml -->
-<view class="user-posts-tab" wx:if="{{ currentPostUser }}">
+<view class="user-posts-tab" wx:if="{{ currentPostUser }}" style="overflow-y: auto">
   <view class="user-info">
     <view class="user-stats">
       <span>标题 :{{ selectedPost.title || '无标题' }} ,</span>
@@ -11,7 +11,7 @@
     </view>
   </view>
 
-  <view class="posts-grid" style="overflow-y: auto">
+  <view class="posts-grid">
     <view class="posts-container">
       <view
         wx:for="{{ currentPostUser.posts || [] }}"

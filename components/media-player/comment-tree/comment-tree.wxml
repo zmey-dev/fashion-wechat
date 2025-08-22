@@ -2,36 +2,39 @@
 <wxs src="../../../utils/userDisplayName.wxs" module="userUtils" />
 <view class="comment-tree-container">
   <!-- Post Info Section -->
-  <view wx:if="{{selectedPost.title || selectedPost.content}}" class="post-info-section">
-    <view wx:if="{{selectedPost.title}}" class="post-full-title">{{selectedPost.title}}</view>
-    <view wx:if="{{selectedPost.content}}" class="post-full-content">{{selectedPost.content}}</view>
-  </view>
-  
-  <!-- Comments List -->
-  <scroll-view class="comments-list" scroll-y="true" enhanced="true">
-    <view wx:if="{{comments.length === 0}}" class="no-comments">
-      <text class="no-comments-text">暂无评论，快来发表第一条评论吧！</text>
+  <view  style="overflow-y: auto">
+    <view wx:if="{{selectedPost.title || selectedPost.content}}" class="post-info-section">
+      <view wx:if="{{selectedPost.title}}" class="post-full-title">{{selectedPost.title}}</view>
+      <view wx:if="{{selectedPost.content}}" class="post-full-content">{{selectedPost.content}}</view>
     </view>
     
-    <view wx:else class="comments-container">
-      <comment-tree-item 
-        wx:for="{{rootComments}}" 
-        wx:key="id"
-        comment="{{item}}"
-        all-comments="{{comments}}"
-        logged-user="{{loggedUser}}"
-        selected-post="{{selectedPost}}"
-        event-id="{{eventId}}"
-        depth="{{0}}"
-        bind:like="onCommentLike"
-        bind:edit="onCommentEdit"
-        bind:reply="onCommentReply"
-        bind:delete="onCommentDelete"
-        bind:imagepreview="onImagePreview"
-        bind:imageupload="onImageUpload"
-      />
-    </view>
-  </scroll-view>
+    <!-- Comments List -->
+    <scroll-view class="comments-list" scroll-y="true" enhanced="true">
+      <view wx:if="{{comments.length === 0}}" class="no-comments">
+        <text class="no-comments-text">暂无评论，快来发表第一条评论吧！</text>
+      </view>
+      
+      <view wx:else class="comments-container">
+        <comment-tree-item 
+          wx:for="{{rootComments}}" 
+          wx:key="id"
+          comment="{{item}}"
+          all-comments="{{comments}}"
+          logged-user="{{loggedUser}}"
+          selected-post="{{selectedPost}}"
+          event-id="{{eventId}}"
+          depth="{{0}}"
+          bind:like="onCommentLike"
+          bind:edit="onCommentEdit"
+          bind:reply="onCommentReply"
+          bind:delete="onCommentDelete"
+          bind:imagepreview="onImagePreview"
+          bind:imageupload="onImageUpload"
+        />
+      </view>
+    </scroll-view>
+  </view>
+  
 
   <!-- Comment Input Section -->
   <view class="comment-input-section">

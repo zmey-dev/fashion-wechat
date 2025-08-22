@@ -83,14 +83,37 @@
         </button>
       </view>
 
-      <!-- Media grid displaying user's posts -->
-      <view class="media-grid">
-        <view class="media-item" wx:for="{{userMediaList}}" wx:key="id" bindtap="previewImage" data-id="{{item.id}}">
+      <!-- Posts Grid (Index Style) -->
+      <view class="posts-grid">
+        <view 
+          wx:for="{{userMediaList}}" 
+          wx:key="id"
+          class="post-card"
+          data-post-id="{{item.id}}"
+          data-index="{{index}}"
+          bindtap="onPostTap"
+        >
+          <!-- Media Container -->
           <view class="media-container">
-            <image wx:if="{{item.type=='image'}}" class="media-image" src="{{item.media[0].url}}" mode="aspectFill"></image>
-            <image wx:else class="media-image" src="{{item.media[0].preview_url}}" mode="aspectFill"></image>
-            <view class="media-overlay">
-              <text class="likes-count">♥ {{item.likes}}</text>
+            <image 
+              class="post-image"
+              src="{{item.type === 'video' ? item.media[0].preview_url : item.media[0].url}}"
+              lazy-load="{{true}}"
+              mode="aspectFill"
+            />
+          </view>
+          
+          <!-- User Section -->
+          <view class="user-section">
+            <view class="user-info">
+              <view class="user-row">
+                <avatar avatar="{{currentUser.avatar}}" user="{{currentUser}}" size="45"></avatar>
+                <text class="user-name">{{userUtils.getShortDisplayName(currentUser, 8)}}</text>
+              </view>
+            </view>
+            <view class="like-display">
+              <image class="heart-icon" src="/images/icons/heart.svg" mode="aspectFit"></image>
+              <text class="like-count">{{item.likes}}</text>
             </view>
           </view>
         </view>

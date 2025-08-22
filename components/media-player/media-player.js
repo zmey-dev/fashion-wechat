@@ -351,7 +351,7 @@ Component({
       this.setData({
         displayTitle: this.truncateTitle(currentPost.title, 30),
         displayContent: currentPost.content
-          ? this.truncateTitle(currentPost.content, 60)
+          ? currentPost.content
           : "",
         displayLikes: this.formatNumber(currentPost.likes),
         displayComments: this.formatNumber(currentPost.comments?.length || 0),

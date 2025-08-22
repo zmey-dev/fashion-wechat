@@ -1,8 +1,32 @@
 <!-- components/post-info-overlay/post-info-overlay.wxml -->
-<view class="post-info"
->
+<view class="post-info">
   <view class="post-title">{{ displayTitle }}</view>
-  <view class="post-content" wx:if="{{ displayContent }}">
-    {{ displayContent }}
+  
+  <!-- Collapsed state -->
+  <view 
+    wx:if="{{ displayContent && !isExpanded }}"
+    class="post-content-container"
+    bindtap="toggleExpand"
+  >
+    <text class="post-content collapsed">{{ truncatedContent }}</text>
+  </view>
+  
+  <!-- Expanded state with scroll-view -->
+  <scroll-view
+    wx:if="{{ displayContent && isExpanded }}"
+    class="post-content-scroll expanded"
+    scroll-y="true"
+    bindtap="toggleExpand"
+    catchtouchmove="onTouchMove"
+  >
+    <text class="post-content-expanded">{{ fullContent }}</text>
+  </scroll-view>
+  
+  <view 
+    class="expand-indicator" 
+    wx:if="{{ displayContent && showExpandIndicator }}"
+    bindtap="toggleExpand"
+  >
+    {{ isExpanded ? '收起' : '展开' }}
   </view>
 </view>

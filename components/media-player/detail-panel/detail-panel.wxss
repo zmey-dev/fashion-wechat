@@ -4,7 +4,7 @@
 .detail-panel {
   position: fixed;
   box-sizing: border-box;
-  padding-bottom: 120rpx;
+  padding-bottom: calc(120rpx + env(safe-area-inset-bottom) );
   bottom: -75%;
   left: 0;
   width: 100%;
@@ -33,8 +33,8 @@
 }
 
 .detail-panel.half {
-  height: calc(75% - 60rpx);
-  bottom: 0;
+  height: calc(75% - 45rpx);
+  bottom: 0rpx;
   border-radius: 20rpx 20rpx 0 0;
   box-shadow: 0 -10rpx 30rpx rgba(0, 0, 0, 0.5);
 }

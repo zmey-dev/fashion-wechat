@@ -9,7 +9,6 @@
   z-index: 300;
   animation: slideInFromLeft 0.6s ease-out;
   max-width: calc(100vw - 200rpx);
-  pointer-events: none;
 }
 
 /* Post Title */
@@ -26,6 +25,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   transition: all 0.3s ease;
+  pointer-events: none;
 }
 
 .post-title::before {
@@ -47,18 +47,86 @@
   transform: scaleY(1);
 }
 
-/* Post Content */
-.post-content {
+/* Post Content Container */
+.post-content-container {
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+/* Post Content - Base styles */
+.post-content, .post-content-expanded {
   color: rgba(255, 255, 255, 0.95);
   font-size: 28rpx;
   line-height: 1.4;
   text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.9);
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
   transition: all 0.3s ease;
+  display: block;
+}
+
+/* Collapsed state */
+.post-content.collapsed {
+  display: inline-block;
+}
+
+/* Expanded scroll container */
+.post-content-scroll.expanded {
+  max-height: 50vh;
+  background: linear-gradient(180deg, 
+    rgba(0, 0, 0, 0.7) 0%, 
+    rgba(0, 0, 0, 0.85) 50%,
+    rgba(0, 0, 0, 0.7) 100%);
+  padding: 20rpx;
+  border-radius: 12rpx;
+  margin-top: 10rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.5);
+  pointer-events: auto;
+}
+
+/* Expanded text content */
+.post-content-expanded {
+  white-space: pre-wrap;
+  word-break: break-word;
+  display: block;
+}
+
+/* Custom scrollbar for expanded content */
+.post-content.expanded::-webkit-scrollbar {
+  width: 6rpx;
+}
+
+.post-content.expanded::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3rpx;
+}
+
+.post-content.expanded::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3rpx;
+}
+
+.post-content.expanded::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Expand/Collapse Indicator */
+.expand-indicator {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 24rpx;
+  margin-top: 8rpx;
+  text-align: left;
+  cursor: pointer;
+  pointer-events: auto;
+  display: inline-block;
+  padding: 4rpx 12rpx;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 20rpx;
+  transition: all 0.2s ease;
+}
+
+.expand-indicator:active {
+  transform: scale(0.95);
+  background: rgba(0, 0, 0, 0.7);
 }
 
 /* Gradient Fade Effect for Long Text */
