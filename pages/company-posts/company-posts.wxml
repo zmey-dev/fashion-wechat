@@ -1,137 +1,91 @@
-<!--pages/company-posts/company-posts.wxml-->
 <wxs src="../../utils/userDisplayName.wxs" module="userUtils" />
-<app-layout current-page="company">
-  <!-- Main content container -->
-  <view class="content-container {{userInfo.role === 'teacher' ? 'teacher-layout' : ''}}">
-    <!-- User List View -->
-    <view class="user-list" wx:if="{{!showUserMedia}}">
-      <!-- Search Bar -->
-      <view class="search-container">
-        <view class="search-box">
-          <view class="search-icon">🔍</view>
-          <input 
-            class="search-input" 
-            type="text" 
-            placeholder="搜索企业" 
-            value="{{searchValue}}"
-            bindinput="searchUsers"
-            confirm-type="search"
+<app-layout current-page="company" search-params="{{searchParams}}" bind:search="onSearch">
+  <!-- Main Content Area with Scroll View for infinite scroll -->
+  <scroll-view 
+    class="content-area" 
+    id="contentArea"
+    scroll-y="{{true}}"
+    bindscrolltolower="onReachBottom"
+    lower-threshold="80"
+  >
+    <!-- Posts Grid -->
+    <view class="posts-grid">
+      <view 
+        wx:for="{{posts}}" 
+        wx:key="id"
+        class="post-card"
+        data-post-id="{{item.id}}"
+        data-index="{{index}}"
+        bindtap="onPostTap"
+      >
+        <!-- Media Container -->
+        <view class="media-container">
+          <image 
+            class="post-image"
+            src="{{item.type === 'video' ? item.media[0].preview_url : item.media[0].url}}"
+            lazy-load="{{true}}"
+            mode="aspectFill"
           />
-          <view class="clear-icon" bindtap="clearSearch" wx:if="{{searchValue}}">✕</view>
         </view>
-      </view>
-      
-      <!-- No results message -->
-      <view class="no-results" wx:if="{{filteredUserList.length === 0}}">
-        <text>未找到匹配的企业</text>
-      </view>
-      
-      <!-- User list items -->
-      <view class="user-item" wx:for="{{filteredUserList}}" wx:key="id" bindtap="selectUser" data-id="{{item.id}}">
-        <avatar class="user-avatar" avatar="{{item.avatar}}" user="{{item}}" size="{{70}}" mode="aspectFill"></avatar>
-        <view class="user-info">
-          <text class="user-nickname">{{userUtils.getShortDisplayName(item, 10)}}<text class="company-badge-small">企业</text></text>
-          <text class="user-followers">粉丝 {{item.followers}}人</text>
-        </view>
-        <view class="user-arrow">
-          <image class="back-icon" src="/images/icons/chevron-right.svg"></image>
+        
+        <!-- User Section -->
+        <view class="user-section">
+          <view class="user-info">
+            <view class="user-row" catchtap="onUserTap" data-username="{{item.user.username}}" data-userId="{{item.user.id}}">
+              <avatar avatar="{{item.user.avatar}}" user="{{item.user}}" size="45"></avatar>
+              <text class="user-name">{{userUtils.getShortDisplayName(item.user, 8)}}</text>
+            </view>
+          </view>
+          <view class="like-display">
+            <image class="heart-icon" src="/images/icons/heart.svg" mode="aspectFit"></image>
+            <text class="like-count">{{item.likes}}</text>
+          </view>
         </view>
       </view>
     </view>
-
-    <!-- User Media View -->
-    <view class="user-media-container" wx:if="{{showUserMedia}}">
-      <!-- Media header with back button and user profile -->
-      <view class="media-header">
-        <view class="back-button" bindtap="backToUserList">
-          <image class="back-icon" src="/images/icons/back.svg"></image>
-        </view>
-        <view class="user-profile-header">
-          <view class="profile-info">
-            <avatar class="profile-avatar" avatar="{{currentUser.avatar}}" user="{{currentUser}}" size="{{80}}" mode="aspectFill"></avatar>
-            <view class="profile-details">
-              <view class="username-container">
-                <text class="profile-username">{{userUtils.getDisplayName(currentUser)}}<text class="company-badge">企业</text></text>
-              </view>
-            </view>
-          </view>
-        </view>
+    
+    <!-- Loading State for first load -->
+    <view class="loading-container" wx:if="{{loading && posts.length === 0}}">
+      <image class="loading-logo" src="/images/logo.png" mode="aspectFit"></image>
+      <view class="loading-progress-bar">
+        <view class="loading-progress-fill"></view>
       </view>
-      
-      <!-- Action buttons for follow, friend, and message -->
-      <view class="action-buttons">
-        <!-- Follow/Unfollow Button -->
-        <button 
-          class="action-btn {{currentUser.isFollowed ? 'followed' : 'default'}}" 
-          bindtap="handleFollowToggle">
-          <text class="btn-text">{{currentUser.isFollowed ? '已关注' : '关注'}}</text>
-        </button>
-
-        <!-- Friend Button -->
-        <button 
-          class="action-btn {{currentUser.isFriend ? (currentUser.isAllow ? 'friend' : 'pending') : 'default'}}" 
-          bindtap="handleFriendToggle">
-          <text class="btn-text">{{currentUser.isFriend ? '好友' : '加好友'}}</text>
-        </button>
-
-        <!-- Message Button (only shown if they are friends) -->
-        <button 
-          class="action-btn default" 
-          bindtap="handleSendMessage"
-          wx:if="{{currentUser.isFriend}}">
-          <text class="btn-text">留言</text>
-        </button>
-      </view>
-
-      <!-- Posts Grid (Index Style) -->
-      <view class="posts-grid">
-        <view 
-          wx:for="{{userMediaList}}" 
-          wx:key="id"
-          class="post-card"
-          data-post-id="{{item.id}}"
-          data-index="{{index}}"
-          bindtap="onPostTap"
-        >
-          <!-- Media Container -->
-          <view class="media-container">
-            <image 
-              class="post-image"
-              src="{{item.type === 'video' ? item.media[0].preview_url : item.media[0].url}}"
-              lazy-load="{{true}}"
-              mode="aspectFill"
-            />
-          </view>
-          
-          <!-- User Section -->
-          <view class="user-section">
-            <view class="user-info">
-              <view class="user-row" catchtap="onUserTap" data-username="{{item.user.username}}" data-userId="{{item.user.id}}">
-                <avatar avatar="{{item.user.avatar}}" user="{{item.user}}" size="45"></avatar>
-                <text class="user-name">{{userUtils.getShortDisplayName(item.user, 8)}}</text>
-              </view>
-            </view>
-            <view class="like-display">
-              <image class="heart-icon" src="/images/icons/heart.svg" mode="aspectFit"></image>
-              <text class="like-count">{{item.likes}}</text>
-            </view>
-          </view>
-        </view>
-      </view>
-
-      <!-- Loading indicator -->
-      <view class="loading-container" wx:if="{{loading}}">
-        <image class="loading-logo" src="/images/logo.png" mode="aspectFit"></image>
-        <view class="loading-progress-bar">
-          <view class="loading-progress-fill"></view>
-        </view>
-        <text class="loading-text">{{messages.loading}}</text>
-      </view>
-      
-      <!-- No more content message -->
-      <view class="no-more" wx:if="{{!hasMore && userMediaList.length > 0}}">
-        <text>没有更多内容</text>
-      </view>
+      <text class="loading-text">{{messages.loading}}</text>
     </view>
+    
+    <!-- Loading more indicator -->
+    <view class="loading-more" wx:if="{{loading && posts.length > 0}}">
+      <view class="loading-spinner small"></view>
+      <text class="loading-text">加载更多...</text>
+    </view>
+    
+    <!-- Empty State -->
+    <view class="empty-state" wx:if="{{!loading && posts.length === 0}}">
+      <text class="empty-icon">🏢</text>
+      <text class="empty-title">还没有企业动态</text>
+      <text class="empty-desc">稍后再来查看企业发布的内容</text>
+    </view>
+    
+    <!-- End Message -->
+    <view class="end-message" wx:if="{{!hasMore && posts.length > 0}}">
+      <text class="end-text">已经到底了</text>
+    </view>
+  </scroll-view>
+
+  <!-- Scroll To Top Button -->
+  <view 
+    wx:if="{{showScrollTop}}" 
+    class="scroll-top-button {{scrollTopAnimating ? 'animating' : ''}}" 
+    bindtap="onScrollToTop"
+  >
+    <view class="scroll-top-inner">
+      <view class="arrow-up"></view>
+      <view class="arrow-up second"></view>
+    </view>
+    <view class="scroll-top-ripple"></view>
   </view>
+    
+  <!-- Login Modal -->
+  <login-modal wx:if="{{showLoginModal}}" bind:close="onLoginClose" bind:success="onLoginSuccess" />
+  
 </app-layout>

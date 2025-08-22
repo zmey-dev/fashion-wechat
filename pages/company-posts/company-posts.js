@@ -1,191 +1,163 @@
-const { default: config } = require("../../config");
 const app = getApp();
+const { default: config } = require("../../config");
 
 Page({
   data: {
-    userInfo: app.globalData.userInfo || {},
-    userList: [],
-    filteredUserList: [],
-    currentUser: null,
-    currentPath: "company",
-    userMediaList: [],
-    showUserMedia: false,
+    posts: [],
     loading: false,
+    currentPage: 1,
     hasMore: true,
-    page: 1,
-    pageSize: 10,
-    searchValue: "",
-    // Chinese messages for UI text
+    pageSize: 15,
+    userInfo: null,
+    showLoginModal: false,
+    showScrollTop: false,
+    scrollTopAnimating: false,
+    existPostIds: [],
+    // Search parameters
+    searchParams: {},
     messages: {
       loading: "加载中...",
       errors: {
-        loadFailed: "加载失败",
-        networkError: "网络错误",
-        operationFailed: "操作失败",
-        addFriendFailed: "添加好友失败",
-        removeFriendFailed: "取消好友失败",
+        loadFailed: "加载失败，请稍后重试",
+        networkError: "网络错误，请检查网络连接",
       },
-      actions: {
-        following: "关注中...",
-        unfollowing: "取消关注中...",
-        addingFriend: "添加好友中...",
-        removingFriend: "取消好友中...",
-        followed: "已关注",
-        unfollowed: "已取消关注",
-        friendAdded: "已添加好友",
-        friendRemoved: "已取消好友",
-      },
-      confirmations: {
-        removeFriendTitle: "提示",
-        removeFriendContent: "您确定要删除您的好友请求吗？",
+      time: {
+        justNow: "刚刚",
+        minutesAgo: "分钟前",
+        hoursAgo: "小时前",
+        daysAgo: "天前",
       },
     },
   },
 
   onLoad: function (options) {
-    const postId = options.postId || null;
+    // Set user info
+    this.setData({
+      userInfo: app.globalData.userInfo,
+    });
 
-    // Subscribe to user info changes
+    // Setup subscriptions
     this.userInfoHandler = (userInfo) => {
       this.setData({ userInfo });
     };
     app.subscribe("userInfo", this.userInfoHandler);
 
-    this.setData({
-      userInfo: app.globalData.userInfo || {},
-    });
+    this.loginModalHandler = (showLoginModal) => {
+      this.setData({ showLoginModal });
+    };
+    app.subscribe("showLoginModal", this.loginModalHandler);
 
-    this.loadUserList();
+    // Check if there are search parameters in URL
+    if (options.search) {
+      const searchParams = {};
+      if (options.search) searchParams.search = decodeURIComponent(options.search);
+      
+      console.log('onLoad - URL search params:', searchParams);
+      console.log('onLoad - Raw options:', options);
+      this.setData({ searchParams });
+      
+      // Clear any existing pendingSearch since URL params take priority
+      if (app.globalData.pendingSearch) {
+        console.log('onLoad - Clearing pendingSearch due to URL params:', app.globalData.pendingSearch);
+        app.globalData.pendingSearch = null;
+      }
+    }
+
+    // Initial post loading
+    this.initializePage();
   },
 
   onShow: function () {
-    this.loadUserList();
+    // Check if we already have searchParams from URL (onLoad)
+    // If so, don't process pendingSearch to avoid overriding URL params
+    const hasUrlParams = this.data.searchParams && this.data.searchParams.search;
+    
+    console.log('onShow - hasUrlParams:', hasUrlParams);
+    console.log('onShow - current searchParams:', this.data.searchParams);
+    console.log('onShow - pendingSearch:', app.globalData.pendingSearch);
+    
+    if (!hasUrlParams && app.globalData.pendingSearch) {
+      // Only use pendingSearch if we don't have URL params
+      const searchParams = app.globalData.pendingSearch;
+      console.log('Processing pendingSearch:', searchParams);
+      this.setData({ searchParams });
+      this.handleRefresh();
+      // Clear the pending search
+      app.globalData.pendingSearch = null;
+    } else if (hasUrlParams) {
+      // URL params take priority, clear pendingSearch and refresh
+      console.log('URL params found, clearing pendingSearch and refreshing');
+      app.globalData.pendingSearch = null;
+      this.handleRefresh();
+    }
+    // Check if posts need to be refreshed
+    else if (app.globalData.refreshPosts) {
+      this.handleRefresh();
+      app.globalData.refreshPosts = false;
+    } else if (!this.data.posts.length && !this.data.loading) {
+      // Only initialize if no posts loaded and not currently loading
+      this.initializePage();
+    }
   },
 
   onUnload: function () {
-    // Unsubscribe from user info changes
+    // Unsubscribe
     app.unsubscribe("userInfo", this.userInfoHandler);
+    app.unsubscribe("showLoginModal", this.loginModalHandler);
   },
 
-  // Load user list from API - CHANGED TO COMPANY ENDPOINT
-  loadUserList: function () {
-    wx.showLoading({
-      title: this.data.messages.loading,
-    });
-    wx.request({
-      url: `${config.BACKEND_URL}/v2/users/company`,
-      method: "GET",
-      header: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${getApp().globalData.userInfo.token}`,
-      },
-      success: (res) => {
-        if (res.statusCode === 200) {
-          this.setData({
-            userList: res.data.users,
-            filteredUserList: res.data.users,
-          });
-        } else {
-          wx.showToast({
-            title: this.data.messages.errors.loadFailed,
-            icon: "none",
-          });
-        }
-      },
-      fail: () => {
-        wx.showToast({
-          title: this.data.messages.errors.networkError,
-          icon: "none",
-        });
-      },
-      complete: () => {
-        wx.hideLoading();
-      },
-    });
+  initializePage: function () {
+    // Load posts with current search params (empty or from URL)
+    this.loadCompanyPosts();
   },
 
-  // Search users functionality
-  searchUsers: function (e) {
-    const searchValue = e.detail.value.toLowerCase();
-    this.setData({
-      searchValue: searchValue,
-    });
-
-    if (!searchValue) {
-      this.setData({
-        filteredUserList: this.data.userList,
-      });
-      return;
-    }
-
-    const filtered = this.data.userList.filter((user) => {
-      const displayName = user.company_name || user.nickname || user.name || '';
-      return displayName.toLowerCase().includes(searchValue);
-    });
-
-    this.setData({
-      filteredUserList: filtered,
-    });
+  onSearch: function (e) {
+    console.log('Search event received:', e.detail);
+    const searchParams = e.detail;
+    this.setData({ searchParams });
+    this.handleRefresh();
   },
 
-  // Clear search input
-  clearSearch: function () {
-    this.setData({
-      searchValue: "",
-      filteredUserList: this.data.userList,
-    });
-  },
-
-  // Select user and show their media
-  selectUser: function (e) {
-    const userId = e.currentTarget.dataset.id;
-    const selectedUser = this.data.userList.find((user) => user.id === userId);
-
-    // Prepare user data with required properties for UI interactions
-    const userWithState = {
-      ...selectedUser,
-      // Ensure these properties exist for the UI controls
-      isFollowed: selectedUser.is_followed || false,
-      isFriend: selectedUser.is_friend || false,
-      isAllowed: selectedUser.is_allowed || false,
-    };
-
-    this.setData({
-      currentUser: userWithState,
-      showUserMedia: true,
-      userMediaList: [],
-      page: 1,
-      hasMore: true,
-    });
-
-    this.loadUserMedia(userId);
-  },
-
-  // Load user's media posts
-  loadUserMedia: function (userId) {
-    if (!this.data.hasMore || this.data.loading) return;
+  loadCompanyPosts: function () {
+    if (this.data.loading || !this.data.hasMore) return;
 
     this.setData({ loading: true });
 
+    const params = {
+      limit: this.data.pageSize,
+      offset: (this.data.currentPage - 1) * this.data.pageSize
+    };
+
+    // Add search parameter if exists
+    if (this.data.searchParams.search) {
+      params.search = this.data.searchParams.search;
+    }
+
     wx.request({
-      url: `${config.BACKEND_URL}/v2/post/by-user-id`,
+      url: `${config.BACKEND_URL}/v2/post/company`,
       method: "GET",
-      data: {
-        user_id: userId,
-        limit: this.data.pageSize,
-        offset: (this.data.page - 1) * this.data.pageSize,
-      },
+      data: params,
       header: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${getApp().globalData.userInfo.token}`,
+        Authorization: app.globalData.userInfo
+          ? `Bearer ${app.globalData.userInfo.token}`
+          : "",
       },
       success: (res) => {
-        if (res.statusCode === 200) {
-          const newMedia = res.data.posts || [];
+        if (res.statusCode === 200 && res.data.status === "success") {
+          const newPosts = res.data.posts || [];
+          
+          // Filter out duplicates
+          const filteredPosts = newPosts.filter(
+            (post) => !this.data.existPostIds.includes(post.id)
+          );
+          const newPostIds = filteredPosts.map((post) => post.id);
+
           this.setData({
-            userMediaList: this.data.userMediaList.concat(newMedia),
+            posts: [...this.data.posts, ...filteredPosts],
+            existPostIds: [...this.data.existPostIds, ...newPostIds],
             hasMore: res.data.has_more || false,
-            page: this.data.page + 1,
+            currentPage: this.data.currentPage + 1,
           });
         } else {
           wx.showToast({
@@ -202,259 +174,82 @@ Page({
       },
       complete: () => {
         this.setData({ loading: false });
+        wx.stopPullDownRefresh();
       },
     });
   },
 
-  // Handle reaching bottom of page for infinite scroll
   onReachBottom: function () {
-    if (this.data.showUserMedia && this.data.currentUser) {
-      this.loadUserMedia(this.data.currentUser.id);
-    }
+    this.loadCompanyPosts();
   },
 
-  // Go back to user list
-  backToUserList: function () {
+  onPullDownRefresh: function () {
+    this.handleRefresh();
+  },
+
+  handleRefresh: function () {
+    // Reset all data and reload
     this.setData({
-      showUserMedia: false,
-      currentUser: null,
+      posts: [],
+      currentPage: 1,
+      hasMore: true,
+      existPostIds: [],
+      showScrollTop: false,
     });
+    this.loadCompanyPosts();
   },
 
-  // Handle post tap - navigate to post detail with index style
   onPostTap: function (e) {
     const postId = e.currentTarget.dataset.postId;
-    const userId = this.data.currentUser.id;
-    
-    // Navigate with type=company to distinguish from regular discover
+    const postIndex = e.currentTarget.dataset.index;
+
+    // Navigate to post detail with company type
     wx.navigateTo({
-      url: `/pages/post-detail/post-detail?postId=${postId}&user_id=${userId}&type=company`,
+      url: `/pages/post-detail/post-detail?postId=${postId}&type=company`,
     });
   },
 
-  // Handle user tap - navigate to user profile (index style)
   onUserTap: function (e) {
     const username = e.currentTarget.dataset.username;
     getApp().handleGoUserProfile(username);
   },
 
-  // Handle pull down refresh
-  onPullDownRefresh: function () {
-    if (this.data.showUserMedia && this.data.currentUser) {
-      this.setData({
-        userMediaList: [],
-        page: 1,
-        hasMore: true,
-      });
-      this.loadUserMedia(this.data.currentUser.id);
-    } else {
-      this.loadUserList();
+  onScrollToTop: function () {
+    this.setData({ scrollTopAnimating: true });
+    
+    // Scroll to top
+    const scrollView = this.createSelectorQuery().select('#contentArea');
+    if (scrollView) {
+      scrollView.scrollTo({ top: 0, duration: 300 });
     }
-    wx.stopPullDownRefresh();
+
+    // Hide button after animation
+    setTimeout(() => {
+      this.setData({ scrollTopAnimating: false, showScrollTop: false });
+    }, 300);
   },
 
-  /**
-   * Handle follow/unfollow action
-   */
-  handleFollowToggle: function () {
-    const currentUser = this.data.currentUser;
-    const newFollowStatus = !currentUser.isFollowed;
-
-    wx.showLoading({
-      title: newFollowStatus
-        ? this.data.messages.actions.following
-        : this.data.messages.actions.unfollowing,
-    });
-
-    wx.request({
-      url: `${config.BACKEND_URL}/post/save_follow`,
-      method: "POST",
-      data: {
-        follower_id: currentUser.id,
-      },
-      header: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${getApp().globalData.userInfo.token}`,
-      },
-      success: (res) => {
-        if (res.statusCode === 200) {
-          // Update local state
-          const updatedUser = { ...currentUser, isFollowed: newFollowStatus };
-
-          // Also update in the main user list
-          const updatedUserList = this.data.userList.map((user) =>
-            user.id === currentUser.id
-              ? { ...user, is_followed: newFollowStatus }
-              : user
-          );
-
-          this.setData({
-            currentUser: updatedUser,
-            userList: updatedUserList,
-            filteredUserList: this.filterUsersBySearch(updatedUserList),
-          });
-
-          wx.showToast({
-            title: newFollowStatus
-              ? this.data.messages.actions.followed
-              : this.data.messages.actions.unfollowed,
-            icon: "success",
-          });
-        } else {
-          if (res.data.msg)
-            wx.showToast({
-              title: res.data.msg,
-              icon: "error",
-            });
-        }
-      },
-      fail: () => {
-        wx.showToast({
-          title: this.data.messages.errors.operationFailed,
-          icon: "error",
-        });
-      },
-      complete: () => {
-        wx.hideLoading();
-      },
-    });
-  },
-
-  // Helper function to filter users based on current search
-  filterUsersBySearch: function (userList) {
-    const searchValue = this.data.searchValue.toLowerCase();
-    if (!searchValue) return userList;
-
-    return userList.filter((user) => {
-      const displayName = user.company_name || user.nickname || user.name || '';
-      return displayName.toLowerCase().includes(searchValue);
-    });
-  },
-
-  /**
-   * Handle friend request/cancel
-   */
-  handleFriendToggle: function () {
-    const currentUser = this.data.currentUser;
-
-    if (currentUser.isFriend) {
-      // Confirm before removing friend
-      wx.showModal({
-        title: this.data.messages.confirmations.removeFriendTitle,
-        content: this.data.messages.confirmations.removeFriendContent,
-        success: (res) => {
-          if (res.confirm) {
-            this.updateFriendStatus(false);
-          }
-        },
-      });
-    } else {
-      // Add friend directly
-      this.updateFriendStatus(true);
+  // Monitor scroll position to show/hide scroll to top button
+  onPageScroll: function (e) {
+    const showScrollTop = e.scrollTop > 500;
+    if (this.data.showScrollTop !== showScrollTop) {
+      this.setData({ showScrollTop });
     }
   },
 
-  /**
-   * Update friend status with API
-   */
-  updateFriendStatus: function (addFriend) {
-    const currentUser = this.data.currentUser;
-
-    wx.showLoading({
-      title: addFriend
-        ? this.data.messages.actions.addingFriend
-        : this.data.messages.actions.removingFriend,
-    });
-
-    if (addFriend)
-      wx.request({
-        url: `${config.BACKEND_URL}/friend/add_friend`,
-        method: "POST",
-        data: {
-          friend_id: currentUser.id,
-        },
-        header: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${getApp().globalData.userInfo.token}`,
-        },
-        success: (res) => {
-          if (res.statusCode === 200) {
-            const updatedUser = { ...currentUser, isFriend: true };
-            this.setData({
-              currentUser: updatedUser,
-            });
-            wx.showToast({
-              title: this.data.messages.actions.friendAdded,
-              icon: "success",
-            });
-          } else {
-            if (res.data.msg)
-              wx.showToast({
-                title: res.data.msg,
-                icon: "error",
-              });
-          }
-        },
-        fail: () => {
-          wx.showToast({
-            title: this.data.messages.errors.addFriendFailed,
-            icon: "error",
-          });
-        },
-        complete: () => {
-          wx.hideLoading();
-        },
-      });
-    else
-      wx.request({
-        url: `${config.BACKEND_URL}/friend/del_friend_by_friend_id`,
-        method: "DELETE",
-        data: {
-          friend_id: currentUser.id,
-        },
-        header: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${getApp().globalData.userInfo.token}`,
-        },
-        success: (res) => {
-          if (res.statusCode === 200) {
-            const updatedUser = { ...currentUser, isFriend: false };
-            this.setData({
-              currentUser: updatedUser,
-            });
-            wx.showToast({
-              title: this.data.messages.actions.friendRemoved,
-              icon: "success",
-            });
-          } else {
-            if (res.data.msg)
-              wx.showToast({
-                title: res.data.msg,
-                icon: "error",
-              });
-          }
-        },
-        fail: () => {
-          wx.showToast({
-            title: this.data.messages.errors.removeFriendFailed,
-            icon: "error",
-          });
-        },
-        complete: () => {
-          wx.hideLoading();
-        },
-      });
+  onLoginClose: function () {
+    this.setData({ showLoginModal: false });
   },
 
-  /**
-   * Navigate to message page
-   */
-  handleSendMessage: function () {
-    const currentUser = this.data.currentUser;
+  onLoginSuccess: function () {
+    this.setData({ showLoginModal: false });
+    // Reload posts after successful login
+    this.handleRefresh();
+  },
 
+  onSearchTap: function () {
     wx.navigateTo({
-      url: `/pages/chat/chat?username=${currentUser.username}`,
+      url: "/pages/search/search",
     });
   },
-
 });
