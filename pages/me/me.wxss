@@ -233,14 +233,7 @@
 }
 
 /* Loading */
-.loading-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 60rpx;
-  gap: 20rpx;
-}
+/* Use global loading-container styles from app.wxss */
 
 .loading-spinner {
   width: 60rpx;

@@ -6,6 +6,11 @@
   /* Ensure black background extends to edges */
   width: 100vw;
   overflow-x: hidden;
+  /* Performance optimizations */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
 }
 
 /* Filter Bar Styles */
@@ -153,7 +158,7 @@
   margin: 0 8rpx;
   padding: 10rpx 15rpx;
   border-radius: 20rpx;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: none;
   text-align: center;
   min-width: 0;
   position: relative;
@@ -170,35 +175,14 @@
 }
 
 .filter-tab:hover {
-  background-color: rgba(255, 255, 255, 0.2);
-  transform: scale(1.02);
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .filter-tab.active {
-  background-color: rgba(255, 255, 255, 0.2);
-  transform: scale(1.02);
-  box-shadow: 0 4rpx 12rpx rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.15);
 }
 
-.filter-tab::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.1),
-    transparent
-  );
-  transition: left 0.5s;
-}
-
-.filter-tab:active::before {
-  left: 100%;
-}
+/* Remove shimmer effect to prevent flickering */
 
 .filter-text {
   font-size: 28rpx;
@@ -209,7 +193,7 @@
   text-overflow: ellipsis;
   text-align: center;
   width: 100%;
-  transition: color 0.3s ease;
+  transition: none;
 }
 
 .filter-tab:hover .filter-text {
@@ -271,6 +255,11 @@
   padding: 0 10rpx;
   box-sizing: border-box;
   overflow: hidden;
+  /* Performance optimizations */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
 }
 
 .tab-item {
@@ -280,27 +269,25 @@
   align-items: center;
   justify-content: center;
   padding: 8rpx 4rpx;
-  transition: all 0.3s ease;
+  transition: none;
   position: relative;
   border-radius: 12rpx;
 }
 
 .tab-item:hover {
-  background-color: rgba(255, 255, 255, 0.2);
-  transform: scale(1.02);
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .tab-item.active {
-  background-color: rgba(255, 255, 255, 0.2);
-  transform: scale(1.05);
+  background-color: rgba(255, 255, 255, 0.15);
 }
 
 .tab-item.special {
-  transform: scale(1.1);
+  /* Remove transform to prevent flickering */
 }
 
 .tab-item.special.active {
-  transform: scale(1.15);
+  background-color: rgba(255, 255, 255, 0.2);
 }
 
 .tab-icon-container {
@@ -319,7 +306,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
+  /* Remove transition to prevent flickering */
 }
 
 .tab-icon-image {
@@ -329,7 +316,7 @@
 }
 
 .tab-item.active .tab-icon {
-  transform: scale(1.1);
+  /* Remove scale transform to prevent flickering */
 }
 
 .tab-item.special .tab-icon {
@@ -373,7 +360,7 @@
 .tab-text {
   font-size: 20rpx;
   color: #999;
-  transition: color 0.3s ease;
+  transition: none;
   text-align: center;
   white-space: nowrap;
   overflow: hidden;
@@ -566,17 +553,9 @@
   line-clamp: 1;
 }
 
-/* Smooth transitions for better UX */
-.filter-tab {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.filter-tab:hover {
-  background-color: rgba(255, 255, 255, 0.2);
-}
-
+/* Simplified transitions to prevent flickering */
 .filter-tab:active {
-  transform: scale(0.98);
+  opacity: 0.8;
 }
 
 /* Safe area support for different devices */

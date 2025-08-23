@@ -18,6 +18,12 @@ page {
   width: 100vw;
   overflow-x: hidden;
   
+  /* Performance optimizations to reduce flickering */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  
   /* Add safe area support */
   padding-top: env(safe-area-inset-top);
   padding-top: constant(safe-area-inset-top); /* iOS 11.0 fallback */
@@ -201,16 +207,20 @@ page {
 
 /* Loading animations */
 .loading-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 120rpx 0;
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 120rpx 20rpx;
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
   z-index: 9999;
+  width: 100vw !important;
+  max-width: 750rpx !important;
+  box-sizing: border-box !important;
+  text-align: center !important;
 }
 
 /* Fullscreen loading overlay for navigation */
@@ -243,10 +253,11 @@ page {
 .loading-logo {
   width: 320rpx;
   height: 320rpx;
-  margin-bottom: 40rpx;
+  margin: 0 auto 40rpx auto !important;
   animation: pulse 2s ease-in-out infinite;
   position: relative;
   z-index: 10000;
+  display: block !important;
 }
 
 .loading-spinner {
@@ -272,7 +283,7 @@ page {
   background-color: rgba(255, 255, 255, 0.1);
   border-radius: 2rpx;
   overflow: hidden;
-  margin-top: 20rpx;
+  margin: 20rpx auto 0 auto !important;
 }
 
 .loading-progress-fill {
@@ -307,6 +318,9 @@ page {
 .loading-text {
   font-size: 28rpx;
   color: rgba(255, 255, 255, 0.6);
+  width: 100% !important;
+  text-align: center !important;
+  display: block !important;
 }
 
 .loading-more {
