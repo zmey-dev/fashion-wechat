@@ -251,8 +251,8 @@ page {
 
 /* Logo-based loading */
 .loading-logo {
-  width: 320rpx;
-  height: 320rpx;
+  width: 280rpx;
+  height: 280rpx;
   margin: 0 auto 40rpx auto !important;
   animation: pulse 2s ease-in-out infinite;
   position: relative;
