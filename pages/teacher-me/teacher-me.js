@@ -2300,8 +2300,8 @@ Page({
 
     if (!new_password) {
       errors.new_password = "请输入新密码";
-    } else if (new_password.length < 6) {
-      errors.new_password = "密码长度至少为6位";
+    } else if (new_password.length < 8) {
+      errors.new_password = "密码长度至少为8位";
     }
 
     if (!new_password_confirmation) {

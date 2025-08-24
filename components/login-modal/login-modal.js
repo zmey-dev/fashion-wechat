@@ -44,7 +44,7 @@ Component({
         phoneRequired: "请输入手机号码",
         phoneInvalid: "请输入有效的手机号码",
         passwordRequired: "请输入密码",
-        passwordTooShort: "密码至少需要6个字符",
+        passwordTooShort: "密码至少需要8个字符",
         codeRequired: "请输入验证码",
         codeInvalid: "验证码必须为6位数字",
         emailCodeRequired: "请输入邮箱验证码",
@@ -277,7 +277,7 @@ Component({
         return;
       }
 
-      if (password.length < 6) {
+      if (password.length < 8) {
         this.setData({
           passwordError: this.data.messages.errors.passwordTooShort,
         });

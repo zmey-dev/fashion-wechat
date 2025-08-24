@@ -535,9 +535,9 @@ Page({
 
   // Reset password (exact same as web version)
   handleResetPassword() {
-    if (this.data.newPassword.length < 6) {
+    if (this.data.newPassword.length < 8) {
       this.setData({
-        'errors.password': "密码长度至少为6位"
+        'errors.password': "密码长度至少为8位"
       });
       return;
     }

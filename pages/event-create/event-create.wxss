@@ -20,7 +20,6 @@ page {
 /* Content Scroll */
 .content-scroll {
   flex: 1;
-  margin-bottom: 120rpx;
   overflow-y: auto;
 }
 
@@ -538,7 +537,7 @@ page {
   right: 0;
   background: #2d2d2d;
   padding: 24rpx 32rpx;
-  padding-bottom: 24rpx;
+  padding-bottom: calc( 45rpx + env(safe-area-inset-bottom) );
   border-top: 1rpx solid #4a4a4a;
   z-index: 100;
   box-shadow: 0 -4rpx 32rpx rgba(0, 0, 0, 0.3);
@@ -894,7 +893,7 @@ page {
   
   .bottom-action {
     padding: 20rpx 24rpx;
-    padding-bottom: 20rpx;
+    padding-bottom: calc( 20rpx + env(safe-area-inset-bottom) );
   }
   
   .calendar-content {
