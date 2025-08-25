@@ -93,17 +93,23 @@ Page({
         if (res.data && res.data.status === "success") {
           const allEvents = res.data.events || [];
 
-          // Current date
+          // Current date at start of day for comparison
           const now = new Date();
+          now.setHours(0, 0, 0, 0);
 
           // Separate active and past events
-          const activeEvents = allEvents.filter(
-            (event) => new Date(event.end_date) >= now
-          );
+          // Events are active until the end of their end_date (inclusive)
+          const activeEvents = allEvents.filter((event) => {
+            const endDate = new Date(event.end_date);
+            endDate.setHours(23, 59, 59, 999); // Set to end of day
+            return endDate >= now;
+          });
 
-          const pastEvents = allEvents.filter(
-            (event) => new Date(event.end_date) < now
-          );
+          const pastEvents = allEvents.filter((event) => {
+            const endDate = new Date(event.end_date);
+            endDate.setHours(23, 59, 59, 999); // Set to end of day
+            return endDate < now;
+          });
           this.setData({
             events: activeEvents,
             pastEvents: pastEvents,

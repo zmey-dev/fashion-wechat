@@ -119,9 +119,15 @@
           <view class="past-info">
             <text class="past-title" style="color: {{item.title_color || '#FFFFFF'}};">{{item.title}}</text>
             <text class="past-university">{{item.user.university.name}}</text>
+            <view class="past-dates">
+              <text class="past-date-text">{{item.start_date}} - {{item.end_date}}</text>
+            </view>
             <view class="past-stats">
               <text class="past-participants" wx:if="{{item.allow_limit}}">{{item.students_count}}/{{item.limit}} 参与者</text>
               <text class="past-participants" wx:else>{{item.students_count}} 参与者</text>
+            </view>
+            <view class="past-organizer" wx:if="{{item.user}}">
+              <text class="past-organizer-text">主办: {{item.user.name || item.user.username}}</text>
             </view>
           </view>
         </view>

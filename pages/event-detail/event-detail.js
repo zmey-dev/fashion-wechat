@@ -136,9 +136,18 @@ Page({
           
           const canJoin = this.checkCanJoinEvent(event);
           
+          // Check if event has expired (same logic as Frontend)
+          const now = new Date();
+          const endDate = new Date(event.end_date);
+          const isEventExpired = endDate < now;
+          
+          // Update viewOnly to true if event is expired (for crown hiding)
+          const shouldViewOnly = this.data.viewOnly || isEventExpired;
+          
           this.setData({
             event: processedEvent,
-            canJoinEvent: canJoin
+            canJoinEvent: canJoin,
+            viewOnly: shouldViewOnly
           });
         } else {
           this.showToast(this.data.messages.errors.loadFailed);
@@ -283,9 +292,22 @@ Page({
   onPostTap: function (e) {
     const { postId } = e.currentTarget.dataset;
     
-    // Navigate to post detail with event context like web version
+    // Navigate to post detail with event context
+    // For expired events (viewOnly mode), posts should still be fully accessible
+    let url = `/pages/post-detail/post-detail?postId=${postId}&type=by_event_id&event_id=${this.data.eventId}`;
+    
     wx.navigateTo({
-      url: `/pages/post-detail/post-detail?postId=${postId}&type=by_event_id&event_id=${this.data.eventId}`
+      url: url
+    });
+  },
+
+  onUserTap: function(e) {
+    e.stopPropagation();
+    const { userId, username } = e.currentTarget.dataset;
+    
+    // Navigate to user profile
+    wx.navigateTo({
+      url: `/pages/profile/profile?userId=${userId}`
     });
   },
 

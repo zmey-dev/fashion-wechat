@@ -1,5 +1,5 @@
 <app-layout current-page="event">
-  <view class="event-detail-container {{userInfo.role === 'teacher' ? 'teacher-layout' : ''}}">
+  <view class="event-detail-container {{userInfo.role === 'teacher' ? 'teacher-layout' : ''}} {{viewOnly ? 'index-bg' : ''}}">
     <!-- Content Container -->
     <view class="content-wrapper">
       <!-- Event Header with Poster -->
@@ -74,7 +74,7 @@
       </view>
 
       <!-- Posts Content Area -->
-      <view class="content-area">
+      <view class="content-area {{viewOnly ? 'index-content' : ''}}">
         <!-- Loading State -->
         <view wx:if="{{loading && posts.length === 0}}" class="loading-container">
           <view class="loading-spinner"></view>
@@ -91,16 +91,16 @@
         </view>
 
         <!-- Posts Grid -->
-        <view wx:else class="posts-grid">
+        <view wx:else class="posts-grid {{viewOnly ? 'index-style' : ''}}">
           <view 
             wx:for="{{posts}}" 
             wx:key="id"
-            class="post-card"
+            class="post-card {{viewOnly ? 'index-card' : ''}}"
             data-post-id="{{item.id}}"
             data-index="{{index}}"
             bindtap="onPostTap"
           >
-            <!-- Crown for Top 3 -->
+            <!-- Crown for Top 3 (always show) -->
             <view wx:if="{{index < 3}}" class="crown-wrapper">
               <image class="crown-icon" src="/images/crown{{index}}.png" mode="aspectFit"></image>
             </view>
@@ -119,30 +119,27 @@
                 lazy-load="{{true}}"
                 mode="aspectFill"
               />
+              <!-- Video indicator -->
+              <view wx:if="{{item.type === 'video'}}" class="video-indicator">
+                <image class="video-icon" src="/images/icons/play.svg"></image>
+              </view>
+              <!-- Multiple media indicator -->
+              <view wx:if="{{item.media && item.media.length > 1}}" class="multiple-indicator">
+                <image class="multiple-icon" src="/images/icons/multiple.svg"></image>
+              </view>
             </view>
             
-            <!-- Post Info -->
-            <view class="post-info">
-              <view class="post-title-wrapper">
-                <text class="post-title">{{item.title}}</text>
+            <!-- User Section (same as index page) -->
+            <view class="user-section">
+              <view class="user-info">
+                <view class="user-row" catchtap="onUserTap" data-username="{{item.user.username}}" data-userId="{{item.user.id}}">
+                  <avatar avatar="{{item.user.avatar}}" user="{{item.user}}" size="45"></avatar>
+                  <text class="user-name">{{item.user.nickname || item.user.username}}</text>
+                </view>
               </view>
-              
-              <view class="post-actions">
-                <!-- User Info (Hidden for Event) -->
-                <!-- <view class="user-info" catchtap="onUserTap" data-username="{{item.user.nickname}}" data-userId="{{item.user.id}}">
-                  <avatar avatar="{{item.user.avatar}}" name="{{item.user.nickname}}" size="32"></avatar>
-                  <text class="username">@{{item.user.nickname}}</text>
-                </view> -->
-                      <!-- Like Button (User Role Only) -->
-            <view wx:if="{{userInfo.role === 'user'}}" class="like-section">
-              <view class="like-btn" bindtap="onLikePost" data-post-id="{{item.id}}" data-index="{{index}}">
-                <image 
-                  class="heart-icon {{item.likes_exists ? 'liked' : ''}}" 
-                  src="/images/icons/heart.svg"
-                ></image>
+              <view class="like-display">
+                <image class="heart-icon" src="/images/icons/heart.svg" mode="aspectFit"></image>
                 <text class="like-count">{{item.likes}}</text>
-              </view>
-            </view>
               </view>
             </view>
           </view>

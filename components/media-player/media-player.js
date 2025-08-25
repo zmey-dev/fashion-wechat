@@ -42,6 +42,10 @@ Component({
     audioMode: "both", // "both" (both audio tracks), "uploaded" (uploaded audio only), "video" (video audio only)
     showAudioModeSelector: false,
 
+    // Event state
+    isEventExpired: false,
+    shouldHideUserInfo: false, // Only hide user info for active events
+
     // Template-bound computed data
     currentPost: null,
     currentPostUser: null,
@@ -215,7 +219,7 @@ Component({
      * Load post data and related information with media preloading
      */
     async loadPostData() {
-      const { selectedPost } = this.properties;
+      const { selectedPost, eventId } = this.properties;
       if (!selectedPost) {
         return;
       }
@@ -231,6 +235,21 @@ Component({
 
       // Set loading flag to prevent concurrent loads
       this.isCurrentlyLoading = true;
+
+      // Check if event is expired (if in event context)
+      let isEventExpired = false;
+      let shouldHideUserInfo = false;
+      
+      if (eventId && selectedPost.event) {
+        const now = new Date();
+        const endDate = new Date(selectedPost.event.end_date);
+        isEventExpired = endDate < now;
+        // Only hide user info for active events
+        shouldHideUserInfo = eventId && !isEventExpired;
+      } else if (eventId) {
+        // If we have eventId but no event data, don't hide user info
+        shouldHideUserInfo = false;
+      }
 
       const postUser = selectedPost.user || {};
       const comments = selectedPost.comments || [];
@@ -252,6 +271,8 @@ Component({
         currentSlideIndex: 0,
         selectedDot: null,
         showDetail: false,
+        isEventExpired: isEventExpired,
+        shouldHideUserInfo: shouldHideUserInfo,
         currentPost: {
           id: selectedPost.id || "",
           title: selectedPost.title || "",

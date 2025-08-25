@@ -9,7 +9,8 @@ Component({  properties: {
     displayFavorites: { type: String, value: "0" },
     displayShares: { type: String, value: "0" },
     isContinue: { type: Boolean, value: true },
-    eventId: { type: String, value: null }
+    eventId: { type: String, value: null },
+    shouldHideUserInfo: { type: Boolean, value: false }
   },
 
   methods: {

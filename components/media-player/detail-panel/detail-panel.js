@@ -12,6 +12,7 @@ Component({
     displayFollowerCount: { type: String, value: "0" },
     displayLikeCount: { type: String, value: "0" },
     eventId: { type: String, value: null },
+    shouldHideUserInfo: { type: Boolean, value: false },
   },
   data: {
     // Remove local panelState, use property instead
