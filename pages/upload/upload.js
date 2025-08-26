@@ -1204,17 +1204,32 @@ Page({
         mask: true,
       });
 
-      // Wait for all file uploads to complete
+      // Wait for all file uploads to complete with timeout
       if (uploadingFiles.length > 0) {
         try {
-          while (this.data.files.some((file) => file.uploading)) {
+          let waitCount = 0;
+          const maxWait = 1200; // Maximum 120 seconds (1200 * 100ms)
+          
+          while (this.data.files.some((file) => file.uploading) && waitCount < maxWait) {
             console.log(
               `Waiting for file uploads... (${
                 this.data.files.filter((file) => file.uploading).length
               } still uploading)`
             );
             await new Promise((resolve) => setTimeout(resolve, 100));
+            waitCount++;
           }
+          
+          if (waitCount >= maxWait) {
+            wx.hideLoading();
+            this.setData({ isSubmitting: false, loading: false });
+            wx.showToast({
+              title: "文件上传超时，请检查网络后重试",
+              icon: "none",
+            });
+            return;
+          }
+          
           console.log("All file uploads completed");
         } catch (error) {
           wx.hideLoading();
@@ -1227,13 +1242,28 @@ Page({
         }
       }
 
-      // Wait for audio upload to complete
+      // Wait for audio upload to complete with timeout
       if (audioUploading) {
         console.log("Waiting for audio upload to complete...");
         try {
-          while (this.data.audio && this.data.audio.uploading) {
+          let audioWaitCount = 0;
+          const maxAudioWait = 600; // Maximum 60 seconds for audio
+          
+          while (this.data.audio && this.data.audio.uploading && audioWaitCount < maxAudioWait) {
             await new Promise((resolve) => setTimeout(resolve, 100));
+            audioWaitCount++;
           }
+          
+          if (audioWaitCount >= maxAudioWait) {
+            wx.hideLoading();
+            this.setData({ isSubmitting: false, loading: false });
+            wx.showToast({
+              title: "音频上传超时，请重试",
+              icon: "none",
+            });
+            return;
+          }
+          
           console.log("Audio upload completed");
         } catch (error) {
           wx.hideLoading();
@@ -1319,8 +1349,35 @@ Page({
 
     if (stillFailedFiles.length > 0 || audioStillFailed) {
       this.setData({ loading: false });
+      
+      // Show specific error message based on error type
+      let errorMsg = "文件上传失败";
+      if (stillFailedFiles.length > 0) {
+        const firstError = stillFailedFiles[0].uploadError;
+        if (firstError && (firstError.includes('不受支持') || firstError.includes('不支持'))) {
+          errorMsg = firstError;
+        } else if (firstError && firstError.includes('编码')) {
+          errorMsg = "视频文件编码格式不支持，请转换为标准 H.264 编码后重试";
+        } else if (firstError && firstError.includes('格式')) {
+          errorMsg = "文件格式不受支持，请选择其他文件";
+        } else if (firstError && firstError.includes('网络')) {
+          errorMsg = "网络连接异常，请检查网络后重试";
+        } else if (firstError && firstError.includes('超时')) {
+          errorMsg = "上传超时，请检查网络或减小文件大小";
+        } else {
+          errorMsg = "文件上传失败，请检查文件格式或网络连接后重试";
+        }
+      }
+      
+      if (audioStillFailed && this.data.audio.uploadError) {
+        const audioError = this.data.audio.uploadError;
+        if (audioError && (audioError.includes('不受支持') || audioError.includes('不支持'))) {
+          errorMsg = audioError;
+        }
+      }
+      
       wx.showToast({
-        title: "文件上传失败，请检查网络连接后重试",
+        title: errorMsg,
         icon: "none",
         duration: 3000,
       });
@@ -1527,8 +1584,21 @@ Page({
         fail: (error) => {
           wx.hideLoading();
           console.error("Form submission error:", error);
+          
+          // Show specific error message based on error type
+          let errorMsg = this.data.messages.errors.requestFailed;
+          const errorStr = error.errMsg || error.message || '';
+          
+          if (errorStr.includes('timeout') || errorStr.includes('超时')) {
+            errorMsg = "上传超时，请检查网络或减小文件大小";
+          } else if (errorStr.includes('network') || errorStr.includes('网络')) {
+            errorMsg = "网络连接异常，请检查网络后重试";
+          } else if (errorStr.includes('fail')) {
+            errorMsg = "提交失败，请检查网络连接后重试";
+          }
+          
           wx.showToast({
-            title: this.data.messages.errors.requestFailed,
+            title: errorMsg,
             icon: "none",
           });
         },
@@ -1539,11 +1609,48 @@ Page({
     } catch (error) {
       wx.hideLoading();
       console.error("Form submission error:", error);
-      wx.showToast({
-        title: this.data.messages.errors.operationFailed,
-        icon: "none",
-      });
+      
+      // Show specific error message based on error type  
+      const errorMsg = error.message || '';
+      if (errorMsg.includes('不受支持') || errorMsg.includes('不支持')) {
+        wx.showToast({
+          title: errorMsg,
+          icon: "none",
+        });
+      } else if (errorMsg.includes('编码')) {
+        wx.showToast({
+          title: "视频文件编码格式不支持，请转换为标准 H.264 编码后重试",
+          icon: "none",
+        });
+      } else if (errorMsg.includes('格式')) {
+        wx.showToast({
+          title: "文件格式不受支持，请选择其他文件",
+          icon: "none",
+        });
+      } else if (errorMsg.includes('网络')) {
+        wx.showToast({
+          title: "网络连接异常，请检查网络后重试",
+          icon: "none",
+        });
+      } else if (errorMsg.includes('超时')) {
+        wx.showToast({
+          title: "上传超时，请检查网络或减小文件大小",
+          icon: "none",
+        });
+      } else {
+        wx.showToast({
+          title: this.data.messages.errors.operationFailed,
+          icon: "none",
+        });
+      }
+      
       this.setData({ loading: false, isSubmitting: false });
+    } finally {
+      // Ensure loading is always stopped
+      if (this.data.isSubmitting || this.data.loading) {
+        wx.hideLoading();
+        this.setData({ loading: false, isSubmitting: false });
+      }
     }
   },
 
@@ -1686,7 +1793,21 @@ Page({
           const files = this.data.files;
           if (files[fileIndex]) {
             files[fileIndex].uploading = false;
-            files[fileIndex].uploadError = error.message || "文件上传失败，请重试";  // "File upload failed, please try again"
+            // Set specific error message based on error type
+            let errorMsg = error.message || "文件上传失败";
+            if (errorMsg.includes('不受支持') || errorMsg.includes('不支持') || 
+                errorMsg.includes('安全风险') || errorMsg.includes('禁止')) {
+              // Format error - keep original message
+              files[fileIndex].uploadError = errorMsg;
+            } else if (errorMsg.includes('codec') || errorMsg.includes('编码')) {
+              files[fileIndex].uploadError = "视频文件编码格式不支持，请转换为标准 H.264 编码后重试";
+            } else if (errorMsg.includes('network') || errorMsg.includes('网络')) {
+              files[fileIndex].uploadError = "网络连接异常，请检查网络后重试";
+            } else if (errorMsg.includes('timeout') || errorMsg.includes('超时')) {
+              files[fileIndex].uploadError = "上传超时，请检查网络或减小文件大小";
+            } else {
+              files[fileIndex].uploadError = "文件上传失败，请检查文件格式后重试";
+            }
 
             const uploadingFiles = this.data.uploadingFiles.filter(
               (idx) => idx !== fileIndex

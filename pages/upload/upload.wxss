@@ -597,6 +597,7 @@
 
 .form-input {
   height: 70rpx;
+  width: 100%;
   padding: 8rpx 20rpx;
   border: 2rpx solid rgba(255, 255, 255, 0.2);
   border-radius: 16rpx;
