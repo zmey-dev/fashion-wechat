@@ -58,7 +58,7 @@ Page({
         audioSizeLimit: "音频文件不能超过10MB",
         chooseAudioFailed: "选择音频失败",
         operationFailed: "操作失败，请重试",
-        uploadFailed: "上传失败",
+        uploadFailed: "文件上传失败",  // "File upload failed"
         createFailed: "创建失败",
         updateFailed: "更新失败",
         requestFailed: "请求失败",
@@ -252,15 +252,18 @@ Page({
     };
   },
 
-  // Validate file type and size
+  // Validate file type and size - STRICT MODE
   validateFile(file, type) {
     const supportedFormats = this.getSupportedFormats();
     const formats = supportedFormats[type];
     
-    if (!formats) return { valid: false, error: "不支持的文件类型" };
+    if (!formats) return { valid: false, error: "该文件格式不受支持，请选择其他文件" };  // "This file format is not supported, please choose another file"
 
-    // Check file size
-    if (file.size > formats.maxSize) {
+    // Check file size - handle different file object structures
+    // WeChat's chooseMedia may return size in different ways
+    const fileSize = file.size || file.fileSize || 0;
+    
+    if (fileSize > 0 && fileSize > formats.maxSize) {
       const maxSizeMB = Math.round(formats.maxSize / (1024 * 1024));
       return { 
         valid: false, 
@@ -268,8 +271,64 @@ Page({
       };
     }
 
-    // For images and videos, WeChat's chooseMedia already filters by type
-    // For audio, we'll validate in the audio selection function
+    // Get file extension from the path
+    const filePath = file.tempFilePath || file.url || '';
+    const fileName = filePath.toLowerCase();
+    const fileExtension = fileName.split('.').pop();
+    
+    // STRICT: Check file extension against allowed list
+    if (!formats.extensions.includes(fileExtension)) {
+      return { 
+        valid: false, 
+        error: `该文件格式 (.${fileExtension}) 不受支持。本平台仅支持: ${formats.displayText}`  // "This file format (.ext) is not supported. This platform only supports: ..." 
+      };
+    }
+    
+    // Explicitly block dangerous extensions
+    const dangerousExtensions = ['exe', 'bat', 'cmd', 'sh', 'ps1', 'dll', 'com', 'scr',
+                                 'msi', 'jar', 'app', 'deb', 'dmg', 'pkg', 'run',
+                                 'html', 'htm', 'js', 'jsx', 'ts', 'tsx', 'css', 'php',
+                                 'py', 'rb', 'go', 'java', 'c', 'cpp', 'h', 'swift',
+                                 'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx',
+                                 'zip', 'rar', 'tar', 'gz', '7z', 'iso',
+                                 'webm', 'mkv', 'flv', 'wmv', 'm4v', '3gp', 'mpeg'];
+    
+    if (dangerousExtensions.includes(fileExtension)) {
+      return { 
+        valid: false, 
+        error: `该文件格式 (.${fileExtension}) 不受支持或存在安全风险。本平台仅允许上传图片、视频和音频文件。`  // "This file format (.ext) is not supported or poses a security risk. This platform only allows uploading images, videos and audio files." 
+      };
+    }
+    
+    // Additional validation for specific types
+    if (type === 'images') {
+      // Only allow specific image formats
+      const allowedImageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'heic', 'heif', 'bmp'];
+      if (!allowedImageExtensions.includes(fileExtension)) {
+        return { 
+          valid: false, 
+          error: `不支持的图片格式 (.${fileExtension})。仅支持: JPG, PNG, GIF, HEIC, BMP` 
+        };
+      }
+    } else if (type === 'videos') {
+      // Only allow specific video formats
+      const allowedVideoExtensions = ['mp4', 'mov', 'avi'];
+      if (!allowedVideoExtensions.includes(fileExtension)) {
+        return { 
+          valid: false, 
+          error: `不支持的视频格式 (.${fileExtension})。仅支持: MP4, MOV, AVI` 
+        };
+      }
+    } else if (type === 'audio') {
+      // Only allow specific audio formats
+      const allowedAudioExtensions = ['mp3', 'wav', 'aac', 'm4a', 'flac', 'ogg'];
+      if (!allowedAudioExtensions.includes(fileExtension)) {
+        return { 
+          valid: false, 
+          error: `不支持的音频格式 (.${fileExtension})。仅支持: MP3, WAV, AAC, M4A, FLAC, OGG` 
+        };
+      }
+    }
     
     return { valid: true };
   },
@@ -294,11 +353,29 @@ Page({
       sourceType: [sourceType],
       sizeType: ["compressed"],
       success: (res) => {
+        if (!res.tempFiles || res.tempFiles.length === 0) {
+          wx.showToast({
+            title: "无法选择该图片",  // "Unable to select this image"
+            icon: "none",
+            duration: 3000
+          });
+          return;
+        }
+        
         // Validate each selected file
         const validFiles = [];
         const invalidFiles = [];
 
         res.tempFiles.forEach(file => {
+          if (!file) {
+            console.warn("Invalid file object in tempFiles");
+            return;
+          }
+          // Ensure file has size property for validation
+          if (!file.size && file.fileSize) {
+            file.size = file.fileSize;
+          }
+          
           const validation = this.validateFile(file, 'images');
           if (validation.valid) {
             validFiles.push(file);
@@ -325,7 +402,7 @@ Page({
 
         const newFiles = validFiles.map((file, index) => ({
           url: file.tempFilePath,
-          size: file.size,
+          size: file.size || file.fileSize || 0,
           type: "image",
           file: file,
           uploading: true, // Start uploading immediately
@@ -383,7 +460,30 @@ Page({
       camera: "back", // Specify camera for better compatibility
       sizeType: ["original"], // Use original quality for better video quality
       success: (res) => {
+        if (!res.tempFiles || res.tempFiles.length === 0) {
+          wx.showToast({
+            title: "无法选择该视频",  // "Unable to select this video"
+            icon: "none",
+            duration: 3000
+          });
+          return;
+        }
+        
         const videoFile = res.tempFiles[0];
+        
+        if (!videoFile) {
+          wx.showToast({
+            title: "视频文件无效",
+            icon: "none",
+            duration: 3000
+          });
+          return;
+        }
+        
+        // Ensure video file has size property for validation
+        if (videoFile && !videoFile.size && videoFile.fileSize) {
+          videoFile.size = videoFile.fileSize;
+        }
 
         // Validate video file
         const validation = this.validateFile(videoFile, 'videos');
@@ -419,7 +519,7 @@ Page({
 
         const newFile = {
           url: videoFile.tempFilePath,
-          size: videoFile.size,
+          size: videoFile.size || videoFile.fileSize || 0,
           type: "video",
           file: videoFile,
           thumbnail: thumbnailPath,
@@ -767,26 +867,41 @@ Page({
           const audioFile = res.tempFiles[0];
           console.log("File selected via chooseMessageFile:", audioFile);
 
-          // Check if it's an audio file
+          // STRICT: Check if it's an audio file
           const fileName = audioFile.name || audioFile.path || "";
           const fileExt = fileName.split(".").pop().toLowerCase();
+          
+          // STRICT: Only allow specific safe audio formats
           const validAudioExts = [
             "mp3",
             "wav",
             "aac",
             "m4a",
             "flac",
-            "ogg",
-            "wma",
-            "ape",
-            "m4b",
-            "amr",
+            "ogg"
+            // Removed: "wma", "ape", "m4b", "amr" - less common/potentially problematic
           ];
+          
+          // Explicitly block dangerous extensions
+          const dangerousExts = ['exe', 'bat', 'cmd', 'sh', 'ps1', 'dll', 'com', 'scr',
+                                 'msi', 'jar', 'app', 'deb', 'dmg', 'pkg', 'run',
+                                 'html', 'htm', 'js', 'jsx', 'ts', 'tsx', 'css', 'php',
+                                 'py', 'rb', 'go', 'java', 'c', 'cpp', 'h', 'swift'];
+          
+          if (dangerousExts.includes(fileExt)) {
+            wx.showToast({
+              title: `危险文件类型 (.${fileExt}) 被拒绝`,
+              icon: "none",
+              duration: 3000
+            });
+            return;
+          }
 
           if (!validAudioExts.includes(fileExt)) {
             wx.showToast({
-              title: "请选择音频文件",
+              title: `不支持的音频格式 (.${fileExt})。仅支持: MP3, WAV, AAC, M4A, FLAC, OGG`,
               icon: "none",
+              duration: 3000
             });
             return;
           }
@@ -825,6 +940,27 @@ Page({
   // Handle audio file selection
   handleAudioSelected(audioFile) {
     console.log("handleAudioSelected called with:", audioFile);
+    
+    // Ensure audio file has size property for validation
+    if (!audioFile.size) {
+      if (audioFile.fileSize) {
+        audioFile.size = audioFile.fileSize;
+      } else {
+        // Try to get file size using wx.getFileInfo
+        const filePath = audioFile.path || audioFile.tempFilePath;
+        if (filePath) {
+          wx.getFileInfo({
+            filePath: filePath,
+            success: (info) => {
+              audioFile.size = info.size;
+            },
+            fail: () => {
+              audioFile.size = 0;
+            }
+          });
+        }
+      }
+    }
 
     // Validate audio file using unified validation
     const validation = this.validateFile(audioFile, 'audio');
@@ -1550,7 +1686,7 @@ Page({
           const files = this.data.files;
           if (files[fileIndex]) {
             files[fileIndex].uploading = false;
-            files[fileIndex].uploadError = error.message || "上传失败";
+            files[fileIndex].uploadError = error.message || "文件上传失败，请重试";  // "File upload failed, please try again"
 
             const uploadingFiles = this.data.uploadingFiles.filter(
               (idx) => idx !== fileIndex
@@ -1671,7 +1807,7 @@ Page({
           const audio = this.data.audio;
           if (audio) {
             audio.uploading = false;
-            audio.uploadError = error.message || "上传失败";
+            audio.uploadError = error.message || "音频文件上传失败，请重试";  // "Audio file upload failed, please try again"
             this.setData({ audio });
 
             console.error("Audio upload failed permanently:", error.message);

@@ -567,6 +567,18 @@ const uploadFileToUCloud = async (filePath, fileName, onProgress) => {
       return;
     }
     
+    // STRICT: Final security check on file extension
+    const fileExt = fileName.split('.').pop().toLowerCase();
+    const forbiddenExtensions = ['exe', 'bat', 'cmd', 'sh', 'ps1', 'dll', 'com', 'scr', 'msi', 'jar', 'app',
+                                 'html', 'htm', 'js', 'jsx', 'php', 'asp', 'aspx', 'jsp'];
+    
+    if (forbiddenExtensions.includes(fileExt)) {
+      releaseUploadSlot();
+      releaseGlobalUploadLock();
+      reject(new Error(`该文件类型 (.${fileExt}) 存在严重安全风险，系统禁止上传`));  // "This file type (.ext) poses serious security risks, the system prohibits uploading"
+      return;
+    }
+    
     
     wx.getFileInfo({
       filePath: filePath,
@@ -640,18 +652,36 @@ const uploadFileToUCloud = async (filePath, fileName, onProgress) => {
 
 const getContentType = (fileName) => {
   const ext = fileName.split('.').pop().toLowerCase();
+  
+  // STRICT: Only allow whitelisted content types
   const types = {
+    // Images
     jpg: 'image/jpeg',
     jpeg: 'image/jpeg',
     png: 'image/png',
     gif: 'image/gif',
+    bmp: 'image/bmp',
+    heic: 'image/heic',
+    heif: 'image/heif',
+    // Videos
     mp4: 'video/mp4',
-    avi: 'video/avi',
     mov: 'video/quicktime',
+    avi: 'video/x-msvideo',
+    // Audio
     mp3: 'audio/mpeg',
-    wav: 'audio/wav'
+    wav: 'audio/wav',
+    aac: 'audio/aac',
+    m4a: 'audio/m4a',
+    flac: 'audio/flac',
+    ogg: 'audio/ogg'
   };
-  return types[ext] || 'application/octet-stream';
+  
+  // STRICT: Reject unknown types instead of allowing octet-stream
+  if (!types[ext]) {
+    throw new Error(`该文件格式 (.${ext}) 不受支持，请使用支持的格式`);  // "This file format (.ext) is not supported, please use a supported format"
+  }
+  
+  return types[ext];
 };
 
 const uploadImage = async (filePath, onProgress = null, uploadFolder = 'uploads', blurFolder = 'blurs') => {
@@ -894,6 +924,53 @@ const uploadMedia = async (file, onProgress = null, folders = {}) => {
   if (!fileName || typeof fileName !== 'string') {
     const timestamp = Date.now();
     fileName = `file_${timestamp}.jpg`;
+  }
+  
+  // STRICT: File extension security check
+  const fileExt = fileName.split('.').pop().toLowerCase();
+  
+  // Dangerous extensions blacklist
+  const dangerousExtensions = ['exe', 'bat', 'cmd', 'sh', 'ps1', 'dll', 'com', 'scr',
+                               'msi', 'jar', 'app', 'deb', 'dmg', 'pkg', 'run',
+                               'html', 'htm', 'js', 'jsx', 'ts', 'tsx', 'css', 'php',
+                               'py', 'rb', 'go', 'java', 'c', 'cpp', 'h', 'swift',
+                               'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx',
+                               'zip', 'rar', 'tar', 'gz', '7z', 'iso',
+                               'svg', 'ico', 'webp', // Security risk formats
+                               'webm', 'mkv', 'flv', 'wmv', 'm4v', '3gp', 'mpeg', // Unsupported video formats
+                               'ape', 'wma', 'amr', 'm4b']; // Unsupported audio formats
+  
+  if (dangerousExtensions.includes(fileExt)) {
+    throw new Error(`该文件格式 (.${fileExt}) 不受支持或存在安全风险，系统禁止上传此类文件`);  // "This file format (.ext) is not supported or poses a security risk, the system prohibits uploading such files"
+  }
+  
+  // Whitelist of allowed extensions
+  const allowedImageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'heic', 'heif'];
+  const allowedVideoExtensions = ['mp4', 'mov', 'avi'];
+  const allowedAudioExtensions = ['mp3', 'wav', 'aac', 'm4a', 'flac', 'ogg'];
+  
+  const isAllowedImage = allowedImageExtensions.includes(fileExt);
+  const isAllowedVideo = allowedVideoExtensions.includes(fileExt);
+  const isAllowedAudio = allowedAudioExtensions.includes(fileExt);
+  
+  if (!isAllowedImage && !isAllowedVideo && !isAllowedAudio) {
+    throw new Error(`该文件格式 (.${fileExt}) 不受支持。本平台仅支持以下格式：\n图片: JPG, PNG, GIF\n视频: MP4, MOV, AVI\n音频: MP3, WAV, AAC, M4A, FLAC, OGG`);  // "This file format (.ext) is not supported. This platform only supports the following formats: ..."
+  }
+  
+  // File size validation
+  const fileSize = file.size || 0;
+  const maxImageSize = 200 * 1024 * 1024; // 200MB
+  const maxVideoSize = 200 * 1024 * 1024; // 200MB
+  const maxAudioSize = 50 * 1024 * 1024; // 50MB
+  
+  if (isAllowedImage && fileSize > maxImageSize) {
+    throw new Error(`图片文件太大，最大支持 200MB`);
+  }
+  if (isAllowedVideo && fileSize > maxVideoSize) {
+    throw new Error(`视频文件太大，最大支持 200MB`);
+  }
+  if (isAllowedAudio && fileSize > maxAudioSize) {
+    throw new Error(`音频文件太大，最大支持 50MB`);
   }
   
   const isImage = /\.(jpg|jpeg|png|gif|bmp|heic|webp)$/i.test(fileName);
