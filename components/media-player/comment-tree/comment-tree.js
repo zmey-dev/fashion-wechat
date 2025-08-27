@@ -35,6 +35,7 @@ Component({
     replyToComment: null,
     rootComments: [],
     isSending: false,
+    isProcessing: false, // Loading state for processing
     emojiList: [
       "😀",
       "😂",
@@ -144,10 +145,9 @@ Component({
     async uploadCommentImage(filePath) {
       if (this.data.isSending) return;
       
-      this.setData({ isSending: true });
-      
-      wx.showLoading({
-        title: "处理中...",
+      this.setData({ 
+        isSending: true,
+        isProcessing: true
       });
 
       try {
@@ -165,11 +165,6 @@ Component({
         if (!uploadResult || !uploadResult.url) {
           throw new Error("图片上传失败");
         }
-        
-        // Change loading text
-        wx.showLoading({
-          title: "发布中...",
-        });
         
         // Then send comment with image URL to backend
         const requestData = {
@@ -191,8 +186,10 @@ Component({
           },
           data: requestData,
           success: (res) => {
-            wx.hideLoading();
-            this.setData({ isSending: false });
+            this.setData({ 
+              isSending: false,
+              isProcessing: false 
+            });
             
             if (res.data.status === "success") {
               wx.showToast({
@@ -211,8 +208,10 @@ Component({
             }
           },
           fail: (err) => {
-            wx.hideLoading();
-            this.setData({ isSending: false });
+            this.setData({ 
+              isSending: false,
+              isProcessing: false 
+            });
             wx.showToast({
               title: "网络错误",
               icon: "error",
@@ -220,8 +219,10 @@ Component({
           },
         });
       } catch (error) {
-        wx.hideLoading();
-        this.setData({ isSending: false });
+        this.setData({ 
+          isSending: false,
+          isProcessing: false 
+        });
         wx.showToast({
           title: error.message || "上传失败",
           icon: "error",
@@ -255,10 +256,9 @@ Component({
 
       // Prevent duplicate sending
       if (this.data.isSending) return;
-      this.setData({ isSending: true });
-      
-      wx.showLoading({
-        title: isUpdate ? "更新中..." : "发布中...",
+      this.setData({ 
+        isSending: true,
+        isProcessing: true 
       });
 
       const apiUrl = isUpdate
@@ -285,8 +285,10 @@ Component({
           Authorization: loggedUser.token ? `Bearer ${loggedUser.token}` : "",
         },
         data: requestData,        success: (res) => {
-          wx.hideLoading();
-          this.setData({ isSending: false });
+          this.setData({ 
+            isSending: false,
+            isProcessing: false 
+          });
           
           if (res.data.status == "success") {
             wx.showToast({
@@ -313,8 +315,10 @@ Component({
           }
         },
         fail: (err) => {
-          wx.hideLoading();
-          this.setData({ isSending: false });
+          this.setData({ 
+            isSending: false,
+            isProcessing: false 
+          });
           wx.showToast({
             title: "网络错误",
             icon: "error",

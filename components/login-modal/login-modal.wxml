@@ -157,5 +157,14 @@
         <text class="agreement-link" bindtap="goToPrivacy">《隐私政策》</text>
       </view>
     </view>
+
+    <!-- Loading Overlay -->
+    <view class="loading-container" wx:if="{{loading}}">
+      <image class="loading-logo small" src="/images/logo.png" mode="aspectFit"></image>
+      <view class="loading-progress-bar small">
+        <view class="loading-progress-fill"></view>
+      </view>
+      <text class="loading-text">{{loadingMessage || '处理中...'}}</text>
+    </view>
   </view>
 </view>

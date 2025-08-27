@@ -1,8 +1,17 @@
 <!--pages/follow/follow.wxml-->
 <wxs src="../../utils/userDisplayName.wxs" module="userUtils" />
 <app-layout current-page="follow">
+  <!-- Main Loading Screen -->
+  <view wx:if="{{isLoading}}" class="loading-container">
+    <image class="loading-logo" src="/images/logo.png" mode="aspectFit"></image>
+    <view class="loading-progress-bar">
+      <view class="loading-progress-fill"></view>
+    </view>
+    <text class="loading-text">{{loadingMessage}}</text>
+  </view>
+  
   <!-- Main content container -->
-  <view class="content-container {{userInfo.role === 'teacher' ? 'teacher-layout' : ''}}">
+  <view class="content-container {{userInfo.role === 'teacher' ? 'teacher-layout' : ''}}" wx:else>
     <!-- User List View -->
     <view class="user-list" wx:if="{{!showUserMedia}}">
       <!-- Search Bar -->

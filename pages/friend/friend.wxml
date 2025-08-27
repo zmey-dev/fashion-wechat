@@ -96,6 +96,10 @@
 
       <!-- Loading indicator -->
       <view class="loading-indicator" wx:if="{{loading}}">
+        <image class="loading-logo" src="/images/logo.png" mode="aspectFit"></image>
+        <view class="loading-progress-bar">
+          <view class="loading-progress-fill"></view>
+        </view>
         <text>{{messages.loading}}</text>
       </view>
       

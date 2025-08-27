@@ -8,6 +8,13 @@ Page({
     userInfo: getApp().globalData.userInfo || {},
     currentView: "list", // 'list' or 'chat'
 
+    // Loading states
+    isLoadingFriends: false,
+    isLoadingMessages: false,
+    isUploadingFile: false,
+    isSendingFriendRequest: false,
+    isProcessingAction: false,
+    
     // Chat list data
     friends: [],
     filteredFriends: [],
@@ -457,8 +464,8 @@ Page({
   getMessagesByUserId(userId) {
     if (!userId || !this.data.userInfo.token) return;
 
-    wx.showLoading({
-      title: this.data.uiTexts.loadingMessages,
+    this.setData({
+      isLoadingMessages: true
     });
 
     wx.request({
@@ -469,7 +476,9 @@ Page({
         Authorization: `Bearer ${this.data.userInfo.token}`,
       },
       success: (res) => {
-        wx.hideLoading();
+        this.setData({
+          isLoadingMessages: false
+        });
 
         if (res.data) {
           // Transform messages and format times
@@ -513,7 +522,9 @@ Page({
         }
       },
       fail: (err) => {
-        wx.hideLoading();
+        this.setData({
+          isLoadingMessages: false
+        });
         console.error("Failed to fetch messages:", err);
         wx.showToast({
           title: this.data.uiTexts.networkError,
@@ -575,6 +586,9 @@ Page({
   },
 
   getFriends: function() {
+    // Set loading state to true
+    this.setData({ isLoadingFriends: true });
+    
     try {
       wx.request({
         url: `${config.BACKEND_URL}/friend/get_friends`,
@@ -593,6 +607,7 @@ Page({
             this.setData({
               friends: friends,
               filteredFriends: friends,
+              isLoadingFriends: false,
             });
 
             // Use centralized unread message fetching
@@ -1105,11 +1120,8 @@ Page({
     const uploadId = Date.now().toString();
     this.setData({
       uploadingFiles: [...this.data.uploadingFiles, uploadId],
-      [`fileUploadProgress.${uploadId}`]: 0
-    });
-
-    wx.showLoading({
-      title: "上传中...",
+      [`fileUploadProgress.${uploadId}`]: 0,
+      isUploadingFile: true
     });
 
     try {
@@ -1128,7 +1140,9 @@ Page({
       );
       
       if (uploadResult && uploadResult.url) {
-        wx.hideLoading();
+        this.setData({
+          isUploadingFile: false
+        });
         
         // Remove from uploading list
         const updatedUploading = this.data.uploadingFiles.filter(id => id !== uploadId);
@@ -1142,7 +1156,9 @@ Page({
     } catch (error) {
       console.error("Image upload failed:", error);
       
-      wx.hideLoading();
+      this.setData({
+        isUploadingFile: false
+      });
       
       // Remove from uploading list and add error
       const updatedUploading = this.data.uploadingFiles.filter(id => id !== uploadId);
@@ -1264,11 +1280,8 @@ Page({
     const uploadId = Date.now().toString();
     this.setData({
       uploadingFiles: [...this.data.uploadingFiles, uploadId],
-      [`fileUploadProgress.${uploadId}`]: 0
-    });
-
-    wx.showLoading({
-      title: "上传中...",
+      [`fileUploadProgress.${uploadId}`]: 0,
+      isUploadingFile: true
     });
 
     try {
@@ -1301,7 +1314,9 @@ Page({
       }
       
       if (uploadResult && (uploadResult.url || uploadResult.uploadUrl || uploadResult.audioUrl)) {
-        wx.hideLoading();
+        this.setData({
+          isUploadingFile: false
+        });
         
         // Remove from uploading list
         const updatedUploading = this.data.uploadingFiles.filter(id => id !== uploadId);
@@ -1315,7 +1330,9 @@ Page({
     } catch (error) {
       console.error("File upload failed:", error);
       
-      wx.hideLoading();
+      this.setData({
+        isUploadingFile: false
+      });
       
       // Remove from uploading list and add error
       const updatedUploading = this.data.uploadingFiles.filter(id => id !== uploadId);
@@ -1395,7 +1412,9 @@ Page({
   onSendFriendRequest: function() {
     if (!this.data.selectedUser) return;
     
-    wx.showLoading({ title: "发送中..." });
+    this.setData({
+      isSendingFriendRequest: true
+    });
     
     wx.request({
       url: `${config.BACKEND_URL}/friend/add_friend`,
@@ -1408,7 +1427,9 @@ Page({
         Authorization: `Bearer ${this.data.userInfo.token}`,
       },
       success: (res) => {
-        wx.hideLoading();
+        this.setData({
+          isSendingFriendRequest: false
+        });
         if (res.data && res.data.status === "success") {
           wx.showToast({
             title: "好友请求已发送",
@@ -1442,7 +1463,9 @@ Page({
         }
       },
       fail: () => {
-        wx.hideLoading();
+        this.setData({
+          isSendingFriendRequest: false
+        });
         wx.showToast({
           title: "网络错误",
           icon: "none"
@@ -1490,7 +1513,9 @@ Page({
       cancelText: "取消",
       success: (res) => {
         if (res.confirm) {
-          wx.showLoading({ title: "处理中..." });
+          this.setData({
+            isProcessingAction: true
+          });
           
           wx.request({
             url: `${config.BACKEND_URL}/friend/del_friend_by_friend_id`,
@@ -1503,7 +1528,9 @@ Page({
               Authorization: `Bearer ${this.data.userInfo.token}`,
             },
             success: (res) => {
-              wx.hideLoading();
+              this.setData({
+                isProcessingAction: false
+              });
               if (res.statusCode === 200) {
                 // Remove friend from local state
                 const updatedFriends = this.data.friends.filter(f => f.id !== friendId);
@@ -1529,7 +1556,9 @@ Page({
               }
             },
             fail: () => {
-              wx.hideLoading();
+              this.setData({
+                isProcessingAction: false
+              });
               wx.showToast({
                 title: "网络错误",
                 icon: "none"
@@ -1550,7 +1579,9 @@ Page({
       cancelText: "取消",
       success: (res) => {
         if (res.confirm) {
-          wx.showLoading({ title: "删除中..." });
+          this.setData({
+            isProcessingAction: true
+          });
           
           wx.request({
             url: `${config.BACKEND_URL}/messages/del_messages_by_friend_id`,
@@ -1563,7 +1594,9 @@ Page({
               Authorization: `Bearer ${this.data.userInfo.token}`,
             },
             success: (res) => {
-              wx.hideLoading();
+              this.setData({
+                isProcessingAction: false
+              });
               if (res.statusCode === 200) {
                 // Clear chat messages if currently viewing this friend
                 if (this.data.selectedUser && this.data.selectedUser.id === friendId) {
@@ -1604,7 +1637,9 @@ Page({
               }
             },
             fail: () => {
-              wx.hideLoading();
+              this.setData({
+                isProcessingAction: false
+              });
               wx.showToast({
                 title: "网络错误",
                 icon: "none"

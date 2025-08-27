@@ -12,6 +12,8 @@ Page({
     userMediaList: [],
     showUserMedia: false,
     loading: false,
+    isFollowLoading: false,
+    isFriendLoading: false,
     hasMore: true,
     page: 1,
     pageSize: 10,
@@ -71,9 +73,7 @@ Page({
 
   // Load user list from API
   loadUserList: function () {
-    wx.showLoading({
-      title: this.data.messages.loading,
-    });
+    this.setData({ loading: true });
     wx.request({
       url: `${config.BACKEND_URL}/friend/get_friends`,
       method: "GET",
@@ -101,7 +101,7 @@ Page({
         });
       },
       complete: () => {
-        wx.hideLoading();
+        this.setData({ loading: false });
       },
     });
   },
@@ -266,10 +266,8 @@ Page({
     const currentUser = this.data.currentUser;
     const newFollowStatus = !currentUser.isFollowed;
 
-    wx.showLoading({
-      title: newFollowStatus
-        ? this.data.messages.actions.following
-        : this.data.messages.actions.unfollowing,
+    this.setData({
+      isFollowLoading: true
     });
 
     wx.request({
@@ -321,7 +319,7 @@ Page({
         });
       },
       complete: () => {
-        wx.hideLoading();
+        this.setData({ loading: false });
       },
     });
   },
@@ -379,10 +377,8 @@ Page({
 
     const currentUser = this.data.currentUser;
 
-    wx.showLoading({
-      title: addFriend
-        ? this.data.messages.actions.addingFriend
-        : this.data.messages.actions.removingFriend,
+    this.setData({
+      isFriendLoading: true
     });
 
     if (addFriend)
@@ -421,7 +417,7 @@ Page({
           });
         },
         complete: () => {
-          wx.hideLoading();
+          this.setData({ loading: false });
         },
       });
     else
@@ -460,7 +456,7 @@ Page({
           });
         },
         complete: () => {
-          wx.hideLoading();
+          this.setData({ loading: false });
         },
       });
   },

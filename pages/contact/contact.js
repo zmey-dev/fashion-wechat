@@ -13,6 +13,7 @@ Page({
     images: [],
     maxImages: 4,
     isSubmitting: false,
+    isLoading: false, // Loading state for submission
     
     // Upload states
     uploadingImages: [],
@@ -170,12 +171,9 @@ Page({
     }
 
     // Set submitting state
-    this.setData({ isSubmitting: true });
-
-    // Show loading indicator
-    wx.showLoading({
-      title: this.data.messages.form.submitting,
-      mask: true,
+    this.setData({ 
+      isSubmitting: true,
+      isLoading: true 
     });
 
     try {
@@ -188,9 +186,6 @@ Page({
       // Then submit the form with image URLs
       const result = await this.submitForm(title, description, imageUrls);
 
-      // Hide loading indicator
-      wx.hideLoading();
-
       if (result.status === "success") {
         // Reset form after successful submission
         this.setData({
@@ -198,6 +193,7 @@ Page({
           description: "",
           images: [],
           isSubmitting: false,
+          isLoading: false,
         });
 
         // Show success message
@@ -217,10 +213,10 @@ Page({
         );
       }
     } catch (error) {
-      // Hide loading indicator
-      wx.hideLoading();
-
-      this.setData({ isSubmitting: false });
+      this.setData({ 
+        isSubmitting: false,
+        isLoading: false 
+      });
 
       // Show error message
       const errorMessage =

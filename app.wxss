@@ -260,6 +260,12 @@ page {
   display: block !important;
 }
 
+.loading-logo.small {
+  width: 120rpx;
+  height: 120rpx;
+  margin: 0 auto 20rpx auto !important;
+}
+
 .loading-spinner {
   width: 60rpx;
   height: 60rpx;
@@ -284,6 +290,12 @@ page {
   border-radius: 2rpx;
   overflow: hidden;
   margin: 20rpx auto 0 auto !important;
+}
+
+.loading-progress-bar.small {
+  width: 120rpx;
+  height: 3rpx;
+  margin: 10rpx auto 0 auto !important;
 }
 
 .loading-progress-fill {

@@ -320,7 +320,10 @@
     <!-- Show loading state -->
     <block wx:if="{{loading}}">
       <view class="loading-container">
-        <view class="loading-spinner"></view>
+        <image class="loading-logo" src="/images/logo.png" mode="aspectFit"></image>
+        <view class="loading-progress-bar">
+          <view class="loading-progress-fill"></view>
+        </view>
         <text class="loading-text">{{messages.loading}}</text>
       </view>
     </block>

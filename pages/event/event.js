@@ -15,6 +15,7 @@ Page({
     userInfo: null, // Chinese messages for UI text
     messages: {
       loading: "加载中...",
+      processing: "处理中...",
       errors: {
         loadFailed: "加载活动失败",
         networkError: "网络错误",
@@ -261,9 +262,8 @@ Page({
     });
     
     // Show loading
-    wx.showLoading({
-      title: '处理中...',
-      mask: true
+    this.setData({
+      loading: true
     });
     
     // Use a teacher-specific API endpoint to join the event
@@ -275,7 +275,9 @@ Page({
         'Authorization': `Bearer ${getApp().globalData.userInfo?.token}`
       },
       success: (res) => {
-        wx.hideLoading();
+        this.setData({
+          loading: false
+        });
         
         if (res.data && res.data.status === 'success') {
           wx.showToast({
@@ -300,7 +302,9 @@ Page({
         }
       },
       fail: (err) => {
-        wx.hideLoading();
+        this.setData({
+          loading: false
+        });
         console.error('Teacher join event failed:', err);
         
         wx.showToast({

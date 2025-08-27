@@ -10,6 +10,7 @@ Component({
     showPassword: false,
     countdown: 0,
     loading: false,
+    loadingMessage: "",
     termsAgreed: false,
     loginIdentifierError: "", // For username/phone login errors
     phoneError: "",
@@ -410,9 +411,9 @@ Component({
         return;
       }
       try {
-        wx.showLoading({
-          title: this.data.messages.status.sendingCode,
-          mask: true,
+        this.setData({
+          loading: true,
+          loadingMessage: this.data.messages.status.sendingCode
         });
         const data = await this.requestVerificationCode(this.ensureCountryCode(phone));
         // Always start countdown regardless of alert or new code
@@ -452,7 +453,9 @@ Component({
           phoneSuccessMessage: "", // Clear any success message
         });
       } finally {
-        wx.hideLoading();
+        this.setData({
+          loading: false
+        });
       }
     },
 

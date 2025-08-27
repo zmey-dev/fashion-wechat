@@ -45,6 +45,8 @@ Page({
     currentTab: 0, // 0: students, 1: university, 2: profile, 3: contact
     tabs: ["学生", "大学信息", "个人资料", "联系我们"],
     loading: false,
+    isLoading: false,
+    loadingMessage: "",
     hasMore: true,
 
     // Modal and form states
@@ -1262,7 +1264,7 @@ Page({
   //       });
   //     },
   //     complete: () => {
-  //       wx.hideLoading();
+  //       this.setData({ isLoading: false });
   //     }
   //   });
   // },
@@ -1314,7 +1316,7 @@ Page({
   //       });
   //     },
   //     complete: () => {
-  //       wx.hideLoading();
+  //       this.setData({ isLoading: false });
   //     }
   //   });
   // },
@@ -1342,7 +1344,10 @@ Page({
       return;
     }
 
-    wx.showLoading({ title: "发送中..." });
+    this.setData({
+      isLoading: true,
+      loadingMessage: "发送中..."
+    });
 
     wx.request({
       url: `${config.BACKEND_URL}/verification/send_phone_sms_code`,
@@ -1395,7 +1400,7 @@ Page({
         });
       },
       complete: () => {
-        wx.hideLoading();
+        this.setData({ isLoading: false });
       },
     });
   },
@@ -1409,7 +1414,10 @@ Page({
       return;
     }
 
-    wx.showLoading({ title: "验证中..." });
+    this.setData({
+      isLoading: true,
+      loadingMessage: "验证中..."
+    });
 
     wx.request({
       url: `${config.BACKEND_URL}/verification/verify_phone_sms_code`,
@@ -1449,7 +1457,7 @@ Page({
         });
       },
       complete: () => {
-        wx.hideLoading();
+        this.setData({ isLoading: false });
       },
     });
   },
@@ -1589,14 +1597,14 @@ Page({
 
     // Check if files are still uploading
     if (this.data.avatarUploading || this.data.credentialUploading) {
-      wx.showLoading({
-        title: "等待文件上传完成...",
-        mask: true,
+      this.setData({
+        isLoading: true,
+        loadingMessage: "等待文件上传完成..."
       });
 
       // Wait for uploads to complete
       this.waitForUploadsToComplete().then(() => {
-        wx.hideLoading();
+        this.setData({ isLoading: false });
         if (this.data.avatarUploadError || this.data.credentialUploadError) {
           wx.showToast({
             title: "文件上传失败，请重试",
@@ -1614,8 +1622,9 @@ Page({
 
   // Save profile with uploaded file URLs
   saveProfileWithUploads: function () {
-    wx.showLoading({
-      title: "保存中...",
+    this.setData({
+      isLoading: true,
+      loadingMessage: "保存中..."
     });
 
     // Prepare form data using standard format
@@ -1876,7 +1885,7 @@ Page({
         });
       },
       complete: () => {
-        wx.hideLoading();
+        this.setData({ isLoading: false });
       },
     });
   },
@@ -2235,7 +2244,10 @@ Page({
       return;
     }
 
-    wx.showLoading({ title: "提交中..." });
+    this.setData({
+      isLoading: true,
+      loadingMessage: "提交中..."
+    });
 
     try {
       const res = await wx.request({
@@ -2274,7 +2286,7 @@ Page({
         icon: "none",
       });
     } finally {
-      wx.hideLoading();
+      this.setData({ isLoading: false });
     }
   },
 

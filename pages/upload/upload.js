@@ -26,6 +26,8 @@ Page({
 
     // UI states
     loading: false,
+    isLoading: false,
+    loadingMessage: "",
     imageLoading: false,
     activeTab: "media", // 'media' or 'form'
     showInstructions: true,
@@ -147,7 +149,9 @@ Page({
 
   // Load existing post for update
   loadExistingPost(mediaId) {
-    wx.showLoading({ title: this.data.messages.loading });
+    this.setData({
+      isLoading: true
+    });
 
     wx.request({
       url: `${getApp().globalData.apiBase}/posts/${mediaId}`,
@@ -171,7 +175,9 @@ Page({
         }
       },
       complete: () => {
-        wx.hideLoading();
+        this.setData({
+          isLoading: false
+        });
       },
     });
   },
@@ -1199,9 +1205,10 @@ Page({
     if (uploadingFiles.length > 0 || audioUploading) {
       // Show full screen loading overlay
       this.setData({ isSubmitting: true, loading: true });
-      wx.showLoading({
-        title: "等待文件上传完成...",
-        mask: true,
+      this.setData({ 
+        isSubmitting: true, 
+        loading: true,
+        loadingMessage: "等待文件上传完成..."
       });
 
       // Wait for all file uploads to complete with timeout
@@ -1221,7 +1228,6 @@ Page({
           }
           
           if (waitCount >= maxWait) {
-            wx.hideLoading();
             this.setData({ isSubmitting: false, loading: false });
             wx.showToast({
               title: "文件上传超时，请检查网络后重试",
@@ -1232,7 +1238,6 @@ Page({
           
           console.log("All file uploads completed");
         } catch (error) {
-          wx.hideLoading();
           this.setData({ isSubmitting: false, loading: false });
           wx.showToast({
             title: "文件上传过程中发生错误，请重试",
@@ -1255,7 +1260,6 @@ Page({
           }
           
           if (audioWaitCount >= maxAudioWait) {
-            wx.hideLoading();
             this.setData({ isSubmitting: false, loading: false });
             wx.showToast({
               title: "音频上传超时，请重试",
@@ -1266,7 +1270,6 @@ Page({
           
           console.log("Audio upload completed");
         } catch (error) {
-          wx.hideLoading();
           this.setData({ isSubmitting: false, loading: false });
           wx.showToast({
             title: "音频上传过程中发生错误，请重试",
@@ -1276,7 +1279,6 @@ Page({
         }
       }
 
-      wx.hideLoading();
       // Keep loading state active for the actual submission
     }
 
@@ -1289,9 +1291,9 @@ Page({
       console.log(`Retrying ${failedFiles.length} failed file uploads...`);
       try {
         this.setData({ loading: true });
-        wx.showLoading({
-          title: "重试失败的上传...",
-          mask: true,
+        this.setData({ 
+          loading: true,
+          loadingMessage: "重试失败的上传..." 
         });
 
         // Reset error states and retry uploads
@@ -1315,10 +1317,10 @@ Page({
           await new Promise((resolve) => setTimeout(resolve, 100));
         }
 
-        wx.hideLoading();
+        this.setData({ loading: false });
       } catch (error) {
         console.error("Failed to retry file uploads:", error);
-        wx.hideLoading();
+        this.setData({ loading: false });
       }
     }
 
@@ -1387,11 +1389,11 @@ Page({
     // All uploads successful, proceed with form submission
     try {
       this.setData({ loading: true });
-      wx.showLoading({
-        title: this.data.isUpdateMode
+      this.setData({ 
+        loading: true,
+        loadingMessage: this.data.isUpdateMode
           ? this.data.messages.updating
-          : this.data.messages.loading,
-        mask: true,
+          : this.data.messages.loading
       });
 
       // Prepare file URLs exactly like web version
@@ -1545,7 +1547,7 @@ Page({
           Authorization: `Bearer ${getApp().globalData.userInfo.token}`,
         },
         success: (res) => {
-          wx.hideLoading();
+          this.setData({ loading: false });
           if (res.statusCode === 200 && res.data.status === "success") {
             wx.showToast({
               title: this.data.isUpdateMode
@@ -1582,7 +1584,7 @@ Page({
           }
         },
         fail: (error) => {
-          wx.hideLoading();
+          this.setData({ loading: false });
           console.error("Form submission error:", error);
           
           // Show specific error message based on error type
@@ -1607,7 +1609,7 @@ Page({
         },
       });
     } catch (error) {
-      wx.hideLoading();
+      this.setData({ loading: false });
       console.error("Form submission error:", error);
       
       // Show specific error message based on error type  
@@ -1648,7 +1650,6 @@ Page({
     } finally {
       // Ensure loading is always stopped
       if (this.data.isSubmitting || this.data.loading) {
-        wx.hideLoading();
         this.setData({ loading: false, isSubmitting: false });
       }
     }

@@ -37,11 +37,29 @@
     </view>
   </view>
 
+  <!-- Loading State -->
+  <view wx:if="{{loading}}" class="loading-container">
+    <image class="loading-logo" src="/images/logo.png" mode="aspectFit"></image>
+    <view class="loading-progress-bar">
+      <view class="loading-progress-fill"></view>
+    </view>
+    <text class="loading-text">{{messages.loading}}</text>
+  </view>
+
+  <!-- Processing Loading State -->
+  <view wx:if="{{isProcessing}}" class="loading-container">
+    <image class="loading-logo" src="/images/logo.png" mode="aspectFit"></image>
+    <view class="loading-progress-bar">
+      <view class="loading-progress-fill"></view>
+    </view>
+    <text class="loading-text">{{messages.actions.processing}}</text>
+  </view>
+
   <!-- Friend Notifications -->
   <scroll-view 
     class="notification-list" 
     scroll-y="true"
-    wx:if="{{activeTab === 0}}"
+    wx:if="{{activeTab === 0 && !loading}}"
   >
     <view wx:if="{{friendNotifications.length === 0}}" class="empty-state">
       <image src="/images/icons/empty.svg" class="empty-icon" mode="aspectFit"></image>
@@ -116,7 +134,7 @@
   <scroll-view 
     class="notification-list" 
     scroll-y="true"
-    wx:if="{{activeTab === 1}}"
+    wx:if="{{activeTab === 1 && !loading}}"
   >
     <view wx:if="{{postNotifications.length === 0}}" class="empty-state">
       <image src="/images/icons/empty.svg" class="empty-icon" mode="aspectFit"></image>

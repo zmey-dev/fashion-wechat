@@ -5,6 +5,8 @@ Page({  data: {
     userInfo: getApp().globalData.userInfo || {},
     posts: [],
     loading: false,
+    isLoading: false,
+    loadingMessage: "",
     hasMore: true,
     currentTab: 0,
     tabs: ["作品", "喜欢", "收藏", "历史", "联系我们"], // Added contact tab
@@ -474,7 +476,7 @@ Page({  data: {
   //       });
   //     },
   //     complete: () => {
-  //       wx.hideLoading();
+  //       this.setData({ isLoading: false });
   //     },
   //   });
   // },
@@ -483,7 +485,10 @@ Page({  data: {
   sendPhoneVerificationCode: function () {
     if (!this.data.phoneChanged || !this.data.profileForm.phone) return;
 
-    wx.showLoading({ title: "发送中..." });
+    this.setData({
+      isLoading: true,
+      loadingMessage: "发送中..."
+    });
 
     wx.request({
       url: `${config.BACKEND_URL}/verification/send_phone_sms_code`,
@@ -515,7 +520,7 @@ Page({  data: {
         });
       },
       complete: () => {
-        wx.hideLoading();
+        this.setData({ isLoading: false });
       },
     });
   },
@@ -582,7 +587,7 @@ Page({  data: {
   //       });
   //     },
   //     complete: () => {
-  //       wx.hideLoading();
+  //       this.setData({ isLoading: false });
   //     },
   //   });
   // },
@@ -597,7 +602,10 @@ Page({  data: {
       return;
     }
 
-    wx.showLoading({ title: "验证中..." });
+    this.setData({
+      isLoading: true,
+      loadingMessage: "验证中..."
+    });
 
     wx.request({
       url: `${config.BACKEND_URL}/verification/verify_phone_sms_code`,
@@ -635,7 +643,7 @@ Page({  data: {
         });
       },
       complete: () => {
-        wx.hideLoading();
+        this.setData({ isLoading: false });
       },
     });
   },
@@ -691,8 +699,9 @@ Page({  data: {
       return;
     }
 
-    wx.showLoading({
-      title: "保存中...",
+    this.setData({
+      isLoading: true,
+      loadingMessage: "保存中..."
     });
 
     // Prepare form data
@@ -725,7 +734,7 @@ Page({  data: {
           formData.avatar_url = data.avatar_url;
           this.updateProfile(formData);
         } else {
-          wx.hideLoading();
+          this.setData({ isLoading: false });
           wx.showToast({
             title: "头像上传失败",
             icon: "none",
@@ -733,7 +742,7 @@ Page({  data: {
         }
       },
       fail: () => {
-        wx.hideLoading();
+        this.setData({ isLoading: false });
         wx.showToast({
           title: "头像上传失败",
           icon: "none",
@@ -794,7 +803,7 @@ Page({  data: {
         });
       },
       complete: () => {
-        wx.hideLoading();
+        this.setData({ isLoading: false });
       },
     });
   },
@@ -827,8 +836,9 @@ Page({  data: {
 
   // Perform logout
   performLogout: function () {
-    wx.showLoading({
-      title: "退出中...",
+    this.setData({
+      isLoading: true,
+      loadingMessage: "退出中..."
     });
 
     // Clear local storage
@@ -849,7 +859,7 @@ Page({  data: {
       profileForm: this.initializeProfileForm({}),
     });
 
-    wx.hideLoading();
+    this.setData({ isLoading: false });
 
     wx.showToast({
       title: this.data.messages.success.logoutSuccess,
@@ -1351,7 +1361,10 @@ Page({  data: {
       return;
     }
 
-    wx.showLoading({ title: '提交中...' });
+    this.setData({
+      isLoading: true,
+      loadingMessage: '提交中...'
+    });
 
     try {
       const res = await wx.request({
@@ -1390,7 +1403,7 @@ Page({  data: {
         icon: 'none'
       });
     } finally {
-      wx.hideLoading();
+      this.setData({ isLoading: false });
     }
   },
 });

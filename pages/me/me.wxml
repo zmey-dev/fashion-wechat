@@ -1,6 +1,15 @@
 <wxs src="../../utils/userDisplayName.wxs" module="userUtils" />
 <app-layout current-page="me">
-  <view class="me-container">  <!-- User Profile Header -->
+  <!-- Main Loading Screen -->
+  <view wx:if="{{isLoading}}" class="loading-container">
+    <image class="loading-logo" src="/images/logo.png" mode="aspectFit"></image>
+    <view class="loading-progress-bar">
+      <view class="loading-progress-fill"></view>
+    </view>
+    <text class="loading-text">{{loadingMessage}}</text>
+  </view>
+  
+  <view class="me-container" wx:else>  <!-- User Profile Header -->
   <view class="profile-header">
     <view class="profile-info">
       <view class="avatar-container">

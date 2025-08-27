@@ -26,15 +26,23 @@
       <!-- Follow/Unfollow Button -->
       <button 
         class="action-btn {{currentUser.isFollowed ? 'followed' : 'default'}}" 
-        bindtap="handleFollowToggle">
-        <text class="btn-text">{{currentUser.isFollowed ? '已关注' : '关注'}}</text>
+        bindtap="handleFollowToggle"
+        disabled="{{isFollowLoading}}">
+        <view wx:if="{{isFollowLoading}}" class="loading-small">
+          <image class="loading-logo small" src="/images/logo.png" mode="aspectFit"></image>
+        </view>
+        <text class="btn-text" wx:else>{{currentUser.isFollowed ? '已关注' : '关注'}}</text>
       </button>
 
       <!-- Friend Button -->
       <button 
         class="action-btn {{currentUser.isFriend ? (currentUser.isAllow ? 'friend' : 'pending') : 'default'}}" 
-        bindtap="handleFriendToggle">
-        <text class="btn-text">{{currentUser.isFriend ? '好友' : '加好友'}}</text>
+        bindtap="handleFriendToggle"
+        disabled="{{isFriendLoading}}">
+        <view wx:if="{{isFriendLoading}}" class="loading-small">
+          <image class="loading-logo small" src="/images/logo.png" mode="aspectFit"></image>
+        </view>
+        <text class="btn-text" wx:else>{{currentUser.isFriend ? '好友' : '加好友'}}</text>
       </button>
 
       <!-- Message Button (only shown if they are friends) -->
@@ -67,6 +75,10 @@
       
       <!-- Loading indicator -->
       <view class="loading-indicator" wx:if="{{loading}}">
+        <image class="loading-logo small" src="/images/logo.png" mode="aspectFit"></image>
+        <view class="loading-progress-bar small">
+          <view class="loading-progress-fill"></view>
+        </view>
         <text>{{messages.loading}}</text>
       </view>
       
@@ -90,6 +102,10 @@
 
   <!-- Loading Indicator for initial load -->
   <view class="loading-container" wx:if="{{loading && !currentUser}}">
+    <image class="loading-logo" src="/images/logo.png" mode="aspectFit"></image>
+    <view class="loading-progress-bar">
+      <view class="loading-progress-fill"></view>
+    </view>
     <text class="loading-text">{{messages.loading}}</text>
   </view>
 </app-layout>

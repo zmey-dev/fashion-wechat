@@ -12,6 +12,7 @@ Page({
     expandedItems: {}, // Track which items are expanded
     loading: false,
     error: null,
+    isProcessing: false, // Loading state for actions
     // Chinese messages for UI text
     messages: {
       loading: "加载中...",
@@ -216,8 +217,8 @@ Page({
     console.log("Notification found:", notification);
     console.log("Current user:", this.data.userInfo);
 
-    wx.showLoading({
-      title: this.data.messages.actions.processing,
+    this.setData({
+      isProcessing: true
     });
 
     // For friend requests, the current user is the receiver
@@ -289,7 +290,9 @@ Page({
         Authorization: `Bearer ${this.data.userInfo.token}`,
       },
       success: (res) => {
-        wx.hideLoading();
+        this.setData({
+          isProcessing: false
+        });
 
         if (res.data && res.data.status === "success") {
           const actionText =
@@ -315,7 +318,9 @@ Page({
         }
       },
       fail: (err) => {
-        wx.hideLoading();
+        this.setData({
+          isProcessing: false
+        });
         console.error("Friend action request failed:", err);
 
         wx.showToast({

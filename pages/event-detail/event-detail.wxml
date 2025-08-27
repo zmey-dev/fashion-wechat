@@ -77,7 +77,10 @@
       <view class="content-area {{isExpired ? 'index-content' : ''}}">
         <!-- Loading State -->
         <view wx:if="{{loading && posts.length === 0}}" class="loading-container">
-          <view class="loading-spinner"></view>
+          <image class="loading-logo" src="/images/logo.png" mode="aspectFit"></image>
+          <view class="loading-progress-bar">
+            <view class="loading-progress-fill"></view>
+          </view>
           <text class="loading-text">正在加载活动内容...</text>
         </view>
 
@@ -167,7 +170,10 @@
 
         <!-- Loading More Indicator -->
         <view wx:if="{{loading && posts.length > 0}}" class="loading-more">
-          <view class="loading-spinner small"></view>
+          <image class="loading-logo small" src="/images/logo.png" mode="aspectFit"></image>
+          <view class="loading-progress-bar small">
+            <view class="loading-progress-fill"></view>
+          </view>
         </view>
 
         <!-- End Message -->

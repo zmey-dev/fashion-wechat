@@ -11,6 +11,8 @@ Page({
     userMediaList: [],
     showUserMedia: false,
     loading: false,
+    isLoading: false,
+    loadingMessage: "",
     hasMore: true,
     page: 1,
     pageSize: 10,
@@ -69,8 +71,9 @@ Page({
 
   // Load user list from API
   loadUserList: function () {
-    wx.showLoading({
-      title: this.data.messages.loading,
+    this.setData({
+      isLoading: true,
+      loadingMessage: this.data.messages.loading
     });
     wx.request({
       url: `${config.BACKEND_URL}/user/get_my_follow_users`,
@@ -99,7 +102,7 @@ Page({
         });
       },
       complete: () => {
-        wx.hideLoading();
+        this.setData({ isLoading: false });
       },
     });
   },
@@ -251,10 +254,11 @@ Page({
     const currentUser = this.data.currentUser;
     const newFollowStatus = !currentUser.isFollowed;
 
-    wx.showLoading({
-      title: newFollowStatus
+    this.setData({
+      isLoading: true,
+      loadingMessage: newFollowStatus
         ? this.data.messages.actions.following
-        : this.data.messages.actions.unfollowing,
+        : this.data.messages.actions.unfollowing
     });
 
     wx.request({
@@ -306,7 +310,7 @@ Page({
         });
       },
       complete: () => {
-        wx.hideLoading();
+        this.setData({ isLoading: false });
       },
     });
   },
@@ -350,10 +354,11 @@ Page({
   updateFriendStatus: function (addFriend) {
     const currentUser = this.data.currentUser;
 
-    wx.showLoading({
-      title: addFriend
+    this.setData({
+      isLoading: true,
+      loadingMessage: addFriend
         ? this.data.messages.actions.addingFriend
-        : this.data.messages.actions.removingFriend,
+        : this.data.messages.actions.removingFriend
     });
 
     if (addFriend)
@@ -392,7 +397,7 @@ Page({
           });
         },
         complete: () => {
-          wx.hideLoading();
+          this.setData({ isLoading: false });
         },
       });
     else
@@ -431,7 +436,7 @@ Page({
           });
         },
         complete: () => {
-          wx.hideLoading();
+          this.setData({ isLoading: false });
         },
       });
   },

@@ -27,6 +27,7 @@ Component({
 
   data: {
     createdTime: "",
+    isUploading: false,
   },
 
   lifetimes: {
@@ -110,8 +111,8 @@ Component({
 
     // Upload comment image
     uploadCommentImage(filePath) {
-      wx.showLoading({
-        title: "上传中...",
+      this.setData({
+        isUploading: true
       });
 
       wx.uploadFile({
@@ -128,7 +129,9 @@ Component({
           comment_id: this.properties.item.id,
         },
         success: (res) => {
-          wx.hideLoading();
+          this.setData({
+            isUploading: false
+          });
           const data = JSON.parse(res.data);          if (data.status=="success") {
             wx.showToast({
               title: "图片更新成功",
@@ -144,7 +147,9 @@ Component({
             });
           }
         },        fail: (err) => {
-          wx.hideLoading();
+          this.setData({
+            isUploading: false
+          });
           wx.showToast({
             title: "上传失败",
             icon: "error",

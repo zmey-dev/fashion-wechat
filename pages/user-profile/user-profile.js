@@ -9,6 +9,8 @@ Page({
     currentUser: null,
     userMediaList: [],
     loading: false,
+    isFollowLoading: false,
+    isFriendLoading: false,
     hasMore: true,
     offset: 0,
     limit: 20, // Match web version
@@ -88,10 +90,6 @@ Page({
   // Load user profile from API
   loadUserProfile: function (username) {
     this.setData({ loading: true, error: false });
-
-    wx.showLoading({
-      title: this.data.messages.loading,
-    });
     wx.request({
       url: `${config.BACKEND_URL}/profile/get_profile`,
       method: "GET",
@@ -140,7 +138,6 @@ Page({
       },
       complete: () => {
         this.setData({ loading: false });
-        wx.hideLoading();
       },
     });
   },
@@ -229,10 +226,8 @@ Page({
     const currentUser = this.data.currentUser;
     const newFollowStatus = !currentUser.isFollowed;
 
-    wx.showLoading({
-      title: newFollowStatus
-        ? this.data.messages.actions.following
-        : this.data.messages.actions.unfollowing,
+    this.setData({
+      isFollowLoading: true
     });
 
     wx.request({
@@ -275,7 +270,9 @@ Page({
         });
       },
       complete: () => {
-        wx.hideLoading();
+        this.setData({
+          isFollowLoading: false
+        });
       },
     });
   },
@@ -309,10 +306,8 @@ Page({
   updateFriendStatus: function (addFriend) {
     const currentUser = this.data.currentUser;
 
-    wx.showLoading({
-      title: addFriend
-        ? this.data.messages.actions.addingFriend
-        : this.data.messages.actions.removingFriend,
+    this.setData({
+      isFriendLoading: true
     });
 
     if (addFriend)
@@ -351,7 +346,9 @@ Page({
           });
         },
         complete: () => {
-          wx.hideLoading();
+          this.setData({
+            isFriendLoading: false
+          });
         },
       });
     else
@@ -390,7 +387,9 @@ Page({
           });
         },
         complete: () => {
-          wx.hideLoading();
+          this.setData({
+            isFriendLoading: false
+          });
         },
       });
   },

@@ -1,6 +1,15 @@
 <!-- components/report-modal/report-modal.wxml -->
 <view class="modal-overlay" wx:if="{{visible}}" bindtap="onClose">
   <view class="modal-container" catch:tap="preventBubble">
+    
+    <!-- Loading State -->
+    <view wx:if="{{isLoading}}" class="loading-container">
+      <image class="loading-logo" src="/images/logo.png" mode="aspectFit"></image>
+      <view class="loading-progress-bar">
+        <view class="loading-progress-fill"></view>
+      </view>
+      <text class="loading-text">{{loadingMessage}}</text>
+    </view>
     <!-- 头部区域 -->
     <view class="modal-header">
       <view class="header-left"></view>

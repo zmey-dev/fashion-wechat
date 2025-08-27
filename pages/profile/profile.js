@@ -76,6 +76,9 @@ Page({
     isEditingUsername: false,
     tempUsername: "",
     usernameError: "",
+    // Loading states
+    isLoading: false,
+    loadingMessage: "",
     // Chinese messages for UI text
     messages: {
       loading: "加载中...",
@@ -490,15 +493,15 @@ Page({
 
       // Check if avatar is still uploading
       if (this.data.avatarUploading) {
-        wx.showLoading({
-          title: "等待头像上传完成...",
-          mask: true,
+        this.setData({
+          isLoading: true,
+          loadingMessage: "等待头像上传完成..."
         });
         
         // Wait for upload to complete with timeout
         this.waitForAvatarUpload()
           .then(() => {
-            wx.hideLoading();
+            this.setData({ isLoading: false });
             if (this.data.avatarUploadError) {
               wx.showToast({
                 title: `头像上传失败: ${this.data.avatarUploadError}`,
@@ -518,7 +521,7 @@ Page({
             }
           })
           .catch((error) => {
-            wx.hideLoading();
+            this.setData({ isLoading: false });
             wx.showToast({
               title: `头像上传超时: ${error.message || '请重试'}`,
               icon: "none",
@@ -542,9 +545,9 @@ Page({
   // Save profile with avatar URL
   saveProfileWithAvatar: function () {
     try {
-      wx.showLoading({
-        title: "保存中...",
-        mask: true
+      this.setData({
+        isLoading: true,
+        loadingMessage: "保存中..."
       });
 
       // Validate data before sending
@@ -578,7 +581,7 @@ Page({
 
       this.updateProfile(formData);
     } catch (error) {
-      wx.hideLoading();
+      this.setData({ isLoading: false });
       this.isSaving = false;
       wx.showToast({
         title: `数据准备失败: ${error.message}`,
@@ -682,7 +685,7 @@ Page({
 
     // Set up timeout
     timeoutId = setTimeout(() => {
-      wx.hideLoading();
+      this.setData({ isLoading: false });
       this.isSaving = false;
       wx.showToast({
         title: "请求超时，请检查网络连接",
@@ -810,7 +813,7 @@ Page({
       },
       complete: () => {
         clearTimeout(timeoutId);
-        wx.hideLoading();
+        this.setData({ isLoading: false });
         this.isSaving = false;
       },
     });
@@ -836,8 +839,9 @@ Page({
   // Save company avatar to server
   saveCompanyAvatar: async function (avatarUrl) {
     try {
-      wx.showLoading({
-        title: "保存头像中...",
+      this.setData({
+        isLoading: true,
+        loadingMessage: "保存头像中..."
       });
 
       const formData = new FormData();
@@ -859,7 +863,7 @@ Page({
         });
       });
 
-      wx.hideLoading();
+      this.setData({ isLoading: false });
 
       if (response.statusCode === 200 && response.data.status === "success") {
         // Update user info
@@ -887,7 +891,7 @@ Page({
         throw new Error(response.data.message || "保存失败");
       }
     } catch (error) {
-      wx.hideLoading();
+      this.setData({ isLoading: false });
       console.error("Save company avatar failed:", error);
       wx.showToast({
         title: "头像保存失败",
@@ -954,8 +958,9 @@ Page({
       return;
     }
 
-    wx.showLoading({
-      title: "更新中...",
+    this.setData({
+      isLoading: true,
+      loadingMessage: "更新中..."
     });
 
     wx.request({
@@ -969,7 +974,7 @@ Page({
         id: tempUsername,
       },
       success: (res) => {
-        wx.hideLoading();
+        this.setData({ isLoading: false });
         if (res.statusCode === 200 && res.data.status === "success") {
           // Update user info
           const updatedUserInfo = {
@@ -1002,7 +1007,7 @@ Page({
         }
       },
       fail: (err) => {
-        wx.hideLoading();
+        this.setData({ isLoading: false });
         const errorMsg = "网络错误，请重试";
         this.setData({
           usernameError: errorMsg,
@@ -1026,8 +1031,9 @@ Page({
 
   // Perform logout
   performLogout: function () {
-    wx.showLoading({
-      title: "退出中...",
+    this.setData({
+      isLoading: true,
+      loadingMessage: "退出中..."
     });
 
     // Clear local storage
@@ -1041,7 +1047,7 @@ Page({
       getApp().globalData.socketManager.disconnect();
     }
 
-    wx.hideLoading();
+    this.setData({ isLoading: false });
 
     wx.showToast({
       title: this.data.messages.success.logoutSuccess,
@@ -1065,7 +1071,10 @@ Page({
       return;
     }
 
-    wx.showLoading({ title: "发送中..." });
+    this.setData({
+      isLoading: true,
+      loadingMessage: "发送中..."
+    });
 
     wx.request({
       url: `${config.BACKEND_URL}/verification/send_email_code`,
@@ -1118,7 +1127,7 @@ Page({
         });
       },
       complete: () => {
-        wx.hideLoading();
+        this.setData({ isLoading: false });
       },
     });
   },
@@ -1162,7 +1171,10 @@ Page({
       return;
     }
 
-    wx.showLoading({ title: "发送中..." });
+    this.setData({
+      isLoading: true,
+      loadingMessage: "发送中..."
+    });
 
     wx.request({
       url: `${config.BACKEND_URL}/verification/send_phone_sms_code`,
@@ -1215,7 +1227,7 @@ Page({
         });
       },
       complete: () => {
-        wx.hideLoading();
+        this.setData({ isLoading: false });
       },
     });
   },
@@ -1244,7 +1256,10 @@ Page({
       return;
     }
 
-    wx.showLoading({ title: "验证中..." });
+    this.setData({
+      isLoading: true,
+      loadingMessage: "验证中..."
+    });
 
     wx.request({
       url: `${config.BACKEND_URL}/verification/verify_email_code`,
@@ -1283,7 +1298,7 @@ Page({
         });
       },
       complete: () => {
-        wx.hideLoading();
+        this.setData({ isLoading: false });
       },
     });
   },
@@ -1298,7 +1313,10 @@ Page({
       return;
     }
 
-    wx.showLoading({ title: "验证中..." });
+    this.setData({
+      isLoading: true,
+      loadingMessage: "验证中..."
+    });
 
     wx.request({
       url: `${config.BACKEND_URL}/verification/verify_phone_sms_code`,
@@ -1337,7 +1355,7 @@ Page({
         });
       },
       complete: () => {
-        wx.hideLoading();
+        this.setData({ isLoading: false });
       },
     });
   },

@@ -1,6 +1,15 @@
 <!-- comment-tree.wxml -->
 <wxs src="../../../utils/userDisplayName.wxs" module="userUtils" />
 <view class="comment-tree-container">
+  
+  <!-- Processing Loading State -->
+  <view wx:if="{{isProcessing}}" class="loading-container">
+    <image class="loading-logo" src="/images/logo.png" mode="aspectFit"></image>
+    <view class="loading-progress-bar">
+      <view class="loading-progress-fill"></view>
+    </view>
+    <text class="loading-text">处理中...</text>
+  </view>
   <!-- Post Info Section -->
   <view  style="overflow-y: auto">
     <view wx:if="{{selectedPost.title || selectedPost.content}}" class="post-info-section">

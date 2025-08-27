@@ -44,6 +44,8 @@ Component({
 
     // UI state
     isSubmitting: false,
+    isLoading: false, // Loading state for processing
+    loadingMessage: "",
     
     // Upload states
     uploadingImages: [],
@@ -175,12 +177,10 @@ Component({
       }
 
       // Set submission state
-      this.setData({ isSubmitting: true });
-
-      // Show loading animation
-      wx.showLoading({
-        title: "提交中...",
-        mask: true,
+      this.setData({ 
+        isSubmitting: true,
+        isLoading: true,
+        loadingMessage: "提交中..."
       });
 
       try {        // Initialize form data
@@ -203,9 +203,8 @@ Component({
               imageUrls.push(image.uploadResult.url);
             } else if (image.tempFilePath) {
               // Need to upload now (fallback)
-              wx.showLoading({
-                title: `上传图片 ${i + 1}/${images.length}...`,
-                mask: true,
+              this.setData({
+                loadingMessage: `上传图片 ${i + 1}/${images.length}...`
               });
               
               try {
@@ -232,7 +231,10 @@ Component({
         // After all images uploaded, submit report
         const result = await this.submitReport(formData);
 
-        wx.hideLoading();
+        this.setData({ 
+          isLoading: false,
+          loadingMessage: ""
+        });
 
         if (result.status === "success") {
           // Success feedback
@@ -257,7 +259,10 @@ Component({
           throw new Error(result.message || "提交失败");
         }
       } catch (error) {
-        wx.hideLoading();
+        this.setData({ 
+          isLoading: false,
+          loadingMessage: ""
+        });
 
         const errorMessage = error.message || "网络错误，请重试";
         wx.showToast({
@@ -273,7 +278,11 @@ Component({
         });
       } finally {
         // Reset submission state
-        this.setData({ isSubmitting: false });
+        this.setData({ 
+          isSubmitting: false,
+          isLoading: false,
+          loadingMessage: ""
+        });
       }
     },
 
@@ -304,6 +313,8 @@ Component({
         description: "",
         images: [],
         isSubmitting: false,
+        isLoading: false,
+        loadingMessage: "",
       });
     },
 

@@ -97,9 +97,9 @@ Page({
     }
   }, // Load existing event data for editing
   loadEventData(eventId) {
-    wx.showLoading({
-      title: "加载中...",
-      mask: true,
+    this.setData({
+      isLoading: true,
+      loadingMessage: "加载中..."
     });
 
     this.loadEventFromAPI(eventId, {
@@ -157,7 +157,7 @@ Page({
           ),
         });
 
-        wx.hideLoading();
+        this.setData({ isLoading: false });
 
         wx.showToast({
           title: "活动信息加载完成",
@@ -166,7 +166,7 @@ Page({
         });
       },
       fail: (error) => {
-        wx.hideLoading();
+        this.setData({ isLoading: false });
         wx.showToast({
           title: "加载活动信息失败",
           icon: "none",
@@ -642,9 +642,9 @@ Page({
     const { eventId } = this.data;
     const isUpdate = !!eventId;
 
-    wx.showLoading({
-      title: isUpdate ? "更新中..." : "发布中...",
-      mask: true,
+    this.setData({
+      isLoading: true,
+      loadingMessage: isUpdate ? "更新中..." : "发布中..."
     });
 
     // Prepare form data
@@ -663,14 +663,14 @@ Page({
     if (this.data.posterImage) {
       // Check if image is still uploading
       if (this.data.posterUploading) {
-        wx.showLoading({
-          title: "等待图片上传完成...",
-          mask: true,
+        this.setData({
+          isLoading: true,
+          loadingMessage: "等待图片上传完成..."
         });
         
         // Wait for upload to complete
         this.waitForPosterUpload().then(() => {
-          wx.hideLoading();
+          this.setData({ isLoading: false });
           if (this.data.posterUploadUrl) {
             formData.poster_url = this.data.posterUploadUrl;
             this.submitEvent(formData, isUpdate);
@@ -704,7 +704,7 @@ Page({
       // No image case (should not happen due to validation, but just in case)
       this.submitEventToAPI(formData, isUpdate, {
         success: () => {
-          wx.hideLoading();
+          this.setData({ isLoading: false });
 
           if (!isUpdate) {
             wx.removeStorageSync("eventDraft");
@@ -723,7 +723,7 @@ Page({
           this.setData({ isUploading: false });
         },
         fail: (error) => {
-          wx.hideLoading();
+          this.setData({ isLoading: false });
           wx.showToast({
             title: isUpdate ? "修改失败" : "发布失败",
             icon: "none",
@@ -822,7 +822,7 @@ Page({
   submitEvent(formData, isUpdate) {
     this.submitEventToAPI(formData, isUpdate, {
       success: () => {
-        wx.hideLoading();
+        this.setData({ isLoading: false });
         
         if (!isUpdate) {
           wx.removeStorageSync("eventDraft");
@@ -841,7 +841,7 @@ Page({
         this.setData({ isUploading: false });
       },
       fail: (error) => {
-        wx.hideLoading();
+        this.setData({ isLoading: false });
         wx.showToast({
           title: isUpdate ? "修改失败" : "发布失败",
           icon: "none",

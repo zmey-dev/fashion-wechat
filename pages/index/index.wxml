@@ -55,7 +55,10 @@
     
     <!-- Loading more indicator -->
     <view class="loading-more" wx:if="{{loading && posts.length > 0}}">
-      <view class="loading-spinner small"></view>
+      <image class="loading-logo small" src="/images/logo.png" mode="aspectFit"></image>
+      <view class="loading-progress-bar small">
+        <view class="loading-progress-fill"></view>
+      </view>
       <text class="loading-text">加载更多...</text>
     </view>
     

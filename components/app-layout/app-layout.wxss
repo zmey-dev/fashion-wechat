@@ -1,11 +1,11 @@
 /* app-layout.wxss */
 .app-layout {
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh;
   background-color: #000;
   /* Ensure black background extends to edges */
   width: 100vw;
-  overflow-x: hidden;
+  overflow: hidden;
   /* Performance optimizations */
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;

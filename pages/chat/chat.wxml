@@ -17,8 +17,17 @@
       </view>
     </view>
 
+    <!-- Loading State -->
+    <view wx:if="{{isLoadingFriends && friends.length === 0}}" class="loading-container">
+      <image class="loading-logo" src="/images/logo.png" mode="aspectFit"></image>
+      <view class="loading-progress-bar">
+        <view class="loading-progress-fill"></view>
+      </view>
+      <text class="loading-text">{{messages.loading}}</text>
+    </view>
+
     <!-- Friends List -->
-    <scroll-view class="friends-list" scroll-y enhanced="{{true}}" show-scrollbar="{{false}}">
+    <scroll-view class="friends-list" scroll-y enhanced="{{true}}" show-scrollbar="{{false}}" wx:if="{{!isLoadingFriends || friends.length > 0}}">
       <view 
         wx:for="{{filteredFriends}}" 
         wx:key="id"
@@ -107,6 +116,15 @@
       </view>
     </view>
 
+    <!-- Loading Messages State -->
+    <view wx:if="{{isLoadingMessages && chatMessages.length === 0}}" class="loading-container">
+      <image class="loading-logo" src="/images/logo.png" mode="aspectFit"></image>
+      <view class="loading-progress-bar">
+        <view class="loading-progress-fill"></view>
+      </view>
+      <text class="loading-text">{{uiTexts.loadingMessages}}</text>
+    </view>
+
     <!-- Messages Container -->
     <scroll-view 
       class="messages-container"
@@ -115,6 +133,7 @@
       show-scrollbar="{{false}}"
       scroll-into-view="{{scrollIntoView}}"
       scroll-with-animation="{{true}}"
+      wx:if="{{!isLoadingMessages || chatMessages.length > 0}}"
     >
       <view class="messages-list">
         <view 
@@ -198,6 +217,33 @@
           {{item}}
         </view>
       </scroll-view>
+    </view>
+
+    <!-- File Upload Loading State -->
+    <view wx:if="{{isUploadingFile}}" class="loading-container">
+      <image class="loading-logo small" src="/images/logo.png" mode="aspectFit"></image>
+      <view class="loading-progress-bar small">
+        <view class="loading-progress-fill"></view>
+      </view>
+      <text class="loading-text">上传中...</text>
+    </view>
+
+    <!-- Processing Action Loading State -->
+    <view wx:if="{{isProcessingAction}}" class="loading-container">
+      <image class="loading-logo small" src="/images/logo.png" mode="aspectFit"></image>
+      <view class="loading-progress-bar small">
+        <view class="loading-progress-fill"></view>
+      </view>
+      <text class="loading-text">处理中...</text>
+    </view>
+
+    <!-- Friend Request Loading State -->
+    <view wx:if="{{isSendingFriendRequest}}" class="loading-container">
+      <image class="loading-logo small" src="/images/logo.png" mode="aspectFit"></image>
+      <view class="loading-progress-bar small">
+        <view class="loading-progress-fill"></view>
+      </view>
+      <text class="loading-text">发送中...</text>
     </view>
 
     <!-- Message Input or Friend Request -->

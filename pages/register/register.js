@@ -50,6 +50,7 @@ Page({
     formStep: 1,
     totalSteps: 3,
     isLoading: false,
+    loadingMessage: "",
     errors: {},
     termsAgreed: false,
     
@@ -310,7 +311,10 @@ Page({
       return;
     }
 
-    wx.showLoading({ title: "发送中..." });
+    this.setData({
+      isLoading: true,
+      loadingMessage: "发送中..."
+    });
     
     wx.request({
       url: `${config.BACKEND_URL}/verification/send_email_code`,
@@ -362,7 +366,9 @@ Page({
         });
       },
       complete: () => {
-        wx.hideLoading();
+        this.setData({
+          isLoading: false
+        });
       }
     });
   },
@@ -412,7 +418,10 @@ Page({
       return;
     }
 
-    wx.showLoading({ title: "发送中..." });
+    this.setData({
+      isLoading: true,
+      loadingMessage: "发送中..."
+    });
     
     wx.request({
       url: `${config.BACKEND_URL}/verification/send_phone_sms_code`,
@@ -464,7 +473,9 @@ Page({
         });
       },
       complete: () => {
-        wx.hideLoading();
+        this.setData({
+          isLoading: false
+        });
       }
     });
   },
@@ -492,7 +503,10 @@ Page({
       return;
     }
 
-    wx.showLoading({ title: "验证中..." });
+    this.setData({
+      isLoading: true,
+      loadingMessage: "验证中..."
+    });
     
     wx.request({
       url: `${config.BACKEND_URL}/verification/verify_email_code`,
@@ -530,7 +544,9 @@ Page({
         });
       },
       complete: () => {
-        wx.hideLoading();
+        this.setData({
+          isLoading: false
+        });
       }
     });
   },
@@ -545,7 +561,10 @@ Page({
       return;
     }
 
-    wx.showLoading({ title: "验证中..." });
+    this.setData({
+      isLoading: true,
+      loadingMessage: "验证中..."
+    });
     
     wx.request({
       url: `${config.BACKEND_URL}/verification/verify_phone_sms_code`,
@@ -583,7 +602,9 @@ Page({
         });
       },
       complete: () => {
-        wx.hideLoading();
+        this.setData({
+          isLoading: false
+        });
       }
     });
   },
