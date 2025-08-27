@@ -308,18 +308,28 @@ page {
   align-items: center;
   justify-content: space-between;
   padding: 12px 16px;
+  padding-left: 80rpx; /* Add padding for back button */
   background: #0f0f0f;
   border-bottom: 1px solid #1c1c1e;
+  min-height: 120rpx; /* Fixed height to prevent shifting */
+  position: relative;
 }
 
 .header-left {
   display: flex;
   align-items: center;
   flex: 1;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .back-btn {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
   transition: background-color 0.15s ease;
+  z-index: 101;
 }
 
 .back-btn:active {
@@ -350,19 +360,27 @@ page {
 .user-info {
   flex: 1;
   min-width: 0;
+  overflow: hidden;
 }
 
 .user-name-wrapper {
   display: flex;
   align-items: center;
-  gap: 10rpx;
+  gap: 8rpx;
   margin-bottom: 2px;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .user-name {
   font-size: 32rpx;
   font-weight: 600;
   color: white;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
 }
 
 .company-badge {

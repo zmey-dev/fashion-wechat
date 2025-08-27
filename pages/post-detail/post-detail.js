@@ -7,6 +7,7 @@ Page({
     postId: null,
     userId: null,
     eventId: null,
+    isEventExpired: false,
     type: "discover",
     filter: "",
     search: "",
@@ -50,6 +51,7 @@ Page({
     const postId = options.postId;
     const userId = options.user_id;
     const eventId = options.eventId || options.event_id;
+    const isEventExpired = options.isEventExpired === 'true';
     const type = options.type || "discover";
     const filter = options.filter || "";
     const search = options.search || "";
@@ -69,6 +71,7 @@ Page({
       postId: postId,
       userId: userId || null,
       eventId: eventId || null,
+      isEventExpired: isEventExpired,
       type: type,
       filter: filter,
       search: search,

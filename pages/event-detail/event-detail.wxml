@@ -1,5 +1,5 @@
 <app-layout current-page="event">
-  <view class="event-detail-container {{userInfo.role === 'teacher' ? 'teacher-layout' : ''}} {{viewOnly ? 'index-bg' : ''}}">
+  <view class="event-detail-container {{userInfo.role === 'teacher' ? 'teacher-layout' : ''}} {{isExpired ? 'index-bg' : ''}}">
     <!-- Content Container -->
     <view class="content-wrapper">
       <!-- Event Header with Poster -->
@@ -74,7 +74,7 @@
       </view>
 
       <!-- Posts Content Area -->
-      <view class="content-area {{viewOnly ? 'index-content' : ''}}">
+      <view class="content-area {{isExpired ? 'index-content' : ''}}">
         <!-- Loading State -->
         <view wx:if="{{loading && posts.length === 0}}" class="loading-container">
           <view class="loading-spinner"></view>
@@ -91,17 +91,17 @@
         </view>
 
         <!-- Posts Grid -->
-        <view wx:else class="posts-grid {{viewOnly ? 'index-style' : ''}}">
+        <view wx:else class="posts-grid {{isExpired ? 'index-style' : ''}}">
           <view 
             wx:for="{{posts}}" 
             wx:key="id"
-            class="post-card {{viewOnly ? 'index-card' : ''}}"
+            class="post-card {{isExpired ? 'index-card' : ''}}"
             data-post-id="{{item.id}}"
             data-index="{{index}}"
             bindtap="onPostTap"
           >
-            <!-- Crown for Top 3 (always show) -->
-            <view wx:if="{{index < 3}}" class="crown-wrapper">
+            <!-- Crown for Top 3 (show only for active events) -->
+            <view wx:if="{{index < 3 && !isExpired && !viewOnly}}" class="crown-wrapper">
               <image class="crown-icon" src="/images/crown{{index}}.png" mode="aspectFit"></image>
             </view>
 
@@ -129,8 +129,8 @@
               </view>
             </view>
             
-            <!-- User Section (same as index page) -->
-            <view class="user-section">
+            <!-- User Section (same as index page) - Only for expired events -->
+            <view wx:if="{{isExpired}}" class="user-section">
               <view class="user-info">
                 <view class="user-row" catchtap="onUserTap" data-username="{{item.user.username}}" data-userId="{{item.user.id}}">
                   <avatar avatar="{{item.user.avatar}}" user="{{item.user}}" size="45"></avatar>
@@ -140,6 +140,26 @@
               <view class="like-display">
                 <image class="heart-icon" src="/images/icons/heart.svg" mode="aspectFit"></image>
                 <text class="like-count">{{item.likes}}</text>
+              </view>
+            </view>
+            
+            <!-- Original Post Info - Only for non-expired events -->
+            <view wx:if="{{!isExpired}}" class="post-info">
+              <view class="post-title-wrapper">
+                <text class="post-title">{{item.title}}</text>
+              </view>
+              
+              <view class="post-actions">
+                <!-- Like Button (User Role Only) -->
+                <view wx:if="{{userInfo.role === 'user'}}" class="like-section">
+                  <view class="like-btn" bindtap="onLikePost" data-post-id="{{item.id}}" data-index="{{index}}">
+                    <image 
+                      class="heart-icon {{item.likes_exists ? 'liked' : ''}}" 
+                      src="/images/icons/heart.svg"
+                    ></image>
+                    <text class="like-count">{{item.likes}}</text>
+                  </view>
+                </view>
               </view>
             </view>
           </view>

@@ -24,6 +24,10 @@ Component({
       type: String,
       value: null,
     },
+    isEventExpired: {
+      type: Boolean,
+      value: false,
+    },
     isLoading: {
       type: Boolean,
       value: false,
@@ -44,7 +48,7 @@ Component({
 
     // Event state
     isEventExpired: false,
-    shouldHideUserInfo: false, // Only hide user info for active events
+    shouldHideUserInfo: false, // Never hide user info (show all for expired events)
 
     // Template-bound computed data
     currentPost: null,
@@ -240,14 +244,30 @@ Component({
       let isEventExpired = false;
       let shouldHideUserInfo = false;
       
-      if (eventId && selectedPost.event) {
-        const now = new Date();
-        const endDate = new Date(selectedPost.event.end_date);
-        isEventExpired = endDate < now;
-        // Only hide user info for active events
-        shouldHideUserInfo = eventId && !isEventExpired;
-      } else if (eventId) {
-        // If we have eventId but no event data, don't hide user info
+      // Use the passed isEventExpired property if available
+      if (eventId) {
+        // If we have explicit isEventExpired from props, use it
+        if (this.properties.isEventExpired !== undefined) {
+          isEventExpired = this.properties.isEventExpired;
+          // Only hide user info for active events (non-expired)
+          shouldHideUserInfo = eventId && !isEventExpired;
+          console.log('Using passed isEventExpired:', { isEventExpired, shouldHideUserInfo });
+        } else if (selectedPost.event) {
+          // Fallback to checking event data if available
+          const now = new Date();
+          const endDate = new Date(selectedPost.event.end_date);
+          isEventExpired = endDate < now;
+          // Only hide user info for active events
+          shouldHideUserInfo = eventId && !isEventExpired;
+          console.log('Event expired check from post data:', { isEventExpired, shouldHideUserInfo });
+        } else {
+          // If we have eventId but no event data or expiry info, assume active event
+          // For event context without event data, we should hide for active events
+          shouldHideUserInfo = true; // Default to hiding for event context
+          console.log('Event ID without event data, assuming active event, hiding user info');
+        }
+      } else {
+        // No event context at all
         shouldHideUserInfo = false;
       }
 

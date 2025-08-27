@@ -41,6 +41,18 @@ Page({
     },
   },
 
+  navigateBack: function() {
+    wx.navigateBack({
+      delta: 1,
+      fail: () => {
+        // If navigateBack fails, go to discover page
+        wx.switchTab({
+          url: '/pages/index/index'
+        });
+      }
+    });
+  },
+
   onLoad: function (options) {
     const { username } = options;
     this.setData({ username });

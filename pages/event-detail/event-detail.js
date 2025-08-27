@@ -14,6 +14,7 @@ Page({
     currentTime: '',
     canJoinEvent: false,
     viewOnly: false,
+    isExpired: false,  // Add separate flag for expired events
     showDescriptionModal: false,
     modalDescription: '',
     modalDescriptionNodes: [],
@@ -141,13 +142,15 @@ Page({
           const endDate = new Date(event.end_date);
           const isEventExpired = endDate < now;
           
-          // Update viewOnly to true if event is expired (for crown hiding)
-          const shouldViewOnly = this.data.viewOnly || isEventExpired;
+          // Keep viewOnly separate from isExpired
+          // viewOnly is for read-only mode (passed from options)
+          // isExpired is for expired events that need special styling
           
           this.setData({
             event: processedEvent,
             canJoinEvent: canJoin,
-            viewOnly: shouldViewOnly
+            isExpired: isEventExpired
+            // Don't change viewOnly based on expiry
           });
         } else {
           this.showToast(this.data.messages.errors.loadFailed);
@@ -160,10 +163,10 @@ Page({
   },
 
   checkCanJoinEvent: function (event) {
-    const { userInfo, viewOnly } = this.data;
+    const { userInfo, viewOnly, isExpired } = this.data;
     
-    // If view only mode, cannot join
-    if (viewOnly) return false;
+    // If view only mode or expired, cannot join
+    if (viewOnly || isExpired) return false;
     
     // Check if event has ended
     const now = new Date();
@@ -292,9 +295,9 @@ Page({
   onPostTap: function (e) {
     const { postId } = e.currentTarget.dataset;
     
-    // Navigate to post detail with event context
+    // Navigate to post detail with event context and expiry status
     // For expired events (viewOnly mode), posts should still be fully accessible
-    let url = `/pages/post-detail/post-detail?postId=${postId}&type=by_event_id&event_id=${this.data.eventId}`;
+    let url = `/pages/post-detail/post-detail?postId=${postId}&type=by_event_id&event_id=${this.data.eventId}&isEventExpired=${this.data.isExpired}`;
     
     wx.navigateTo({
       url: url

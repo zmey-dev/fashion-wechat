@@ -95,16 +95,23 @@
   display: flex;
   align-items: center;
   padding: 20rpx 30rpx;
+  padding-left: 90rpx; /* Add padding for back button */
   background-color: #1e1e1e;
   border-bottom: 1px solid #333;
   position: sticky;
   top: 0;
   z-index: 100;
+  min-height: 120rpx; /* Fixed height to prevent shifting */
 }
 
 .back-button {
-  width:50rpx;
-  height:50rpx;
+  position: absolute;
+  left: 30rpx;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 50rpx;
+  height: 50rpx;
+  z-index: 101;
 }
 
 .back-icon {
@@ -182,13 +189,17 @@
 /* Professional Profile Header Styles */
 .user-profile-header {
   flex: 1;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .profile-info {
   display: flex;
   flex-direction: row;
   align-items: center;
-  width: 100%;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .profile-avatar {
@@ -203,18 +214,20 @@
 .profile-details {
   flex: 1;
   display: flex;
-  flex-direction: row;
-  align-items: center;
+  flex-direction: column; /* Change to column for better layout */
+  justify-content: center;
   min-width: 0;
-  gap: 12rpx;
+  gap: 4rpx;
+  overflow: hidden;
 }
 
 .username-container {
   display: flex;
-  align-items: flex-start;
-  gap: 12rpx;
+  align-items: center;
+  gap: 8rpx;
   min-width: 0;
-  flex-direction: row;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .company-badge {
@@ -225,7 +238,7 @@
   font-weight: 600;
   padding: 4rpx 12rpx;
   border-radius: 8rpx;
-  margin-left: 12rpx;
+  margin-left: 8rpx;
   line-height: 1;
   flex-shrink: 0;
 }
@@ -246,11 +259,12 @@
   font-size: 30rpx;
   font-weight: 700;
   color: #ffffff;
-  flex: 1;
   line-height: 1.4;
   letter-spacing: 0.5rpx;
-  word-break: break-word;
-  overflow-wrap: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
 }
 
 .profile-university {

@@ -25,6 +25,7 @@
       index="{{ 0 }}"
       totalCount="{{ 1 }}"
       event-id="{{ eventId }}"
+      is-event-expired="{{ isEventExpired }}"
       is-loading="{{ false }}"
       bind:postNavigation="handlePostNavigation"
       bind:likeUpdated="handleLikeUpdated"

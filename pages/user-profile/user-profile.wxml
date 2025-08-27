@@ -4,6 +4,10 @@
   <view class="user-profile-container {{userInfo.role === 'teacher' ? 'teacher-layout' : ''}}" wx:if="{{currentUser && !error}}">
     <!-- User Profile Header -->
     <view class="profile-header">
+      <!-- Back button -->
+      <view class="back-button" bindtap="navigateBack">
+        <image class="back-icon" src="/images/icons/back.svg"></image>
+      </view>
       <view class="profile-info">
         <avatar class="profile-avatar" avatar="{{currentUser.avatar}}" user="{{currentUser}}" size="{{80}}" mode="aspectFill"></avatar>
         <view class="profile-details">
