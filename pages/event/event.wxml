@@ -35,8 +35,11 @@
             current="{{currentEventIndex}}"
             bindchange="onSwiperChange">            <swiper-item wx:for="{{events}}" wx:key="id">
               <view class="event-slide">
-                <!-- Full poster image without overlay -->
+                <!-- Full poster image with blurred background -->
                 <view class="slide-image-container">
+                  <!-- Blurred background image -->
+                  <image class="slide-bg-image" src="{{item.poster_image}}" mode="aspectFill"></image>
+                  <!-- Main image on top -->
                   <image class="slide-image" src="{{item.poster_image}}" mode="aspectFit"></image>
                 </view>
                 

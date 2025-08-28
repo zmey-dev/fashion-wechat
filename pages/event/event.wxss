@@ -209,10 +209,27 @@ swiper-item {
   background-color: #000;
 }
 
+/* Blurred background image */
+.slide-bg-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(40rpx);
+  transform: scale(1.1); /* Slightly scale up to avoid blur edge artifacts */
+  opacity: 0.6;
+  z-index: 1;
+}
+
+/* Main image on top */
 .slide-image {
+  position: relative;
   width: 100%;
   height: 100%;
   object-fit: contain;
+  z-index: 2;
 }
 
 .slide-content {
