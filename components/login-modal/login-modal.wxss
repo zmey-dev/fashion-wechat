@@ -21,7 +21,6 @@
   border-radius: 16px;
   padding: 0;
   position: relative;
-  transform: translateY(50px);
   transition: transform 0.3s ease;
   border: 1px solid #333;
 }
@@ -108,7 +107,6 @@
 /* WeChat Login */
 .wechat-login {
   text-align: center;
-  padding: 40px 0;
 }
 
 .wechat-icon {

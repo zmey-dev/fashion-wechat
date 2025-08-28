@@ -1,5 +1,13 @@
 <!-- create-event.wxml -->
 <view class="page-container">
+  <!-- Loading State -->
+  <view wx:if="{{isUploading}}" class="loading-container">
+    <image class="loading-logo" src="/images/logo.png" mode="aspectFit"></image>
+    <view class="loading-progress-bar">
+      <view class="loading-progress-fill"></view>
+    </view>
+    <text class="loading-text">{{eventId ? '更新中...' : '发布中...'}}</text>
+  </view>
   <!-- Main Content -->
   <scroll-view scroll-y="{{true}}" class="content-scroll">
     <view class="content-wrapper">
