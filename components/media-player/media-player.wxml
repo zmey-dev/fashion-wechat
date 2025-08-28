@@ -17,10 +17,14 @@
     <view class="blur-overlay"></view>
   </view>
   
-  <!-- Loading indicator - DISABLED to prevent duplicate loading spinners -->
-  <!-- <view wx:if="{{ isLoading }}" class="loading-container">
-    <view class="loading-spinner"></view>
-  </view> -->
+  <!-- Loading indicator - only show when no currentPost exists (first entry) -->
+  <view wx:if="{{ isLoading }}" class="loading-container">
+    <image class="loading-logo" src="/images/logo.png" mode="aspectFit"></image>
+    <view class="loading-progress-bar">
+      <view class="loading-progress-fill"></view>
+    </view>
+    <text class="loading-text">加载中...</text>
+  </view>
 
   <report-modal
     visible="{{ showReportModal }}"

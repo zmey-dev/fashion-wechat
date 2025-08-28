@@ -185,7 +185,7 @@ Page({
   // Navigation like web version onClickArrow
   handlePreviousPost: function () {
     if (this.data.previousPostId) {
-      this.setData({ isLoading: true });
+      // Don't show loading during navigation
       this.fetchPostDetail(this.data.previousPostId, "recommend", {});
     } else {
       wx.showToast({
@@ -197,7 +197,7 @@ Page({
 
   handleNextPost: function () {
     if (this.data.nextPostId) {
-      this.setData({ isLoading: true });
+      // Don't show loading during navigation
       this.fetchPostDetail(this.data.nextPostId, "recommend", {});
     } else {
       wx.showToast({
@@ -210,7 +210,7 @@ Page({
   // Refresh current post like web version
   handleRefreshPost: function () {
     if (this.data.selectedPost?.id) {
-      this.setData({ isLoading: true });
+      // Don't show loading during refresh
       this.fetchPostDetail(this.data.selectedPost.id, "recommend", {});
     }
   },

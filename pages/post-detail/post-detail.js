@@ -137,8 +137,11 @@ Page({
     this.isLoadingPost = true;
     this.loadingPostId = this.data.postId;
     
+    // Only show loading for initial page load, not navigation
+    const shouldShowLoading = !this.data.hasLoadedOnce || (!this.data.isNavigating && !this.data.post);
+    
     this.setData({
-      isLoading: true,
+      isLoading: shouldShowLoading,
       hasError: false,
       errorMessage: "",
       mediaInitialized: false,
@@ -459,30 +462,21 @@ Page({
     // Always load fresh data without caching
     this.isLoadingPost = false;
     
-    // Immediately show loading and set transition flags
+    // Update state for navigation - keep current post visible
     this.setData({
-      isLoading: true,
+      postId: postId,
+      // Keep current post visible - don't set to null during navigation
+      isLoading: false,  // Don't show loading during navigation
       isNavigating: true, // Set navigation flag to prevent empty state
       isTransitioning: true, // Prevent empty state during transition
+      mediaInitialized: false,
+      hasError: false,
+      errorMessage: "",
+      hasLoadedOnce: true, // Mark that we've started loading
     });
     
-    // Use setTimeout to ensure UI updates before clearing post data
-    setTimeout(() => {
-      this.setData({
-        postId: postId,
-        post: null, // Clear current post to prevent flickering
-        mediaInitialized: false,
-        hasError: false,
-        errorMessage: "",
-        hasLoadedOnce: true, // Mark that we're starting a new load
-        isLoading: true, // Ensure loading state is maintained
-        isNavigating: true, // Keep navigation flag during transition
-        isTransitioning: true, // Maintain transition flag
-      });
-      
-      // Load post data normally
-      this.loadPostData();
-    }, 30); // Reduced delay for faster response
+    // Load post data immediately
+    this.loadPostData();
   },
 
   // Handle user profile tap event

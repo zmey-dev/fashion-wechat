@@ -28,12 +28,11 @@ Component({
       type: Boolean,
       value: false,
     },
-    isLoading: {
-      type: Boolean,
-      value: false,
-    },
   },
   data: {
+    // Track if this is the first load ever (component attached)
+    isFirstEntry: true,
+    
     // Media state
     currentSlideIndex: 0,
     isPlaying: true,  // Start playing by default but will be blocked by isWaitingForApi
@@ -172,11 +171,6 @@ Component({
       // Update container dimensions when detail panel is shown/hidden
       setTimeout(() => this.getContainerDimensions(), 300);
     },
-    isLoading: function (loading) {
-      // TikTok-style: no loading animations, instant content display
-      if (!loading) {
-      }
-    },
   },
 
   /**
@@ -284,9 +278,14 @@ Component({
       // Initialize media loading states
       const mediaLoadingStates = media.map(() => ({ loading: false, error: false }));
 
+      // Only show loading on the very first entry to media player
+      // isFirstEntry starts as true, becomes false after first load
+      const shouldShowLoading = this.data.isFirstEntry;
+      
       // Immediately set data and ensure all loading states are false
       this.setData({
-        isLoading: false,
+        isLoading: shouldShowLoading,
+        isFirstEntry: false,  // Mark that we've loaded at least once
         isWaitingForApi: false,
         currentSlideIndex: 0,
         selectedDot: null,
@@ -327,11 +326,18 @@ Component({
       this.updateDisplayValues();
       this.startAutoPlay();
       
+      // Clear loading flag after initial animation (only for very first entry)
+      if (shouldShowLoading) {
+        setTimeout(() => {
+          this.setData({ isLoading: false });
+        }, 800); // Give enough time for initial loading animation
+      }
+      
       // Clear loading flag
       this.isCurrentlyLoading = false;
       
-      // For video posts, ensure loading state is cleared after a short delay
-      if (selectedPost.type === 'video') {
+      // For video posts, ensure loading state is cleared after a short delay (only for first entry)
+      if (selectedPost.type === 'video' && shouldShowLoading) {
         setTimeout(() => {
           this.setData({
             isLoading: false,
@@ -1563,16 +1569,7 @@ Component({
         this.startAutoPlay();
       }
       
-      // For video posts, ensure loading is cleared with additional delay
-      if (this.data.currentPost && this.data.currentPost.type === 'video') {
-        setTimeout(() => {
-          this.setData({
-            isLoading: false,
-            isWaitingForApi: false
-          });
-          this.isCurrentlyLoading = false;
-        }, 1000);
-      }
+      // Never show loading during navigation - isFirstEntry is now false
     },
     
     /**
@@ -1601,16 +1598,7 @@ Component({
         this.startAutoPlay();
       }
       
-      // For video posts, ensure loading is completely cleared
-      if (this.data.currentPost?.type === 'video') {
-        setTimeout(() => {
-          this.setData({
-            isLoading: false,
-            isWaitingForApi: false
-          });
-          this.isCurrentlyLoading = false;
-        }, 800);
-      }
+      // Never show loading during navigation - isFirstEntry is now false
     },
 
   },

@@ -2,15 +2,7 @@
 <view
 class="media-container"
 bindtap="onScreenTap"
->
-  <!-- Image Loading Overlay - DISABLED to prevent duplicate loading spinner -->
-  <!-- <view wx:if="{{ showImageLoader && currentPost.type === 'image' }}" class="image-loading-overlay">
-    <view class="image-loading-container">
-      <view class="image-loading-spinner"></view>
-      <text class="image-loading-text">加载中...</text>
-    </view>
-  </view> -->
-  
+>  
   <!-- Media content -->
   <swiper
     class="media-swiper"
