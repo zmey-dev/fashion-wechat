@@ -4,6 +4,7 @@ const { USER_ROLES } = require("../../services/constants");
 Page({
   data: {
     currentEventIndex: 0,
+    autoRotationTimer: null,
     showRulesModal: false,
     showDeleteModal: false,
     selectedEvent: null,
@@ -65,6 +66,32 @@ Page({
     // Load event data
     this.fetchEvents();
   },
+
+  startAutoRotation() {
+    // Clear any existing timer
+    this.stopAutoRotation();
+    
+    // Only start rotation if there are multiple events
+    if (this.data.events.length > 1) {
+      this.setData({
+        autoRotationTimer: setInterval(() => {
+          const nextIndex = (this.data.currentEventIndex + 1) % this.data.events.length;
+          this.setData({
+            currentEventIndex: nextIndex
+          });
+        }, 15000) // 15 seconds
+      });
+    }
+  },
+
+  stopAutoRotation() {
+    if (this.data.autoRotationTimer) {
+      clearInterval(this.data.autoRotationTimer);
+      this.setData({
+        autoRotationTimer: null
+      });
+    }
+  },
   onShow() {
     // Refresh events whenever page is shown
     // Also refresh user info in case role changed
@@ -75,8 +102,21 @@ Page({
       userInfo: userInfo,
       isTeacher: userInfo.role === USER_ROLES.TEACHER,
     });
+    
+    // Start auto rotation when page is shown
+    this.startAutoRotation();
 
     this.fetchEvents();
+  },
+
+  onHide() {
+    // Stop auto rotation when page is hidden
+    this.stopAutoRotation();
+  },
+
+  onUnload() {
+    // Stop auto rotation when page is unloaded
+    this.stopAutoRotation();
   },
 
   // Fetch event data from API
@@ -116,7 +156,10 @@ Page({
             pastEvents: pastEvents,
             loading: false,
             error: null,
-          });          // Initialize selected event
+          });
+          
+          // Start auto rotation after events are loaded
+          this.startAutoRotation();          // Initialize selected event
           if (activeEvents.length > 0) {
             // Process HTML content for the first event
             const processedEvent = {
