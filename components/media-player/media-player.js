@@ -1262,49 +1262,16 @@ Component({
      * Professional slide animation for post transitions
      */
     animateSwipeOut(direction, callback) {
-      if (this.data.isAnimating) return;
-
-      this.setData({ 
-        isAnimating: true,
-        animationType: direction === "up" ? "slide_up" : "slide_down"
-      });
-
       // Add haptic feedback
       wx.vibrateShort({ type: 'light' });
-
-      const { containerHeight, windowHeight } = this.data;
-      const height = containerHeight || windowHeight;
       
-      // Create faster slide animation - only for swipe out
-      const animation = wx.createAnimation({
-        duration: 200, // Faster swipe out animation
-        timingFunction: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)', // easeOutQuad
-      });
-
-      // Phase 1: Slide out with subtle scaling and opacity
-      const targetTransform = direction === "up" ? -height : height;
-      animation
-        .translateY(targetTransform)
-        .scale(0.95)
-        .opacity(0.8)
-        .step();
-
-      this.setData({
-        slideAnimation: animation.export(),
-        verticalTransform: targetTransform,
-        animationOpacity: 0.8,
-        animationScale: 0.95
-      });
-
-      // Phase 2: Execute callback and show new content immediately (no slide-in animation)
-      setTimeout(() => {
-        if (callback) {
-          callback();
-          
-          // Phase 3: Show new content immediately without animation
-          this.resetToNormalState();
-        }
-      }, 200); // Reduced timing
+      // No animation - immediately execute callback
+      if (callback) {
+        callback();
+      }
+      
+      // Reset state immediately
+      this.resetToNormalState();
     },
 
     /**
@@ -1383,19 +1350,9 @@ Component({
      * Animate content in after loading complete
      */
     animateContentIn() {
-      const animation = wx.createAnimation({
-        duration: 350, // Reduced from 500ms to 350ms
-        timingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)', // easeOutExpo
-      });
-
-      animation
-        .translateY(0)
-        .scale(1)
-        .opacity(1)
-        .step();
-
+      // No animation - immediately show content
       this.setData({
-        slideAnimation: animation.export(),
+        slideAnimation: null,
         verticalTransform: 0,
         animationOpacity: 1,
         animationScale: 1,
@@ -1408,24 +1365,11 @@ Component({
      * Fast spring-back animation when swipe is invalid (no delay)
      */
     animateBackToCenter() {
-      if (this.data.isAnimating) return;
-
-      // Add subtle haptic feedback
+      // No animation - immediately reset to center
       wx.vibrateShort({ type: 'light' });
-
-      const animation = wx.createAnimation({
-        duration: 150, // Further reduced for faster feedback
-        timingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)', // easeOutBack
-      });
-
-      animation
-        .translateY(0)
-        .scale(1)
-        .opacity(1)
-        .step();
-
+      
       this.setData({
-        slideAnimation: animation.export(),
+        slideAnimation: null,
         verticalTransform: 0,
         animationOpacity: 1,
         animationScale: 1
@@ -1436,24 +1380,12 @@ Component({
      * Loading state animation - smoother transition
      */
     animateLoadingState() {
-      if (this.data.isAnimating) return;
-
-      this.setData({ isAnimating: true });
-
-      const animation = wx.createAnimation({
-        duration: 150, // Reduced from 200ms to 150ms
-        timingFunction: 'ease-out',
-      });
-
-      animation
-        .opacity(0.3)
-        .scale(0.95)
-        .step();
-
+      // No animation for loading state
       this.setData({
-        slideAnimation: animation.export(),
-        animationOpacity: 0.6,
-        animationScale: 0.98
+        slideAnimation: null,
+        animationOpacity: 1,
+        animationScale: 1,
+        isAnimating: false
       });
     },
 
@@ -1461,18 +1393,9 @@ Component({
      * Restore from loading state
      */
     restoreFromLoadingState() {
-      const animation = wx.createAnimation({
-        duration: 300, // Reduced from 400ms to 300ms
-        timingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
-      });
-
-      animation
-        .opacity(1)
-        .scale(1)
-        .step();
-
+      // No animation - immediately restore state
       this.setData({
-        slideAnimation: animation.export(),
+        slideAnimation: null,
         animationOpacity: 1,
         animationScale: 1,
         isAnimating: false
