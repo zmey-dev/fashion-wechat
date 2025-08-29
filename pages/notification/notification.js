@@ -132,6 +132,7 @@ Page({
 
   getNotifications() {
     this.setData({ loading: true });
+    getApp().showGlobalLoading('加载中...');
 
     wx.request({
       url: `${config.BACKEND_URL}/notify/get_notifications`,
@@ -167,11 +168,15 @@ Page({
           loading: false,
           error: this.data.messages.errors.networkError,
         });
+        getApp().hideGlobalLoading();
 
         wx.showToast({
           title: this.data.messages.errors.networkError,
           icon: "none",
         });
+      },
+      complete: () => {
+        getApp().hideGlobalLoading();
       },
     });
   },

@@ -1,14 +1,6 @@
 <!--pages/friend/friend.wxml-->
 <wxs src="../../utils/userDisplayName.wxs" module="userUtils" />
 <app-layout current-page="friend">
-  <!-- Loading State for initial load -->
-  <view wx:if="{{loading && filteredUserList.length === 0 && !showUserMedia}}" class="loading-container">
-    <image class="loading-logo" src="/images/logo.png" mode="aspectFit"></image>
-    <view class="loading-progress-bar">
-      <view class="loading-progress-fill"></view>
-    </view>
-    <text class="loading-text">{{messages.loading}}</text>
-  </view>
 
   <!-- Main content container -->
   <view class="content-container {{userInfo.role === 'teacher' ? 'teacher-layout' : ''}}" wx:if="{{!loading || filteredUserList.length > 0 || showUserMedia}}">
@@ -104,13 +96,6 @@
       </view>
 
       <!-- Loading indicator -->
-      <view class="loading-indicator" wx:if="{{loading}}">
-        <image class="loading-logo" src="/images/logo.png" mode="aspectFit"></image>
-        <view class="loading-progress-bar">
-          <view class="loading-progress-fill"></view>
-        </view>
-        <text>{{messages.loading}}</text>
-      </view>
       
       <!-- No more content message -->
       <view class="no-more" wx:if="{{!hasMore && userMediaList.length > 0}}">

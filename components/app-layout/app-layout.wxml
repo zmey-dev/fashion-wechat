@@ -88,4 +88,7 @@
     bind:success="onLoginSuccess"
   >
   </login-modal>
+  
+  <!-- Global Loading Overlay -->
+  <loading-overlay />
 </view>

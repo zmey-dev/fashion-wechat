@@ -1,16 +1,7 @@
 <!-- Profile Page -->
 <wxs src="../../utils/userDisplayName.wxs" module="userUtils" />
 <app-layout current-page="profile">
-  <!-- Main Loading Screen -->
-  <view wx:if="{{isLoading}}" class="loading-container">
-    <image class="loading-logo" src="/images/logo.png" mode="aspectFit"></image>
-    <view class="loading-progress-bar">
-      <view class="loading-progress-fill"></view>
-    </view>
-    <text class="loading-text">{{loadingMessage}}</text>
-  </view>
-  
-  <view class="profile-container" wx:else><!-- Avatar Section - Horizontal Layout with Edit/Cancel Buttons -->
+  <view class="profile-container"><!-- Avatar Section - Horizontal Layout with Edit/Cancel Buttons -->
     <view class="avatar-section-horizontal">
       <view class="avatar-container-horizontal" bindtap="selectAvatar">
         <avatar class="avatar-medium" avatar="{{selectedAvatar || userInfo.avatar}}" user="{{userInfo}}" size="120" mode="aspectFill" />

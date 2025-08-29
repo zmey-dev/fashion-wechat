@@ -75,6 +75,7 @@ Page({
       isLoading: true,
       loadingMessage: this.data.messages.loading
     });
+    getApp().showGlobalLoading('加载中...');
     wx.request({
       url: `${config.BACKEND_URL}/user/get_my_follow_users`,
       method: "GET",
@@ -103,6 +104,7 @@ Page({
       },
       complete: () => {
         this.setData({ isLoading: false });
+        getApp().hideGlobalLoading();
       },
     });
   },
@@ -168,6 +170,7 @@ Page({
     if (!this.data.hasMore || this.data.loading) return;
 
     this.setData({ loading: true });
+    getApp().showGlobalLoading('加载中...');
 
     wx.request({
       url: `${config.BACKEND_URL}/v2/post/by-user-id`,
@@ -204,6 +207,7 @@ Page({
       },
       complete: () => {
         this.setData({ loading: false });
+        getApp().hideGlobalLoading();
       },
     });
   },

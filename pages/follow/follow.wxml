@@ -1,17 +1,9 @@
 <!--pages/follow/follow.wxml-->
 <wxs src="../../utils/userDisplayName.wxs" module="userUtils" />
 <app-layout current-page="follow">
-  <!-- Main Loading Screen -->
-  <view wx:if="{{isLoading}}" class="loading-container">
-    <image class="loading-logo" src="/images/logo.png" mode="aspectFit"></image>
-    <view class="loading-progress-bar">
-      <view class="loading-progress-fill"></view>
-    </view>
-    <text class="loading-text">{{loadingMessage}}</text>
-  </view>
   
   <!-- Main content container -->
-  <view class="content-container {{userInfo.role === 'teacher' ? 'teacher-layout' : ''}}" wx:else>
+  <view class="content-container {{userInfo.role === 'teacher' ? 'teacher-layout' : ''}}" wx:if="{{!isLoading}}">
     <!-- User List View -->
     <view class="user-list" wx:if="{{!showUserMedia}}">
       <!-- Search Bar -->
@@ -107,14 +99,6 @@
         </view>
       </view>
 
-      <!-- Loading indicator -->
-      <view class="loading-container" wx:if="{{loading}}">
-        <image class="loading-logo" src="/images/logo.png" mode="aspectFit"></image>
-        <view class="loading-progress-bar">
-          <view class="loading-progress-fill"></view>
-        </view>
-        <text class="loading-text">{{messages.loading}}</text>
-      </view>
       
       <!-- No more content message -->
       <view class="no-more" wx:if="{{!hasMore && userMediaList.length > 0}}">

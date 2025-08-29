@@ -44,23 +44,7 @@
       </view>
     </view>
     
-    <!-- Loading State for first load -->
-    <view class="loading-container" wx:if="{{loading && posts.length === 0}}">
-      <image class="loading-logo" src="/images/logo.png" mode="aspectFit"></image>
-      <view class="loading-progress-bar">
-        <view class="loading-progress-fill"></view>
-      </view>
-      <text class="loading-text">{{messages.loading}}</text>
-    </view>
     
-    <!-- Loading more indicator -->
-    <view class="loading-more" wx:if="{{loading && posts.length > 0}}">
-      <image class="loading-logo small" src="/images/logo.png" mode="aspectFit"></image>
-      <view class="loading-progress-bar small">
-        <view class="loading-progress-fill"></view>
-      </view>
-      <text class="loading-text">加载更多...</text>
-    </view>
     
     <!-- Empty State -->
     <view class="empty-state" wx:if="{{!loading && posts.length === 0}}">

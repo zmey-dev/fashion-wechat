@@ -140,8 +140,14 @@ Page({
     // Only show loading for initial page load, not navigation
     const shouldShowLoading = !this.data.hasLoadedOnce || (!this.data.isNavigating && !this.data.post);
     
+    // Use global loading
+    const app = getApp();
+    if (shouldShowLoading) {
+      app.showGlobalLoading('加载中...');
+    }
+    
     this.setData({
-      isLoading: shouldShowLoading,
+      isLoading: false, // Don't use local loading anymore
       hasError: false,
       errorMessage: "",
       mediaInitialized: false,
@@ -245,6 +251,10 @@ Page({
       isTransitioning: false, // Clear transition flag
     });
     
+    // Hide global loading
+    const app = getApp();
+    app.hideGlobalLoading();
+    
     // Initialize media player if not already done (for new posts)
     if (!this.data.mediaInitialized) {
       setTimeout(() => {
@@ -282,6 +292,10 @@ Page({
       isTransitioning: false, // Clear transition flag on error
       // Don't clear post on error to avoid showing empty state
     });
+    
+    // Hide global loading on error
+    const app = getApp();
+    app.hideGlobalLoading();
   },
 
   // Extract post ID from post object or use fallback ID

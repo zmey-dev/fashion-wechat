@@ -854,6 +854,7 @@ Page({
   },
 
   loadEventFromAPI(eventId, callbacks) {
+    getApp().showGlobalLoading('加载中...');
     wx.request({
       url: `${config.BACKEND_URL}/teacher/event/${eventId}`,
       method: "GET",
@@ -874,9 +875,13 @@ Page({
       },
       fail: (error) => {
         console.error("Load event API error:", error);
+        getApp().hideGlobalLoading();
         if (callbacks.fail) {
           callbacks.fail(error);
         }
+      },
+      complete: () => {
+        getApp().hideGlobalLoading();
       },
     });
   },
@@ -886,6 +891,7 @@ Page({
       ? `${config.BACKEND_URL}/teacher/event/${this.data.eventId}`
       : `${config.BACKEND_URL}/teacher/event`;
 
+    getApp().showGlobalLoading('提交中...');
     wx.request({
       url: url,
       method: "POST",
@@ -911,9 +917,13 @@ Page({
       },
       fail: (error) => {
         console.error("Submit event API error:", error);
+        getApp().hideGlobalLoading();
         if (callbacks.fail) {
           callbacks.fail(error);
         }
+      },
+      complete: () => {
+        getApp().hideGlobalLoading();
       },
     });
   },

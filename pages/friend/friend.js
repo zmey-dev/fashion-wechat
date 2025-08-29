@@ -74,6 +74,7 @@ Page({
   // Load user list from API
   loadUserList: function () {
     this.setData({ loading: true });
+    getApp().showGlobalLoading('加载中...');
     wx.request({
       url: `${config.BACKEND_URL}/friend/get_friends`,
       method: "GET",
@@ -102,6 +103,7 @@ Page({
       },
       complete: () => {
         this.setData({ loading: false });
+        getApp().hideGlobalLoading();
       },
     });
   },
@@ -174,6 +176,9 @@ Page({
     if (!this.data.hasMore || this.data.loading) return;
 
     this.setData({ loading: true });
+    
+    const app = getApp();
+    app.showGlobalLoading('加载更多...');
 
     wx.request({
       url: `${config.BACKEND_URL}/v2/post/by-user-id`,
@@ -210,6 +215,7 @@ Page({
       },
       complete: () => {
         this.setData({ loading: false });
+        getApp().hideGlobalLoading();
       },
     });
   },
@@ -320,6 +326,7 @@ Page({
       },
       complete: () => {
         this.setData({ loading: false });
+        getApp().hideGlobalLoading();
       },
     });
   },

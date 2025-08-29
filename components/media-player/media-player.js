@@ -282,9 +282,15 @@ Component({
       // isFirstEntry starts as true, becomes false after first load
       const shouldShowLoading = this.data.isFirstEntry;
       
+      // Use global loading for first entry
+      if (shouldShowLoading) {
+        const app = getApp();
+        app.showGlobalLoading('加载中...');
+      }
+      
       // Immediately set data and ensure all loading states are false
       this.setData({
-        isLoading: shouldShowLoading,
+        isLoading: false,  // Don't use local loading anymore
         isFirstEntry: false,  // Mark that we've loaded at least once
         isWaitingForApi: false,
         currentSlideIndex: 0,
@@ -326,10 +332,11 @@ Component({
       this.updateDisplayValues();
       this.startAutoPlay();
       
-      // Clear loading flag after initial animation (only for very first entry)
+      // Clear global loading after initial animation (only for very first entry)
       if (shouldShowLoading) {
         setTimeout(() => {
-          this.setData({ isLoading: false });
+          const app = getApp();
+          app.hideGlobalLoading();
         }, 800); // Give enough time for initial loading animation
       }
       

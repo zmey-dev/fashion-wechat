@@ -244,6 +244,7 @@ Page({
 
   loadStudents: function () {
     this.setData({ loading: true });
+    getApp().showGlobalLoading('加载中...');
 
     // Build query parameters with filters
     const params = { ...this.data.activeFilters };
@@ -290,6 +291,10 @@ Page({
           icon: "none",
         });
         this.setData({ loading: false });
+        getApp().hideGlobalLoading();
+      },
+      complete: () => {
+        getApp().hideGlobalLoading();
       },
     });
   },

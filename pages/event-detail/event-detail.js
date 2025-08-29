@@ -108,6 +108,7 @@ Page({
   },
 
   loadEventInfo: function () {
+    getApp().showGlobalLoading('加载中...');
     wx.request({
       url: `${config.BACKEND_URL}/event`,
       method: 'GET',
@@ -154,10 +155,15 @@ Page({
           });
         } else {
           this.showToast(this.data.messages.errors.loadFailed);
+          getApp().hideGlobalLoading();
         }
       },
       fail: () => {
+        getApp().hideGlobalLoading();
         this.showToast(this.data.messages.errors.networkError);
+      },
+      complete: () => {
+        getApp().hideGlobalLoading();
       }
     });
   },
@@ -191,6 +197,7 @@ Page({
     if (this.data.loading) return;
     
     this.setData({ loading: true });
+    getApp().showGlobalLoading('加载中...');
 
     const requestData = {
       scope: this.data.pageSize,
@@ -244,10 +251,12 @@ Page({
         }
       },
       fail: () => {
+        getApp().hideGlobalLoading();
         this.showToast(this.data.messages.errors.networkError);
       },
       complete: () => {
         this.setData({ loading: false });
+        getApp().hideGlobalLoading();
       }
     });
   },

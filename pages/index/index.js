@@ -122,6 +122,7 @@ Page({
     }
 
     this.setData({ loading: true });
+    getApp().showGlobalLoading('加载中...');
 
     const requestData = {
       limit: this.data.pageSize,
@@ -186,6 +187,7 @@ Page({
       },
       complete: () => {
         this.setData({ loading: false });
+        getApp().hideGlobalLoading();
       },
     });
   },

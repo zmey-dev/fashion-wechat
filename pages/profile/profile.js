@@ -168,6 +168,7 @@ Page({
 
   // Load university information including faculties
   loadUniversityInfo: function () {
+    getApp().showGlobalLoading('加载中...');
     wx.request({
       url: `${config.BACKEND_URL}/myuniversity`,
       method: "GET",
@@ -203,6 +204,10 @@ Page({
       },
       fail: () => {
         console.error("Failed to load university info");
+        getApp().hideGlobalLoading();
+      },
+      complete: () => {
+        getApp().hideGlobalLoading();
       },
     });
   },
@@ -683,10 +688,13 @@ Page({
     const requestTimeout = 15000; // 15 second timeout
     let timeoutId;
 
+    getApp().showGlobalLoading('更新中...');
+
     // Set up timeout
     timeoutId = setTimeout(() => {
       this.setData({ isLoading: false });
       this.isSaving = false;
+      getApp().hideGlobalLoading();
       wx.showToast({
         title: "请求超时，请检查网络连接",
         icon: "none",
@@ -705,6 +713,7 @@ Page({
       timeout: requestTimeout,
       success: (res) => {
         clearTimeout(timeoutId);
+        getApp().hideGlobalLoading();
         
         try {
           // Check response status
@@ -793,6 +802,7 @@ Page({
       },
       fail: (error) => {
         clearTimeout(timeoutId);
+        getApp().hideGlobalLoading();
         
         let errorMessage = "网络连接失败";
         if (error.errMsg) {
@@ -813,6 +823,7 @@ Page({
       },
       complete: () => {
         clearTimeout(timeoutId);
+        getApp().hideGlobalLoading();
         this.setData({ isLoading: false });
         this.isSaving = false;
       },

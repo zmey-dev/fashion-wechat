@@ -122,6 +122,7 @@ Page({
   // Fetch event data from API
   fetchEvents() {
     this.setData({ loading: true });
+    getApp().showGlobalLoading('加载中...');
 
     wx.request({
       url: `${config.BACKEND_URL}/event`,
@@ -188,6 +189,7 @@ Page({
             title: this.data.messages.errors.loadFailed,
             icon: "none",
           });
+          getApp().hideGlobalLoading();
         }
       },
       fail: (err) => {
@@ -196,11 +198,15 @@ Page({
           loading: false,
           error: this.data.messages.errors.networkError,
         });
+        getApp().hideGlobalLoading();
 
         wx.showToast({
           title: this.data.messages.errors.networkError,
           icon: "none",
         });
+      },
+      complete: () => {
+        getApp().hideGlobalLoading();
       },
     });
   }, // Handle swiper change

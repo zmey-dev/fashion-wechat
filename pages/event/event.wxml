@@ -144,17 +144,9 @@
     </view>
   </view>
 
-  <!-- Loading state -->
-  <view wx:if="{{loading && !events.length}}" class="loading-container">
-    <image class="loading-logo" src="/images/logo.png" mode="aspectFit"></image>
-    <view class="loading-progress-bar">
-      <view class="loading-progress-fill"></view>
-    </view>
-    <text class="loading-text">{{messages.loading}}</text>
-  </view>
 
   <!-- Error state -->
-  <view wx:elif="{{error}}" class="error-container">
+  <view wx:if="{{error}}" class="error-container">
     <icon type="warn" size="64" color="#E53E3E"></icon>
     <text class="error-text">{{error}}</text>
     <button class="retry-button" bindtap="fetchEvents">重试</button>
@@ -320,19 +312,8 @@
 
   <!-- Page content -->
   <view class="container">
-    <!-- Show loading state -->
-    <block wx:if="{{loading}}">
-      <view class="loading-container">
-        <image class="loading-logo" src="/images/logo.png" mode="aspectFit"></image>
-        <view class="loading-progress-bar">
-          <view class="loading-progress-fill"></view>
-        </view>
-        <text class="loading-text">{{messages.loading}}</text>
-      </view>
-    </block>
-    
     <!-- Show error state -->
-    <block wx:elif="{{error}}">
+    <block wx:if="{{error}}">
       <view class="error-container">
         <text class="error-text">{{error}}</text>
         <button class="retry-button" bindtap="fetchEvents">重试</button>
@@ -340,7 +321,7 @@
     </block>
     
     <!-- Show empty state -->
-    <block wx:elif="{{events.length === 0 && pastEvents.length === 0}}">
+    <block wx:elif="{{!loading && events.length === 0 && pastEvents.length === 0}}">
       <view class="empty-container">
         <text class="empty-text">暂无活动</text>
       </view>

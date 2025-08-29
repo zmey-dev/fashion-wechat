@@ -12,14 +12,6 @@
       </view>
     </view>
 
-    <!-- Loading State -->
-    <view wx:if="{{isLoading}}" class="loading-container">
-      <image class="loading-logo" src="/images/logo.png" mode="aspectFit"></image>
-      <view class="loading-progress-bar">
-        <view class="loading-progress-fill"></view>
-      </view>
-      <text class="loading-text">{{messages.form.submitting}}</text>
-    </view>
 
     <!-- Content -->
     <view class="content">

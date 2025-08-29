@@ -28,10 +28,7 @@
         class="action-btn {{currentUser.isFollowed ? 'followed' : 'default'}}" 
         bindtap="handleFollowToggle"
         disabled="{{isFollowLoading}}">
-        <view wx:if="{{isFollowLoading}}" class="loading-small">
-          <image class="loading-logo small" src="/images/logo.png" mode="aspectFit"></image>
-        </view>
-        <text class="btn-text" wx:else>{{currentUser.isFollowed ? '已关注' : '关注'}}</text>
+        <text class="btn-text">{{currentUser.isFollowed ? '已关注' : '关注'}}</text>
       </button>
 
       <!-- Friend Button -->
@@ -39,10 +36,7 @@
         class="action-btn {{currentUser.isFriend ? (currentUser.isAllow ? 'friend' : 'pending') : 'default'}}" 
         bindtap="handleFriendToggle"
         disabled="{{isFriendLoading}}">
-        <view wx:if="{{isFriendLoading}}" class="loading-small">
-          <image class="loading-logo small" src="/images/logo.png" mode="aspectFit"></image>
-        </view>
-        <text class="btn-text" wx:else>{{currentUser.isFriend ? '好友' : '加好友'}}</text>
+        <text class="btn-text">{{currentUser.isFriend ? '好友' : '加好友'}}</text>
       </button>
 
       <!-- Message Button (only shown if they are friends) -->
@@ -73,14 +67,6 @@
         </view>
       </view>
       
-      <!-- Loading indicator -->
-      <view class="loading-indicator" wx:if="{{loading}}">
-        <image class="loading-logo small" src="/images/logo.png" mode="aspectFit"></image>
-        <view class="loading-progress-bar small">
-          <view class="loading-progress-fill"></view>
-        </view>
-        <text>{{messages.loading}}</text>
-      </view>
       
       <!-- No more content message -->
       <view class="no-more" wx:if="{{!hasMore && userMediaList.length > 0}}">
@@ -100,12 +86,4 @@
     <button class="retry-button" bindtap="onPullDownRefresh">重试</button>
   </view>
 
-  <!-- Loading Indicator for initial load -->
-  <view class="loading-container" wx:if="{{loading && !currentUser}}">
-    <image class="loading-logo" src="/images/logo.png" mode="aspectFit"></image>
-    <view class="loading-progress-bar">
-      <view class="loading-progress-fill"></view>
-    </view>
-    <text class="loading-text">{{messages.loading}}</text>
-  </view>
 </app-layout>

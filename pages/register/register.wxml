@@ -344,12 +344,4 @@
     </checkbox-group>
   </view>
 
-  <!-- Loading Overlay -->
-  <view class="loading-container" wx:if="{{isLoading}}">
-    <image class="loading-logo" src="/images/logo.png" mode="aspectFit"></image>
-    <view class="loading-progress-bar">
-      <view class="loading-progress-fill"></view>
-    </view>
-    <text class="loading-text">{{loadingMessage || messages.loading}}</text>
-  </view>
 </view>

@@ -1,0 +1,94 @@
+/* components/loading-overlay/loading-overlay.wxss */
+.loading-overlay-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-overlay-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+.loading-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40rpx;
+  z-index: 100000;
+  pointer-events: none;
+}
+
+.loading-logo {
+  width: 280rpx;
+  height: 280rpx;
+  margin-bottom: 40rpx;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.loading-progress-bar {
+  width: 200rpx;
+  height: 6rpx;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 3rpx;
+  overflow: hidden;
+  margin-bottom: 20rpx;
+}
+
+.loading-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #f06292, #ec407a, #e91e63);
+  border-radius: 3rpx;
+  animation: progress 1.5s ease-in-out infinite;
+}
+
+@keyframes progress {
+  0% {
+    width: 0%;
+    transform: translateX(0);
+  }
+  50% {
+    width: 100%;
+    transform: translateX(0);
+  }
+  100% {
+    width: 100%;
+    transform: translateX(100%);
+  }
+}
+
+.loading-text {
+  font-size: 28rpx;
+  color: #ffffff;
+  text-align: center;
+  margin-top: 10rpx;
+}

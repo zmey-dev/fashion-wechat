@@ -341,14 +341,6 @@
     </view>
   </view>
   
-  <!-- Loading Overlay -->
-  <view class="loading-container" wx:if="{{isLoading || (loading && isSubmitting)}}">
-    <image class="loading-logo" src="/images/logo.png" mode="aspectFit"></image>
-    <view class="loading-progress-bar">
-      <view class="loading-progress-fill"></view>
-    </view>
-    <text class="loading-text">{{loadingMessage || (isUpdateMode ? messages.updating : messages.loading)}}</text>
-  </view>
 
   <!-- Hidden canvas for blur image generation -->
   <canvas 

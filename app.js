@@ -56,6 +56,28 @@ App({
     return this.globalData[key];
   },
 
+  // Global loading management methods
+  showGlobalLoading(text = '加载中...') {
+    this.globalData.isGlobalLoading = true;
+    this.globalData.loadingText = text;
+    // Notify all subscribers
+    if (this.globalData.observers['globalLoading']) {
+      this.globalData.observers['globalLoading'].forEach((callback) => {
+        callback({ visible: true, text: text });
+      });
+    }
+  },
+
+  hideGlobalLoading() {
+    this.globalData.isGlobalLoading = false;
+    // Notify all subscribers
+    if (this.globalData.observers['globalLoading']) {
+      this.globalData.observers['globalLoading'].forEach((callback) => {
+        callback({ visible: false });
+      });
+    }
+  },
+
   // Centralized unread message management methods
   updateUnreadMessages(unreadMessages) {
     // Reset the unread messages map

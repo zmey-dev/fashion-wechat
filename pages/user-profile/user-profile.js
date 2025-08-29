@@ -90,6 +90,7 @@ Page({
   // Load user profile from API
   loadUserProfile: function (username) {
     this.setData({ loading: true, error: false });
+    getApp().showGlobalLoading('加载中...');
     wx.request({
       url: `${config.BACKEND_URL}/profile/get_profile`,
       method: "GET",
@@ -138,6 +139,7 @@ Page({
       },
       complete: () => {
         this.setData({ loading: false });
+        getApp().hideGlobalLoading();
       },
     });
   },
@@ -147,6 +149,7 @@ Page({
     if (!this.data.hasMore || this.data.loading) return;
 
     this.setData({ loading: true });
+    getApp().showGlobalLoading('加载中...');
 
     // Use web version API pattern
     wx.request({
@@ -184,6 +187,7 @@ Page({
       },
       complete: () => {
         this.setData({ loading: false });
+        getApp().hideGlobalLoading();
       },
     });
   },

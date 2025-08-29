@@ -175,6 +175,7 @@ Page({
       isSubmitting: true,
       isLoading: true 
     });
+    getApp().showGlobalLoading('提交中...');
 
     try {
       // Upload images first if any
@@ -202,12 +203,14 @@ Page({
           icon: "success",
           duration: 3000,
         });
+        getApp().hideGlobalLoading();
 
         // Add haptic feedback for success if available
         if (wx.vibrateShort) {
           wx.vibrateShort({ type: "medium" });
         }
       } else {
+        getApp().hideGlobalLoading();
         throw new Error(
           result.message || this.data.messages.errors.submitFailed
         );
@@ -217,6 +220,7 @@ Page({
         isSubmitting: false,
         isLoading: false 
       });
+      getApp().hideGlobalLoading();
 
       // Show error message
       const errorMessage =

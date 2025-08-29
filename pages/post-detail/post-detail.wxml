@@ -5,19 +5,10 @@
   
   <!-- Post Viewer Container -->
   <view class="post-viewer-container {{userInfo.role === 'teacher' ? 'teacher-layout' : ''}}">
-    <!-- Loading State - Show when loading (highest priority) -->
-    <view wx:if="{{ isLoading }}" class="loading-container">
-      <image class="loading-logo" src="/images/logo.png" mode="aspectFit"></image>
-      <view class="loading-progress-bar">
-        <view class="loading-progress-fill"></view>
-      </view>
-      <text class="loading-text">{{messages.loading}}</text>
-    </view>
-    
-    <!-- Media Player Component - Show when post exists and not loading -->
+    <!-- Media Player Component - Show when post exists -->
     <media-player
       id="media-player"
-      wx:elif="{{ post && !isLoading }}"
+      wx:if="{{ post }}"
       selectedPost="{{ post }}"
       selectedPostUser="{{ post.user }}"
       followedUsers="{{ followedUsers }}"

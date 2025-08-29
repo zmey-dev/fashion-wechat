@@ -124,6 +124,7 @@ Page({  data: {
       return;
     }
 
+    app.showGlobalLoading('加载中...');
     wx.request({
       url: `${config.BACKEND_URL}/get_my_profile`,
       method: "GET",
@@ -160,6 +161,7 @@ Page({  data: {
         }
       },
       fail: () => {
+        app.hideGlobalLoading();
         // Network error, use cached data if available
         const cachedUserInfo = app.globalData.userInfo;
         if (cachedUserInfo) {
@@ -177,6 +179,9 @@ Page({  data: {
             icon: "none",
           });
         }
+      },
+      complete: () => {
+        app.hideGlobalLoading();
       },
     });
   },
@@ -275,6 +280,7 @@ Page({  data: {
 
   // Load university information including faculties
   loadUniversityInfo: function () {
+    getApp().showGlobalLoading('加载中...');
     wx.request({
       url: `${config.BACKEND_URL}/myuniversity`,
       method: "GET",
@@ -319,6 +325,10 @@ Page({  data: {
             },
           ],
         });
+        getApp().hideGlobalLoading();
+      },
+      complete: () => {
+        getApp().hideGlobalLoading();
       },
     });
   },
@@ -879,6 +889,7 @@ Page({  data: {
       loading: true,
       posts: [], // Reset posts for refresh
     });
+    getApp().showGlobalLoading('加载中...');
 
     // Use web version API pattern
     const apiUrl = this.getApiUrl(this.data.currentTab);
@@ -915,15 +926,20 @@ Page({  data: {
         },
         fail: () => {
           this.setData({ loading: false });
+          getApp().hideGlobalLoading();
           wx.showToast({
             title: this.data.messages.errors.loadFailed,
             icon: "none",
           });
         },
+        complete: () => {
+          getApp().hideGlobalLoading();
+        },
       });
     } catch (error) {
       console.error("Failed to load posts:", error);
       this.setData({ loading: false });
+      getApp().hideGlobalLoading();
     }
   },
 
@@ -942,6 +958,7 @@ Page({  data: {
     if (this.data.loading || !this.data.hasMore) return;
 
     this.setData({ loading: true });
+    getApp().showGlobalLoading('加载中...');
 
     // Use web version API pattern
     const apiUrl = this.getApiUrl(this.data.currentTab);
@@ -978,10 +995,15 @@ Page({  data: {
         },
         fail: () => {
           this.setData({ loading: false });
+          getApp().hideGlobalLoading();
+        },
+        complete: () => {
+          getApp().hideGlobalLoading();
         },
       });
     } catch (error) {
       this.setData({ loading: false });
+      getApp().hideGlobalLoading();
     }
   },
 

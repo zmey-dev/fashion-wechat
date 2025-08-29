@@ -2,6 +2,7 @@
   "component": true,
   "usingComponents": {
     "login-modal": "../login-modal/login-modal",
-    "search-bar": "../search-bar/search-bar"
+    "search-bar": "../search-bar/search-bar",
+    "loading-overlay": "../loading-overlay/loading-overlay"
   }
 }

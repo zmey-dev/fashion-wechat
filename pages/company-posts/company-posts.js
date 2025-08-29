@@ -122,6 +122,7 @@ Page({
     if (this.data.loading || !this.data.hasMore) return;
 
     this.setData({ loading: true });
+    getApp().showGlobalLoading('加载中...');
 
     const params = {
       limit: this.data.pageSize,
@@ -174,6 +175,7 @@ Page({
       },
       complete: () => {
         this.setData({ loading: false });
+        getApp().hideGlobalLoading();
         wx.stopPullDownRefresh();
       },
     });

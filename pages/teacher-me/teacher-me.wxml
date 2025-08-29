@@ -1,15 +1,7 @@
 <wxs src="../../utils/userDisplayName.wxs" module="userUtils" />
 <app-layout current-page="me">
-  <!-- Main Loading Screen -->
-  <view wx:if="{{isLoading}}" class="loading-container">
-    <image class="loading-logo" src="/images/logo.png" mode="aspectFit"></image>
-    <view class="loading-progress-bar">
-      <view class="loading-progress-fill"></view>
-    </view>
-    <text class="loading-text">{{loadingMessage}}</text>
-  </view>
   
-  <view class="container" wx:else>
+  <view class="container" wx:if="{{!isLoading}}">
     <!-- Page header with tabs -->
     <view class="header">
       <view class="tab-container">
@@ -401,14 +393,6 @@
         </view>
       </view>
       
-      <!-- Loading indicator for posts -->
-      <view wx:if="{{loading && studentPosts.length > 0}}" class="loading-indicator">
-        <image class="loading-logo small" src="/images/logo.png" mode="aspectFit"></image>
-        <view class="loading-progress-bar small">
-          <view class="loading-progress-fill"></view>
-        </view>
-        <text>加载中...</text>
-      </view>
     </block>
   </block>
 
@@ -1045,13 +1029,5 @@
     </view>
   </view>
   
-  <!-- Loading Overlay -->  
-  <view wx:if="{{loading && currentTab === 1 && !university}}" class="loading-overlay">
-    <image class="loading-logo" src="/images/logo.png" mode="aspectFit"></image>
-    <view class="loading-progress-bar">
-      <view class="loading-progress-fill"></view>
-    </view>
-    <text>{{messages.loading}}</text>
-  </view>
   </view>
 </app-layout>

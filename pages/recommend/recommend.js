@@ -87,7 +87,9 @@ Page({
 
   // Load initial post like web version
   loadInitialPost: function () {
-    this.setData({ isLoading: true });
+    // Use global loading
+    const app = getApp();
+    app.showGlobalLoading('加载中...');
     
     // Get first recommended post
     wx.request({
@@ -115,6 +117,9 @@ Page({
             loadError: true,
             errorMessage: this.data.messages.errors.loadFailed,
           });
+          // Hide global loading on error
+          const app = getApp();
+          app.hideGlobalLoading();
         }
       },
       fail: (err) => {
@@ -124,6 +129,9 @@ Page({
           loadError: true,
           errorMessage: this.data.messages.errors.networkError,
         });
+        // Hide global loading on error
+        const app = getApp();
+        app.hideGlobalLoading();
       },
     });
   },
@@ -157,6 +165,10 @@ Page({
             isLoading: false,
           });
           
+          // Hide global loading
+          const app = getApp();
+          app.hideGlobalLoading();
+          
           // Notify media player that API loading is complete
           const mediaPlayer = this.selectComponent('.media-player');
           if (mediaPlayer && mediaPlayer.onApiLoadComplete) {
@@ -168,6 +180,9 @@ Page({
             loadError: true,
             errorMessage: res.data?.msg || this.data.messages.errors.loadFailed,
           });
+          // Hide global loading on error
+          const app = getApp();
+          app.hideGlobalLoading();
         }
       },
       fail: (err) => {
@@ -177,6 +192,9 @@ Page({
           loadError: true,
           errorMessage: this.data.messages.errors.networkError,
         });
+        // Hide global loading on error
+        const app = getApp();
+        app.hideGlobalLoading();
       },
     });
   },

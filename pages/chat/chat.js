@@ -467,6 +467,7 @@ Page({
     this.setData({
       isLoadingMessages: true
     });
+    getApp().showGlobalLoading('加载中...');
 
     wx.request({
       url: `${config.BACKEND_URL}/messages/get_message/${userId}`,
@@ -479,6 +480,7 @@ Page({
         this.setData({
           isLoadingMessages: false
         });
+        getApp().hideGlobalLoading();
 
         if (res.data) {
           // Transform messages and format times
@@ -525,6 +527,7 @@ Page({
         this.setData({
           isLoadingMessages: false
         });
+        getApp().hideGlobalLoading();
         console.error("Failed to fetch messages:", err);
         wx.showToast({
           title: this.data.uiTexts.networkError,
@@ -588,6 +591,7 @@ Page({
   getFriends: function() {
     // Set loading state to true
     this.setData({ isLoadingFriends: true });
+    getApp().showGlobalLoading('加载中...');
     
     try {
       wx.request({
@@ -598,6 +602,7 @@ Page({
           Authorization: `Bearer ${this.data.userInfo.token}`,
         },
         success: (res) => {
+          getApp().hideGlobalLoading();
           if (res.data && res.data.status === "success") {
             const friends = res.data.users.map((friend) => ({
               ...friend,
@@ -628,6 +633,8 @@ Page({
           }
         },
         fail: () => {
+          getApp().hideGlobalLoading();
+          this.setData({ isLoadingFriends: false });
           wx.showToast({
             title: this.data.uiTexts.networkError,
             icon: "none",

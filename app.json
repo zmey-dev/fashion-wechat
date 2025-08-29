@@ -32,7 +32,10 @@
     "onReachBottomDistance": 50,
     "navigationBarLoading": false,
     "backgroundColorTop": "#000000",
-    "backgroundColorBottom": "#000000"
+    "backgroundColorBottom": "#000000",
+    "pageOrientation": "portrait",
+    "animationType": "none",
+    "animationDuration": 0
   },
   "networkTimeout": {
     "request": 60000,
