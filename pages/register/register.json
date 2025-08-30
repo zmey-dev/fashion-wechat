@@ -4,5 +4,6 @@
   "navigationBarTextStyle": "white",
   "backgroundColor": "#1a1a1a",
   "backgroundTextStyle": "light",
-  "enablePullDownRefresh": false
+  "enablePullDownRefresh": false,
+  "disableScroll": true
 }

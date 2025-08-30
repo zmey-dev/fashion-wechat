@@ -9,5 +9,6 @@
     "app-layout": "/components/app-layout/app-layout",
     "avatar": "/components/avatar/avatar",
     "media-card": "/components/media-card/media-card"
-  }
+  },
+  "disableScroll": true
 }

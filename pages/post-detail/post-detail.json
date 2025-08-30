@@ -3,5 +3,7 @@
     "app-layout": "../../components/app-layout/app-layout",
     "login-modal": "../../components/login-modal/login-modal",
     "media-player": "../../components/media-player/media-player"
-  }
+  },
+  "disableSwipeBack": true,
+  "disableScroll": true
 }

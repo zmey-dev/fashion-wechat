@@ -6,5 +6,6 @@
   "navigationBarBackgroundColor": "#0a0a0a",
   "navigationBarTextStyle": "white",
   "backgroundColor": "#0a0a0a",
-  "navigationBarLoading": false
+  "navigationBarLoading": false,
+  "disableScroll": true
 }
