@@ -28,6 +28,10 @@ Component({
       type: Boolean,
       value: false,
     },
+    isContinue: {
+      type: Boolean,
+      value: false,
+    },
   },
   data: {
     // Track if this is the first load ever (component attached)
@@ -459,6 +463,47 @@ Component({
       this.startAutoPlay();
     },
 
+    // Public methods for parent components
+    pauseMedia() {
+      this.setData({ 
+        isPlaying: false,
+        currentSlideIndex: 0  // Reset to first slide
+      });
+      this.clearAutoPlayTimer();
+      
+      // Pause video if exists
+      const mediaDisplay = this.selectComponent('#media-display');
+      if (mediaDisplay) {
+        const videoContext = wx.createVideoContext('media-video', mediaDisplay);
+        if (videoContext) {
+          videoContext.pause();
+          videoContext.seek(0);  // Reset to beginning
+        }
+      }
+    },
+
+    playMedia() {
+      this.setData({ 
+        isPlaying: true 
+      });
+      
+      // Start autoplay for images
+      if (this.data.currentPost?.type === 'image') {
+        this.startAutoPlay();
+      }
+      
+      // Play video if exists
+      const mediaDisplay = this.selectComponent('#media-display');
+      if (mediaDisplay && this.data.currentPost?.type === 'video') {
+        setTimeout(() => {
+          const videoContext = wx.createVideoContext('media-video', mediaDisplay);
+          if (videoContext) {
+            videoContext.play();
+          }
+        }, 100);
+      }
+    },
+
     showPlayIndicatorBriefly() {
       this.setData({ showPlayIndicator: true });
       setTimeout(() => {
@@ -550,7 +595,15 @@ Component({
     onProgressTap(e) {
       const { index } = e.detail;
       this.setData({ currentSlideIndex: index });
-    },    // Video ended event handler
+    },
+
+    onContinueToggle(e) {
+      const newValue = e.detail.value;
+      // Notify parent component
+      this.triggerEvent('continueToggled', { value: newValue });
+    },
+
+    // Video ended event handler
     onVideoEnded() {
       const { currentPost, isWaitingForApi, isLoading } = this.data;
       
@@ -572,11 +625,14 @@ Component({
         return;
       }
       
-      // Always trigger event to parent for navigation
-      this.triggerEvent('videoEnded');
-      
-      // Navigation now handled by parent swiper
+      // Check if continue is enabled
+      if (this.properties.isContinue) {
+        // Auto-advance to next post
+        this.triggerEvent('videoEnded');
+      }
+      // If continue is false, let the video loop naturally via loop attribute
     },
+
 
     // Action Buttons Events
     onUserProfile() {

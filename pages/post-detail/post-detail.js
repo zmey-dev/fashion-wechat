@@ -29,6 +29,9 @@ Page({
     userInfo: null,
     showLoginModal: false,
     
+    // Global auto-continue state
+    globalIsContinue: false,
+    
     // UI messages (Chinese for user interface)
     messages: {
       loading: "加载中...",
@@ -199,7 +202,25 @@ Page({
     // Prevent redundant updates
     if (newIndex === oldIndex) return;
     
+    // Pause old media player
+    if (oldIndex >= 0 && oldIndex < this.data.posts.length) {
+      const oldMediaPlayer = this.selectComponent(`#media-player-${oldIndex}`);
+      if (oldMediaPlayer) {
+        oldMediaPlayer.pauseMedia && oldMediaPlayer.pauseMedia();
+      }
+    }
+    
     this.setData({ currentIndex: newIndex });
+    
+    // Play new media player
+    if (newIndex >= 0 && newIndex < this.data.posts.length) {
+      const newMediaPlayer = this.selectComponent(`#media-player-${newIndex}`);
+      if (newMediaPlayer) {
+        setTimeout(() => {
+          newMediaPlayer.playMedia && newMediaPlayer.playMedia();
+        }, 100);
+      }
+    }
     
     // Check if we need to load more posts
     const { posts } = this.data;
@@ -421,5 +442,18 @@ Page({
         this.loadNextPost();
       }
     }
+  },
+
+  handleContinueToggled: function(e) {
+    this.setData({ globalIsContinue: e.detail.value });
+    
+    // Update all media players with new continue value
+    const { posts } = this.data;
+    posts.forEach((post, index) => {
+      const mediaPlayer = this.selectComponent(`#media-player-${index}`);
+      if (mediaPlayer) {
+        mediaPlayer.setData({ isContinue: e.detail.value });
+      }
+    });
   }
 });

@@ -33,6 +33,7 @@
           event-id="{{ eventId }}"
           is-event-expired="{{ isEventExpired }}"
           is-loading="{{ false }}"
+          is-continue="{{ globalIsContinue }}"
           bind:postNavigation="handlePostNavigation"
           bind:likeUpdated="handleLikeUpdated"
           bind:favoriteUpdated="handleFavoriteUpdated"
@@ -41,6 +42,7 @@
           bind:showLogin="showLoginModal"
           bind:navigateToProfile="navigateToUserProfile"
           bind:videoEnded="handleVideoEnded"
+          bind:continueToggled="handleContinueToggled"
         >
         </media-player>
       </swiper-item>
