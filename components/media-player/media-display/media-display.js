@@ -327,42 +327,34 @@ Component({
     },
 
     onVideoWaiting() {
-      // Video is waiting for more data - this can cause infinite loading
-      // Force clear loading after a timeout to prevent infinite loading
+      // Video is waiting for more data
+      // Don't show any loading indicator, let poster image remain visible
+      // Immediately clear any loading states to prevent built-in loading
+      const parent = this.selectOwnerComponent();
+      if (parent && parent.setData) {
+        parent.setData({
+          isLoading: false,
+          isWaitingForApi: false
+        });
+      }
+      
+      // Try to resume playback after short delay
       setTimeout(() => {
-        const parent = this.selectOwnerComponent();
-        if (parent && parent.setData) {
-          parent.setData({
-            isLoading: false,
-            isWaitingForApi: false
-          });
+        const videoContext = wx.createVideoContext('media-video', this);
+        if (videoContext) {
+          videoContext.play();
         }
-      }, 3000); // 3 second timeout
+      }, 500);
     },
 
     onVideoLoadedData() {
-      // Video data has been loaded - aggressively clear loading states
+      // Video data has been loaded - immediately start playback
       const videoContext = wx.createVideoContext('media-video', this);
       if (videoContext) {
-        // Multiple attempts to clear the native loading spinner
-        videoContext.seek(0);
-        
-        // Force play briefly to trigger proper initialization
-        videoContext.play();
-        setTimeout(() => {
-          videoContext.pause();
-          videoContext.seek(0);
-          
-          // Second attempt after short delay
-          setTimeout(() => {
-            videoContext.play();
-            setTimeout(() => {
-              if (!this.properties.isPlaying) {
-                videoContext.pause();
-              }
-            }, 50);
-          }, 100);
-        }, 50);
+        // Immediately play without multiple seeks to reduce loading appearance
+        if (this.properties.isPlaying) {
+          videoContext.play();
+        }
       }
       
       // Clear parent loading states
@@ -373,11 +365,6 @@ Component({
           isWaitingForApi: false
         });
       }
-      
-      // Start autoplay after data is loaded
-      setTimeout(() => {
-        this.startVideoAutoplay();
-      }, 200);
     },
 
     onVideoTimeUpdate() {
