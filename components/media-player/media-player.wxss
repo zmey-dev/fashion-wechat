@@ -6,23 +6,9 @@
   height: 100%;
   background: #000;
   overflow: hidden;
-  /* touch-action is not supported in WXSS, use catchtouchmove instead */
 }
 
-/* Hide WeChat's default loading indicator in top-right corner */
-.media-player::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  right: 0;
-  width: 100rpx;
-  height: 100rpx;
-  background: #000;
-  z-index: 9999;
-  pointer-events: none;
-}
-
-/* Main content container - TikTok style with no animations */
+/* Main content container - Full parent size */
 .media-content {
   position: absolute;
   top: 0;
@@ -1116,13 +1102,13 @@ action-buttons.hidden {
   transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-/* Blur Background - Full Screen */
+/* Blur Background - Full parent size */
 .blur-background-container {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
   z-index: 0;
   overflow: hidden;
 }
@@ -1137,8 +1123,8 @@ action-buttons.hidden {
   position: absolute;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
+  width: 100%;
+  height: 100%;
   background: rgba(0, 0, 0, 0.4);
 }
 

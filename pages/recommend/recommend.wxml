@@ -2,25 +2,54 @@
 <app-layout current-page="recommend">
   <login-modal wx:if="{{ showLoginModal }}" class="login-modal" />
   <view class="post-viewer-container {{userInfo.role === 'teacher' ? 'teacher-layout' : ''}}">
-    <media-player
-      class="media-player"
-      wx:if="{{ selectedPost }}"
-      selectedPost="{{ selectedPost }}"
-      followedUsers="{{ followedUsers }}"
-      authUser="{{ userInfo }}"
-      hasNext="{{ !!nextPostId }}"
-      hasPrevious="{{ !!previousPostId }}"
-      bind:postNavigation="handlePostNavigation"
-      bind:likeUpdated="handleLikeUpdated"
-      bind:favoriteUpdated="handleFavoriteUpdated"
-      bind:shareUpdated="handleShareUpdated"
-      bind:followUpdated="handleFollowUpdated"
-      bind:showLogin="showLoginModal"
-      bind:navigateToProfile="navigateToUserProfile"
-      bind:previousPost="handlePreviousPost"
-      bind:nextPost="handleNextPost"
-      bind:refreshPost="handleRefreshPost"
+    <!-- Vertical Swiper for Infinite Scroll -->
+    <swiper 
+      wx:if="{{ posts.length > 0 }}"
+      class="posts-swiper"
+      vertical="{{ true }}"
+      current="{{ currentIndex }}"
+      duration="300"
+      bindchange="onSwiperChange"
+      bindanimationfinish="onAnimationFinish"
+      circular="{{ false }}"
+      style="height: calc(100vh - 240rpx); width: 100vw;"
     >
-    </media-player>
+      <swiper-item 
+        wx:for="{{ posts }}" 
+        wx:key="id"
+        class="swiper-item"
+      >
+        <media-player
+          id="media-player-{{index}}"
+          selectedPost="{{ item }}"
+          followedUsers="{{ followedUsers }}"
+          authUser="{{ userInfo }}"
+          index="{{ index }}"
+          totalCount="{{ posts.length }}"
+          bind:postNavigation="handlePostNavigation"
+          bind:likeUpdated="handleLikeUpdated"
+          bind:favoriteUpdated="handleFavoriteUpdated"
+          bind:shareUpdated="handleShareUpdated"
+          bind:followUpdated="handleFollowUpdated"
+          bind:showLogin="showLoginModal"
+          bind:navigateToProfile="navigateToUserProfile"
+          class="media-player"
+        >
+        </media-player>
+      </swiper-item>
+    </swiper>
+    
+    <!-- Error State -->
+    <view wx:elif="{{ loadError }}" class="error-container">
+      <view class="error-icon">⚠️</view>
+      <text class="error-text">{{errorMessage}}</text>
+      <button class="retry-btn" bindtap="onRetry">重试</button>
+    </view>
+    
+    <!-- Empty State -->
+    <view wx:elif="{{ !posts.length && !isLoading }}" class="empty-container">
+      <view class="empty-icon">📭</view>
+      <text class="empty-text">暂无推荐内容</text>
+    </view>
   </view>
 </app-layout>

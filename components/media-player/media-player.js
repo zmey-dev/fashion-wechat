@@ -79,22 +79,7 @@ Component({
     containerWidth: 0,
     containerHeight: 0,
 
-    touchStartY: 0,
-    touchStartX: 0,
-    touchEndY: 0,
-    touchEndX: 0,
-    currentTouchY: 0,
-    isVerticalSwiping: false,
-    verticalTransform: 0, // Current vertical transform value
-    minSwipeDistance: 50, // Minimum distance for valid swipe
-    maxHorizontalThreshold: 100, // Maximum horizontal movement still considered vertical swipe
-    maxTransformDistance: 150, // Maximum transform distance for visual feedback
-
-    // TikTok-style swipe detection (minimal properties)
-    isSwipeGesture: false,
-    minSwipeDistance: 80,
-    maxSwipeTime: 600,
-    swipeVelocityThreshold: 0.5,
+    // Remove all swipe-related properties
     
     // API loading state
     isWaitingForApi: false,
@@ -282,11 +267,8 @@ Component({
       // isFirstEntry starts as true, becomes false after first load
       const shouldShowLoading = this.data.isFirstEntry;
       
-      // Use global loading for first entry
-      if (shouldShowLoading) {
-        const app = getApp();
-        app.showGlobalLoading('加载中...');
-      }
+      // Don't use global loading for media player navigation
+      // Loading should only be shown on initial page load, not during swipe navigation
       
       // Immediately set data and ensure all loading states are false
       this.setData({
@@ -332,13 +314,7 @@ Component({
       this.updateDisplayValues();
       this.startAutoPlay();
       
-      // Clear global loading after initial animation (only for very first entry)
-      if (shouldShowLoading) {
-        setTimeout(() => {
-          const app = getApp();
-          app.hideGlobalLoading();
-        }, 800); // Give enough time for initial loading animation
-      }
+      // No global loading to clear since we don't show it during navigation
       
       // Clear loading flag
       this.isCurrentlyLoading = false;
@@ -537,8 +513,6 @@ Component({
       const { currentSlideIndex } = this.data;
       if (currentSlideIndex > 0) {
         this.setData({ currentSlideIndex: currentSlideIndex - 1 });
-      } else {
-        this.moveToPreviousPost();
       }
     },
 
@@ -571,12 +545,13 @@ Component({
       }
     },
 
+    // Remove direct post navigation - will be handled by parent
     moveToPreviousPost() {
-      this.triggerEvent("previousPost");
+      // Disabled - navigation handled by parent swiper
     },
 
     moveToNextPost() {
-      this.triggerEvent("nextPost");
+      // Disabled - navigation handled by parent swiper
     },
 
     // Media Controls Events
@@ -1143,264 +1118,7 @@ Component({
       this.clearAutoPlayTimer();
     },
 
-    /**
-     * Touch event handlers for vertical swipe navigation
-     */
-    onTouchStart(e) {
-      if (this.data.showDetail || this.data.showReportModal) return;
-      const touch = e.touches[0];
-      this.setData({
-        touchStartY: touch.pageY,
-        touchStartX: touch.pageX,
-        currentTouchY: touch.pageY,
-        isVerticalSwiping: false,
-        verticalTransform: 0,
-      });
-    },
-
-    onTouchMove(e) {
-      if (this.data.showDetail || this.data.showReportModal) return;
-      const touch = e.touches[0];
-      const { touchStartY, touchStartX, maxTransformDistance } = this.data;
-
-      const deltaY = touch.pageY - touchStartY;
-      const deltaX = Math.abs(touch.pageX - touchStartX);
-      const absDeltaY = Math.abs(deltaY);
-
-      this.setData({ currentTouchY: touch.pageY }); // Check if this is a vertical swipe
-      if (absDeltaY > 10 && (absDeltaY > deltaX || deltaX < 30)) {
-        this.setData({ isVerticalSwiping: true });
-
-        // Calculate transform value with damping effect
-        let transformValue = deltaY;
-
-        // Apply damping when exceeding maximum distance
-        if (Math.abs(transformValue) > maxTransformDistance) {
-          const excess = Math.abs(transformValue) - maxTransformDistance;
-          const dampingFactor = 0.3; // Reduce movement when exceeding limit
-          transformValue =
-            transformValue > 0
-              ? maxTransformDistance + excess * dampingFactor
-              : -maxTransformDistance - excess * dampingFactor;
-        }
-
-        this.setData({ verticalTransform: transformValue });
-
-        // Return false to prevent default behavior
-        return false;
-      }
-    },
-
-    onTouchEnd(e) {
-      if (this.data.showDetail || this.data.showReportModal) return;
-      const touch = e.changedTouches[0];
-      const {
-        touchStartY,
-        touchStartX,
-        minSwipeDistance,
-        maxHorizontalThreshold,
-        isVerticalSwiping,
-        verticalTransform,
-      } = this.data;
-
-      if (!isVerticalSwiping) return;
-
-      this.setData({
-        touchEndY: touch.pageY,
-        touchEndX: touch.pageX,
-      });
-
-      const deltaY = touch.pageY - touchStartY;
-      const deltaX = Math.abs(touch.pageX - touchStartX);
-      const absDeltalY = Math.abs(deltaY);
-
-      // Check if this is a valid vertical swipe
-      if (absDeltalY >= minSwipeDistance && deltaX <= maxHorizontalThreshold) {
-        if (deltaY < 0) {
-          // Swipe up - next post
-          this.handleVerticalSwipeUp();
-        } else {
-          // Swipe down - previous post
-          this.handleVerticalSwipeDown();
-        }
-      } else {
-        // Invalid swipe - animate back to original position with subtle feedback
-        wx.vibrateShort({ type: 'light' });
-        this.animateBackToCenter();
-      }
-
-      // Reset touch data
-      this.setData({
-        touchStartY: 0,
-        touchStartX: 0,
-        touchEndY: 0,
-        touchEndX: 0,
-        currentTouchY: 0,
-        isVerticalSwiping: false,
-      });
-    },
-
-    /**
-     * Handle vertical swipe up (next post)
-     */ handleVerticalSwipeUp() {
-      // Animate swipe out and trigger next post
-      this.animateSwipeOut("up", () => {
-        this.moveToNextPost();
-      });
-    },
-
-    /**
-     * Handle vertical swipe down (previous post)
-     */
-    handleVerticalSwipeDown() {
-      // Animate swipe out and trigger previous post
-      this.animateSwipeOut("down", () => {
-        this.moveToPreviousPost();
-      });
-    },
-    /**
-     * Professional slide animation for post transitions
-     */
-    animateSwipeOut(direction, callback) {
-      // Add haptic feedback
-      wx.vibrateShort({ type: 'light' });
-      
-      // No animation - immediately execute callback
-      if (callback) {
-        callback();
-      }
-      
-      // Reset state immediately
-      this.resetToNormalState();
-    },
-
-    /**
-     * Reset to normal state immediately without animation (for faster transitions)
-     */
-    resetToNormalState() {
-      // Immediately reset all animation states without any transition
-      this.setData({
-        slideAnimation: null,
-        verticalTransform: 0,
-        animationOpacity: 1,
-        animationScale: 1,
-        isAnimating: false,
-        animationType: ""
-      });
-    },
-
-    /**
-     * Animate new post sliding in (wait for image loading)
-     */
-    animateSlideIn() {
-      // Reset position and prepare for slide in
-      this.setData({
-        verticalTransform: 0,
-        animationOpacity: 1,
-        animationScale: 1
-      });
-
-      // Check if current post has images that need loading
-      const { currentPost } = this.data;
-      if (currentPost && currentPost.type === 'image') {
-        // Start with loading state animation
-        this.animateLoadingState();
-        
-        // Wait for image loading completion
-        this.waitForImageLoading(() => {
-          this.animateContentIn();
-        });
-      } else {
-        // For videos, animate in immediately
-        this.animateContentIn();
-      }
-    },
-
-    /**
-     * Wait for image loading and then callback
-     */
-    waitForImageLoading(callback) {
-      const mediaDisplay = this.selectComponent('#media-display') || this.selectComponent('media-display');
-      if (!mediaDisplay) {
-        // Fallback if component not found
-        setTimeout(callback, 300);
-        return;
-      }
-
-      // Check loading state periodically
-      const checkInterval = 100;
-      const maxWaitTime = 5000; // Increased to 5 seconds max wait
-      let waitTime = 0;
-
-      const checkLoading = () => {
-        const loadingState = mediaDisplay.data.showImageLoader;
-        
-        if (!loadingState || waitTime >= maxWaitTime) {
-          callback();
-        } else {
-          waitTime += checkInterval;
-          setTimeout(checkLoading, checkInterval);
-        }
-      };
-
-      checkLoading();
-    },
-
-    /**
-     * Animate content in after loading complete
-     */
-    animateContentIn() {
-      // No animation - immediately show content
-      this.setData({
-        slideAnimation: null,
-        verticalTransform: 0,
-        animationOpacity: 1,
-        animationScale: 1,
-        isAnimating: false,
-        animationType: ""
-      });
-    },
-
-    /**
-     * Fast spring-back animation when swipe is invalid (no delay)
-     */
-    animateBackToCenter() {
-      // No animation - immediately reset to center
-      wx.vibrateShort({ type: 'light' });
-      
-      this.setData({
-        slideAnimation: null,
-        verticalTransform: 0,
-        animationOpacity: 1,
-        animationScale: 1
-      });
-    },
-
-    /**
-     * Loading state animation - smoother transition
-     */
-    animateLoadingState() {
-      // No animation for loading state
-      this.setData({
-        slideAnimation: null,
-        animationOpacity: 1,
-        animationScale: 1,
-        isAnimating: false
-      });
-    },
-
-    /**
-     * Restore from loading state
-     */
-    restoreFromLoadingState() {
-      // No animation - immediately restore state
-      this.setData({
-        slideAnimation: null,
-        animationOpacity: 1,
-        animationScale: 1,
-        isAnimating: false
-      });
-    },
+    // All touch event handlers removed - navigation handled by parent swiper
 
     /**
      * Audio mode management
@@ -1454,17 +1172,10 @@ Component({
       }
     },
     
-    /**
-     * Validate swipe gesture for TikTok-style navigation
-     */
-    isValidSwipe(distance, duration, velocity) {
-      return distance >= this.data.minSwipeDistance && 
-             duration <= this.data.maxSwipeTime && 
-             velocity >= this.data.swipeVelocityThreshold;
-    },
+    // Swipe validation removed - handled by parent
     
     /**
-     * Handle post change completion - TikTok style
+     * Handle post change completion
      */
     onPostChanged() {
       
@@ -1486,13 +1197,6 @@ Component({
       
       // Clear any existing autoplay timer from previous post
       this.clearAutoPlayTimer();
-      
-      // Reset any swipe states
-      this.setData({
-        isSwipeGesture: false,
-        isTouching: false,
-        isSwipeActive: false
-      });
       
       // Start autoplay if conditions are met for both image and video
       if (this.data.currentPost && this.data.isPlaying) {

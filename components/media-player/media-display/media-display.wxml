@@ -17,9 +17,6 @@ bindtap="onScreenTap"
     <swiper-item wx:for="{{ currentMedia }}" wx:key="id" class="media-item">
       <view class="media-wrapper">
         <image
-          width="100%"
-          height="100%"
-          mode="aspectFill"
           class="media-image"
           id="media-image"
           src="{{ item.url }}"

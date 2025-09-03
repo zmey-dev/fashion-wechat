@@ -19,7 +19,7 @@
   height: 100%;
   box-sizing: border-box;
   display: flex;
-  flex-direction: column;
+  align-items: center;
   justify-content: center;
 }
 
@@ -28,6 +28,9 @@
   height: 100%;
   position: relative;
   z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .media-item {
@@ -50,6 +53,8 @@
 .media-image {
   width: 100%;
   height: 100%;
+  max-width: 100vw;
+  max-height: 100vh;
   object-fit: contain;
   position: relative;
   z-index: 2;
@@ -58,9 +63,12 @@
 .media-video {
   width: 100%;
   height: 100%;
+  max-width: 100vw;
+  max-height: 100vh;
   position: relative;
   z-index: 2;
   background-color: transparent;
+  object-fit: contain;
 }
 
 /* Play Indicator Overlay */

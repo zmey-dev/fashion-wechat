@@ -2,29 +2,30 @@
 .page-container {
   position: relative;
   width: 100vw;
-  height: calc(100vh - env(safe-area-inset-bottom));
-  height: calc(100vh - constant(safe-area-inset-bottom)); /* iOS 11.0 fallback */
+  height: 100%;
   background-color: #000;
+  overflow: hidden;
 }
 
 .post-viewer-container {
   position: relative;
-  width: 100%;
-  height: calc(100vh - 240rpx - env(safe-area-inset-bottom));
-  height: calc(100vh - 240rpx - constant(safe-area-inset-bottom)); /* iOS 11.0 fallback */
+  width: 100vw;
+  height: 100%;
   background-color: #000;
+  overflow: hidden;
 }
 
-/* Teacher layout - smaller container height */
+/* Teacher layout - no tab bar */
 .post-viewer-container.teacher-layout {
-  height: calc(100vh - 120rpx - env(safe-area-inset-bottom));
-  height: calc(100vh - 120rpx - constant(safe-area-inset-bottom)); /* iOS 11.0 fallback */
+  height: calc(100vh - 120rpx);
 }
 
 /* Media player smooth transitions */
 media-player {
   opacity: 1;
   transition: opacity 0.3s ease-in-out;
+  width: 100%;
+  height: 100%;
 }
 
 .loading-container {
@@ -43,23 +44,13 @@ media-player {
   transition: opacity 0.2s ease-in-out;
 }
 
-/* Navigation loading indicator - subtle indicator during cached transitions */
+/* Navigation loading indicator - hidden */
 .navigation-loading {
-  position: absolute;
-  top: 40rpx;
-  right: 40rpx;
-  z-index: 1000;
-  pointer-events: none;
+  display: none;
 }
 
 .navigation-indicator {
-  width: 60rpx;
-  height: 60rpx;
-  border: 4rpx solid rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
-  border-top-color: rgba(255, 255, 255, 0.8);
-  animation: spin 1s linear infinite;
-  background-color: rgba(0, 0, 0, 0.5);
+  display: none;
 }
 
 .loading-spinner {
@@ -165,4 +156,20 @@ media-player {
   align-items: center;
   background-color: rgba(0, 0, 0, 0.1);
   z-index: 1000;
+}
+
+/* Swiper styles for infinite scroll */
+.posts-swiper {
+  width: 100% !important;
+  height: 100% !important;
+  position: relative !important;
+}
+
+.swiper-item {
+  width: 100% !important;
+  height: 100% !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }

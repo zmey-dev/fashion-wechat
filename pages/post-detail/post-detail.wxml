@@ -3,32 +3,47 @@
   <!-- Login Modal -->
   <login-modal wx:if="{{ showLoginModal }}" class="login-modal" />
   
-  <!-- Post Viewer Container -->
+  <!-- Post Viewer Container with Swiper -->
   <view class="post-viewer-container {{userInfo.role === 'teacher' ? 'teacher-layout' : ''}}">
-    <!-- Media Player Component - Show when post exists -->
-    <media-player
-      id="media-player"
-      wx:if="{{ post }}"
-      selectedPost="{{ post }}"
-      selectedPostUser="{{ post.user }}"
-      followedUsers="{{ followedUsers }}"
-      authUser="{{ userInfo }}"
-      index="{{ 0 }}"
-      totalCount="{{ 1 }}"
-      event-id="{{ eventId }}"
-      is-event-expired="{{ isEventExpired }}"
-      is-loading="{{ false }}"
-      bind:postNavigation="handlePostNavigation"
-      bind:likeUpdated="handleLikeUpdated"
-      bind:favoriteUpdated="handleFavoriteUpdated"
-      bind:shareUpdated="handleShareUpdated"
-      bind:followUpdated="handleFollowUpdated"
-      bind:showLogin="showLoginModal"
-      bind:navigateToProfile="navigateToUserProfile"
-      bind:previousPost="handlePreviousPost"
-      bind:nextPost="handleNextPost"
+    <!-- Vertical Swiper for Infinite Scroll -->
+    <swiper 
+      wx:if="{{ posts.length > 0 }}"
+      class="posts-swiper"
+      vertical="{{ true }}"
+      current="{{ currentIndex }}"
+      duration="300"
+      bindchange="onSwiperChange"
+      bindanimationfinish="onAnimationFinish"
+      circular="{{ false }}"
+      style="height: calc(100vh - 240rpx); width: 100vw;"
     >
-    </media-player>
+      <swiper-item 
+        wx:for="{{ posts }}" 
+        wx:key="id"
+        class="swiper-item"
+      >
+        <media-player
+          id="media-player-{{index}}"
+          selectedPost="{{ item }}"
+          selectedPostUser="{{ item.user }}"
+          followedUsers="{{ followedUsers }}"
+          authUser="{{ userInfo }}"
+          index="{{ index }}"
+          totalCount="{{ posts.length }}"
+          event-id="{{ eventId }}"
+          is-event-expired="{{ isEventExpired }}"
+          is-loading="{{ false }}"
+          bind:postNavigation="handlePostNavigation"
+          bind:likeUpdated="handleLikeUpdated"
+          bind:favoriteUpdated="handleFavoriteUpdated"
+          bind:shareUpdated="handleShareUpdated"
+          bind:followUpdated="handleFollowUpdated"
+          bind:showLogin="showLoginModal"
+          bind:navigateToProfile="navigateToUserProfile"
+        >
+        </media-player>
+      </swiper-item>
+    </swiper>
 
     
     

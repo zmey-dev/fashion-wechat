@@ -13,27 +13,21 @@ Page({
     search: "",
     universityId: "",
     
-    // Post data
-    post: null,
-    nextPostId: null,
-    previousPostId: null,
-    
-    // Removed pre-cached posts to disable caching
+    // Swiper infinite scroll data
+    posts: [], // Array of posts for swiper
+    currentIndex: 1, // Start at middle (index 1)
+    isLoadingNext: false,
+    isLoadingPrev: false,
     
     // Loading states
     isLoading: false,
     hasError: false,
     errorMessage: "",
-    isNavigating: false, // Separate flag for navigation loading
-    isTransitioning: false, // Flag to prevent empty state during post transitions
-    hasLoadedOnce: false, // Flag to track if we've attempted to load data at least once
+    hasLoadedOnce: false,
     
     // User state
     userInfo: null,
     showLoginModal: false,
-    
-    // Media loading flag to prevent duplicates
-    mediaInitialized: false,
     
     // UI messages (Chinese for user interface)
     messages: {
@@ -62,10 +56,6 @@ Page({
       return;
     }
     
-    // Initialize loading flags
-    this.isLoadingPost = false;
-    this.loadingPostId = null;
-    
     // Set initial data
     this.setData({
       postId: postId,
@@ -83,19 +73,266 @@ Page({
     // Subscribe to global events
     this.subscribeToGlobalEvents();
     
-    // Start loading the post
-    this.loadPostData();
+    // Initialize with current post
+    this.initializeInfiniteScroll(postId);
   },
 
   onShow: function() {
-    // Only reload if no post data exists and not currently loading
-    if (!this.data.post && !this.data.isLoading && this.data.postId && !this.data.hasLoadedOnce) {
-      this.loadPostData();
+    // Only reload if no posts exist
+    if (this.data.posts.length === 0 && !this.data.isLoading && this.data.postId) {
+      this.initializeInfiniteScroll(this.data.postId);
     }
   },
 
   onUnload: function() {
     this.unsubscribeFromGlobalEvents();
+  },
+
+  // Initialize infinite scroll with current, previous, and next posts
+  initializeInfiniteScroll: async function(postId) {
+    if (this.data.isLoading) return;
+    
+    this.setData({
+      isLoading: true,
+      hasError: false,
+      posts: []
+    });
+    
+    // Show loading only for initial load
+    const app = getApp();
+    app.showGlobalLoading('加载中...');
+
+    try {
+      // Load current post with neighbors
+      const data = await this.loadPostWithNeighbors(postId);
+      
+      if (data && data.current) {
+        // Build initial posts array [prev, current, next]
+        const posts = [];
+        
+        // Add previous if exists
+        if (data.previous) {
+          posts.push(data.previous);
+        }
+        
+        // Add current (always exists)
+        posts.push(data.current);
+        
+        // Add next if exists  
+        if (data.next) {
+          posts.push(data.next);
+        }
+        
+        // Determine current index based on what's available
+        let currentIndex = 0;
+        if (data.previous) {
+          currentIndex = 1; // Current is at index 1 if previous exists
+        }
+        
+        this.setData({
+          posts: posts,
+          currentIndex: currentIndex,
+          isLoading: false,
+          hasLoadedOnce: true
+        });
+        
+        // Hide loading after initial load
+        app.hideGlobalLoading();
+      } else {
+        app.hideGlobalLoading();
+        this.showError(this.data.messages.noPostFound);
+      }
+    } catch (error) {
+      const app = getApp();
+      app.hideGlobalLoading();
+      this.showError(this.data.messages.networkError);
+    }
+  },
+
+  // Load post with its neighbors
+  loadPostWithNeighbors: function(postId) {
+    return new Promise((resolve, reject) => {
+      const apiParams = { 
+        type: this.data.type 
+      };
+      
+      if (this.data.userId) apiParams.user_id = this.data.userId;
+      if (this.data.eventId) apiParams.event_id = this.data.eventId;
+      if (this.data.filter) apiParams.filter = this.data.filter;
+      if (this.data.search) apiParams.search = this.data.search;
+      if (this.data.universityId) apiParams.university_id = this.data.universityId;
+      
+      const requestHeaders = {
+        "Content-Type": "application/json"
+      };
+      
+      if (this.data.userInfo && this.data.userInfo.token) {
+        requestHeaders.Authorization = `Bearer ${this.data.userInfo.token}`;
+      }
+      
+      wx.request({
+        url: `${config.BACKEND_URL}/v2/post/detail/${postId}`,
+        method: "GET",
+        data: apiParams,
+        header: requestHeaders,
+        success: (response) => {
+          if (response.statusCode === 200 && response.data.status === "success") {
+            resolve({
+              current: response.data.current || response.data.post,
+              next: response.data.next,
+              previous: response.data.previous
+            });
+          } else {
+            reject(new Error(response.data?.message || "Failed to load"));
+          }
+        },
+        fail: reject
+      });
+    });
+  },
+
+  // Handle swiper change event
+  onSwiperChange: function(e) {
+    const newIndex = e.detail.current;
+    const oldIndex = this.data.currentIndex;
+    
+    // Prevent redundant updates
+    if (newIndex === oldIndex) return;
+    
+    this.setData({ currentIndex: newIndex });
+    
+    // Check if we need to load more posts
+    const { posts } = this.data;
+    
+    // Load previous posts when reaching first item
+    if (newIndex === 0 && oldIndex > 0) {
+      this.loadPreviousPost();
+    }
+    // Load next posts when reaching last item
+    else if (newIndex === posts.length - 1 && newIndex > oldIndex) {
+      this.loadNextPost();
+    }
+  },
+
+  // Load previous post for infinite scroll
+  loadPreviousPost: async function() {
+    if (this.data.isLoadingPrev) return;
+    
+    const { posts, currentIndex } = this.data;
+    const currentPost = posts[currentIndex];
+    
+    // Check if current post has previous_post_id
+    if (!currentPost || !currentPost.id) return;
+    
+    this.setData({ isLoadingPrev: true });
+    
+    try {
+      // Load the previous post's data
+      const data = await this.loadPostWithNeighbors(currentPost.id);
+      
+      if (data && data.previous) {
+        // Add previous post to beginning of array
+        const newPosts = [data.previous, ...posts];
+        
+        // Keep array size manageable (max 5 posts)
+        if (newPosts.length > 5) {
+          newPosts.pop(); // Remove last post
+        }
+        
+        this.setData({
+          posts: newPosts,
+          currentIndex: currentIndex + 1, // Adjust index since we added at beginning
+          isLoadingPrev: false
+        });
+      } else {
+        // No more previous posts
+        wx.showToast({
+          title: this.data.messages.firstPost,
+          icon: 'none',
+          duration: 1500
+        });
+        this.setData({ isLoadingPrev: false });
+      }
+    } catch (error) {
+      this.setData({ isLoadingPrev: false });
+    }
+  },
+
+  // Load next post for infinite scroll
+  loadNextPost: async function() {
+    if (this.data.isLoadingNext) return;
+    
+    const { posts, currentIndex } = this.data;
+    const currentPost = posts[currentIndex];
+    
+    if (!currentPost || !currentPost.id) return;
+    
+    this.setData({ isLoadingNext: true });
+    
+    try {
+      // Load the next post's data
+      const data = await this.loadPostWithNeighbors(currentPost.id);
+      
+      if (data && data.next) {
+        // Add next post to end of array
+        const newPosts = [...posts, data.next];
+        
+        // Keep array size manageable (max 5 posts)
+        if (newPosts.length > 5) {
+          newPosts.shift(); // Remove first post
+          // Adjust current index since we removed from beginning
+          this.setData({
+            posts: newPosts,
+            currentIndex: currentIndex - 1,
+            isLoadingNext: false
+          });
+        } else {
+          this.setData({
+            posts: newPosts,
+            isLoadingNext: false
+          });
+        }
+      } else {
+        // No more next posts
+        wx.showToast({
+          title: this.data.messages.lastPost,
+          icon: 'none',
+          duration: 1500
+        });
+        this.setData({ isLoadingNext: false });
+      }
+    } catch (error) {
+      this.setData({ isLoadingNext: false });
+    }
+  },
+
+  // Animation finish handler
+  onAnimationFinish: function(e) {
+    // Clean up posts array if needed after animation completes
+    const { posts, currentIndex } = this.data;
+    
+    // Maintain a window of 5 posts maximum for performance
+    if (posts.length > 5) {
+      let newPosts = [...posts];
+      let newIndex = currentIndex;
+      
+      // Remove posts that are too far from current position
+      if (currentIndex > 3) {
+        // Remove from beginning
+        newPosts = newPosts.slice(-5);
+        newIndex = currentIndex - (posts.length - 5);
+      } else if (currentIndex < 2 && posts.length > 5) {
+        // Remove from end
+        newPosts = newPosts.slice(0, 5);
+      }
+      
+      if (newPosts.length !== posts.length) {
+        this.setData({
+          posts: newPosts,
+          currentIndex: newIndex
+        });
+      }
+    }
   },
 
   // Subscribe to global application events
@@ -122,528 +359,55 @@ Page({
     }
   },
 
-  // Main function to load post data from API
-  loadPostData: function() {
-    if (!this.data.postId) {
-      return;
-    }
-    
-    // Simple duplicate prevention - only check if same request is in progress
-    if (this.isLoadingPost && this.loadingPostId === this.data.postId) {
-      return;
-    }
-    
-    // Set loading flags
-    this.isLoadingPost = true;
-    this.loadingPostId = this.data.postId;
-    
-    // Only show loading for initial page load, not navigation
-    const shouldShowLoading = !this.data.hasLoadedOnce || (!this.data.isNavigating && !this.data.post);
-    
-    // Use global loading
-    const app = getApp();
-    if (shouldShowLoading) {
-      app.showGlobalLoading('加载中...');
-    }
-    
-    this.setData({
-      isLoading: false, // Don't use local loading anymore
-      hasError: false,
-      errorMessage: "",
-      mediaInitialized: false,
-      hasLoadedOnce: true, // Mark that we've started loading
-      // Don't change isNavigating here - let navigation flow control it
-    });
-    
-    // Build query parameters for API request
-    const apiParams = { 
-      type: this.data.type 
-    };
-    
-    if (this.data.userId) {
-      apiParams.user_id = this.data.userId;
-    }
-    if (this.data.eventId) {
-      apiParams.event_id = this.data.eventId;
-    }
-    if (this.data.filter) {
-      apiParams.filter = this.data.filter;
-    }
-    if (this.data.search) {
-      apiParams.search = this.data.search;
-    }
-    if (this.data.universityId) {
-      apiParams.university_id = this.data.universityId;
-    }
-    
-    // Build request headers
-    const requestHeaders = {
-      "Content-Type": "application/json"
-    };
-    
-    if (this.data.userInfo && this.data.userInfo.token) {
-      requestHeaders.Authorization = `Bearer ${this.data.userInfo.token}`;
-    }
-    
-    const apiUrl = `${config.BACKEND_URL}/v2/post/detail/${this.data.postId}`;
-    
-    // Execute API request
-    wx.request({
-      url: apiUrl,
-      method: "GET",
-      data: apiParams,
-      header: requestHeaders,
-      success: (response) => {
-        // Let handleApiSuccessResponse manage loading state
-        this.handleApiSuccessResponse(response);
-      },
-      fail: (error) => {
-        // Let handleApiErrorResponse manage loading state
-        this.handleApiErrorResponse(error);
-      },
-      complete: () => {
-        // Clear loading flags
-        this.isLoadingPost = false;
-        this.loadingPostId = null;
-        
-        // Don't force loading state here - let success/error handlers manage it
-      },
-    });
-  },
-
-  // Handle successful API response with navigation caching
-  handleApiSuccessResponse: function(response) {
-    if (response.statusCode !== 200) {
-      this.showError(this.data.messages.networkError);
-      return;
-    }
-    
-    if (!response.data || response.data.status !== "success") {
-      const errorMessage = response.data?.message || this.data.messages.loadFailed;
-      this.showError(errorMessage);
-      return;
-    }
-    
-    const responseData = response.data;
-    const postData = responseData.current || responseData.post;
-    
-    if (!postData) {
-      this.showError(this.data.messages.noPostFound);
-      return;
-    }
-    
-    // Extract navigation data
-    const nextPostId = this.extractPostIdFromData(responseData.next || responseData.next_post, responseData.next_post_id);
-    const previousPostId = this.extractPostIdFromData(responseData.previous || responseData.previous_post, responseData.previous_post_id);
-    const nextPost = responseData.next || null;
-    const previousPost = responseData.previous || null;
-    
-    // Update with complete data without caching
-    this.setData({
-      post: postData,
-      nextPostId: nextPostId,
-      previousPostId: previousPostId,
-      // Removed cached posts to disable instant navigation
-      hasError: false,
-      errorMessage: "",
-      isLoading: false,
-      isNavigating: false, // Stop navigation indicator
-      isTransitioning: false, // Clear transition flag
-    });
-    
-    // Hide global loading
-    const app = getApp();
-    app.hideGlobalLoading();
-    
-    // Initialize media player if not already done (for new posts)
-    if (!this.data.mediaInitialized) {
-      setTimeout(() => {
-        this.initializeMediaPlayerForPost();
-      }, 100);
-    }
-    
-    // For video posts, add additional safety net to clear loading
-    if (postData && postData.type === 'video') {
-      setTimeout(() => {
-        this.setData({
-          isLoading: false,
-          isNavigating: false
-        });
-      }, 1500);
-    }
-  },
-
-  // Handle API request error
-  handleApiErrorResponse: function(error) {
-    this.showError(this.data.messages.networkError);
-  },
-
   // Display error message to user
   showError: function(message) {
-    // Clear loading states
-    this.isLoadingPost = false;
-    this.loadingPostId = null;
-    
     this.setData({
       hasError: true,
       errorMessage: message,
       isLoading: false,
-      isNavigating: false, // Clear navigation flag on error
-      isTransitioning: false, // Clear transition flag on error
-      // Don't clear post on error to avoid showing empty state
-    });
-    
-    // Hide global loading on error
-    const app = getApp();
-    app.hideGlobalLoading();
-  },
-
-  // Extract post ID from post object or use fallback ID
-  extractPostIdFromData: function(postObject, fallbackId) {
-    if (postObject && typeof postObject === 'object' && postObject.id) {
-      return postObject.id;
-    }
-    return fallbackId || null;
-  },
-
-  // Simplified media player initialization with immediate execution
-  initializeMediaPlayerForPost: function() {
-    if (this.data.mediaInitialized || this.isInitializingMedia) {
-      return;
-    }
-    
-    if (!this.data.post || !this.data.post.id) {
-      return;
-    }
-    
-    // Set initialization flags
-    this.isInitializingMedia = true;
-    
-    // Force ensure loading is stopped
-    this.setData({ 
-      mediaInitialized: true,
-      isLoading: false // Force stop loading during initialization
-    });
-    
-    // Use direct initialization approach
-    this.initializeMediaPlayerDirect();
-  },
-
-  // Direct media player initialization without delays
-  initializeMediaPlayerDirect: function() {
-    // Force stop loading immediately
-    this.setData({ isLoading: false });
-    
-    // Try immediate component selection
-    const component = this.selectComponent('#media-player');
-    if (component) {
-      this.callMediaPlayerMethods(component);
-      return;
-    }
-    
-    // If not found immediately, try once after nextTick
-    wx.nextTick(() => {
-      const componentAfterTick = this.selectComponent('#media-player');
-      if (componentAfterTick) {
-        this.callMediaPlayerMethods(componentAfterTick);
-      } else {
-        this.setData({ mediaInitialized: false });
-        this.isInitializingMedia = false;
-      }
     });
   },
-  
-  // Try immediate component initialization
-  tryImmediateComponentInit: function() {
-    const selectors = [
-      '#media-player',
-      '.media-player', 
-      'media-player'
-    ];
-    
-    for (let selector of selectors) {
-      try {
-        const component = this.selectComponent(selector);
-        if (component) {
-                this.callMediaPlayerMethods(component);
-          return true;
-        }
-      } catch (error) {
-        // Error with selector - continue to next
-      }
-    }
-    
-    // No component found immediately
-    return false;
-  },
-  
-  // Try delayed initialization with progressive delays and loading control
-  tryDelayedInit: function(index, delays) {
-    if (index >= delays.length) {
-      // All delayed initialization attempts failed
-      
-      // Ensure loading is stopped even if initialization fails
-      this.setData({ 
-        mediaInitialized: false,
-        isLoading: false // Force stop loading
-      });
-      
-      // Clear initialization flag
-      this.isInitializingMedia = false;
-      return;
-    }
-    
-    const delay = delays[index];
-    // Trying delayed init with delay
-    
-    setTimeout(() => {
-      // Ensure loading is still stopped during retry
-      if (this.data.isLoading) {
-        this.setData({ isLoading: false });
-      }
-      
-      const success = this.tryImmediateComponentInit();
-      if (!success) {
-        this.tryDelayedInit(index + 1, delays);
-      }
-    }, delay);
-  },
-  
-  // Call media player methods with enhanced error handling
-  callMediaPlayerMethods: function(component) {
-    try {
-      // Method 1: Force stop all loading states immediately
-      if (typeof component.setData === 'function') {
-        component.setData({
-          isWaitingForApi: false,
-          isLoading: false
-        });
-      }
-      
-      // Method 2: onPostChanged
-      if (typeof component.onPostChanged === 'function') {
-        component.onPostChanged();
-      }
-      
-      // Method 3: onApiLoadComplete
-      if (typeof component.onApiLoadComplete === 'function') {
-        component.onApiLoadComplete();
-      }
-      
-    } catch (error) {
-      this.setData({ mediaInitialized: false });
-    } finally {
-      // Clear initialization flag
-      this.isInitializingMedia = false;
-    }
-  },
 
-  
-
-  // Navigate to previous post in sequence with instant display
-  handlePreviousPost: function() {
-    if (!this.data.previousPostId) {
-      wx.showToast({
-        title: this.data.messages.firstPost,
-        icon: "none",
-      });
-      return;
-    }
-    
-    this.navigateToPostById(this.data.previousPostId, 'previous');
-  },
-
-  // Navigate to next post in sequence with instant display
-  handleNextPost: function() {
-    if (!this.data.nextPostId) {
-      wx.showToast({
-        title: this.data.messages.lastPost,
-        icon: "none",
-      });
-      return;
-    }
-    
-    this.navigateToPostById(this.data.nextPostId, 'next');
-  },
-
-  // Navigate to specific post by ID without caching
-  navigateToPostById: function(postId, direction = 'unknown') {
-    // Only prevent if exactly same post ID
-    if (this.data.postId === postId) {
-      return;
-    }
-    
-    // Always load fresh data without caching
-    this.isLoadingPost = false;
-    
-    // Update state for navigation - keep current post visible
-    this.setData({
-      postId: postId,
-      // Keep current post visible - don't set to null during navigation
-      isLoading: false,  // Don't show loading during navigation
-      isNavigating: true, // Set navigation flag to prevent empty state
-      isTransitioning: true, // Prevent empty state during transition
-      mediaInitialized: false,
-      hasError: false,
-      errorMessage: "",
-      hasLoadedOnce: true, // Mark that we've started loading
-    });
-    
-    // Load post data immediately
-    this.loadPostData();
-  },
-
-  // Handle user profile tap event
-  onUserTap: function(event) {
-    const username = event.currentTarget.dataset.username;
-    if (username && app.handleGoUserProfile) {
-      app.handleGoUserProfile(username);
-    }
-  },
-
-  // Handle login modal close event
-  onLoginClose: function() {
-    if (app.setState) {
-      app.setState("showLoginModal", false);
-    }
-  },
-
-  // Handle successful login event
-  onLoginSuccess: function() {
-    this.setData({
-      userInfo: app.globalData.userInfo,
-    });
-    
-    // Reload current post with authentication if needed
-    if (this.data.postId && !this.data.isLoading) {
-      this.loadPostData();
-    }
-  },
-
-  // Handle retry button tap event
+  // Retry loading
   onRetry: function() {
-    if (this.data.postId && !this.data.isLoading) {
-      this.loadPostData();
+    if (this.data.postId) {
+      this.initializeInfiniteScroll(this.data.postId);
+    } else {
+      wx.navigateBack();
     }
   },
 
-  // Handle page refresh event (pull down or manual)
-  onRefresh: function() {
-    if (this.data.postId && !this.data.isLoading) {
-      this.setData({
-        post: null,
-        mediaInitialized: false,
-        hasError: false,
-        errorMessage: "",
+  // Event handlers from media player
+  handlePostNavigation: function(e) {
+    // Navigation is now handled by swiper
+  },
+
+  handleLikeUpdated: function(e) {
+    // Update like status in posts array if needed
+  },
+
+  handleFavoriteUpdated: function(e) {
+    // Update favorite status in posts array if needed
+  },
+
+  handleShareUpdated: function(e) {
+    // Handle share update
+  },
+
+  handleFollowUpdated: function(e) {
+    // Handle follow update
+  },
+
+  showLoginModal: function() {
+    app.setState("showLoginModal", true);
+  },
+
+  navigateToUserProfile: function(e) {
+    const { username } = e.detail;
+    if (username) {
+      wx.navigateTo({
+        url: `/pages/user-profile/user-profile?username=${username}`
       });
-      this.loadPostData();
     }
-  },
-
-  // Manual retry for media player initialization (can be called from WXML)
-  retryMediaPlayerInit: function() {
-    if (this.data.post && !this.data.mediaInitialized) {
-      this.setData({ mediaInitialized: false });
-      this.initializeMediaPlayerForPost();
-    }
-  },
-
-  // Handle retry button tap event
-  onRetry: function() {
-    if (this.data.postId && !this.data.isLoading) {
-      this.setData({
-        hasError: false,
-        errorMessage: "",
-        post: null,
-        mediaInitialized: false,
-        hasLoadedOnce: true, // Keep the flag since we're retrying
-      });
-      this.loadPostData();
-    }
-  },
-  
-  
-  // Load post data in background (for cached navigation)
-  loadPostDataInBackground: function() {
-    if (!this.data.postId) {
-      return;
-    }
-    
-    // Build request parameters
-    const apiParams = { 
-      type: this.data.type 
-    };
-    
-    if (this.data.userId) {
-      apiParams.user_id = this.data.userId;
-    }
-    if (this.data.eventId) {
-      apiParams.event_id = this.data.eventId;
-    }
-    if (this.data.filter) {
-      apiParams.filter = this.data.filter;
-    }
-    
-    // Build request headers
-    const requestHeaders = {
-      "Content-Type": "application/json"
-    };
-    
-    if (this.data.userInfo && this.data.userInfo.token) {
-      requestHeaders.Authorization = `Bearer ${this.data.userInfo.token}`;
-    }
-    
-    const apiUrl = `${config.BACKEND_URL}/v2/post/detail/${this.data.postId}`;
-    
-    // Execute background API request
-    wx.request({
-      url: apiUrl,
-      method: "GET",
-      data: apiParams,
-      header: requestHeaders,
-      success: (response) => {
-        this.handleBackgroundApiResponse(response);
-      },
-      fail: (error) => {
-        // Don't show error for background requests
-        this.setData({ isNavigating: false });
-      },
-      complete: () => {
-        // Background API request completed
-      },
-    });
-  },
-  
-  // Handle background API response (update with complete data)
-  handleBackgroundApiResponse: function(response) {
-    if (response.statusCode !== 200 || !response.data || response.data.status !== "success") {
-      this.setData({ isNavigating: false });
-      return;
-    }
-    
-    const responseData = response.data;
-    const postData = responseData.current || responseData.post;
-    
-    if (!postData || postData.id !== this.data.postId) {
-      this.setData({ isNavigating: false });
-      return;
-    }
-    
-    // Extract navigation data
-    const nextPostId = this.extractPostIdFromData(responseData.next || responseData.next_post, responseData.next_post_id);
-    const previousPostId = this.extractPostIdFromData(responseData.previous || responseData.previous_post, responseData.previous_post_id);
-    const nextPost = responseData.next || null;
-    const previousPost = responseData.previous || null;
-    
-    // Update with complete data
-    this.setData({
-      post: postData, // Update with complete post data
-      nextPostId: nextPostId,
-      previousPostId: previousPostId,
-      nextPost: nextPost,
-      previousPost: previousPost,
-      isNavigating: false,
-    });
-  },
-  
+  }
 });

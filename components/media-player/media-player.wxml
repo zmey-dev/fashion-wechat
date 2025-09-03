@@ -1,10 +1,6 @@
 <!-- components/media-player/media-player.wxml -->
 <view 
-  class="media-player" 
-  bindtouchstart="onTouchStart"
-  bindtouchmove="onTouchMove"
-  bindtouchend="onTouchEnd"
-  catchtouchmove="onTouchMove"
+  class="media-player"
 >
   <!-- Blur Background -->
   <view class="blur-background-container">
