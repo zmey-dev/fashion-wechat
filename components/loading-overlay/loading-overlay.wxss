@@ -66,7 +66,7 @@
 
 .loading-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #f06292, #ec407a, #e91e63);
+  background: linear-gradient(90deg, #4caf50, #66bb6a, #81c784);
   border-radius: 3rpx;
   animation: progress 1.5s ease-in-out infinite;
 }
