@@ -74,6 +74,9 @@ Component({
   detached() {
     // Clean up event listeners
     wx.offWindowResize && wx.offWindowResize();
+    
+    // Clean up audio context to prevent memory leaks
+    this.destroyUploadedAudio();
   },
 
   methods: {
@@ -98,10 +101,8 @@ Component({
         videoContext.seek(0);
       }
       
-      // Pause uploaded audio but don't destroy context to avoid reloading
-      if (this.audioContext) {
-        this.audioContext.pause();
-      }
+      // Destroy uploaded audio context to prevent multiple audio playback
+      this.destroyUploadedAudio();
       
       // Show video again after a delay with fresh source
       setTimeout(() => {
@@ -450,12 +451,19 @@ Component({
       const { currentPost } = this.properties;
       if (!currentPost || !currentPost.audio_url) return;
       
-      // Create or get audio context
-      if (!this.audioContext) {
-        this.audioContext = wx.createInnerAudioContext();
-        this.audioContext.src = currentPost.audio_url;
-        this.audioContext.loop = true;
-      }
+      // Destroy previous audio context first to prevent multiple audio playback
+      this.destroyUploadedAudio();
+      
+      // Create new audio context for current post
+      this.audioContext = wx.createInnerAudioContext();
+      this.audioContext.src = currentPost.audio_url;
+      this.audioContext.loop = true;
+      
+      // Add error handling
+      this.audioContext.onError((err) => {
+        console.error('Audio playback error:', err);
+        this.destroyUploadedAudio();
+      });
       
       this.audioContext.play();
     },
@@ -466,6 +474,18 @@ Component({
     muteUploadedAudio() {
       if (this.audioContext) {
         this.audioContext.pause();
+      }
+    },
+
+    /**
+     * Destroy uploaded audio context to prevent memory leaks and multiple audio playback
+     */
+    destroyUploadedAudio() {
+      if (this.audioContext) {
+        // Stop and destroy the audio context completely
+        this.audioContext.stop();
+        this.audioContext.destroy();
+        this.audioContext = null;
       }
     }
   }

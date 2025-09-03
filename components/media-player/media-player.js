@@ -480,15 +480,18 @@ Component({
           videoContext.pause();
           videoContext.seek(0);  // Reset to beginning
         }
+        
+        // Stop uploaded audio if exists
+        if (mediaDisplay.destroyUploadedAudio) {
+          mediaDisplay.destroyUploadedAudio();
+        }
       }
+      
+      // Notify parent of play state change
+      this.triggerEvent('playStateChanged', { isPlaying: false });
     },
 
     playMedia() {
-      console.log('playMedia called', {
-        postType: this.data.currentPost?.type,
-        postId: this.data.currentPost?.id,
-        mediaLength: this.data.mediaLength
-      });
       
       // Ensure we start from first slide and clear any existing timer
       this.clearAutoPlayTimer();
