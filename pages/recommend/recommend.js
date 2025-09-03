@@ -217,27 +217,28 @@ Page({
     // Prevent redundant updates
     if (newIndex === oldIndex) return;
     
-    // Pause old media player
-    if (oldIndex >= 0 && oldIndex < this.data.posts.length) {
-      const oldMediaPlayer = this.selectComponent(`#media-player-${oldIndex}`);
-      if (oldMediaPlayer) {
-        oldMediaPlayer.pauseMedia && oldMediaPlayer.pauseMedia();
+    // Pause ALL media players first
+    const { posts } = this.data;
+    posts.forEach((post, index) => {
+      const mediaPlayer = this.selectComponent(`#media-player-${index}`);
+      if (mediaPlayer && mediaPlayer.pauseMedia) {
+        mediaPlayer.pauseMedia();
       }
-    }
+    });
     
     this.setData({ currentIndex: newIndex });
     
-    // Play new media player
-    if (newIndex >= 0 && newIndex < this.data.posts.length) {
+    // Play only the current media player with longer delay to ensure clean state
+    if (newIndex >= 0 && newIndex < posts.length) {
       const newMediaPlayer = this.selectComponent(`#media-player-${newIndex}`);
       if (newMediaPlayer) {
         setTimeout(() => {
           newMediaPlayer.playMedia && newMediaPlayer.playMedia();
-        }, 100);
+        }, 200);
       }
     }
     
-    const { posts } = this.data;
+    // posts variable already declared above
     
     // Load previous posts when reaching first item
     if (newIndex === 0 && oldIndex > 0) {
@@ -407,11 +408,69 @@ Page({
     const { currentIndex, posts } = this.data;
     
     if (currentIndex < posts.length - 1) {
-      this.setData({ currentIndex: currentIndex + 1 });
+      const newIndex = currentIndex + 1;
+      
+      // Pause ALL media players first
+      posts.forEach((post, index) => {
+        const mediaPlayer = this.selectComponent(`#media-player-${index}`);
+        if (mediaPlayer && mediaPlayer.pauseMedia) {
+          mediaPlayer.pauseMedia();
+        }
+      });
+      
+      this.setData({ currentIndex: newIndex });
+      
+      // Play the new current media player to maintain play state
+      const newMediaPlayer = this.selectComponent(`#media-player-${newIndex}`);
+      if (newMediaPlayer) {
+        setTimeout(() => {
+          newMediaPlayer.playMedia && newMediaPlayer.playMedia();
+        }, 200);
+      }
       
       if (currentIndex === posts.length - 2) {
         this.loadNextPost();
       }
+    }
+  },
+
+  handleImageSlideEnded: function(e) {
+    const { currentIndex, posts } = this.data;
+    
+    console.log('handleImageSlideEnded called', {
+      currentIndex,
+      totalPosts: posts.length,
+      canAdvance: currentIndex < posts.length - 1
+    });
+    
+    if (currentIndex < posts.length - 1) {
+      const newIndex = currentIndex + 1;
+      console.log('Advancing to next post:', newIndex);
+      
+      // Pause ALL media players first
+      posts.forEach((post, index) => {
+        const mediaPlayer = this.selectComponent(`#media-player-${index}`);
+        if (mediaPlayer && mediaPlayer.pauseMedia) {
+          mediaPlayer.pauseMedia();
+        }
+      });
+      
+      this.setData({ currentIndex: newIndex });
+      
+      // Play the new current media player to maintain play state
+      const newMediaPlayer = this.selectComponent(`#media-player-${newIndex}`);
+      if (newMediaPlayer) {
+        setTimeout(() => {
+          newMediaPlayer.playMedia && newMediaPlayer.playMedia();
+        }, 200);
+      }
+      
+      if (currentIndex === posts.length - 2) {
+        console.log('Loading next post batch');
+        this.loadNextPost();
+      }
+    } else {
+      console.log('Already at last post, cannot advance');
     }
   },
 

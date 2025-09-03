@@ -315,7 +315,11 @@ Component({
       });
 
       this.updateDisplayValues();
-      this.startAutoPlay();
+      
+      // Clear any existing timer first
+      this.clearAutoPlayTimer();
+      
+      // Timer will be started by playMedia() when this post becomes current
       
       // No global loading to clear since we don't show it during navigation
       
@@ -401,32 +405,31 @@ Component({
      * Auto play management
      */
     startAutoPlay() {
-      // Check if we should delay autoplay until API completes
-      if (this.data.isWaitingForApi) {
+      // Only for image posts
+      if (this.data.currentPost?.type !== "image") {
         return;
       }
       
-      this.clearAutoPlayTimer();
-      if (this.data.isPlaying && !this.data.showDetail) {
-        if (this.data.currentPost?.type === "image") {
-          // Auto-advance for image posts
-          const timer = setInterval(() => {
-            this.moveToNextSlide();
-          }, 5000);
-          this.setData({ autoPlayTimer: timer });
-        } else if (this.data.currentPost?.type === "video") {
-          // Auto-start video playback
-          const mediaDisplay = this.selectComponent('media-display');
-          if (mediaDisplay && mediaDisplay.startVideoAutoplay) {
-            mediaDisplay.startVideoAutoplay();
-          }
-        }
+      // Check if we should delay autoplay until API completes
+      if (this.data.isWaitingForApi || !this.data.isPlaying || this.data.showDetail) {
+        return;
       }
+      
+      // Always clear any existing timer first
+      this.clearAutoPlayTimer();
+      
+      // Create new timer only for images
+      const timer = setInterval(() => {
+        this.moveToNextSlide();
+      }, 5000);
+      this.setData({ autoPlayTimer: timer });
     },
 
     clearAutoPlayTimer() {
       if (this.data.autoPlayTimer) {
+        // Handle both setInterval and setTimeout
         clearInterval(this.data.autoPlayTimer);
+        clearTimeout(this.data.autoPlayTimer);
         this.setData({ autoPlayTimer: null });
       }
     },
@@ -436,9 +439,7 @@ Component({
     },
 
     resumeAutoPlay() {
-      if (this.data.currentPost && this.data.currentPost.type === "image" && !this.data.isWaitingForApi) {
-        this.startAutoPlay();
-      }
+      // Removed - timer management now centralized in playMedia()
     },
 
     /**
@@ -460,7 +461,7 @@ Component({
 
     resumePlayback() {
       this.setData({ isPlaying: true });
-      this.startAutoPlay();
+      // Timer will be started by playMedia() when needed
     },
 
     // Public methods for parent components
@@ -469,7 +470,7 @@ Component({
         isPlaying: false,
         currentSlideIndex: 0  // Reset to first slide
       });
-      this.clearAutoPlayTimer();
+      this.clearAutoPlayTimer();  // Stop auto timer
       
       // Pause video if exists
       const mediaDisplay = this.selectComponent('#media-display');
@@ -483,24 +484,37 @@ Component({
     },
 
     playMedia() {
-      this.setData({ 
-        isPlaying: true 
+      console.log('playMedia called', {
+        postType: this.data.currentPost?.type,
+        postId: this.data.currentPost?.id,
+        mediaLength: this.data.mediaLength
       });
       
-      // Start autoplay for images
+      // Ensure we start from first slide and clear any existing timer
+      this.clearAutoPlayTimer();
+      
+      this.setData({ 
+        isPlaying: true,
+        currentSlideIndex: 0  // Always start from first slide
+      });
+      
+      // For image posts, start timer immediately
       if (this.data.currentPost?.type === 'image') {
         this.startAutoPlay();
       }
       
-      // Play video if exists
-      const mediaDisplay = this.selectComponent('#media-display');
-      if (mediaDisplay && this.data.currentPost?.type === 'video') {
-        setTimeout(() => {
-          const videoContext = wx.createVideoContext('media-video', mediaDisplay);
-          if (videoContext) {
-            videoContext.play();
-          }
-        }, 100);
+      // For video posts, just play the video
+      if (this.data.currentPost?.type === 'video') {
+        const mediaDisplay = this.selectComponent('#media-display');
+        if (mediaDisplay) {
+          setTimeout(() => {
+            const videoContext = wx.createVideoContext('media-video', mediaDisplay);
+            if (videoContext) {
+              videoContext.seek(0);
+              videoContext.play();
+            }
+          }, 100);
+        }
       }
     },
 
@@ -528,10 +542,7 @@ Component({
       const newIndex = e.detail.current;
       this.setData({ currentSlideIndex: newIndex });
       
-      // Restart autoplay timer when slide changes
-      if (this.data.isPlaying && !this.data.isWaitingForApi && this.data.currentPost?.type === 'image') {
-        this.startAutoPlay();
-      }
+      // Don't restart timer on manual slide change - let existing timer continue
     },
     onDotTap(e) {
       const { index } = e.detail;
@@ -564,23 +575,32 @@ Component({
       const { currentSlideIndex, mediaLength, currentPost } = this.data;
       
       // Safety check: moveToNextSlide should only work for image posts
-      if (currentPost?.type !== 'image') {
+      if (currentPost?.type !== 'image' || !this.data.isPlaying) {
         return;
       }
       
-      if (currentSlideIndex + 1 < mediaLength) {
-        const newIndex = currentSlideIndex + 1;
-        this.setData({ currentSlideIndex: newIndex });
+      if (mediaLength === 1) {
+        // Single image - handle based on continue setting
+        this.clearAutoPlayTimer();
         
-        // Restart autoplay timer after slide change
-        if (this.data.isPlaying && !this.data.isWaitingForApi) {
+        if (this.properties.isContinue) {
+          this.triggerEvent('imageSlideEnded');
+        } else {
           this.startAutoPlay();
         }
+      } else if (currentSlideIndex + 1 < mediaLength) {
+        // Move to next slide, timer continues
+        this.setData({ currentSlideIndex: currentSlideIndex + 1 });
       } else {
-        // Loop back to first slide
-        this.setData({ currentSlideIndex: 0 });
-        // Restart autoplay timer
-        if (this.data.isPlaying && !this.data.isWaitingForApi) {
+        // Last slide of multi-image post reached - clear timer and handle end
+        this.clearAutoPlayTimer();
+        
+        if (this.properties.isContinue) {
+          // Auto-advance to next post immediately after last slide
+          this.triggerEvent('imageSlideEnded');
+        } else {
+          // Loop back to first slide and restart timer
+          this.setData({ currentSlideIndex: 0 });
           this.startAutoPlay();
         }
       }
@@ -1226,10 +1246,7 @@ Component({
       // Clear any existing autoplay timer from previous post
       this.clearAutoPlayTimer();
       
-      // Start autoplay if conditions are met for both image and video
-      if (this.data.currentPost && this.data.isPlaying) {
-        this.startAutoPlay();
-      }
+      // Don't start timer here - will be started by playMedia() when needed
       
       // Never show loading during navigation - isFirstEntry is now false
     },
@@ -1255,10 +1272,7 @@ Component({
       // Clear loading prevention flag
       this.isCurrentlyLoading = false;
       
-      // Start autoplay now that API is complete for both image and video
-      if (this.data.isPlaying && this.data.currentPost) {
-        this.startAutoPlay();
-      }
+      // Don't start timer here - will be handled by playMedia() when post becomes current
       
       // Never show loading during navigation - isFirstEntry is now false
     },

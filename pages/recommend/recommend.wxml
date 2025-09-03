@@ -35,6 +35,7 @@
           bind:showLogin="showLoginModal"
           bind:navigateToProfile="navigateToUserProfile"
           bind:videoEnded="handleVideoEnded"
+          bind:imageSlideEnded="handleImageSlideEnded"
           bind:continueToggled="handleContinueToggled"
           class="media-player"
         >
