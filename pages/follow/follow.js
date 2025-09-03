@@ -232,7 +232,7 @@ Page({
     const current = e.currentTarget.dataset.id;
     const userId = this.data.currentUser.id;
     wx.navigateTo({
-      url: `/pages/post-detail/post-detail?postId=${current}&user_id=${userId}&type=by_user_id`,
+      url: `/pages/post-detail/post-detail?postId=${current}&user_id=${userId}&type=by_user_id&source=follow`,
     });
   },
 

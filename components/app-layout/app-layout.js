@@ -10,7 +10,6 @@ Component({
       type: String,
       value: "",
       observer: function (newVal, oldVal) {
-        console.log('currentPage changed from', oldVal, 'to', newVal);
         this.scrollToCurrentPage();
         // effectiveSearchParams update is handled by the 'currentPage, searchParams' observer
       },

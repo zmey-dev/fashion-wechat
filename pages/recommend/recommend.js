@@ -121,15 +121,34 @@ Page({
           app.hideGlobalLoading();
         }
       } else {
-        // Load initial batch of recommended posts
-        const posts = await this.loadRecommendedPosts(0, 3);
+        // Load initial post following web version approach
+        // First get recommended posts list, then load detail with navigation
+        const initialPosts = await this.loadRecommendedPosts(0, 1);
         
-        if (posts && posts.length > 0) {
-          this.setData({
-            posts: posts,
-            currentIndex: 0,
-            isLoading: false
-          });
+        if (initialPosts && initialPosts.length > 0) {
+          const firstPost = initialPosts[0];
+          // Load post detail with neighbors for navigation (same as web version)
+          const data = await this.loadPostWithNeighbors(firstPost.id);
+          
+          if (data && data.current) {
+            const posts = [];
+            if (data.previous) posts.push(data.previous);
+            posts.push(data.current);
+            if (data.next) posts.push(data.next);
+            
+            this.setData({
+              posts: posts,
+              currentIndex: data.previous ? 1 : 0,
+              isLoading: false
+            });
+          } else {
+            // Fallback to using the initial post
+            this.setData({
+              posts: [firstPost],
+              currentIndex: 0,
+              isLoading: false
+            });
+          }
           app.hideGlobalLoading();
         } else {
           this.setData({
@@ -151,7 +170,7 @@ Page({
     }
   },
 
-  // Load recommended posts from API
+  // Load recommended posts from API (same as web version)
   loadRecommendedPosts: function(offset, limit) {
     return new Promise((resolve, reject) => {
       wx.request({
@@ -160,7 +179,7 @@ Page({
         data: {
           limit: limit,
           offset: offset,
-          filter: this.data.filterText,
+          filter: this.data.filterText || "", // Ensure consistent with web version
         },
         header: {
           "Content-Type": "application/json",
@@ -250,7 +269,7 @@ Page({
     }
   },
 
-  // Load previous post for infinite scroll
+  // Load previous post for infinite scroll (using detail API like web version)
   loadPreviousPost: async function() {
     if (this.data.isLoadingPrev) return;
     
@@ -262,24 +281,25 @@ Page({
     this.setData({ isLoadingPrev: true });
     
     try {
-      // For recommend page, load more recommended posts
-      const newPosts = await this.loadRecommendedPosts(posts.length, 1);
+      // Use detail API to get previous post info (same as web version)
+      const data = await this.loadPostWithNeighbors(currentPost.id);
       
-      if (newPosts && newPosts.length > 0) {
-        // Add to beginning for previous navigation
-        const updatedPosts = [...newPosts, ...posts];
+      if (data && data.previous) {
+        // Add previous post to beginning of array
+        const newPosts = [data.previous, ...posts];
         
         // Keep array size manageable (max 5 posts)
-        if (updatedPosts.length > 5) {
-          updatedPosts.pop();
+        if (newPosts.length > 5) {
+          newPosts.pop(); // Remove last post
         }
         
         this.setData({
-          posts: updatedPosts,
-          currentIndex: currentIndex + newPosts.length,
+          posts: newPosts,
+          currentIndex: currentIndex + 1, // Adjust index since we added at beginning
           isLoadingPrev: false
         });
       } else {
+        // No more previous posts
         wx.showToast({
           title: this.data.messages.navigation.firstPost,
           icon: 'none',
@@ -292,38 +312,42 @@ Page({
     }
   },
 
-  // Load next post for infinite scroll
+  // Load next post for infinite scroll (using detail API like web version)
   loadNextPost: async function() {
     if (this.data.isLoadingNext) return;
     
-    const { posts } = this.data;
+    const { posts, currentIndex } = this.data;
+    const currentPost = posts[currentIndex];
+    
+    if (!currentPost || !currentPost.id) return;
     
     this.setData({ isLoadingNext: true });
     
     try {
-      // Load more recommended posts
-      const newPosts = await this.loadRecommendedPosts(posts.length, 1);
+      // Use detail API to get next post info (same as web version)
+      const data = await this.loadPostWithNeighbors(currentPost.id);
       
-      if (newPosts && newPosts.length > 0) {
-        // Add to end
-        const updatedPosts = [...posts, ...newPosts];
+      if (data && data.next) {
+        // Add next post to end of array
+        const newPosts = [...posts, data.next];
         
         // Keep array size manageable (max 5 posts)
-        if (updatedPosts.length > 5) {
-          updatedPosts.shift();
+        if (newPosts.length > 5) {
+          newPosts.shift(); // Remove first post
           // Adjust current index since we removed from beginning
           this.setData({
-            posts: updatedPosts,
-            currentIndex: this.data.currentIndex - 1,
+            posts: newPosts,
+            currentIndex: currentIndex - 1,
             isLoadingNext: false
           });
         } else {
           this.setData({
-            posts: updatedPosts,
+            posts: newPosts,
             isLoadingNext: false
           });
         }
       } else {
+        // No more next posts
         wx.showToast({
           title: this.data.messages.navigation.lastPost,
           icon: 'none',

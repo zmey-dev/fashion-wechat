@@ -13,6 +13,9 @@ Page({
     search: "",
     universityId: "",
     
+    // Source page for navigation context
+    sourcePage: "discover",
+    
     // Swiper infinite scroll data
     posts: [], // Array of posts for swiper
     currentIndex: 1, // Start at middle (index 1)
@@ -53,11 +56,63 @@ Page({
     const filter = options.filter || "";
     const search = options.search || "";
     const universityId = options.university_id || "";
+    const source = options.source || ""; // Add source parameter
     
     if (!postId) {
       this.showError(this.data.messages.noPostId);
       return;
     }
+    
+    // Determine source page based on parameters
+    let sourcePage = "index"; // default (discover page is "index" in app-layout)
+    
+    // Check source parameter first (explicit source takes priority)
+    if (source) {
+      sourcePage = source;
+    } else {
+      // Map post types to app-layout page keys
+      switch(type) {
+        case "recommend":
+          sourcePage = "recommend";
+          break;
+        case "discover":
+          sourcePage = "index";
+          break;
+        case "user":
+        case "by_user_id":
+          sourcePage = "me"; // user profile posts
+          break;
+        case "event":
+        case "by_event_id":
+          sourcePage = "event";
+          break;
+        case "company":
+          sourcePage = "company";
+          break;
+        case "follow":
+          sourcePage = "follow";
+          break;
+        case "like":
+        case "liked":
+        case "favorite":
+        case "history":
+        case "me":
+          sourcePage = "me";
+          break;
+        default:
+          // Check parameters for additional context
+          if (userId) {
+            sourcePage = "me";
+          } else if (eventId) {
+            sourcePage = "event";
+          } else if (search) {
+            sourcePage = "index"; // search results come from discover (index)
+          } else {
+            sourcePage = "index"; // fallback to discover
+          }
+      }
+    }
+    
     
     // Set initial data
     this.setData({
@@ -69,6 +124,7 @@ Page({
       filter: filter,
       search: search,
       universityId: universityId,
+      sourcePage: sourcePage,
       userInfo: app.globalData.userInfo || null,
       showLoginModal: app.globalData.showLoginModal || false,
     });
