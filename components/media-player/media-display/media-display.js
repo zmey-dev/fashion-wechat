@@ -29,7 +29,6 @@ Component({
     isNavigatingVideo: false, // Flag to prevent false video ended events during navigation
     videoReady: false, // Flag to control when video src is set
     videoSrc: '', // Dynamic video source
-    userPausedVideo: false, // Flag to track if user manually paused the video
   },
 
   observers: {
@@ -275,42 +274,13 @@ Component({
     },
 
     onVideoPause() {
-      // Video paused - mark as user paused to prevent auto-loop
-      this.setData({ userPausedVideo: true });
       this.triggerEvent('videopaused');
     },    onVideoEnded() {
-      // If auto continue is disabled and user hasn't manually paused the video, loop it
-      if (!this.properties.isContinue && this.properties.currentPost && this.properties.currentPost.type === 'video' && !this.data.userPausedVideo) {
-        this.loopVideo();
-      } else {
-        // Normal behavior - trigger video ended event to move to next post
-        this.triggerEvent('videoended');
-      }
+      // Always trigger video ended event to move to next post
+      // Parent component will handle navigation
+      this.triggerEvent('videoended');
     },
 
-    // Loop video by restarting from beginning
-    loopVideo() {
-      const videoContext = wx.createVideoContext('media-video', this);
-      if (videoContext) {
-        // First, seek to beginning
-        videoContext.seek(0);
-        
-        // Then play after a short delay
-        setTimeout(() => {
-          videoContext.play();
-          
-          // Backup attempt in case first doesn't work
-          setTimeout(() => {
-            videoContext.play();
-          }, 200);
-        }, 150);
-      }
-    },
-
-    // Restart video from beginning with auto-play
-    restartVideo() {
-      this.loopVideo();
-    },
 
     onVideoError(e) {
       // Video error occurred - clear loading state

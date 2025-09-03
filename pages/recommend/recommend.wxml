@@ -33,6 +33,7 @@
           bind:followUpdated="handleFollowUpdated"
           bind:showLogin="showLoginModal"
           bind:navigateToProfile="navigateToUserProfile"
+          bind:videoEnded="handleVideoEnded"
           class="media-player"
         >
         </media-player>

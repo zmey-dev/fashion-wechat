@@ -409,5 +409,17 @@ Page({
         url: `/pages/user-profile/user-profile?username=${username}`
       });
     }
+  },
+
+  handleVideoEnded: function(e) {
+    const { currentIndex, posts } = this.data;
+    
+    if (currentIndex < posts.length - 1) {
+      this.setData({ currentIndex: currentIndex + 1 });
+      
+      if (currentIndex === posts.length - 2) {
+        this.loadNextPost();
+      }
+    }
   }
 });

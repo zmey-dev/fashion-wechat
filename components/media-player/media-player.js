@@ -36,7 +36,6 @@ Component({
     // Media state
     currentSlideIndex: 0,
     isPlaying: true,  // Start playing by default but will be blocked by isWaitingForApi
-    isContinue: true,
     isLoading: false,
     showPlayIndicator: false,
     autoPlayTimer: null,
@@ -517,7 +516,7 @@ Component({
     },
 
     moveToNextSlide() {
-      const { currentSlideIndex, mediaLength, isContinue, currentPost } = this.data;
+      const { currentSlideIndex, mediaLength, currentPost } = this.data;
       
       // Safety check: moveToNextSlide should only work for image posts
       if (currentPost?.type !== 'image') {
@@ -533,40 +532,27 @@ Component({
           this.startAutoPlay();
         }
       } else {
-        if (isContinue) {
-          this.moveToNextPost();
-        } else {
-          this.setData({ currentSlideIndex: 0 });
-          // Restart autoplay timer
-          if (this.data.isPlaying && !this.data.isWaitingForApi) {
-            this.startAutoPlay();
-          }
+        // Loop back to first slide
+        this.setData({ currentSlideIndex: 0 });
+        // Restart autoplay timer
+        if (this.data.isPlaying && !this.data.isWaitingForApi) {
+          this.startAutoPlay();
         }
       }
     },
 
-    // Remove direct post navigation - will be handled by parent
-    moveToPreviousPost() {
-      // Disabled - navigation handled by parent swiper
-    },
-
-    moveToNextPost() {
-      // Disabled - navigation handled by parent swiper
-    },
 
     // Media Controls Events
     onPlayPause() {
       this.togglePlayPause();
     },
 
-    onContinueToggle(e) {
-      this.setData({ isContinue: e.detail.value });
-    },    onProgressTap(e) {
+    onProgressTap(e) {
       const { index } = e.detail;
       this.setData({ currentSlideIndex: index });
     },    // Video ended event handler
     onVideoEnded() {
-      const { isContinue, currentPost, isWaitingForApi, isLoading } = this.data;
+      const { currentPost, isWaitingForApi, isLoading } = this.data;
       
       // Validate that this is a genuine video end, not a navigation artifact
       
@@ -586,24 +572,10 @@ Component({
         return;
       }
       
+      // Always trigger event to parent for navigation
+      this.triggerEvent('videoEnded');
       
-      if (isContinue) {
-        this.moveToNextPost();
-      } else {
-        // Restart current video from beginning and auto-play
-        if (mediaDisplayComponent && mediaDisplayComponent.restartVideo) {
-          mediaDisplayComponent.restartVideo();
-          this.setData({ isPlaying: true });
-        } else {
-          // Fallback method
-          this.setData({ 
-            isPlaying: false 
-          });
-          setTimeout(() => {
-            this.setData({ isPlaying: true });
-          }, 100);
-        }
-      }
+      // Navigation now handled by parent swiper
     },
 
     // Action Buttons Events
