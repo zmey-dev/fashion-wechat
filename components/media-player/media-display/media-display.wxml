@@ -45,7 +45,7 @@ bindtap="onScreenTap"
         </view>
       </view>
     </swiper-item>
-  </swiper>  <!-- Video display -->
+  </swiper>  <!-- Video display with all loading indicators disabled -->
   <video
     wx:elif="{{ showVideo && videoReady }}"
     id="media-video"
@@ -57,7 +57,7 @@ bindtap="onScreenTap"
     show-play-btn="{{ true }}"
     autoplay="{{ isPlaying && !isWaitingForApi }}"
     loop="{{ !isContinue }}"
-    preload="none"
+    preload="metadata"
     poster="{{ currentMedia[0].preview_url || currentMedia[0].thumbnail_url || '' }}"
     show-loading="{{ false }}"
     show-fullscreen-btn="{{ true }}"
@@ -67,6 +67,10 @@ bindtap="onScreenTap"
     show-screen-lock-button="{{ false }}"
     show-mute-btn="{{ false }}"
     enable-auto-rotation="{{ false }}"
+    enable-danmu="{{ false }}"
+    enable-play-gesture="{{ false }}"
+    vslide-gesture="{{ false }}"
+    vslide-gesture-in-fullscreen="{{ false }}"
     object-fit="contain"
     initial-time="{{ 0 }}"
     catch:tap="onVideoTap"
@@ -78,6 +82,7 @@ bindtap="onScreenTap"
     bindcanplay="onVideoCanPlay"
     bindwaiting="onVideoWaiting"
     bindloadeddata="onVideoLoadedData"
+    bindloadedmetadata="onVideoLoadedMetadata"
     bindtimeupdate="onVideoTimeUpdate"
   >
   </video>

@@ -36,28 +36,30 @@ Component({
       // Clear previous dots immediately when media changes
       this.setData({ calculatedDots: [] });
       
-      // Clear previous video state to prevent thumbnail artifacts
-      this.clearVideoState();
+      // Stop any existing video before setting new source
+      this.stopCurrentVideo();
       
-      // Set video source dynamically to prevent infinite loading
+      // Immediately update video source without delay to prevent loading
       if (currentMedia && currentMedia.length > 0 && currentMedia[0]) {
         this.setData({
           videoSrc: currentMedia[0].url || '',
-          videoReady: true
+          videoReady: true,
+          showVideo: true,
+          isNavigatingVideo: false
         });
         
-        // Auto-start video after a short delay to ensure it's loaded
-        setTimeout(() => {
-          this.startVideoAutoplay();
-        }, 300);
+        // Start video autoplay after source is set
+        if (this.properties.currentPost && this.properties.currentPost.type === 'video') {
+          setTimeout(() => {
+            this.startVideoAutoplay();
+          }, 100);
+        }
       }
       
       // Calculate dot positions after DOM updates
       setTimeout(() => {
         this.calculateDotPositions();
       }, 50);
-      
-      // Removed image preloading check
     }
   },
   ready() {
@@ -75,11 +77,28 @@ Component({
     // Clean up event listeners
     wx.offWindowResize && wx.offWindowResize();
     
+    // Stop video playback
+    this.stopCurrentVideo();
+    
     // Clean up audio context to prevent memory leaks
     this.destroyUploadedAudio();
   },
 
   methods: {
+    /**
+     * Stop current video playback
+     */
+    stopCurrentVideo() {
+      const videoContext = wx.createVideoContext('media-video', this);
+      if (videoContext) {
+        videoContext.stop();
+        videoContext.seek(0);
+      }
+      
+      // Also destroy any uploaded audio
+      this.destroyUploadedAudio();
+    },
+    
     /**
      * Clear video state to prevent thumbnail artifacts during navigation
      */
@@ -118,14 +137,14 @@ Component({
      */
     startVideoAutoplay() {
       // Only autoplay if this is a video post and playing is enabled
-      if (this.properties.currentPost && this.properties.currentPost.type === 'video' && this.properties.isPlaying && !this.properties.isWaitingForApi) {
+      if (this.properties.currentPost && 
+          this.properties.currentPost.type === 'video' && 
+          this.properties.isPlaying && 
+          !this.properties.isWaitingForApi) {
         const videoContext = wx.createVideoContext('media-video', this);
         if (videoContext) {
-          // Ensure video starts from beginning and plays
-          videoContext.seek(0);
-          setTimeout(() => {
-            videoContext.play();
-          }, 100);
+          // Just play without stop to avoid interruption
+          videoContext.play();
         }
       }
     },
@@ -322,8 +341,13 @@ Component({
         parent.isCurrentlyLoading = false;
       }
       
-      // Start autoplay when video is ready
-      this.startVideoAutoplay();
+      // Start playing immediately when video can play
+      if (this.properties.isPlaying) {
+        const videoContext = wx.createVideoContext('media-video', this);
+        if (videoContext) {
+          videoContext.play();
+        }
+      }
     },
 
     onVideoWaiting() {
@@ -364,6 +388,15 @@ Component({
           isLoading: false,
           isWaitingForApi: false
         });
+      }
+    },
+
+    onVideoLoadedMetadata() {
+      // Video metadata loaded - can start playing now
+      const videoContext = wx.createVideoContext('media-video', this);
+      if (videoContext && this.properties.isPlaying) {
+        // Start playing immediately when metadata is ready
+        videoContext.play();
       }
     },
 

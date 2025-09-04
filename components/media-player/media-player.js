@@ -506,16 +506,12 @@ Component({
         this.startAutoPlay();
       }
       
-      // For video posts, just play the video
+      // For video posts, use media-display's autoplay method
       if (this.data.currentPost?.type === 'video') {
         const mediaDisplay = this.selectComponent('#media-display');
-        if (mediaDisplay) {
+        if (mediaDisplay && mediaDisplay.startVideoAutoplay) {
           setTimeout(() => {
-            const videoContext = wx.createVideoContext('media-video', mediaDisplay);
-            if (videoContext) {
-              videoContext.seek(0);
-              videoContext.play();
-            }
+            mediaDisplay.startVideoAutoplay();
           }, 100);
         }
       }
