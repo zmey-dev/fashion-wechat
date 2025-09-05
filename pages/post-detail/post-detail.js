@@ -269,15 +269,18 @@ Page({
     
     this.setData({ currentIndex: newIndex });
     
-    // Play only the current media player with longer delay to ensure clean state
-    if (newIndex >= 0 && newIndex < posts.length) {
-      const newMediaPlayer = this.selectComponent(`#media-player-${newIndex}`);
-      if (newMediaPlayer) {
-        setTimeout(() => {
-          newMediaPlayer.playMedia && newMediaPlayer.playMedia();
-        }, 200);
+    // The is-playing property will automatically update based on index === currentIndex
+    // No need to manually call playMedia() - property system handles it
+    
+    // Start media for the current player after state has settled
+    setTimeout(() => {
+      if (newIndex >= 0 && newIndex < posts.length) {
+        const newMediaPlayer = this.selectComponent(`#media-player-${newIndex}`);
+        if (newMediaPlayer && newMediaPlayer.playMedia) {
+          newMediaPlayer.playMedia();
+        }
       }
-    }
+    }, 300);
     
     // Check if we need to load more posts
     // posts variable already declared above

@@ -36,7 +36,7 @@ Component({
       // Clear previous dots immediately when media changes
       this.setData({ calculatedDots: [] });
       
-      // Stop any existing video before setting new source
+      // Stop any existing video and audio before setting new source
       this.stopCurrentVideo();
       
       // Immediately update video source without delay to prevent loading
@@ -103,7 +103,10 @@ Component({
      * Clear video state to prevent thumbnail artifacts during navigation
      */
     clearVideoState() {
-      // Clear video source first to stop any loading
+      // Destroy uploaded audio context first to prevent overlap
+      this.destroyUploadedAudio();
+      
+      // Clear video source to stop any loading
       this.setData({ 
         showVideo: false,
         isNavigatingVideo: true,
@@ -119,9 +122,6 @@ Component({
         videoContext.stop();
         videoContext.seek(0);
       }
-      
-      // Destroy uploaded audio context to prevent multiple audio playback
-      this.destroyUploadedAudio();
       
       // Show video again after a delay with fresh source
       setTimeout(() => {
@@ -145,6 +145,16 @@ Component({
         if (videoContext) {
           // Just play without stop to avoid interruption
           videoContext.play();
+          
+          // Apply audio mode after a delay to ensure video is actively playing
+          setTimeout(() => {
+            // Double-check that this post is still the active one before applying audio mode
+            if (this.properties.isPlaying && 
+                this.properties.currentPost && 
+                this.properties.currentPost.type === 'video') {
+              this.applyAudioMode(videoContext);
+            }
+          }, 500); // 500ms delay
         }
       }
     },
@@ -291,6 +301,19 @@ Component({
           isPlaying: true
         });
       }
+      
+      // Apply audio mode after a delay to ensure this is the actively playing post
+      setTimeout(() => {
+        // Only apply audio mode if this post is still active and playing
+        if (this.properties.isPlaying && 
+            this.properties.currentPost && 
+            this.properties.currentPost.type === 'video') {
+          const videoContext = wx.createVideoContext('media-video', this);
+          if (videoContext) {
+            this.applyAudioMode(videoContext);
+          }
+        }
+      }, 300); // 300ms delay
     },
 
     onVideoPause() {
@@ -428,6 +451,11 @@ Component({
     setAudioMode(mode) {
       this.setData({ audioMode: mode });
       
+      // Apply audio mode only if this is the currently playing post
+      if (!this.properties.isPlaying) {
+        return;
+      }
+      
       // Apply audio mode to current video if playing
       const videoContext = wx.createVideoContext('media-video', this);
       if (videoContext && this.properties.currentPost && this.properties.currentPost.type === 'video') {
@@ -439,7 +467,13 @@ Component({
      * Apply audio mode settings to video
      */
     applyAudioMode(videoContext) {
-      const { audioMode, currentPost } = this.data;
+      const { audioMode } = this.data;
+      const { currentPost, isPlaying } = this.properties;
+      
+      // Only apply audio mode if this is the currently playing post
+      if (!isPlaying) {
+        return;
+      }
       
       // Check if post has uploaded audio
       const hasUploadedAudio = currentPost && currentPost.audio_url;
@@ -468,8 +502,23 @@ Component({
      * Play uploaded audio
      */
     playUploadedAudio() {
-      const { currentPost } = this.properties;
-      if (!currentPost || !currentPost.audio_url) return;
+      const { currentPost, isPlaying, isWaitingForApi } = this.properties;
+      const { videoReady } = this.data;
+      
+      // Only play audio if this is the currently active/playing post with strict conditions
+      if (!currentPost || 
+          !currentPost.audio_url || 
+          !isPlaying || 
+          isWaitingForApi ||
+          !videoReady) {
+        return;
+      }
+      
+      // Additional check: ensure we're not in a transition state
+      const parent = this.selectOwnerComponent();
+      if (parent && (parent.data.isLoading || parent.data.isWaitingForApi || parent.isCurrentlyLoading)) {
+        return;
+      }
       
       // Destroy previous audio context first to prevent multiple audio playback
       this.destroyUploadedAudio();
@@ -502,10 +551,17 @@ Component({
      */
     destroyUploadedAudio() {
       if (this.audioContext) {
-        // Stop and destroy the audio context completely
-        this.audioContext.stop();
-        this.audioContext.destroy();
-        this.audioContext = null;
+        try {
+          // Stop and destroy the audio context completely
+          this.audioContext.stop();
+          this.audioContext.destroy();
+        } catch (error) {
+          // Handle any errors during audio context destruction
+          console.warn('Error destroying audio context:', error);
+        } finally {
+          // Always set to null regardless of errors
+          this.audioContext = null;
+        }
       }
     }
   }

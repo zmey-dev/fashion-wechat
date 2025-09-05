@@ -32,6 +32,10 @@ Component({
       type: Boolean,
       value: false,
     },
+    isPlaying: {
+      type: Boolean,
+      value: false,
+    },
   },
   data: {
     // Track if this is the first load ever (component attached)
@@ -39,7 +43,6 @@ Component({
     
     // Media state
     currentSlideIndex: 0,
-    isPlaying: true,  // Start playing by default but will be blocked by isWaitingForApi
     isLoading: false,
     showPlayIndicator: false,
     autoPlayTimer: null,
@@ -411,7 +414,7 @@ Component({
       }
       
       // Check if we should delay autoplay until API completes
-      if (this.data.isWaitingForApi || !this.data.isPlaying || this.data.showDetail) {
+      if (this.data.isWaitingForApi || !this.properties.isPlaying || this.data.showDetail) {
         return;
       }
       
@@ -446,7 +449,7 @@ Component({
      * Play/Pause management
      */
     togglePlayPause() {
-      const { isPlaying } = this.data;
+      const isPlaying = this.properties.isPlaying;
       if (isPlaying) {
         this.pausePlayback();
       } else {
@@ -455,19 +458,20 @@ Component({
     },
 
     pausePlayback() {
-      this.setData({ isPlaying: false });
       this.clearAutoPlayTimer();
+      // Notify parent to update isPlaying property
+      this.triggerEvent('playStateChanged', { isPlaying: false });
     },
 
     resumePlayback() {
-      this.setData({ isPlaying: true });
+      // Notify parent to update isPlaying property
+      this.triggerEvent('playStateChanged', { isPlaying: true });
       // Timer will be started by playMedia() when needed
     },
 
     // Public methods for parent components
     pauseMedia() {
       this.setData({ 
-        isPlaying: false,
         currentSlideIndex: 0  // Reset to first slide
       });
       this.clearAutoPlayTimer();  // Stop auto timer
@@ -497,9 +501,13 @@ Component({
       this.clearAutoPlayTimer();
       
       this.setData({ 
-        isPlaying: true,
         currentSlideIndex: 0  // Always start from first slide
       });
+      
+      // Only start media if this component is marked as playing
+      if (!this.properties.isPlaying) {
+        return;
+      }
       
       // For image posts, start timer immediately
       if (this.data.currentPost?.type === 'image') {
@@ -557,7 +565,7 @@ Component({
         });
 
         // Pause auto-play when detail panel opens via dot tap
-        if (this.data.isPlaying) {
+        if (this.properties.isPlaying) {
           this.pauseAutoPlay();
         }
       }
@@ -574,7 +582,7 @@ Component({
       const { currentSlideIndex, mediaLength, currentPost } = this.data;
       
       // Safety check: moveToNextSlide should only work for image posts
-      if (currentPost?.type !== 'image' || !this.data.isPlaying) {
+      if (currentPost?.type !== 'image' || !this.properties.isPlaying) {
         return;
       }
       
@@ -892,7 +900,7 @@ Component({
       });
 
       // Pause auto-play when detail panel opens
-      if (newShowDetail && this.data.isPlaying) {
+      if (newShowDetail && this.properties.isPlaying) {
         this.pauseAutoPlay();
       }
     },
@@ -1205,7 +1213,7 @@ Component({
 
       // Handle auto-play based on panel state
       if (state === "half" || state === "full") {
-        if (this.data.isPlaying) {
+        if (this.properties.isPlaying) {
           this.pauseAutoPlay();
         }
       } else if (state === "closed") {

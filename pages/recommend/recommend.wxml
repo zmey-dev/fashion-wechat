@@ -27,6 +27,7 @@
           index="{{ index }}"
           totalCount="{{ posts.length }}"
           is-continue="{{ globalIsContinue }}"
+          is-playing="{{ index === currentIndex }}"
           bind:postNavigation="handlePostNavigation"
           bind:likeUpdated="handleLikeUpdated"
           bind:favoriteUpdated="handleFavoriteUpdated"
