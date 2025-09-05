@@ -312,6 +312,14 @@ Page({
       const data = await this.loadPostWithNeighbors(currentPost.id);
       
       if (data && data.previous) {
+        // Check if the previous post is already in the array to prevent loops
+        const existingPostIds = posts.map(post => post.id);
+        if (existingPostIds.includes(data.previous.id)) {
+          // Already have this post in the array, don't add again
+          this.setData({ isLoadingPrev: false });
+          return;
+        }
+        
         // Add previous post to beginning of array
         const newPosts = [data.previous, ...posts];
         
@@ -326,7 +334,7 @@ Page({
           isLoadingPrev: false
         });
       } else {
-        // No more previous posts
+        // This should rarely happen now with loop navigation
         wx.showToast({
           title: this.data.messages.firstPost,
           icon: 'none',
@@ -355,6 +363,14 @@ Page({
       const data = await this.loadPostWithNeighbors(currentPost.id);
       
       if (data && data.next) {
+        // Check if the next post is already in the array to prevent loops
+        const existingPostIds = posts.map(post => post.id);
+        if (existingPostIds.includes(data.next.id)) {
+          // Already have this post in the array, don't add again
+          this.setData({ isLoadingNext: false });
+          return;
+        }
+        
         // Add next post to end of array
         const newPosts = [...posts, data.next];
         
@@ -374,7 +390,7 @@ Page({
           });
         }
       } else {
-        // No more next posts
+        // This should rarely happen now with loop navigation
         wx.showToast({
           title: this.data.messages.lastPost,
           icon: 'none',
