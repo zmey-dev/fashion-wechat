@@ -1,7 +1,7 @@
 <!-- components/media-display/media-display.wxml -->
 <view
 class="media-container"
-bindtap="onScreenTap"
+catchtap="onScreenTap"
 >  
   <!-- Media content -->
   <swiper

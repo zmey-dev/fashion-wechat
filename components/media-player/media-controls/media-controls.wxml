@@ -7,7 +7,7 @@
   <view class="controls-bottom">
     <!-- Play/pause and seek bar - only for images -->
     <view class="bottom-control-row" wx:if="{{ currentPost.type === 'image' }}">
-      <view class="play-control" bindtap="onPlayPause">
+      <view class="play-control" catchtap="onPlayPause">
         <view wx:if="{{ isPlaying }}" class="svg-icon control-svg">
           <image
             src="/images/icons/pause.svg"
@@ -29,7 +29,7 @@
           wx:for="{{ currentMedia }}"
           wx:key="id"
           class="progress-bar {{index <= currentSlideIndex ? 'active' : ''}}"
-          bindtap="onProgressTap"
+          catchtap="onProgressTap"
           data-index="{{ index }}"
         ></view>
       </view>

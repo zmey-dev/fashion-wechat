@@ -46,6 +46,12 @@ Component({
     isLoading: false,
     showPlayIndicator: false,
     autoPlayTimer: null,
+    
+    // Internal playing state to override the property when manually paused/played
+    internalIsPlaying: null, // null means use property value, true/false means override
+    
+    // Computed playing state for template
+    actualIsPlaying: false,
 
     // Audio playback modes
     audioMode: "both", // "both" (both audio tracks), "uploaded" (uploaded audio only), "video" (video audio only)
@@ -130,6 +136,13 @@ Component({
    * Component observers
    */
   observers: {
+    isPlaying: function (newValue) {
+      // When parent changes isPlaying, reset internal override
+      this.setData({ 
+        internalIsPlaying: null,
+        actualIsPlaying: newValue
+      });
+    },
     selectedPost: function (newPost, oldPost) {
       // Add more strict duplicate prevention
       if (!newPost) {
@@ -169,6 +182,25 @@ Component({
    */
   methods: {
     /**
+     * Get the actual playing state (internal override or property)
+     */
+    getActualPlayingState() {
+      const actualState = this.data.internalIsPlaying !== null ? this.data.internalIsPlaying : this.properties.isPlaying;
+      return actualState;
+    },
+
+    /**
+     * Update actual playing state for template
+     */
+    updateActualPlayingState() {
+      const actualState = this.getActualPlayingState();
+      if (this.data.actualIsPlaying !== actualState) {
+        this.setData({ actualIsPlaying: actualState });
+      }
+      return actualState;
+    },
+
+    /**
      * Initialize component
      */
     initializeComponent() {
@@ -177,6 +209,9 @@ Component({
         windowWidth: systemInfo.windowWidth,
         windowHeight: systemInfo.windowHeight,
       });
+      
+      // Initialize actual playing state
+      this.updateActualPlayingState();
 
       // Get actual container dimensions
       this.getContainerDimensions();
@@ -414,7 +449,8 @@ Component({
       }
       
       // Check if we should delay autoplay until API completes
-      if (this.data.isWaitingForApi || !this.properties.isPlaying || this.data.showDetail) {
+      const actualPlaying = this.data.internalIsPlaying !== null ? this.data.internalIsPlaying : this.properties.isPlaying;
+      if (this.data.isWaitingForApi || !actualPlaying || this.data.showDetail) {
         return;
       }
       
@@ -449,7 +485,7 @@ Component({
      * Play/Pause management
      */
     togglePlayPause() {
-      const isPlaying = this.properties.isPlaying;
+      const isPlaying = this.data.internalIsPlaying !== null ? this.data.internalIsPlaying : this.properties.isPlaying;
       if (isPlaying) {
         this.pausePlayback();
       } else {
@@ -459,14 +495,27 @@ Component({
 
     pausePlayback() {
       this.clearAutoPlayTimer();
+      // Set internal state to paused and update actualIsPlaying
+      this.setData({ 
+        internalIsPlaying: false,
+        actualIsPlaying: false
+      });
       // Notify parent to update isPlaying property
       this.triggerEvent('playStateChanged', { isPlaying: false });
     },
 
     resumePlayback() {
+      // Set internal state to playing and update actualIsPlaying
+      this.setData({ 
+        internalIsPlaying: true,
+        actualIsPlaying: true
+      });
       // Notify parent to update isPlaying property
       this.triggerEvent('playStateChanged', { isPlaying: true });
-      // Timer will be started by playMedia() when needed
+      // Start timer for image posts
+      if (this.data.currentPost?.type === 'image') {
+        this.startAutoPlay();
+      }
     },
 
     // Public methods for parent components
@@ -505,7 +554,7 @@ Component({
       });
       
       // Only start media if this component is marked as playing
-      if (!this.properties.isPlaying) {
+      if (!this.getActualPlayingState()) {
         return;
       }
       
@@ -565,7 +614,7 @@ Component({
         });
 
         // Pause auto-play when detail panel opens via dot tap
-        if (this.properties.isPlaying) {
+        if (this.getActualPlayingState()) {
           this.pauseAutoPlay();
         }
       }
@@ -582,33 +631,36 @@ Component({
       const { currentSlideIndex, mediaLength, currentPost } = this.data;
       
       // Safety check: moveToNextSlide should only work for image posts
-      if (currentPost?.type !== 'image' || !this.properties.isPlaying) {
+      if (currentPost?.type !== 'image') {
+        return;
+      }
+      
+      // Check actual playing state WITHOUT updating actualIsPlaying
+      const isActuallyPlaying = this.data.internalIsPlaying !== null ? this.data.internalIsPlaying : this.properties.isPlaying;
+      if (!isActuallyPlaying) {
         return;
       }
       
       if (mediaLength === 1) {
         // Single image - handle based on continue setting
-        this.clearAutoPlayTimer();
-        
         if (this.properties.isContinue) {
+          this.clearAutoPlayTimer();
           this.triggerEvent('imageSlideEnded');
-        } else {
-          this.startAutoPlay();
         }
+        // For single image without continue, just keep the timer running
+        // No need to restart it
       } else if (currentSlideIndex + 1 < mediaLength) {
         // Move to next slide, timer continues
         this.setData({ currentSlideIndex: currentSlideIndex + 1 });
       } else {
-        // Last slide of multi-image post reached - clear timer and handle end
-        this.clearAutoPlayTimer();
-        
+        // Last slide of multi-image post reached
         if (this.properties.isContinue) {
+          this.clearAutoPlayTimer();
           // Auto-advance to next post immediately after last slide
           this.triggerEvent('imageSlideEnded');
         } else {
-          // Loop back to first slide and restart timer
+          // Loop back to first slide, timer continues
           this.setData({ currentSlideIndex: 0 });
-          this.startAutoPlay();
         }
       }
     },
@@ -900,7 +952,7 @@ Component({
       });
 
       // Pause auto-play when detail panel opens
-      if (newShowDetail && this.properties.isPlaying) {
+      if (newShowDetail && this.getActualPlayingState()) {
         this.pauseAutoPlay();
       }
     },
@@ -1213,7 +1265,7 @@ Component({
 
       // Handle auto-play based on panel state
       if (state === "half" || state === "full") {
-        if (this.properties.isPlaying) {
+        if (this.getActualPlayingState()) {
           this.pauseAutoPlay();
         }
       } else if (state === "closed") {

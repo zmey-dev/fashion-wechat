@@ -13,8 +13,18 @@ Component({
     detailPanelState: {
       type: String,
       value: 'closed',
-      observer(newVal) {
-        this.getContainerDimensions();
+      observer(newVal, oldVal) {
+        // When detail panel state changes, recalculate container dimensions and dots
+        if (oldVal !== undefined && newVal !== oldVal) {
+          // Use setTimeout to ensure DOM has updated
+          setTimeout(() => {
+            this.getContainerDimensions();
+            // Recalculate dots with new container dimensions
+            setTimeout(() => {
+              this.calculateDotPositions();
+            }, 100);
+          }, 300); // Wait for animation to complete
+        }
       }
     }
   },
@@ -29,6 +39,7 @@ Component({
     isNavigatingVideo: false, // Flag to prevent false video ended events during navigation
     videoReady: false, // Flag to control when video src is set
     videoSrc: '', // Dynamic video source
+    imageDimensions: {}, // Store actual image dimensions for each image
   },
 
   observers: {
@@ -60,22 +71,47 @@ Component({
       setTimeout(() => {
         this.calculateDotPositions();
       }, 50);
+      
+      // Pre-fetch image dimensions for better accuracy
+      if (currentMedia && currentMedia.length > 0 && this.properties.currentPost?.type === 'image') {
+        this.prefetchImageDimensions(currentMedia);
+      }
     }
   },
   ready() {
     this.getContainerDimensions();
     
-    // Listen for window resize events
-    wx.onWindowResize && wx.onWindowResize(() => {
-      setTimeout(() => {
+    // Store resize handler for cleanup
+    this.onResizeHandler = () => {
+      // Debounce resize events
+      if (this.resizeTimer) {
+        clearTimeout(this.resizeTimer);
+      }
+      this.resizeTimer = setTimeout(() => {
         this.getContainerDimensions();
       }, 200);
-    });
+    };
+    
+    // Listen for window resize events
+    wx.onWindowResize && wx.onWindowResize(this.onResizeHandler);
+    
+    // Pre-fetch image dimensions on ready
+    const { currentMedia } = this.properties;
+    if (currentMedia && currentMedia.length > 0 && this.properties.currentPost?.type === 'image') {
+      this.prefetchImageDimensions(currentMedia);
+    }
   },
 
   detached() {
     // Clean up event listeners
-    wx.offWindowResize && wx.offWindowResize();
+    if (this.onResizeHandler) {
+      wx.offWindowResize && wx.offWindowResize(this.onResizeHandler);
+    }
+    
+    // Clear any pending timers
+    if (this.resizeTimer) {
+      clearTimeout(this.resizeTimer);
+    }
     
     // Stop video playback
     this.stopCurrentVideo();
@@ -196,18 +232,25 @@ Component({
       query.select('.media-container').boundingClientRect((rect) => {
         
         if (rect) {
+          const hasChanged = this.data.containerWidth !== rect.width || 
+                           this.data.containerHeight !== rect.height;
+          
           this.setData({
             containerWidth: rect.width,
             containerHeight: rect.height
           });
-          this.calculateDotPositions();
+          
+          // Only recalculate dots if dimensions actually changed
+          if (hasChanged) {
+            this.calculateDotPositions();
+          }
         }
       }).exec();
     },    /**
      * Calculate dot positions based on actual image size
      */
     calculateDotPositions() {
-      const { currentMedia, currentSlideIndex, containerWidth, containerHeight } = this.data;
+      const { currentMedia, currentSlideIndex, containerWidth, containerHeight, imageDimensions } = this.data;
       
       // Enhanced validation - ensure we have valid data
       if (!currentMedia || currentMedia.length === 0) {
@@ -232,12 +275,16 @@ Component({
         return;
       }
 
-      // Use fallback dimensions without caching image info
+      // Get actual image dimensions or use defaults
+      const imageUrl = currentItem.url;
+      const imageDims = imageDimensions[imageUrl] || { width: 1080, height: 1080 };
+      
+      // Calculate actual displayed image size based on real dimensions
       const actualImageSize = this.calculateContainedImageSize(
         containerWidth,
         containerHeight,
-        1080, // fallback width
-        1080  // fallback height
+        imageDims.width,
+        imageDims.height
       );
 
       const calculatedDots = dots.map((dot, index) => {
@@ -264,9 +311,38 @@ Component({
       this.triggerEvent('slidechange', { current: e.detail.current });
       // Immediately clear dots and recalculate for new slide
       this.setData({ calculatedDots: [] });
-      setTimeout(() => {
-        this.calculateDotPositions();
-      }, 50); // Reduced delay from 100ms to 50ms
+      
+      // Get current image URL and check if we have dimensions
+      const currentIndex = e.detail.current;
+      const { currentMedia } = this.data;
+      if (currentMedia && currentMedia[currentIndex]) {
+        const imageUrl = currentMedia[currentIndex].url;
+        
+        // If we don't have dimensions for this image, fetch them
+        if (imageUrl && !this.data.imageDimensions[imageUrl]) {
+          wx.getImageInfo({
+            src: imageUrl,
+            success: (res) => {
+              const imageDimensions = this.data.imageDimensions || {};
+              imageDimensions[imageUrl] = {
+                width: res.width,
+                height: res.height
+              };
+              this.setData({ imageDimensions });
+              this.calculateDotPositions();
+            },
+            fail: () => {
+              // Fallback to calculating with default dimensions
+              this.calculateDotPositions();
+            }
+          });
+        } else {
+          // We already have dimensions, just recalculate
+          setTimeout(() => {
+            this.calculateDotPositions();
+          }, 50);
+        }
+      }
     },
 
     onDotTap(e) {
@@ -436,10 +512,57 @@ Component({
     },
 
     /**
+     * Pre-fetch image dimensions for accurate dot positioning
+     */
+    prefetchImageDimensions(mediaList) {
+      if (!mediaList || mediaList.length === 0) return;
+      
+      mediaList.forEach((media) => {
+        if (media.url && !this.data.imageDimensions[media.url]) {
+          wx.getImageInfo({
+            src: media.url,
+            success: (res) => {
+              const imageDimensions = this.data.imageDimensions || {};
+              imageDimensions[media.url] = {
+                width: res.width,
+                height: res.height
+              };
+              this.setData({ imageDimensions });
+              
+              // Recalculate dots if this is the current image
+              const currentMedia = this.data.currentMedia;
+              const currentSlideIndex = this.data.currentSlideIndex;
+              if (currentMedia && currentMedia[currentSlideIndex] && 
+                  currentMedia[currentSlideIndex].url === media.url) {
+                this.calculateDotPositions();
+              }
+            },
+            fail: (err) => {
+              console.log('Failed to get image info:', err);
+            }
+          });
+        }
+      });
+    },
+
+    /**
      * Handle image load event to recalculate positions
      */
     onImageLoad(e) {
-      // Only recalculate dot positions without caching
+      // Get the actual image dimensions from the load event
+      const { width: imageWidth, height: imageHeight } = e.detail;
+      const imageUrl = e.currentTarget.dataset.src;
+      
+      // Store the actual image dimensions
+      const imageDimensions = this.data.imageDimensions || {};
+      imageDimensions[imageUrl] = {
+        width: imageWidth,
+        height: imageHeight
+      };
+      
+      this.setData({ imageDimensions });
+      
+      // Recalculate dot positions with actual image dimensions
       setTimeout(() => {
         this.calculateDotPositions();
       }, 100);
