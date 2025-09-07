@@ -25,7 +25,7 @@
   "window": {
     "backgroundTextStyle": "light",
     "navigationBarBackgroundColor": "#111111",
-    "navigationBarTitleText": "学校秀",
+    "navigationBarTitleText": "校Show",
     "navigationBarTextStyle": "white",
     "backgroundColor": "#000000",
     "enablePullDownRefresh": false,
