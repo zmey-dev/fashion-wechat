@@ -35,6 +35,9 @@ Page({
     // Global auto-continue state
     globalIsContinue: false,
     
+    // WeChat Doc: Global media state tracking for Android
+    activeMediaIndex: -1,
+    
     // UI messages (Chinese for user interface)
     messages: {
       loading: "加载中...",
@@ -144,7 +147,56 @@ Page({
   },
 
   onUnload: function() {
+    // Stop all posts when leaving the page
+    const { posts } = this.data;
+    posts.forEach((post, index) => {
+      this.stopPostAtIndex(index);
+    });
+    
     this.unsubscribeFromGlobalEvents();
+  },
+  
+  onHide: function() {
+    console.log('[Page Hide] Stopping all media for page hide');
+    
+    // WeChat Doc: Complete media cleanup on page hide
+    const { posts } = this.data;
+    const systemInfo = wx.getSystemInfoSync();
+    const isAndroid = systemInfo.platform === 'android';
+    
+    // Android: More aggressive cleanup
+    if (isAndroid) {
+      // Force stop background audio first
+      try {
+        wx.stopBackgroundAudio();
+      } catch (error) {
+        console.warn('Background audio stop failed:', error);
+      }
+      
+      // Stop all posts with extra cleanup
+      posts.forEach((post, index) => {
+        this.stopPostAtIndex(index);
+        
+        // Additional cleanup for Android
+        setTimeout(() => {
+          const mediaPlayer = this.selectComponent(`#media-player-${index}`);
+          if (mediaPlayer) {
+            const mediaDisplay = mediaPlayer.selectComponent('.media-display');
+            if (mediaDisplay && mediaDisplay.destroyVideoContext) {
+              mediaDisplay.destroyVideoContext();
+            }
+          }
+        }, 100);
+      });
+    } else {
+      // iOS: Normal cleanup
+      posts.forEach((post, index) => {
+        this.stopPostAtIndex(index);
+      });
+    }
+    
+    // Reset global media state
+    this.setData({ activeMediaIndex: -1 });
   },
 
   // Initialize infinite scroll with current, previous, and next posts
@@ -197,6 +249,36 @@ Page({
         
         // Hide loading after initial load
         app.hideGlobalLoading();
+        
+        // Immediately ensure only current post can load media
+        setTimeout(() => {
+          console.log(`[Post Detail] Setting up posts - current index: ${currentIndex}`);
+          
+          // Force all posts to respect their playing state
+          posts.forEach((post, index) => {
+            const mediaPlayer = this.selectComponent(`#media-player-${index}`);
+            if (mediaPlayer) {
+              const isCurrentPost = index === currentIndex;
+              console.log(`[Post Detail] Post ${index} - isCurrentPost: ${isCurrentPost}`);
+              
+              if (!isCurrentPost) {
+                // Force non-current posts to stop completely
+                this.stopPostAtIndex(index);
+              }
+            }
+          });
+          
+          // CRITICAL: Set activeMediaIndex before starting current post
+          this.setData({ activeMediaIndex: currentIndex });
+          console.log(`[Post Detail] Set activeMediaIndex to: ${currentIndex}`);
+          
+          // Start the current post
+          const currentMediaPlayer = this.selectComponent(`#media-player-${currentIndex}`);
+          if (currentMediaPlayer && currentMediaPlayer.playMedia) {
+            console.log(`[Post Detail] Starting current post: ${currentIndex}`);
+            currentMediaPlayer.playMedia();
+          }
+        }, 300);
       } else {
         app.hideGlobalLoading();
         this.showError(this.data.messages.noPostFound);
@@ -254,33 +336,50 @@ Page({
   onSwiperChange: function(e) {
     const newIndex = e.detail.current;
     const oldIndex = this.data.currentIndex;
+    const { posts, activeMediaIndex } = this.data;
+    
+    console.log(`[Swiper Change] ${oldIndex} → ${newIndex}, activeMedia: ${activeMediaIndex}`);
     
     // Prevent redundant updates
     if (newIndex === oldIndex) return;
     
-    // Pause ALL media players first
-    const { posts } = this.data;
-    posts.forEach((post, index) => {
-      const mediaPlayer = this.selectComponent(`#media-player-${index}`);
-      if (mediaPlayer && mediaPlayer.pauseMedia) {
-        mediaPlayer.pauseMedia();
-      }
+    // WeChat Doc: Strict media control with global state tracking
+    const systemInfo = wx.getSystemInfoSync();
+    const isAndroid = systemInfo.platform === 'android';
+    
+    // Step 1: Stop ALL media immediately, including previously active
+    if (activeMediaIndex !== -1 && activeMediaIndex !== newIndex) {
+      console.log(`[Android Media] Force stopping previously active: ${activeMediaIndex}`);
+      this.stopPostAtIndex(activeMediaIndex);
+    }
+    
+    // Step 2: Stop all other posts
+    this.stopAllPostsExceptCurrent(newIndex);
+    
+    // Step 3: CRITICAL - Immediately claim the new index to prevent audio conflicts
+    this.setData({ 
+      currentIndex: newIndex,
+      activeMediaIndex: newIndex  // Immediately set to prevent other posts from starting audio
     });
     
-    this.setData({ currentIndex: newIndex });
+    console.log(`[Media Control] IMMEDIATELY claimed activeMediaIndex: ${newIndex}`);
     
-    // The is-playing property will automatically update based on index === currentIndex
-    // No need to manually call playMedia() - property system handles it
-    
-    // Start media for the current player after state has settled
+    // Step 4: Start new media with minimal delay
+    const startDelay = isAndroid ? 300 : 200;  // Reduced delays
     setTimeout(() => {
-      if (newIndex >= 0 && newIndex < posts.length) {
-        const newMediaPlayer = this.selectComponent(`#media-player-${newIndex}`);
-        if (newMediaPlayer && newMediaPlayer.playMedia) {
-          newMediaPlayer.playMedia();
+      // Double-check that we still own this index
+      if (this.data.currentIndex === newIndex && this.data.activeMediaIndex === newIndex) {
+        if (newIndex >= 0 && newIndex < posts.length) {
+          const newMediaPlayer = this.selectComponent(`#media-player-${newIndex}`);
+          if (newMediaPlayer && newMediaPlayer.playMedia) {
+            console.log(`[Media Control] Starting media for confirmed active index ${newIndex}`);
+            newMediaPlayer.playMedia();
+          }
         }
+      } else {
+        console.log(`[Media Control] Index ownership changed during delay - aborting start`);
       }
-    }, 300);
+    }, startDelay);
     
     // Check if we need to load more posts
     // posts variable already declared above
@@ -333,6 +432,12 @@ Page({
           currentIndex: currentIndex + 1, // Adjust index since we added at beginning
           isLoadingPrev: false
         });
+        
+        // Stop the newly loaded previous post immediately
+        setTimeout(() => {
+          const newPostIndex = 0; // Previous post is at index 0
+          this.stopPostAtIndex(newPostIndex);
+        }, 100);
       } else {
         // This should rarely happen now with loop navigation
         wx.showToast({
@@ -389,6 +494,14 @@ Page({
             isLoadingNext: false
           });
         }
+        
+        // Stop the newly loaded next post immediately
+        setTimeout(() => {
+          const newPostIndex = newPosts.length - 1;
+          if (newPostIndex !== this.data.currentIndex) {
+            this.stopPostAtIndex(newPostIndex);
+          }
+        }, 100);
       } else {
         // This should rarely happen now with loop navigation
         wx.showToast({
@@ -497,6 +610,146 @@ Page({
 
   showLoginModal: function() {
     app.setState("showLoginModal", true);
+  },
+  
+  /**
+   * Stop a specific post at given index
+   */
+  stopPostAtIndex: function(index) {
+    const systemInfo = wx.getSystemInfoSync();
+    const isAndroid = systemInfo.platform === 'android';
+    
+    console.log(`[${systemInfo.platform} Page] Stopping post at index ${index}`);
+    
+    const mediaPlayer = this.selectComponent(`#media-player-${index}`);
+    if (mediaPlayer) {
+      // Force set playing state to false
+      mediaPlayer.setData({
+        internalIsPlaying: false,
+        actualIsPlaying: false
+      });
+      
+      // Pause the media player
+      if (mediaPlayer.pauseMedia) {
+        mediaPlayer.pauseMedia();
+      }
+      
+      // Get media-display component and stop all media
+      const mediaDisplay = mediaPlayer.selectComponent('.media-display');
+      if (mediaDisplay) {
+        if (isAndroid) {
+          // Android: Aggressive cleanup sequence
+          console.log(`[Android Page] Starting aggressive cleanup for post ${index}`);
+          
+          // Step 1: Immediate audio destruction
+          if (mediaDisplay.destroyUploadedAudio) {
+            mediaDisplay.destroyUploadedAudio();
+          }
+          
+          // Step 2: Multiple video stop attempts with escalating delays
+          if (mediaDisplay.stopVideo) {
+            mediaDisplay.stopVideo(); // Immediate attempt
+            
+            // One additional attempt for Android reliability
+            setTimeout(() => {
+              if (mediaDisplay.stopVideo) {
+                mediaDisplay.stopVideo();
+              }
+            }, 100);
+          }
+          
+          // Step 3: Global audio cleanup attempts
+          setTimeout(() => {
+            try {
+              wx.stopBackgroundAudio();
+            } catch (bgError) {
+              console.warn('Background audio stop error:', bgError);
+            }
+            
+            try {
+              const bgAudioManager = wx.getBackgroundAudioManager();
+              if (bgAudioManager) {
+                bgAudioManager.stop();
+                bgAudioManager.src = '';
+              }
+            } catch (bgManagerError) {
+              console.warn('Background audio manager error:', bgManagerError);
+            }
+          }, 200);
+          
+        } else {
+          // iOS: Standard cleanup
+          if (mediaDisplay.stopVideo) {
+            mediaDisplay.stopVideo();
+          }
+          
+          if (mediaDisplay.destroyUploadedAudio) {
+            mediaDisplay.destroyUploadedAudio();
+          }
+        }
+      }
+    }
+    
+    console.log(`[${systemInfo.platform} Page] Completed stopping post at index ${index}`);
+  },
+  
+  /**
+   * Stop all posts except the currently active one
+   */
+  stopAllPostsExceptCurrent: function(currentIndex) {
+    const { posts } = this.data;
+    
+    console.log(`[Post Detail] Stopping all posts except index ${currentIndex}`);
+    
+    posts.forEach((post, index) => {
+      if (index !== currentIndex) {
+        const mediaPlayer = this.selectComponent(`#media-player-${index}`);
+        if (mediaPlayer) {
+          // Pause the media player
+          if (mediaPlayer.pauseMedia) {
+            mediaPlayer.pauseMedia();
+          }
+          
+          // Get media-display component and stop all media
+          const mediaDisplay = mediaPlayer.selectComponent('.media-display');
+          if (mediaDisplay) {
+            // WeChat Doc: Use centralized video management to prevent conflicts
+            console.log(`[Post Detail] Stopping video for post ${index} via media-display`);
+            
+            // Use media-display's centralized video control
+            if (mediaDisplay.stopVideo) {
+              mediaDisplay.stopVideo();
+            }
+            
+            // Destroy audio components
+            if (mediaDisplay.destroyUploadedAudio) {
+              mediaDisplay.destroyUploadedAudio();
+            }
+          }
+        }
+      }
+    });
+    
+    console.log(`[Post Detail] All posts except ${currentIndex} have been stopped`);
+    
+    // Android-specific: Global audio cleanup using WeChat API
+    const systemInfo = wx.getSystemInfoSync();
+    if (systemInfo.platform === 'android') {
+      console.log('[Android Global] Performing additional media cleanup');
+      
+      // WeChat Doc: Stop all background audio to prevent overlap
+      try {
+        wx.stopBackgroundAudio();
+      } catch (error) {
+        // Background audio API might not be available
+        console.warn('Background audio stop failed:', error);
+      }
+      
+      // Additional cleanup delay for Android
+      setTimeout(() => {
+        console.log('[Android Global] Final cleanup completed');
+      }, 200);
+    }
   },
 
   navigateToUserProfile: function(e) {

@@ -101,8 +101,9 @@ Component({
    * Component lifecycle
    */
   attached() {
-    // Initialize loading prevention flag
+    // Initialize flags
     this.isCurrentlyLoading = false;
+    this._toggleInProgress = false;
     
     this.initializeComponent();
 
@@ -122,10 +123,17 @@ Component({
   ready() {
     // Update container dimensions after component is fully rendered
     this.getContainerDimensions();
+    
+    // WeChat Doc: Don't auto-start in ready() to prevent race conditions
+    // Let parent components explicitly control playback
+    console.log('[Ready] Component ready, waiting for explicit play command');
   },
 
   detached() {
     this.cleanup();
+
+    // Reset flags
+    this._toggleInProgress = false;
 
     // Remove resize event listener
     if (this.onScreenResize) {
@@ -136,13 +144,6 @@ Component({
    * Component observers
    */
   observers: {
-    isPlaying: function (newValue) {
-      // When parent changes isPlaying, reset internal override
-      this.setData({ 
-        internalIsPlaying: null,
-        actualIsPlaying: newValue
-      });
-    },
     selectedPost: function (newPost, oldPost) {
       // Add more strict duplicate prevention
       if (!newPost) {
@@ -182,22 +183,86 @@ Component({
    */
   methods: {
     /**
-     * Get the actual playing state (internal override or property)
+     * WeChat Doc Compliant: Direct play/pause control without observers
      */
-    getActualPlayingState() {
-      const actualState = this.data.internalIsPlaying !== null ? this.data.internalIsPlaying : this.properties.isPlaying;
-      return actualState;
+    updatePlayingState() {
+      const shouldPlay = this.properties.isPlaying;
+      const currentlyPlaying = this.data.actualIsPlaying;
+      
+      console.log('[Media Player] updatePlayingState - should:', shouldPlay, 'current:', currentlyPlaying);
+      
+      // Only update if state actually changed
+      if (shouldPlay !== currentlyPlaying) {
+        if (shouldPlay) {
+          this.startPlayback();
+        } else {
+          this.stopPlayback();
+        }
+      }
     },
 
     /**
-     * Update actual playing state for template
+     * Start playback - WeChat Doc compliant
      */
-    updateActualPlayingState() {
-      const actualState = this.getActualPlayingState();
-      if (this.data.actualIsPlaying !== actualState) {
-        this.setData({ actualIsPlaying: actualState });
+    startPlayback() {
+      console.log('[Media Player] startPlayback called');
+      
+      if (!this.data.currentPost) return;
+      
+      // Update state first
+      this.setData({ actualIsPlaying: true });
+      
+      // Clear any existing timer
+      this.clearAutoPlayTimer();
+      this.setData({ currentSlideIndex: 0 });
+      
+      // Start appropriate media playback
+      if (this.data.currentPost.type === 'image') {
+        this.startAutoPlay();
+      } else if (this.data.currentPost.type === 'video') {
+        const mediaDisplay = this.selectComponent('.media-display');
+        if (mediaDisplay && mediaDisplay.startVideoAutoplay) {
+          setTimeout(() => {
+            mediaDisplay.startVideoAutoplay();
+          }, 100);
+        }
       }
-      return actualState;
+    },
+
+    /**
+     * Stop playback - WeChat Doc compliant
+     */
+    stopPlayback() {
+      console.log('[Media Player] stopPlayback called');
+      
+      // Update state first
+      this.setData({ actualIsPlaying: false });
+      
+      // Clear timers
+      this.clearAutoPlayTimer();
+      
+      // WeChat Doc: Use centralized video management
+      const mediaDisplay = this.selectComponent('.media-display');
+      if (mediaDisplay) {
+        console.log('[Media Player] Stopping video via centralized management');
+        
+        // Use media-display's centralized video control
+        if (mediaDisplay.stopVideo) {
+          mediaDisplay.stopVideo();
+        }
+        
+        // Destroy audio components
+        if (mediaDisplay.destroyUploadedAudio) {
+          mediaDisplay.destroyUploadedAudio();
+        }
+      }
+    },
+
+    /**
+     * Get the actual playing state (simplified)
+     */
+    getActualPlayingState() {
+      return this.data.actualIsPlaying;
     },
 
     /**
@@ -208,10 +273,8 @@ Component({
       this.setData({
         windowWidth: systemInfo.windowWidth,
         windowHeight: systemInfo.windowHeight,
+        actualIsPlaying: this.properties.isPlaying || false
       });
-      
-      // Initialize actual playing state
-      this.updateActualPlayingState();
 
       // Get actual container dimensions
       this.getContainerDimensions();
@@ -293,7 +356,17 @@ Component({
 
       const postUser = selectedPost.user || {};
       const comments = selectedPost.comments || [];
-      const media = selectedPost.media || [];
+      const mediaRaw = selectedPost.media || [];
+      
+      // Clean all media URLs to remove #devtools_no_referrer
+      const media = mediaRaw.map(item => {
+        if (item && item.url) {
+          // Remove hash fragments
+          const cleanUrl = item.url.split('#')[0];
+          return { ...item, url: cleanUrl };
+        }
+        return item;
+      });
 
       // Clear dots when loading new post
       const mediaDisplayComponent = this.selectComponent('media-display');
@@ -357,12 +430,16 @@ Component({
       // Clear any existing timer first
       this.clearAutoPlayTimer();
       
-      // Timer will be started by playMedia() when this post becomes current
-      
-      // No global loading to clear since we don't show it during navigation
-      
       // Clear loading flag
       this.isCurrentlyLoading = false;
+      
+      // If this post is currently playing and it's an image post, start autoplay
+      if (this.data.actualIsPlaying && selectedPost.type === 'image') {
+        console.log('[LoadPostData] Starting autoplay for active image post');
+        setTimeout(() => {
+          this.startAutoPlay();
+        }, 100);
+      }
       
       // For video posts, ensure loading state is cleared after a short delay (only for first entry)
       if (selectedPost.type === 'video' && shouldShowLoading) {
@@ -445,17 +522,20 @@ Component({
     startAutoPlay() {
       // Only for image posts
       if (this.data.currentPost?.type !== "image") {
+        console.log('[AutoPlay] Not an image post, skipping autoplay');
         return;
       }
       
-      // Check if we should delay autoplay until API completes
-      const actualPlaying = this.data.internalIsPlaying !== null ? this.data.internalIsPlaying : this.properties.isPlaying;
-      if (this.data.isWaitingForApi || !actualPlaying || this.data.showDetail) {
+      // Check if we should start autoplay
+      if (!this.data.actualIsPlaying || this.data.showDetail) {
+        console.log('[AutoPlay] Not playing or detail shown, skipping autoplay');
         return;
       }
       
       // Always clear any existing timer first
       this.clearAutoPlayTimer();
+      
+      console.log('[AutoPlay] Starting auto play timer for image post');
       
       // Create new timer only for images
       const timer = setInterval(() => {
@@ -478,100 +558,45 @@ Component({
     },
 
     resumeAutoPlay() {
-      // Removed - timer management now centralized in playMedia()
+      console.log('[AutoPlay] resumeAutoPlay called');
+      // Only restart if currently playing and is image post
+      if (this.data.actualIsPlaying && this.data.currentPost?.type === 'image') {
+        this.startAutoPlay();
+      }
     },
 
     /**
      * Play/Pause management
      */
     togglePlayPause() {
-      const isPlaying = this.data.internalIsPlaying !== null ? this.data.internalIsPlaying : this.properties.isPlaying;
-      if (isPlaying) {
-        this.pausePlayback();
-      } else {
-        this.resumePlayback();
-      }
-    },
-
-    pausePlayback() {
-      this.clearAutoPlayTimer();
-      // Set internal state to paused and update actualIsPlaying
-      this.setData({ 
-        internalIsPlaying: false,
-        actualIsPlaying: false
-      });
-      // Notify parent to update isPlaying property
-      this.triggerEvent('playStateChanged', { isPlaying: false });
-    },
-
-    resumePlayback() {
-      // Set internal state to playing and update actualIsPlaying
-      this.setData({ 
-        internalIsPlaying: true,
-        actualIsPlaying: true
-      });
-      // Notify parent to update isPlaying property
-      this.triggerEvent('playStateChanged', { isPlaying: true });
-      // Start timer for image posts
-      if (this.data.currentPost?.type === 'image') {
-        this.startAutoPlay();
-      }
-    },
-
-    // Public methods for parent components
-    pauseMedia() {
-      this.setData({ 
-        currentSlideIndex: 0  // Reset to first slide
-      });
-      this.clearAutoPlayTimer();  // Stop auto timer
+      console.log('[Media Player] togglePlayPause - current state:', this.data.actualIsPlaying);
       
-      // Pause video if exists
-      const mediaDisplay = this.selectComponent('#media-display');
-      if (mediaDisplay) {
-        const videoContext = wx.createVideoContext('media-video', mediaDisplay);
-        if (videoContext) {
-          videoContext.pause();
-          videoContext.seek(0);  // Reset to beginning
-        }
-        
-        // Stop uploaded audio if exists
-        if (mediaDisplay.destroyUploadedAudio) {
-          mediaDisplay.destroyUploadedAudio();
-        }
-      }
-      
-      // Notify parent of play state change
-      this.triggerEvent('playStateChanged', { isPlaying: false });
-    },
-
-    playMedia() {
-      
-      // Ensure we start from first slide and clear any existing timer
-      this.clearAutoPlayTimer();
-      
-      this.setData({ 
-        currentSlideIndex: 0  // Always start from first slide
-      });
-      
-      // Only start media if this component is marked as playing
-      if (!this.getActualPlayingState()) {
+      // Simple debouncing
+      if (this._toggleInProgress) {
+        console.log('[Media Player] Toggle in progress, ignoring');
         return;
       }
       
-      // For image posts, start timer immediately
-      if (this.data.currentPost?.type === 'image') {
-        this.startAutoPlay();
-      }
+      this._toggleInProgress = true;
+      setTimeout(() => {
+        this._toggleInProgress = false;
+      }, 500);
       
-      // For video posts, use media-display's autoplay method
-      if (this.data.currentPost?.type === 'video') {
-        const mediaDisplay = this.selectComponent('#media-display');
-        if (mediaDisplay && mediaDisplay.startVideoAutoplay) {
-          setTimeout(() => {
-            mediaDisplay.startVideoAutoplay();
-          }, 100);
-        }
+      // Direct toggle without complex state management
+      if (this.data.actualIsPlaying) {
+        this.stopPlayback();
+      } else {
+        this.startPlayback();
       }
+    },
+
+    // Public methods for parent components (backward compatibility)
+    pauseMedia() {
+      this.stopPlayback();
+    },
+
+    playMedia() {
+      this.startPlayback();
     },
 
     showPlayIndicatorBriefly() {
@@ -630,14 +655,17 @@ Component({
     moveToNextSlide() {
       const { currentSlideIndex, mediaLength, currentPost } = this.data;
       
+      console.log('[AutoPlay] moveToNextSlide called - currentPost type:', currentPost?.type, 'actualIsPlaying:', this.data.actualIsPlaying);
+      
       // Safety check: moveToNextSlide should only work for image posts
       if (currentPost?.type !== 'image') {
+        console.log('[AutoPlay] Not an image post, stopping moveToNextSlide');
         return;
       }
       
-      // Check actual playing state WITHOUT updating actualIsPlaying
-      const isActuallyPlaying = this.data.internalIsPlaying !== null ? this.data.internalIsPlaying : this.properties.isPlaying;
-      if (!isActuallyPlaying) {
+      // Check actual playing state
+      if (!this.data.actualIsPlaying) {
+        console.log('[AutoPlay] Not playing, stopping moveToNextSlide');
         return;
       }
       

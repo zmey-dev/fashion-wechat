@@ -34,7 +34,7 @@
           is-event-expired="{{ isEventExpired }}"
           is-loading="{{ false }}"
           is-continue="{{ globalIsContinue }}"
-          is-playing="{{ index === currentIndex }}"
+          is-playing="{{ false }}"
           bind:postNavigation="handlePostNavigation"
           bind:likeUpdated="handleLikeUpdated"
           bind:favoriteUpdated="handleFavoriteUpdated"

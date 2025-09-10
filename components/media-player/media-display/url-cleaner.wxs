@@ -1,0 +1,17 @@
+var cleanUrl = function(url) {
+  if (!url) return '';
+  
+  var cleanedUrl = url;
+  
+  // Remove hash fragments including #devtools_no_referrer
+  var hashIndex = cleanedUrl.indexOf('#');
+  if (hashIndex > -1) {
+    cleanedUrl = cleanedUrl.substring(0, hashIndex);
+  }
+  
+  return cleanedUrl;
+};
+
+module.exports = {
+  cleanUrl: cleanUrl
+};

@@ -1,4 +1,5 @@
 <!-- components/media-display/media-display.wxml -->
+<wxs src="./url-cleaner.wxs" module="urlCleaner"></wxs>
 <view
 class="media-container"
 catchtap="onScreenTap"
@@ -19,8 +20,8 @@ catchtap="onScreenTap"
         <image
           class="media-image"
           id="media-image"
-          src="{{ item.url }}"
-          data-src="{{ item.url }}"
+          src="{{ urlCleaner.cleanUrl(item.url) }}"
+          data-src="{{ urlCleaner.cleanUrl(item.url) }}"
           mode="aspectFit"
           lazy-load="{{ true }}"
           bindload="onImageLoad"
@@ -58,7 +59,9 @@ catchtap="onScreenTap"
     autoplay="{{ isPlaying && !isWaitingForApi && videoReady }}"
     loop="{{ !isContinue }}"
     preload="metadata"
-    poster="{{ currentMedia[0].preview_url || currentMedia[0].thumbnail_url || '' }}"
+    poster="{{ urlCleaner.cleanUrl(currentMedia[0].preview_url || currentMedia[0].thumbnail_url || '') }}"
+    auto-pause-if-navigate="{{ true }}"
+    auto-pause-if-open-native="{{ true }}"
     show-loading="{{ false }}"
     show-fullscreen-btn="{{ true }}"
     show-center-play-btn="{{ false }}"
