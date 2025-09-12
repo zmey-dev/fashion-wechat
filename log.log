@@ -1,169 +1,33 @@
-[Automatic HotReload] Automatic hot reload after saving the opened code file (json is not supported)
-[Deprecation] SharedArrayBuffer will require cross-origin isolation as of M92, around July 2021. See https://developer.chrome.com/blog/enabling-shared-array-buffer/ for more details.
-[pages/post-detail/post-detail] Some selectors are not allowed in component wxss, including tag name selectors, ID selectors, and attribute selectors.(./components/search-bar/search-bar.wxss:238:25)
-[pages/post-detail/post-detail] Some selectors are not allowed in component wxss, including tag name selectors, ID selectors, and attribute selectors.(./components/media-player/comment-tree-item-child/comment-tree-item-child.wxss:532:20)
-[pages/post-detail/post-detail] Some selectors are not allowed in component wxss, including tag name selectors, ID selectors, and attribute selectors.(./components/media-player/comment-tree-item/comment-tree-item.wxss:527:20)
-[pages/post-detail/post-detail] Some selectors are not allowed in component wxss, including tag name selectors, ID selectors, and attribute selectors.(./components/media-player/details-tab/details-tab.wxss:63:13)
-[pages/post-detail/post-detail] Some selectors are not allowed in component wxss, including tag name selectors, ID selectors, and attribute selectors.(./components/media-player/user-posts-tab/user-posts-tab.wxss:170:11)
-[pages/post-detail/post-detail] Some selectors are not allowed in component wxss, including tag name selectors, ID selectors, and attribute selectors.(./components/media-player/detail-panel/detail-panel.wxss:361:16)
-[pages/post-detail/post-detail] Some selectors are not allowed in component wxss, including tag name selectors, ID selectors, and attribute selectors.(./components/media-player/action-buttons/action-buttons.wxss:349:14)
-[pages/post-detail/post-detail] Some selectors are not allowed in component wxss, including tag name selectors, ID selectors, and attribute selectors.(./components/media-player/media-controls/media-controls.wxss:242:11)
-[pages/post-detail/post-detail] Some selectors are not allowed in component wxss, including tag name selectors, ID selectors, and attribute selectors.(./components/media-player/media-display/media-display.wxss:108:11)
-[pages/post-detail/post-detail] Some selectors are not allowed in component wxss, including tag name selectors, ID selectors, and attribute selectors.(./components/media-player/media-player.wxss:220:11)
-[pages/post-detail/post-detail] Some selectors are not allowed in component wxss, including tag name selectors, ID selectors, and attribute selectors.(./components/login-modal/login-modal.wxss:477:18)
-[Component] data field "isEventExpired" is overwritten by property with the same name (when preparing "components/media-player/media-player").
-handleApiSuccessResponse @ post-detail.js? [sm]:272
-success @ post-detail.js? [sm]:213
-success @ VM1810 app.js:617
-[Component] property "postId" of "components/media-player/report-modal/report-modal" received type-uncompatible value: expected <String> but get null value. Use empty string instead.
-handleApiSuccessResponse @ post-detail.js? [sm]:272
-success @ post-detail.js? [sm]:213
-success @ VM1810 app.js:617
-[Component] property "eventId" of "components/media-player/action-buttons/action-buttons" received type-uncompatible value: expected <String> but get null value. Use empty string instead.
-handleApiSuccessResponse @ post-detail.js? [sm]:272
-success @ post-detail.js? [sm]:213
-success @ VM1810 app.js:617
-[Component] property "eventId" of "components/media-player/comment-tree/comment-tree" received type-uncompatible value: expected <String> but get null value. Use empty string instead.
-handleApiSuccessResponse @ post-detail.js? [sm]:272
-success @ post-detail.js? [sm]:213
-success @ VM1810 app.js:617
-[Component] property "eventId" of "components/media-player/detail-panel/detail-panel" received type-uncompatible value: expected <String> but get null value. Use empty string instead.
-handleApiSuccessResponse @ post-detail.js? [sm]:272
-success @ post-detail.js? [sm]:213
-success @ VM1810 app.js:617
-[Component] property "eventId" of "components/media-player/media-player" received type-uncompatible value: expected <String> but get null value. Use empty string instead.
-handleApiSuccessResponse @ post-detail.js? [sm]:272
-success @ post-detail.js? [sm]:213
-success @ VM1810 app.js:617
-media-player.js? [sm]:180 [DEBUG] selectedPost observer - old: undefined new: video
-media-player.js? [sm]:535 [DEBUG] clearAutoPlayTimer called, data timer: null global timer: undefined
-media-player.js? [sm]:459 [DEBUG] startAutoPlay called, post type: video
-media-player.js? [sm]:463 [DEBUG] Video post - no timer
-media-player.js? [sm]:535 [DEBUG] clearAutoPlayTimer called, data timer: null global timer: undefined
-[Component] property "eventId" of "components/media-player/comment-item/comment-item" received type-uncompatible value: expected <String> but get null value. Use empty string instead.
-handleApiSuccessResponse @ post-detail.js? [sm]:272
-success @ post-detail.js? [sm]:213
-success @ VM1810 app.js:617
-[Component] property "index" of "components/media-player/comment-item/comment-item" received type-uncompatible value: expected <Number> but got non-number value. Used 0 instead.
-handleApiSuccessResponse @ post-detail.js? [sm]:272
-success @ post-detail.js? [sm]:213
-success @ VM1810 app.js:617
-[Component] property "eventId" of "components/media-player/comment-item/comment-item" received type-uncompatible value: expected <String> but get null value. Use empty string instead.
-handleApiSuccessResponse @ post-detail.js? [sm]:272
-success @ post-detail.js? [sm]:213
-success @ VM1810 app.js:617
-[Component] property "index" of "components/media-player/comment-item/comment-item" received type-uncompatible value: expected <Number> but got non-number value. Used 0 instead.
-handleApiSuccessResponse @ post-detail.js? [sm]:272
-success @ post-detail.js? [sm]:213
-success @ VM1810 app.js:617
-[Component] property "postId" of "components/media-player/report-modal/report-modal" received type-uncompatible value: expected <String> but get null value. Use empty string instead.
-handleApiSuccessResponse @ post-detail.js? [sm]:272
-success @ post-detail.js? [sm]:213
-success @ VM1810 app.js:617
-[Component] property "eventId" of "components/media-player/action-buttons/action-buttons" received type-uncompatible value: expected <String> but get null value. Use empty string instead.
-handleApiSuccessResponse @ post-detail.js? [sm]:272
-success @ post-detail.js? [sm]:213
-success @ VM1810 app.js:617
-[Component] property "eventId" of "components/media-player/comment-tree/comment-tree" received type-uncompatible value: expected <String> but get null value. Use empty string instead.
-handleApiSuccessResponse @ post-detail.js? [sm]:272
-success @ post-detail.js? [sm]:213
-success @ VM1810 app.js:617
-[Component] property "eventId" of "components/media-player/detail-panel/detail-panel" received type-uncompatible value: expected <String> but get null value. Use empty string instead.
-handleApiSuccessResponse @ post-detail.js? [sm]:272
-success @ post-detail.js? [sm]:213
-success @ VM1810 app.js:617
-[Component] property "eventId" of "components/media-player/media-player" received type-uncompatible value: expected <String> but get null value. Use empty string instead.
-handleApiSuccessResponse @ post-detail.js? [sm]:272
-success @ post-detail.js? [sm]:213
-success @ VM1810 app.js:617
-media-player.js? [sm]:180 [DEBUG] selectedPost observer - old: undefined new: image
-media-player.js? [sm]:535 [DEBUG] clearAutoPlayTimer called, data timer: null global timer: undefined
-media-player.js? [sm]:459 [DEBUG] startAutoPlay called, post type: image
-media-player.js? [sm]:535 [DEBUG] clearAutoPlayTimer called, data timer: null global timer: undefined
-media-player.js? [sm]:482 [DEBUG] Starting 5-second timer for image slides
-media-player.js? [sm]:483 [DEBUG] isPlaying: true showDetail: false
-media-player.js? [sm]:523 [DEBUG] Timer set with ID: 116 Total global timers: 1
-media-player.js? [sm]:459 [DEBUG] startAutoPlay called, post type: image
-media-player.js? [sm]:535 [DEBUG] clearAutoPlayTimer called, data timer: 116 global timer: 116
-media-player.js? [sm]:539 [DEBUG] Clearing data timer ID: 116
-media-player.js? [sm]:546 [DEBUG] Clearing global timer ID: 116
-media-player.js? [sm]:554 [DEBUG] Clearing ALL global timers: 1
-media-player.js? [sm]:482 [DEBUG] Starting 5-second timer for image slides
-media-player.js? [sm]:483 [DEBUG] isPlaying: true showDetail: false
-media-player.js? [sm]:523 [DEBUG] Timer set with ID: 117 Total global timers: 1
-wx.getSystemInfoSync is deprecated.Please use wx.getSystemSetting/wx.getAppAuthorizeSetting/wx.getDeviceInfo/wx.getWindowInfo/wx.getAppBaseInfo instead.
-initializeComponent @ media-player.js? [sm]:227
-attached @ media-player.js? [sm]:140
-handleApiSuccessResponse @ post-detail.js? [sm]:272
-success @ post-detail.js? [sm]:213
-success @ VM1810 app.js:617
-wx.getSystemInfoSync is deprecated.Please use wx.getSystemSetting/wx.getAppAuthorizeSetting/wx.getDeviceInfo/wx.getWindowInfo/wx.getAppBaseInfo instead.
-attached @ detail-panel.js? [sm]:29
-handleApiSuccessResponse @ post-detail.js? [sm]:272
-success @ post-detail.js? [sm]:213
-success @ VM1810 app.js:617
-wx.getSystemInfoSync is deprecated.Please use wx.getSystemSetting/wx.getAppAuthorizeSetting/wx.getDeviceInfo/wx.getWindowInfo/wx.getAppBaseInfo instead.
-initializeComponent @ media-player.js? [sm]:227
-attached @ media-player.js? [sm]:140
-handleApiSuccessResponse @ post-detail.js? [sm]:272
-success @ post-detail.js? [sm]:213
-success @ VM1810 app.js:617
-wx.getSystemInfoSync is deprecated.Please use wx.getSystemSetting/wx.getAppAuthorizeSetting/wx.getDeviceInfo/wx.getWindowInfo/wx.getAppBaseInfo instead.
-attached @ detail-panel.js? [sm]:29
-handleApiSuccessResponse @ post-detail.js? [sm]:272
-success @ post-detail.js? [sm]:213
-success @ VM1810 app.js:617
-media-player.js? [sm]:490 [DEBUG] Timer 1756794347413 fired after 5 seconds!
-media-player.js? [sm]:491 [DEBUG] Timer was created for post: 76 type: image
-media-player.js? [sm]:492 [DEBUG] Current post type in timer: image
-media-player.js? [sm]:493 [DEBUG] Current post ID: 76
-media-player.js? [sm]:505 [DEBUG] Calling moveToNextSlide
-media-player.js? [sm]:575 [DEBUG] moveToNextSlide called
-media-player.js? [sm]:576 [DEBUG] currentSlideIndex: 0 mediaLength: 1
-media-player.js? [sm]:595 [DEBUG] Last slide reached, isContinue: true
-media-player.js? [sm]:597 [DEBUG] Moving to next post
-media-player.js? [sm]:713 [MediaPlayer] moveToNextPost - triggering nextPost event
-post-detail.js? [sm]:890 [PostDetail] Auto-next triggered at 1756794352415
-post-detail.js? [sm]:913 [PostDetail] Processing auto-next
-post-detail.js? [sm]:929 [PostDetail] Auto-navigating to next post: 76
-media-player.js? [sm]:715 [MediaPlayer] nextPost event triggered
-media-player.js? [sm]:535 [DEBUG] clearAutoPlayTimer called, data timer: null global timer: null
-media-player.js? [sm]:554 [DEBUG] Clearing ALL global timers: 1
-media-player.js? [sm]:535 [DEBUG] clearAutoPlayTimer called, data timer: null global timer: null
-media-player.js? [sm]:535 [DEBUG] clearAutoPlayTimer called, data timer: 117 global timer: null
-media-player.js? [sm]:539 [DEBUG] Clearing data timer ID: 117
-media-player.js? [sm]:535 [DEBUG] clearAutoPlayTimer called, data timer: null global timer: null
-media-player.js? [sm]:180 [DEBUG] selectedPost observer - old: undefined new: video
-media-player.js? [sm]:535 [DEBUG] clearAutoPlayTimer called, data timer: null global timer: null
-media-player.js? [sm]:180 [DEBUG] selectedPost observer - old: undefined new: image
-media-player.js? [sm]:535 [DEBUG] clearAutoPlayTimer called, data timer: null global timer: null
-[Component] property "postId" of "components/media-player/report-modal/report-modal" received type-uncompatible value: expected <String> but get null value. Use empty string instead.
-success @ post-detail.js? [sm]:603
-success @ VM1810 app.js:617
-[Component] property "eventId" of "components/media-player/action-buttons/action-buttons" received type-uncompatible value: expected <String> but get null value. Use empty string instead.
-success @ post-detail.js? [sm]:603
-success @ VM1810 app.js:617
-[Component] property "eventId" of "components/media-player/comment-tree/comment-tree" received type-uncompatible value: expected <String> but get null value. Use empty string instead.
-success @ post-detail.js? [sm]:603
-success @ VM1810 app.js:617
-[Component] property "eventId" of "components/media-player/detail-panel/detail-panel" received type-uncompatible value: expected <String> but get null value. Use empty string instead.
-success @ post-detail.js? [sm]:603
-success @ VM1810 app.js:617
-[Component] property "eventId" of "components/media-player/media-player" received type-uncompatible value: expected <String> but get null value. Use empty string instead.
-success @ post-detail.js? [sm]:603
-success @ VM1810 app.js:617
-media-player.js? [sm]:180 [DEBUG] selectedPost observer - old: undefined new: video
-media-player.js? [sm]:535 [DEBUG] clearAutoPlayTimer called, data timer: null global timer: undefined
-media-player.js? [sm]:459 [DEBUG] startAutoPlay called, post type: video
-media-player.js? [sm]:463 [DEBUG] Video post - no timer
-media-player.js? [sm]:535 [DEBUG] clearAutoPlayTimer called, data timer: null global timer: undefined
-wx.getSystemInfoSync is deprecated.Please use wx.getSystemSetting/wx.getAppAuthorizeSetting/wx.getDeviceInfo/wx.getWindowInfo/wx.getAppBaseInfo instead.
-initializeComponent @ media-player.js? [sm]:227
-attached @ media-player.js? [sm]:140
-success @ post-detail.js? [sm]:603
-success @ VM1810 app.js:617
-wx.getSystemInfoSync is deprecated.Please use wx.getSystemSetting/wx.getAppAuthorizeSetting/wx.getDeviceInfo/wx.getWindowInfo/wx.getAppBaseInfo instead.
-attached @ detail-panel.js? [sm]:29
-success @ post-detail.js? [sm]:603
-success @ VM1810 app.js:617
-post-detail.js? [sm]:918 [PostDetail] Auto-next flag reset
+Network layer in render layer error] Failed to load media <URL>
+net::ERR_FAILED 
+From server 117.50.161.44(env: Windows,mp,1.06.2401020; lib: 3.8.9)
+[Network layer in render layer error] Failed to load media https://xiaoshow.cn-wlcb.ufileos.com/videos/1753859092895_47f731.mp4#devtools_no_referrer
+net::ERR_FAILED 
+From server 117.50.161.44(env: Windows,mp,1.06.2401020; lib: 3.8.9)
+[Network layer in render layer error] Failed to load media https://xiaoshow.cn-wlcb.ufileos.com/videos/1752660632284_zbrqhm.mp4#devtools_no_referrer
+net::ERR_FAILED 
+From server 117.50.161.44(env: Windows,mp,1.06.2401020; lib: 3.8.9)
+[Network layer in render layer error] Failed to load media https://xiaoshow.cn-wlcb.ufileos.com/videos/1753859092895_47f731.mp4#devtools_no_referrer
+net::ERR_FAILED 
+From server 117.50.161.44(env: Windows,mp,1.06.2401020; lib: 3.8.9)
+[Network layer in render layer error] Failed to load media https://xiaoshow.cn-wlcb.ufileos.com/videos/1752660632284_zbrqhm.mp4#devtools_no_referrer
+net::ERR_FAILED 
+From server 117.50.161.44(env: Windows,mp,1.06.2401020; lib: 3.8.9)
+[Network layer in render layer error] Failed to load media https://xiaoshow.cn-wlcb.ufileos.com/videos/1753859092895_47f731.mp4#devtools_no_referrer
+net::ERR_FAILED 
+From server 117.50.161.44(env: Windows,mp,1.06.2401020; lib: 3.8.9)
+[Network layer in render layer error] Failed to load media https://xiaoshow.cn-wlcb.ufileos.com/videos/1752660632284_zbrqhm.mp4#devtools_no_referrer
+net::ERR_FAILED 
+From server 117.50.161.44(env: Windows,mp,1.06.2401020; lib: 3.8.9)
+[Network layer in render layer error] Failed to load media https://xiaoshow.cn-wlcb.ufileos.com/videos/1757515870202_d2iez5.mp4#devtools_no_referrer
+net::ERR_FAILED 
+From server 117.50.161.44(env: Windows,mp,1.06.2401020; lib: 3.8.9)
+[Network layer in render layer error] Failed to load media https://xiaoshow.cn-wlcb.ufileos.com/videos/1757515870202_d2iez5.mp4#devtools_no_referrer
+net::ERR_FAILED 
+From server 117.50.161.44(env: Windows,mp,1.06.2401020; lib: 3.8.9)
+[Network layer in render layer error] Failed to load media https://xiaoshow.cn-wlcb.ufileos.com/videos/1757515870202_d2iez5.mp4#devtools_no_referrer
+net::ERR_FAILED 
+From server 117.50.161.44(env: Windows,mp,1.06.2401020; lib: 3.8.9)
+[Network layer in render layer error] Failed to load media https://xiaoshow.cn-wlcb.ufileos.com/videos/1752660632284_zbrqhm.mp4#devtools_no_referrer
+net::ERR_FAILED 
+From server 117.50.161.44(env: Windows,mp,1.06.2401020; lib: 3.8.9)

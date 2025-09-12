@@ -34,122 +34,154 @@ Component({
     containerHeight: 0,
     calculatedDots: [],
     audioMode: 'both', // 'both', 'uploaded', 'video'
-    // Removed image loading states for caching
-    showVideo: true, // Control video visibility during navigation
+    // Keep video always visible and ready to prevent black screen
+    showVideo: true, // Always true to prevent black screen
     isNavigatingVideo: false, // Flag to prevent false video ended events during navigation
-    videoReady: false, // Flag to control when video src is set
+    videoReady: true, // Always true to prevent black screen
     videoSrc: '', // Dynamic video source
-    imageDimensions: {}, // Store actual image dimensions for each image
+    imageDimensions: {}, // Store image dimensions for dot calculation
+    lastLoadedVideoUrl: '' // Track last loaded video to prevent duplicates
   },
 
   // WeChat Doc: Single VideoContext instance management
   _videoContext: null,
+  _isSettingVideo: false, // Flag to prevent recursive video setting
+  _shouldAutoPlay: false, // Flag to track if video should auto-play when ready
 
   observers: {
+    // Initialize video URL immediately when post changes
+    'currentPost, currentMedia': function(currentPost, currentMedia) {
+      if (!currentPost || !currentMedia || currentMedia.length === 0) {
+        // Clear video when no post
+        if (this.data.videoSrc) {
+            this.setData({
+            videoSrc: '',
+            lastLoadedVideoUrl: ''
+          });
+        }
+        return;
+      }
+      
+      if (currentPost.type === 'video' && currentMedia[0]) {
+        const videoUrl = currentMedia[0].url || '';
+        const finalUrl = videoUrl.indexOf('#') > -1 ? videoUrl.split('#')[0] : videoUrl;
+        
+        // Prevent recursive setting
+        if (this._isSettingVideo) return;
+        
+        // Check both videoSrc and lastLoadedVideoUrl to prevent duplicates
+        if (finalUrl && finalUrl !== this.data.videoSrc && finalUrl !== this.data.lastLoadedVideoUrl) {
+          this._isSettingVideo = true;
+          
+          // Reset playing state when changing video
+          this._isPlaying = false;
+          this._videoStarting = false;
+          
+          // Destroy old video context to prevent multiple instances
+          if (this._videoContext) {
+            try {
+              this._videoContext.stop();
+              this._videoContext = null;
+            } catch(e) {
+              this._videoContext = null;
+            }
+          }
+          
+          // Set both videoSrc and lastLoadedVideoUrl atomically
+          this.setData({
+            videoSrc: finalUrl,
+            lastLoadedVideoUrl: finalUrl
+          }, () => {
+            this._isSettingVideo = false;
+            
+            // Auto-play if this video should be playing
+            if (this._shouldAutoPlay || this.properties.isPlaying === true) {
+              const systemInfo = wx.getSystemInfoSync();
+              const isAndroid = systemInfo.platform === 'android';
+              const autoplayDelay = isAndroid ? 200 : 150;
+              setTimeout(() => {
+                this.startVideoAutoplay();
+              }, autoplayDelay);
+            }
+          });
+        } else if (finalUrl === this.data.lastLoadedVideoUrl && !this.data.videoSrc) {
+          // If we cleared videoSrc but it's the same video, don't restore it
+          // This prevents reloading when stopping
+        }
+      } else if (currentPost.type !== 'video' && this.data.videoSrc) {
+        // Clear video source for non-video posts
+        // Destroy video context first
+        if (this._videoContext) {
+          try {
+            this._videoContext.stop();
+            this._videoContext = null;
+          } catch(e) {
+            this._videoContext = null;
+          }
+        }
+        
+        this.setData({
+          videoSrc: '',
+          lastLoadedVideoUrl: '' // Clear for non-video posts
+        });
+      }
+    },
+    
     isPlaying: function(isPlaying) {
       const systemInfo = wx.getSystemInfoSync();
       const isAndroid = systemInfo.platform === 'android';
       
-      console.log(`[${systemInfo.platform} Media Display] isPlaying observer:`, isPlaying);
-      
       if (isPlaying === false) {
-        // Stop media for all platforms
-        console.log('[Media Display] Stopping media - not playing');
-        
-        // Use the enhanced stopVideo method for complete cleanup
-        this.stopVideo();
+        // Reset playing flag
+        this._isPlaying = false;
+        // Video will be muted automatically by muted="{{ !isPlaying }}" in WXML
+        // Just pause the video if context exists (don't create new one)
+        if (this._videoContext) {
+          this._videoContext.pause();
+        }
+        // Stop audio
+        this.destroyUploadedAudio();
       } else if (isPlaying === true && this.properties.currentPost && this.properties.currentPost.type === 'video') {
-        const currentMedia = this.properties.currentMedia;
-        if (currentMedia && currentMedia.length > 0 && currentMedia[0]) {
-          const cleanUrl = this.cleanMediaUrl(currentMedia[0].url);
-          const finalUrl = cleanUrl.indexOf('#') > -1 ? cleanUrl.split('#')[0] : cleanUrl;
-          
-          console.log(`[${systemInfo.platform} Media Display] Starting video load:`, finalUrl);
-          
-          // Simplified approach - same for both platforms
-          this.setData({
-            videoSrc: finalUrl,
-            videoReady: true,
-            showVideo: true,
-            isNavigatingVideo: false
-          });
-          
-          // Short delay to ensure video element is ready
+        // Mark that we should play this video
+        this._shouldAutoPlay = true;
+        
+        // If video source is already set, start playing immediately
+        if (this.data.videoSrc && !this._isPlaying) {
           const autoplayDelay = isAndroid ? 150 : 100;
           setTimeout(() => {
             this.startVideoAutoplay();
           }, autoplayDelay);
         }
+        // If video source is not yet set, it will auto-play when videoSrc is set
       }
     },
     
-    'currentMedia, currentSlideIndex': function(currentMedia, currentSlideIndex) {
-      // Clear previous dots immediately when media changes
+    'currentSlideIndex': function(currentSlideIndex) {
+      // Clear and recalculate dots when slide changes
       this.setData({ calculatedDots: [] });
-      
-      const systemInfo = wx.getSystemInfoSync();
-      const isAndroid = systemInfo.platform === 'android';
-      
-      console.log(`[${systemInfo.platform} Media Observer] currentMedia changed, isPlaying:`, this.properties.isPlaying);
-      
-      // Only stop video if we're not playing
-      if (!this.properties.isPlaying) {
-        this.stopVideo();
-        this.setData({
-          videoSrc: '',
-          videoReady: false,
-          showVideo: false,
-          isNavigatingVideo: false
-        });
-      } else if (currentMedia && currentMedia.length > 0 && currentMedia[0]) {
-        // Check if this component should actually load media
-        const shouldLoadMedia = this.properties.isPlaying === true;
-        
-        if (shouldLoadMedia && this.properties.currentPost && this.properties.currentPost.type === 'video') {
-          // Clean URL to remove #devtools_no_referrer and other fragments
-          const cleanUrl = this.cleanMediaUrl(currentMedia[0].url);
-          const finalUrl = cleanUrl.indexOf('#') > -1 ? cleanUrl.split('#')[0] : cleanUrl;
-          
-          console.log(`[${systemInfo.platform} Media Observer] Loading video for active post:`, finalUrl);
-          
-          // Simplified approach with minimal delay
-          this.setData({
-            videoSrc: finalUrl,
-            videoReady: true,
-            showVideo: true,
-            isNavigatingVideo: false
-          });
-          
-          // Short delay to let video element load
-          const autoplayDelay = isAndroid ? 200 : 100;
-          setTimeout(() => {
-            this.startVideoAutoplay();
-          }, autoplayDelay);
-        } else {
-          // This is not the active post - ensure video is completely stopped
-          console.log(`[${systemInfo.platform} Media Observer] Ensuring inactive post is stopped`);
-          this.setData({
-            videoSrc: '',
-            videoReady: false,
-            showVideo: false,
-            isNavigatingVideo: false
-          });
-        }
-      }
       
       // Calculate dot positions after DOM updates
       setTimeout(() => {
         this.calculateDotPositions();
       }, 50);
-      
-      // Pre-fetch image dimensions for better accuracy
-      if (currentMedia && currentMedia.length > 0 && this.properties.currentPost?.type === 'image') {
-        this.prefetchImageDimensions(currentMedia);
-      }
     }
   },
   ready() {
     this.getContainerDimensions();
+    
+    // Check if should auto-play on initial load
+    if (this.properties.isPlaying === true && this.properties.currentPost && this.properties.currentPost.type === 'video') {
+      this._shouldAutoPlay = true;
+      // If video source is already set, start playing
+      if (this.data.videoSrc) {
+        const systemInfo = wx.getSystemInfoSync();
+        const isAndroid = systemInfo.platform === 'android';
+        const autoplayDelay = isAndroid ? 300 : 200;
+        setTimeout(() => {
+          this.startVideoAutoplay();
+        }, autoplayDelay);
+      }
+    }
     
     // Store resize handler for cleanup
     this.onResizeHandler = () => {
@@ -165,11 +197,8 @@ Component({
     // Listen for window resize events
     wx.onWindowResize && wx.onWindowResize(this.onResizeHandler);
     
-    // Pre-fetch image dimensions on ready
-    const { currentMedia } = this.properties;
-    if (currentMedia && currentMedia.length > 0 && this.properties.currentPost?.type === 'image') {
-      this.prefetchImageDimensions(currentMedia);
-    }
+    // Skip pre-fetching - dimensions come from parent page cache
+    // This prevents duplicate downloads
   },
 
   detached() {
@@ -194,7 +223,6 @@ Component({
      */
     getVideoContext() {
       if (!this._videoContext) {
-        console.log('[VideoContext] Creating new video context');
         this._videoContext = wx.createVideoContext('media-video', this);
       }
       return this._videoContext;
@@ -205,7 +233,6 @@ Component({
      */
     destroyVideoContext() {
       if (this._videoContext) {
-        console.log('[VideoContext] Destroying video context');
         const systemInfo = wx.getSystemInfoSync();
         const isAndroid = systemInfo.platform === 'android';
         
@@ -228,7 +255,6 @@ Component({
                   this._videoContext.stop();
                   this._videoContext = null;
                 } catch (e) {
-                  console.warn('Final Android video cleanup error:', e);
                   this._videoContext = null;
                 }
               }
@@ -240,20 +266,18 @@ Component({
             this._videoContext = null;
           }
         } catch (error) {
-          console.warn('Error stopping video context:', error);
           this._videoContext = null;
         }
       }
     },
 
+    
     /**
      * WeChat Doc: Public method for parent components to stop video with complete cleanup
      */
     stopVideo() {
       const systemInfo = wx.getSystemInfoSync();
       const isAndroid = systemInfo.platform === 'android';
-      
-      console.log(`[VideoContext] External stop request - Platform: ${systemInfo.platform}`);
       
       // Step 1: Stop uploaded audio first to prevent audio overlap
       this.destroyUploadedAudio();
@@ -264,18 +288,16 @@ Component({
         try {
           if (isAndroid) {
             // Android: Multi-stage cleanup sequence
-            console.log('[Android Video] Starting complete cleanup sequence');
-            
             // Stage 1: Initial stop
             videoContext.pause();
             videoContext.seek(0);
             videoContext.stop();
             
-            // Stage 2: Clear video source immediately to prevent background loading
+            // Stage 2: Only clear video source, keep component visible
             this.setData({
-              videoSrc: '',
-              videoReady: false,
-              showVideo: false
+              videoSrc: ''
+              // Keep lastLoadedVideoUrl to prevent reloading
+              // Keep videoReady and showVideo true to prevent black screen
             });
             
             // Stage 3: Destroy context quickly
@@ -290,16 +312,15 @@ Component({
             videoContext.stop();
           }
         } catch (error) {
-          console.warn('Error in stopVideo:', error);
         }
       }
       
-      // Clear video state (for iOS or if no videoContext)
+      // Clear video source only (for iOS or if no videoContext)
       if (!isAndroid) {
         this.setData({
-          videoSrc: '',
-          videoReady: false,
-          showVideo: false
+          videoSrc: ''
+          // Keep lastLoadedVideoUrl to prevent reloading
+          // Keep videoReady and showVideo true to prevent black screen
         });
       }
     },
@@ -312,10 +333,8 @@ Component({
         const videoContext = this.getVideoContext();
         if (videoContext) {
           try {
-            console.log('[VideoContext] External play request');
             videoContext.play();
           } catch (error) {
-            console.warn('Error in playVideo:', error);
           }
         }
       }
@@ -371,12 +390,11 @@ Component({
       // Destroy uploaded audio context first to prevent overlap
       this.destroyUploadedAudio();
       
-      // Clear video source to stop any loading
+      // Only clear video source, keep component visible
       this.setData({ 
-        showVideo: false,
         isNavigatingVideo: true,
-        videoReady: false,
         videoSrc: '',
+        // Keep lastLoadedVideoUrl to prevent reloading same video
         userPausedVideo: false, // Reset user pause flag for new video
         calculatedDots: [] // Clear dots when clearing video state
       });
@@ -388,101 +406,59 @@ Component({
         videoContext.seek(0);
       }
       
-      // Show video again after a delay with fresh source
-      setTimeout(() => {
-        this.setData({ 
-          showVideo: true,
-          isNavigatingVideo: false  // Reset navigation flag
-        });
-      }, 100);
+      // Reset navigation flag immediately
+      this.setData({ 
+        isNavigatingVideo: false  // Reset navigation flag
+      });
+    },
+    
+    /**
+     * Clear video state when actually switching to a different post
+     */
+    clearVideoStateForNewPost() {
+      this.clearVideoState();
+      // Also clear lastLoadedVideoUrl when switching posts
+      this.setData({
+        lastLoadedVideoUrl: ''
+      });
     },
 
     /**
      * Start video autoplay - Enhanced with global state verification
      */
     startVideoAutoplay() {
+      // Prevent multiple calls
+      if (this._videoStarting) return;
+      
       const systemInfo = wx.getSystemInfoSync();
       const isAndroid = systemInfo.platform === 'android';
       
-      console.log(`[${systemInfo.platform} Video] startVideoAutoplay called - isPlaying:`, this.properties.isPlaying);
-      
       // Basic checks
       if (!this.properties.isPlaying) {
-        console.log('[Video Check] Not playing state - preventing autoplay');
         return;
       }
       
-      // Check global media state at page level - but be more lenient for video autoplay
-      const page = getCurrentPages()[getCurrentPages().length - 1];
-      if (page && page.data && page.data.activeMediaIndex !== undefined) {
-        const mediaPlayer = this.selectOwnerComponent();
-        if (mediaPlayer && mediaPlayer.properties && mediaPlayer.properties.index !== undefined) {
-          const ourIndex = mediaPlayer.properties.index;
-          const activeIndex = page.data.activeMediaIndex;
-          
-          console.log(`[Video Check] Our index: ${ourIndex}, Active index: ${activeIndex}`);
-          
-          // Only prevent if there's a different active index (not -1 or ourselves)
-          if (activeIndex !== -1 && activeIndex !== ourIndex) {
-            console.log('[Video Check] Warning: Not the active post but proceeding anyway for Android compatibility');
-            // Don't return on Android - sometimes activeMediaIndex updates are delayed
-            if (!isAndroid) {
-              return;
-            }
-          }
-        }
-      }
-      
-      if (isAndroid) {
-        // Android: Prevent multiple concurrent autoplay attempts
-        if (this._autoplayInProgress) {
-          console.log('[Android] Autoplay already in progress');
-          return;
-        }
-        this._autoplayInProgress = true;
-        setTimeout(() => {
-          this._autoplayInProgress = false;
-        }, 1000);
-      }
-      
-      // Only autoplay if this is a video post and playing is enabled
+      // Only play if this is a video post with source set
       if (this.properties.currentPost && 
           this.properties.currentPost.type === 'video' && 
           this.properties.isPlaying === true && 
-          !this.properties.isWaitingForApi) {
+          !this.properties.isWaitingForApi &&
+          this.data.videoSrc && 
+          !this._isPlaying) { // Only if not already playing
+        
+        this._videoStarting = true;
         const videoContext = this.getVideoContext();
+        
         if (videoContext) {
-          console.log(`[${systemInfo.platform} Video] Starting video autoplay for active post`);
+          // Play video
+          videoContext.play();
           
-          // Android: Stop first to ensure clean state
-          if (isAndroid) {
-            videoContext.stop();
-            setTimeout(() => {
-              videoContext.play();
-            }, 50);
-          } else {
-            // iOS: Just play
-            videoContext.play();
-          }
-          
-          // Apply audio mode after a delay to ensure video is actively playing
+          // Reset flag after a delay
           setTimeout(() => {
-            // Triple-check that this post is still the active one before applying audio mode
-            const currentPage = getCurrentPages()[getCurrentPages().length - 1];
-            const currentActiveIndex = currentPage && currentPage.data ? currentPage.data.activeMediaIndex : -1;
-            const currentPlayer = this.selectOwnerComponent();
-            const currentPlayerIndex = currentPlayer && currentPlayer.properties ? currentPlayer.properties.index : -1;
-            
-            if (this.properties.isPlaying && 
-                this.properties.currentPost && 
-                this.properties.currentPost.type === 'video' &&
-                (currentActiveIndex === -1 || currentActiveIndex === currentPlayerIndex)) {
-              console.log(`[${systemInfo.platform} Video] Applying audio mode for confirmed active post`);
-              this.applyAudioMode(videoContext);
-            } else {
-              console.log(`[${systemInfo.platform} Video] Post no longer active, skipping audio mode`);
-            }
-          }, 500); // 500ms delay
+            this._videoStarting = false;
+          }, 300);
+        } else {
+          this._videoStarting = false;
         }
       }
     },
@@ -569,7 +545,7 @@ Component({
 
       // Get actual image dimensions or use defaults
       const imageUrl = currentItem.url;
-      const imageDims = imageDimensions[imageUrl] || { width: 1080, height: 1080 };
+      const imageDims = (imageDimensions && imageDimensions[imageUrl]) || { width: 1080, height: 1080 };
       
       // Calculate actual displayed image size based on real dimensions
       const actualImageSize = this.calculateContainedImageSize(
@@ -604,37 +580,10 @@ Component({
       // Immediately clear dots and recalculate for new slide
       this.setData({ calculatedDots: [] });
       
-      // Get current image URL and check if we have dimensions
-      const currentIndex = e.detail.current;
-      const { currentMedia } = this.data;
-      if (currentMedia && currentMedia[currentIndex]) {
-        const imageUrl = currentMedia[currentIndex].url;
-        
-        // If we don't have dimensions for this image, fetch them
-        if (imageUrl && !this.data.imageDimensions[imageUrl]) {
-          wx.getImageInfo({
-            src: imageUrl,
-            success: (res) => {
-              const imageDimensions = this.data.imageDimensions || {};
-              imageDimensions[imageUrl] = {
-                width: res.width,
-                height: res.height
-              };
-              this.setData({ imageDimensions });
-              this.calculateDotPositions();
-            },
-            fail: () => {
-              // Fallback to calculating with default dimensions
-              this.calculateDotPositions();
-            }
-          });
-        } else {
-          // We already have dimensions, just recalculate
-          setTimeout(() => {
-            this.calculateDotPositions();
-          }, 50);
-        }
-      }
+      // Simply recalculate dot positions - no preloading
+      setTimeout(() => {
+        this.calculateDotPositions();
+      }, 100);
     },
 
     onDotTap(e) {
@@ -654,7 +603,8 @@ Component({
     },
     
     onVideoPlay() {
-      console.log('[VideoPlay] Video started playing');
+      // Mark as playing
+      this._isPlaying = true;
       
       // Clear user pause flag since video is now playing
       this.setData({ userPausedVideo: false });
@@ -681,6 +631,8 @@ Component({
     },
 
     onVideoPause() {
+      // Mark as not playing
+      this._isPlaying = false;
       this.triggerEvent('videopaused');
     },    onVideoEnded() {
       // Always trigger video ended event to move to next post
@@ -690,6 +642,11 @@ Component({
 
 
     onVideoError(e) {
+      
+      // Check if URL contains #devtools_no_referrer
+      if (this.data.videoSrc && this.data.videoSrc.includes('#')) {
+      }
+      
       // Video error occurred - trigger event instead of direct state change
       this.triggerEvent('videoerror', {
         isLoading: false,
@@ -722,13 +679,7 @@ Component({
         parent.isCurrentlyLoading = false;
       }
       
-      // Start playing immediately when video can play
-      if (this.properties.isPlaying) {
-        const videoContext = this.getVideoContext();
-        if (videoContext) {
-          videoContext.play();
-        }
-      }
+      // Don't play here - let autoplay handle it
     },
 
     onVideoWaiting() {
@@ -738,24 +689,12 @@ Component({
         isWaitingForApi: false
       });
       
-      // Try to resume playback after short delay
-      setTimeout(() => {
-        const videoContext = this.getVideoContext();
-        if (videoContext) {
-          videoContext.play();
-        }
-      }, 500);
+      // Don't try to play here - let the video buffer naturally
     },
 
     onVideoLoadedData() {
-      // Video data has been loaded - immediately start playback
-      const videoContext = this.getVideoContext();
-      if (videoContext) {
-        // Immediately play without multiple seeks to reduce loading appearance
-        if (this.properties.isPlaying) {
-          videoContext.play();
-        }
-      }
+      // Video data has been loaded
+      // Don't play here - autoplay attribute will handle it
       
       // Clear loading states via event
       this.triggerEvent('videoloadeddata', {
@@ -765,12 +704,8 @@ Component({
     },
 
     onVideoLoadedMetadata() {
-      // Video metadata loaded - can start playing now
-      const videoContext = this.getVideoContext();
-      if (videoContext && this.properties.isPlaying) {
-        // Start playing immediately when metadata is ready
-        videoContext.play();
-      }
+      // Video metadata loaded
+      // Don't play here - autoplay attribute will handle it
     },
 
     onVideoTimeUpdate() {
@@ -782,39 +717,7 @@ Component({
       });
     },
 
-    /**
-     * Pre-fetch image dimensions for accurate dot positioning
-     */
-    prefetchImageDimensions(mediaList) {
-      if (!mediaList || mediaList.length === 0) return;
-      
-      mediaList.forEach((media) => {
-        if (media.url && !this.data.imageDimensions[media.url]) {
-          wx.getImageInfo({
-            src: media.url,
-            success: (res) => {
-              const imageDimensions = this.data.imageDimensions || {};
-              imageDimensions[media.url] = {
-                width: res.width,
-                height: res.height
-              };
-              this.setData({ imageDimensions });
-              
-              // Recalculate dots if this is the current image
-              const currentMedia = this.data.currentMedia;
-              const currentSlideIndex = this.data.currentSlideIndex;
-              if (currentMedia && currentMedia[currentSlideIndex] && 
-                  currentMedia[currentSlideIndex].url === media.url) {
-                this.calculateDotPositions();
-              }
-            },
-            fail: (err) => {
-              console.log('Failed to get image info:', err);
-            }
-          });
-        }
-      });
-    },
+    // Removed prefetchImageDimensions - keep it simple
 
     /**
      * Handle image load event to recalculate positions
@@ -883,11 +786,11 @@ Component({
         this.muteUploadedAudio();
       } else if (audioMode === 'uploaded') {
         // Mute video audio, play only uploaded audio
-        videoContext.muted = true;
+        // Don't set muted property as it's controlled by WXML binding
         this.playUploadedAudio();
       } else {
         // Play both audio tracks
-        videoContext.muted = false;
+        // Don't set muted property as it's controlled by WXML binding
         this.playUploadedAudio();
       }
     },
@@ -899,7 +802,6 @@ Component({
       const { currentPost, isPlaying, isWaitingForApi } = this.properties;
       const { videoReady } = this.data;
       
-      console.log('[Audio Check] playUploadedAudio called - isPlaying:', isPlaying, 'videoReady:', videoReady);
       
       // Only play audio if this is the currently active/playing post with strict conditions
       if (!currentPost || 
@@ -907,14 +809,12 @@ Component({
           !isPlaying || 
           isWaitingForApi ||
           !videoReady) {
-        console.log('[Audio Check] Basic conditions failed - not playing audio');
         return;
       }
       
       // Additional check: ensure we're not in a transition state
       const parent = this.selectOwnerComponent();
       if (parent && (parent.data.isLoading || parent.data.isWaitingForApi || parent.isCurrentlyLoading)) {
-        console.log('[Audio Check] Parent loading state - not playing audio');
         return;
       }
       
@@ -927,10 +827,8 @@ Component({
           const ourIndex = mediaPlayer.properties.index;
           const activeIndex = page.data.activeMediaIndex;
           
-          console.log(`[Audio Check] Our index: ${ourIndex}, Active index: ${activeIndex}`);
           
           if (activeIndex !== -1 && activeIndex !== ourIndex) {
-            console.log('[Audio Check] Not the active post - preventing audio playback');
             return;
           }
         }
@@ -941,12 +839,10 @@ Component({
       if (systemInfo.platform === 'android') {
         // Double-check by looking at parent actualIsPlaying state
         if (parent && parent.data && parent.data.actualIsPlaying !== true) {
-          console.log('[Android Audio Check] Parent not actually playing - preventing audio');
           return;
         }
       }
       
-      console.log('[Audio Check] All checks passed - starting audio playback');
       
       // Destroy previous audio context first to prevent multiple audio playback
       this.destroyUploadedAudio();
@@ -958,13 +854,11 @@ Component({
       
       // Add error handling
       this.audioContext.onError((err) => {
-        console.error('Audio playback error:', err);
         this.destroyUploadedAudio();
       });
       
       this.audioContext.play();
       
-      console.log('[Audio Check] Audio context started for post:', currentPost.id);
     },
 
     /**
@@ -986,18 +880,15 @@ Component({
       
       if (this.audioContext) {
         try {
-          console.log(`[${systemInfo.platform} Audio] Destroying audio context`);
           
           if (isAndroid) {
             // Android: Aggressive multi-stage cleanup
-            console.log('[Android Audio] Starting aggressive cleanup sequence');
             
             // Stage 1: Multiple pause attempts
             try {
               this.audioContext.pause();
               this.audioContext.pause(); // Double pause for Android
             } catch (e1) {
-              console.warn('Android audio pause error:', e1);
             }
             
             // Stage 2: Multiple stop attempts  
@@ -1005,21 +896,18 @@ Component({
               this.audioContext.stop();
               this.audioContext.stop(); // Double stop for Android
             } catch (e2) {
-              console.warn('Android audio stop error:', e2);
             }
             
             // Stage 3: Clear src to prevent background loading
             try {
               this.audioContext.src = '';
             } catch (e3) {
-              console.warn('Android audio src clear error:', e3);
             }
             
             // Stage 4: Destroy with multiple attempts
             try {
               this.audioContext.destroy();
             } catch (e4) {
-              console.warn('Android audio destroy error:', e4);
             }
             
             // Stage 5: Immediate nullification
@@ -1031,7 +919,6 @@ Component({
               try {
                 wx.stopBackgroundAudio();
               } catch (bgError) {
-                console.warn('Background audio stop error:', bgError);
               }
             }, 50);
             
@@ -1042,7 +929,6 @@ Component({
                   this.audioContext.destroy();
                   this.audioContext = null;
                 } catch (finalError) {
-                  console.warn('Final Android cleanup error:', finalError);
                   this.audioContext = null;
                 }
               }
@@ -1058,7 +944,6 @@ Component({
           
         } catch (error) {
           // Handle any errors during audio context destruction
-          console.warn('Error destroying audio context:', error);
           this.audioContext = null;
         }
       }

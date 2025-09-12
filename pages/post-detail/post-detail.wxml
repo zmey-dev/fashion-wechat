@@ -15,6 +15,7 @@
       bindchange="onSwiperChange"
       bindanimationfinish="onAnimationFinish"
       circular="{{ false }}"
+      skip-hidden-item-layout="{{ false }}"
       style="height: calc(100vh - 240rpx); width: 100vw;"
     >
       <swiper-item 
@@ -24,27 +25,21 @@
       >
         <media-player
           id="media-player-{{index}}"
-          selectedPost="{{ item }}"
-          selectedPostUser="{{ item.user }}"
-          followedUsers="{{ followedUsers }}"
+          post="{{ item }}"
           authUser="{{ userInfo }}"
-          index="{{ index }}"
-          totalCount="{{ posts.length }}"
-          event-id="{{ eventId }}"
-          is-event-expired="{{ isEventExpired }}"
-          is-loading="{{ false }}"
-          is-continue="{{ globalIsContinue }}"
-          is-playing="{{ false }}"
-          bind:postNavigation="handlePostNavigation"
+          eventId="{{ eventId }}"
+          isEventExpired="{{ isEventExpired }}"
+          isPlaying="{{ index === currentIndex }}"
+          isContinue="{{ globalIsContinue }}"
           bind:likeUpdated="handleLikeUpdated"
           bind:favoriteUpdated="handleFavoriteUpdated"
           bind:shareUpdated="handleShareUpdated"
           bind:followUpdated="handleFollowUpdated"
           bind:showLogin="showLoginModal"
           bind:navigateToProfile="navigateToUserProfile"
+          bind:continueToggled="handleContinueToggled"
           bind:videoEnded="handleVideoEnded"
           bind:imageSlideEnded="handleImageSlideEnded"
-          bind:continueToggled="handleContinueToggled"
         >
         </media-player>
       </swiper-item>
@@ -60,7 +55,7 @@
     </view>
     
     <!-- Empty State - Only show when truly no content and not during any transitions -->
-    <view wx:elif="{{ !post && !isLoading && !hasError && hasLoadedOnce && !isNavigating && !isTransitioning }}" class="empty-container">
+    <view wx:elif="{{ !posts.length && !isLoading && !hasError && hasLoadedOnce }}" class="empty-container">
       <view class="empty-icon">📭</view>
       <text class="empty-text">内容不存在</text>
       <button class="back-btn" bindtap="onRetry">返回</button>

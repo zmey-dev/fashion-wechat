@@ -1,98 +1,160 @@
-import config from "../../config";
+const { default: config } = require("../../config");
 const app = getApp();
 
 Page({
   data: {
-    currentPath: "recommend",
-    showLoginModal: app.globalData.showLoginModal || false,
-    userInfo: app.globalData.userInfo || {},
-    followedUsers: app.globalData.followedUsers || [],
+    // Post information
+    postId: null,
+    userId: null,
+    eventId: null,
+    isEventExpired: false,
+    type: "recommend",
+    filter: "",
+    search: "",
+    universityId: "",
+    
+    // Source page for navigation context
+    sourcePage: "recommend",
     
     // Swiper infinite scroll data
     posts: [], // Array of posts for swiper
-    currentIndex: 0, // Start at first post
+    currentIndex: 1, // Start at middle (index 1)
     isLoadingNext: false,
     isLoadingPrev: false,
     
     // Loading states
     isLoading: false,
-    loadError: false,
+    hasError: false,
     errorMessage: "",
-    filterText: "",
+    hasLoadedOnce: false,
+    
+    // User state
+    userInfo: null,
+    showLoginModal: false,
     
     // Global auto-continue state
     globalIsContinue: false,
     
-    // Chinese messages for UI text
+    // Flag to prevent swiper bounce back
+    isAutoAdvancing: false,
+    
+    // WeChat Doc: Global media state tracking for Android
+    activeMediaIndex: -1,
+    
+    // Removed caches - let components handle their own loading
+    
+    // UI messages (Chinese for user interface)
     messages: {
       loading: "加载中...",
-      errors: {
-        loadFailed: "内容加载失败",
-        networkError: "网络错误，请稍后重试",
-      },
-      navigation: {
-        firstPost: "已经是第一个作品了",
-        lastPost: "已经是最后一个作品了",
-      },
+      loadFailed: "加载失败",
+      networkError: "网络错误",
+      noPostFound: "暂无推荐内容",
+      firstPost: "已经是第一个作品了",
+      lastPost: "已经是最后一个作品了",
+      noPostId: "暂无推荐内容",
     },
   },
 
-  onLoad: function (options) {
-    const postId = options.postId || null;
-    const filterText = options.filter || "";
+  onLoad: function(options) {
+    const postId = options.postId;
+    const userId = options.user_id;
+    const eventId = options.eventId || options.event_id;
+    const isEventExpired = options.isEventExpired === 'true';
+    const type = options.type || "recommend";
+    const filter = options.filter || "";
+    const search = options.search || "";
+    const universityId = options.university_id || "";
+    const source = options.source || "recommend";
+    
+    // Set initial data
     this.setData({
-      filterText: filterText,
-    });
-
-    // Subscribe to state changes
-    this.userInfoHandler = (userInfo) => {
-      this.setData({ userInfo });
-    };
-    this.showLoginModalHandler = (showLoginModal) => {
-      this.setData({ showLoginModal });
-    };
-    this.followedUserHandler = (followedUsers) => {
-      this.setData({ followedUsers });
-    };
-
-    app.subscribe("userInfo", this.userInfoHandler);
-    app.subscribe("followedUser", this.followedUserHandler);
-    app.subscribe("showLoginModal", this.showLoginModalHandler);
-
-    this.setData({
+      postId: postId || null,
+      userId: userId || null,
+      eventId: eventId || null,
+      isEventExpired: isEventExpired,
+      type: type,
+      filter: filter,
+      search: search,
+      universityId: universityId,
+      sourcePage: source,
+      userInfo: app.globalData.userInfo || null,
       showLoginModal: app.globalData.showLoginModal || false,
-      userInfo: app.globalData.userInfo || {},
-      followedUsers: app.globalData.followedUsers || [],
     });
-
-    // Load initial posts for infinite scroll
+    
+    // Subscribe to global events
+    this.subscribeToGlobalEvents();
+    
+    // Initialize with current post - for recommend, we use the first post from API
     this.initializeInfiniteScroll(postId);
   },
 
-  onShow: function () {
+  onShow: function() {
     // Only reload if no posts exist
     if (this.data.posts.length === 0 && !this.data.isLoading) {
-      this.initializeInfiniteScroll();
+      this.initializeInfiniteScroll(this.data.postId);
     }
   },
 
-  onUnload: function () {
-    // Unsubscribe from state changes
-    app.unsubscribe("userInfo", this.userInfoHandler);
-    app.unsubscribe("showLoginModal", this.showLoginModalHandler);
-    app.unsubscribe("followedUser", this.followedUserHandler);
+  onUnload: function() {
+    // Stop all posts when leaving the page
+    const { posts } = this.data;
+    posts.forEach((post, index) => {
+      this.stopPostAtIndex(index);
+    });
     
-    // Clear posts
-    this.setData({ posts: [] });
+    // No cache to clear
+    
+    this.unsubscribeFromGlobalEvents();
+  },
+  
+  onHide: function() {
+    
+    // WeChat Doc: Complete media cleanup on page hide
+    const { posts } = this.data;
+    const systemInfo = wx.getSystemInfoSync();
+    const isAndroid = systemInfo.platform === 'android';
+    
+    // Android: More aggressive cleanup
+    if (isAndroid) {
+      // Force stop background audio first
+      try {
+        wx.stopBackgroundAudio();
+      } catch (error) {
+      }
+      
+      // Stop all posts with extra cleanup
+      posts.forEach((post, index) => {
+        this.stopPostAtIndex(index);
+        
+        // Additional cleanup for Android
+        setTimeout(() => {
+          const mediaPlayer = this.selectComponent(`#media-player-${index}`);
+          if (mediaPlayer) {
+            const mediaDisplay = mediaPlayer.selectComponent('.media-display');
+            if (mediaDisplay && mediaDisplay.destroyVideoContext) {
+              mediaDisplay.destroyVideoContext();
+            }
+          }
+        }, 100);
+      });
+    } else {
+      // iOS: Normal cleanup
+      posts.forEach((post, index) => {
+        this.stopPostAtIndex(index);
+      });
+    }
+    
+    // Reset global media state
+    this.setData({ activeMediaIndex: -1 });
   },
 
-  // Initialize infinite scroll with recommended posts
+  // Initialize infinite scroll with current, previous, and next posts
   initializeInfiniteScroll: async function(postId) {
     if (this.data.isLoading) return;
     
     this.setData({
       isLoading: true,
-      loadError: false,
+      hasError: false,
       posts: []
     });
     
@@ -101,97 +163,124 @@ Page({
     app.showGlobalLoading('加载中...');
 
     try {
-      if (postId) {
-        // If specific postId provided, load it with neighbors
-        const data = await this.loadPostWithNeighbors(postId);
+      // For recommend page, first get the list of recommended posts
+      const recommendedPosts = await this.getRecommendedPosts();
+      
+      if (recommendedPosts && recommendedPosts.length > 0) {
+        // Store all recommended posts for loop navigation
+        this.allRecommendPosts = recommendedPosts;
+        
+        // If postId is provided, find it in the list
+        let targetPostId = postId;
+        if (!targetPostId) {
+          // No postId provided, use the first recommended post
+          targetPostId = recommendedPosts[0].id;
+        }
+        
+        // Load current post with neighbors using post-detail API
+        const data = await this.loadPostWithNeighbors(targetPostId);
         
         if (data && data.current) {
+          // Build initial posts array [prev, current, next]
           const posts = [];
-          if (data.previous) posts.push(data.previous);
+          
+          // Add previous if exists
+          if (data.previous) {
+            posts.push(data.previous);
+          }
+          
+          // Add current (always exists)
           posts.push(data.current);
-          if (data.next) posts.push(data.next);
+          
+          // Add next if exists  
+          if (data.next) {
+            posts.push(data.next);
+          }
+          
+          // Determine current index based on what's available
+          let currentIndex = 0;
+          if (data.previous) {
+            currentIndex = 1; // Current is at index 1 if previous exists
+          }
           
           this.setData({
             posts: posts,
-            currentIndex: data.previous ? 1 : 0,
-            isLoading: false
+            currentIndex: currentIndex,
+            isLoading: false,
+            hasLoadedOnce: true
           });
           
           // Hide loading after initial load
           app.hideGlobalLoading();
+          
+          // No preloading - let components handle their own loading
+          
+          // Initialize all loaded posts immediately for instant rendering
+          wx.nextTick(() => {
+            // Initialize all posts so they're ready before swiping
+            // Media players will initialize themselves via post property observer
+            // No need to call loadPost manually
+            
+            // Set activeMediaIndex for current post
+            this.setData({ activeMediaIndex: currentIndex });
+          });
+        } else {
+          app.hideGlobalLoading();
+          this.showError(this.data.messages.noPostFound);
         }
       } else {
-        // Load initial post following web version approach
-        // First get recommended posts list, then load detail with navigation
-        const initialPosts = await this.loadRecommendedPosts(0, 1);
-        
-        if (initialPosts && initialPosts.length > 0) {
-          const firstPost = initialPosts[0];
-          // Load post detail with neighbors for navigation (same as web version)
-          const data = await this.loadPostWithNeighbors(firstPost.id);
-          
-          if (data && data.current) {
-            const posts = [];
-            if (data.previous) posts.push(data.previous);
-            posts.push(data.current);
-            if (data.next) posts.push(data.next);
-            
-            this.setData({
-              posts: posts,
-              currentIndex: data.previous ? 1 : 0,
-              isLoading: false
-            });
-          } else {
-            // Fallback to using the initial post
-            this.setData({
-              posts: [firstPost],
-              currentIndex: 0,
-              isLoading: false
-            });
-          }
-          app.hideGlobalLoading();
-        } else {
-          this.setData({
-            isLoading: false,
-            loadError: true,
-            errorMessage: this.data.messages.errors.loadFailed
-          });
-          app.hideGlobalLoading();
-        }
+        app.hideGlobalLoading();
+        this.showError(this.data.messages.noPostFound);
       }
     } catch (error) {
       const app = getApp();
       app.hideGlobalLoading();
-      this.setData({
-        isLoading: false,
-        loadError: true,
-        errorMessage: this.data.messages.errors.networkError
-      });
+      this.showError(this.data.messages.networkError);
     }
   },
 
-  // Load recommended posts from API (same as web version)
-  loadRecommendedPosts: function(offset, limit) {
+  // Get recommended posts from API
+  getRecommendedPosts: function() {
     return new Promise((resolve, reject) => {
+      const requestHeaders = {
+        "Content-Type": "application/json"
+      };
+      
+      // Always check for fresh token from global data
+      const app = getApp();
+      const currentUser = app.globalData.userInfo || this.data.userInfo;
+      if (currentUser && currentUser.token) {
+        requestHeaders.Authorization = `Bearer ${currentUser.token}`;
+      }
+      
       wx.request({
         url: `${config.BACKEND_URL}/v2/post/recommend`,
         method: "GET",
         data: {
-          limit: limit,
-          offset: offset,
-          filter: this.data.filterText || "", // Ensure consistent with web version
+          limit: 30,  // Get more posts for smooth navigation
+          offset: 0
         },
-        header: {
-          "Content-Type": "application/json",
-          Authorization: this.data.userInfo?.token
-            ? `Bearer ${this.data.userInfo.token}`
-            : "",
-        },
-        success: (res) => {
-          if (res.statusCode === 200 && res.data.status === "success") {
-            resolve(res.data.posts || []);
+        header: requestHeaders,
+        success: (response) => {
+          if (response.statusCode === 200 && response.data && response.data.status === "success" && response.data.posts) {
+            const posts = response.data.posts;
+            
+            // Clean media URLs for all posts
+            posts.forEach(post => {
+              if (post.media && Array.isArray(post.media)) {
+                post.media = post.media.map(item => {
+                  if (item && item.url) {
+                    const cleanUrl = item.url.split('#')[0];
+                    return { ...item, url: cleanUrl };
+                  }
+                  return item;
+                });
+              }
+            });
+            
+            resolve(posts);
           } else {
-            reject(new Error(res.data?.msg || "Failed to load"));
+            reject(new Error("No recommendations"));
           }
         },
         fail: reject
@@ -202,25 +291,57 @@ Page({
   // Load post with its neighbors
   loadPostWithNeighbors: function(postId) {
     return new Promise((resolve, reject) => {
+      const apiParams = { 
+        type: this.data.type 
+      };
+      
+      if (this.data.userId) apiParams.user_id = this.data.userId;
+      if (this.data.eventId) apiParams.event_id = this.data.eventId;
+      if (this.data.filter) apiParams.filter = this.data.filter;
+      if (this.data.search) apiParams.search = this.data.search;
+      if (this.data.universityId) apiParams.university_id = this.data.universityId;
+      
+      const requestHeaders = {
+        "Content-Type": "application/json"
+      };
+      
+      // Always check for fresh token from global data
+      const app = getApp();
+      const currentUser = app.globalData.userInfo || this.data.userInfo;
+      if (currentUser && currentUser.token) {
+        requestHeaders.Authorization = `Bearer ${currentUser.token}`;
+      }
+      
       wx.request({
         url: `${config.BACKEND_URL}/v2/post/detail/${postId}`,
         method: "GET",
-        data: { type: "recommend" },
-        header: {
-          "Content-Type": "application/json",
-          Authorization: this.data.userInfo?.token
-            ? `Bearer ${this.data.userInfo.token}`
-            : "",
-        },
-        success: (res) => {
-          if (res.statusCode === 200 && res.data.status === "success") {
+        data: apiParams,
+        header: requestHeaders,
+        success: (response) => {
+          if (response.statusCode === 200 && response.data.status === "success") {
+            // Clean media URLs for all posts
+            const cleanPost = (post) => {
+              if (!post) return post;
+              if (post.media && Array.isArray(post.media)) {
+                post.media = post.media.map(item => {
+                  if (item && item.url) {
+                    // Remove #devtools_no_referrer and any other hash fragments
+                    const cleanUrl = item.url.split('#')[0];
+                    return { ...item, url: cleanUrl };
+                  }
+                  return item;
+                });
+              }
+              return post;
+            };
+            
             resolve({
-              current: res.data.current || res.data.post,
-              next: res.data.next,
-              previous: res.data.previous
+              current: cleanPost(response.data.current || response.data.post),
+              next: cleanPost(response.data.next),
+              previous: cleanPost(response.data.previous)
             });
           } else {
-            reject(new Error(res.data?.message || "Failed to load"));
+            reject(new Error(response.data?.message || "Failed to load"));
           }
         },
         fail: reject
@@ -232,60 +353,63 @@ Page({
   onSwiperChange: function(e) {
     const newIndex = e.detail.current;
     const oldIndex = this.data.currentIndex;
+    const { posts, isAutoAdvancing } = this.data;
     
-    // Prevent redundant updates
     if (newIndex === oldIndex) return;
     
-    // Pause ALL media players first
-    const { posts } = this.data;
-    posts.forEach((post, index) => {
-      const mediaPlayer = this.selectComponent(`#media-player-${index}`);
-      if (mediaPlayer && mediaPlayer.pauseMedia) {
-        mediaPlayer.pauseMedia();
-      }
-    });
+    // Prevent rapid swiping - throttle swipe events
+    const now = Date.now();
+    if (this._lastSwipeTime && (now - this._lastSwipeTime) < 500) {
+      // Too fast - ignore this swipe
+      return;
+    }
+    this._lastSwipeTime = now;
     
+    // If we're auto-advancing, don't do anything here
+    // The state has already been updated
+    if (isAutoAdvancing) {
+      // Reset the flag after a short delay
+      setTimeout(() => {
+        this.setData({ isAutoAdvancing: false });
+      }, 500);
+      return;
+    }
+    
+    // Update current index
     this.setData({ currentIndex: newIndex });
     
-    // The is-playing property will automatically update based on index === currentIndex
-    // No need to manually call playMedia() - property system handles it
+    // Initialize current media player only
+    // Media player will update itself via post property observer
+    // No need to manually call loadPost
     
-    // Start media for the current player after state has settled
-    setTimeout(() => {
-      if (newIndex >= 0 && newIndex < posts.length) {
-        const newMediaPlayer = this.selectComponent(`#media-player-${newIndex}`);
-        if (newMediaPlayer && newMediaPlayer.playMedia) {
-          newMediaPlayer.playMedia();
-        }
-      }
-    }, 300);
-    
-    // posts variable already declared above
-    
-    // Load previous posts when reaching first item
-    if (newIndex === 0 && oldIndex > 0) {
+    // Load more posts if needed - preload when approaching edges
+    if (newIndex <= 1 && oldIndex > newIndex) {
+      // Moving backwards and approaching the beginning
       this.loadPreviousPost();
-    }
-    // Load next posts when reaching last item
-    else if (newIndex === posts.length - 1 && newIndex > oldIndex) {
+    } else if (newIndex >= posts.length - 2 && newIndex > oldIndex) {
+      // Moving forward and approaching the end
       this.loadNextPost();
     }
   },
+  
+  // Removed all preload methods - keep it simple
 
-  // Load previous post for infinite scroll (using detail API like web version)
+  // Load previous post for infinite scroll
   loadPreviousPost: async function() {
     if (this.data.isLoadingPrev) return;
     
     const { posts, currentIndex } = this.data;
-    const currentPost = posts[currentIndex];
+    // Use the first post in array to get its previous, not current post
+    const firstPost = posts[0];
     
-    if (!currentPost || !currentPost.id) return;
+    // Check if first post exists
+    if (!firstPost || !firstPost.id) return;
     
     this.setData({ isLoadingPrev: true });
     
     try {
-      // Use detail API to get previous post info (same as web version)
-      const data = await this.loadPostWithNeighbors(currentPost.id);
+      // Load the previous post's data from the first post in array
+      const data = await this.loadPostWithNeighbors(firstPost.id);
       
       if (data && data.previous) {
         // Check if the previous post is already in the array to prevent loops
@@ -299,20 +423,24 @@ Page({
         // Add previous post to beginning of array
         const newPosts = [data.previous, ...posts];
         
-        // Keep array size manageable (max 5 posts)
-        if (newPosts.length > 5) {
+        // Keep array size manageable (max 10 posts) - increased to prevent destruction
+        if (newPosts.length > 10) {
           newPosts.pop(); // Remove last post
         }
         
+        // First update posts array
         this.setData({
           posts: newPosts,
           currentIndex: currentIndex + 1, // Adjust index since we added at beginning
           isLoadingPrev: false
+        }, () => {
+          // Initialize the new post immediately after DOM update
+          // Media player will initialize itself via post property observer
         });
       } else {
         // This should rarely happen now with loop navigation
         wx.showToast({
-          title: this.data.messages.navigation.firstPost,
+          title: this.data.messages.firstPost,
           icon: 'none',
           duration: 1500
         });
@@ -323,20 +451,21 @@ Page({
     }
   },
 
-  // Load next post for infinite scroll (using detail API like web version)
+  // Load next post for infinite scroll
   loadNextPost: async function() {
     if (this.data.isLoadingNext) return;
     
     const { posts, currentIndex } = this.data;
-    const currentPost = posts[currentIndex];
+    // Use the last post in array to get its next, not current post
+    const lastPost = posts[posts.length - 1];
     
-    if (!currentPost || !currentPost.id) return;
+    if (!lastPost || !lastPost.id) return;
     
     this.setData({ isLoadingNext: true });
     
     try {
-      // Use detail API to get next post info (same as web version)
-      const data = await this.loadPostWithNeighbors(currentPost.id);
+      // Load the next post's data from the last post in array
+      const data = await this.loadPostWithNeighbors(lastPost.id);
       
       if (data && data.next) {
         // Check if the next post is already in the array to prevent loops
@@ -350,25 +479,35 @@ Page({
         // Add next post to end of array
         const newPosts = [...posts, data.next];
         
-        // Keep array size manageable (max 5 posts)
-        if (newPosts.length > 5) {
+        // Keep array size manageable (max 10 posts) - increased to prevent destruction
+        if (newPosts.length > 10) {
           newPosts.shift(); // Remove first post
           // Adjust current index since we removed from beginning
           this.setData({
             posts: newPosts,
             currentIndex: currentIndex - 1,
             isLoadingNext: false
+          }, () => {
+            // Initialize the new post immediately
+            wx.nextTick(() => {
+              // Media player will initialize itself via post property observer
+            });
           });
         } else {
           this.setData({
             posts: newPosts,
             isLoadingNext: false
+          }, () => {
+            // Initialize the new post immediately
+            wx.nextTick(() => {
+              // Media player will initialize itself via post property observer
+            });
           });
         }
       } else {
         // This should rarely happen now with loop navigation
         wx.showToast({
-          title: this.data.messages.navigation.lastPost,
+          title: this.data.messages.lastPost,
           icon: 'none',
           duration: 1500
         });
@@ -381,22 +520,29 @@ Page({
 
   // Animation finish handler
   onAnimationFinish: function(e) {
+    const { isAutoAdvancing } = this.data;
+    
+    // Reset auto-advancing flag after animation completes
+    if (isAutoAdvancing) {
+      this.setData({ isAutoAdvancing: false });
+    }
+    
     // Clean up posts array if needed after animation completes
     const { posts, currentIndex } = this.data;
     
-    // Maintain a window of 5 posts maximum for performance
-    if (posts.length > 5) {
+    // Maintain a window of 10 posts maximum for performance
+    if (posts.length > 10) {
       let newPosts = [...posts];
       let newIndex = currentIndex;
       
       // Remove posts that are too far from current position
-      if (currentIndex > 3) {
+      if (currentIndex > 7) {
         // Remove from beginning
-        newPosts = newPosts.slice(-5);
-        newIndex = currentIndex - (posts.length - 5);
-      } else if (currentIndex < 2 && posts.length > 5) {
+        newPosts = newPosts.slice(-10);
+        newIndex = currentIndex - (posts.length - 10);
+      } else if (currentIndex < 3 && posts.length > 10) {
         // Remove from end
-        newPosts = newPosts.slice(0, 5);
+        newPosts = newPosts.slice(0, 10);
       }
       
       if (newPosts.length !== posts.length) {
@@ -408,9 +554,42 @@ Page({
     }
   },
 
+  // Subscribe to global application events
+  subscribeToGlobalEvents: function() {
+    this.userInfoHandler = (userInfo) => {
+      this.setData({ userInfo });
+    };
+    
+    this.loginModalHandler = (showLoginModal) => {
+      this.setData({ showLoginModal });
+    };
+    
+    app.subscribe("userInfo", this.userInfoHandler);
+    app.subscribe("showLoginModal", this.loginModalHandler);
+  },
+
+  // Unsubscribe from global application events
+  unsubscribeFromGlobalEvents: function() {
+    if (this.userInfoHandler) {
+      app.unsubscribe("userInfo", this.userInfoHandler);
+    }
+    if (this.loginModalHandler) {
+      app.unsubscribe("showLoginModal", this.loginModalHandler);
+    }
+  },
+
+  // Display error message to user
+  showError: function(message) {
+    this.setData({
+      hasError: true,
+      errorMessage: message,
+      isLoading: false,
+    });
+  },
+
   // Retry loading
   onRetry: function() {
-    this.initializeInfiniteScroll();
+    this.initializeInfiniteScroll(this.data.postId);
   },
 
   // Event handlers from media player
@@ -437,6 +616,134 @@ Page({
   showLoginModal: function() {
     app.setState("showLoginModal", true);
   },
+  
+  /**
+   * Stop a specific post at given index
+   */
+  stopPostAtIndex: function(index) {
+    const systemInfo = wx.getSystemInfoSync();
+    const isAndroid = systemInfo.platform === 'android';
+    
+    
+    const mediaPlayer = this.selectComponent(`#media-player-${index}`);
+    if (mediaPlayer) {
+      // Force set playing state to false
+      mediaPlayer.setData({
+        internalIsPlaying: false,
+        actualIsPlaying: false
+      });
+      
+      // Pause the media player
+      if (mediaPlayer.pauseMedia) {
+        mediaPlayer.pauseMedia();
+      }
+      
+      // Get media-display component and stop all media
+      const mediaDisplay = mediaPlayer.selectComponent('.media-display');
+      if (mediaDisplay) {
+        if (isAndroid) {
+          // Android: Aggressive cleanup sequence
+          
+          // Step 1: Immediate audio destruction
+          if (mediaDisplay.destroyUploadedAudio) {
+            mediaDisplay.destroyUploadedAudio();
+          }
+          
+          // Step 2: Multiple video stop attempts with escalating delays
+          if (mediaDisplay.stopVideo) {
+            mediaDisplay.stopVideo(); // Immediate attempt
+            
+            // One additional attempt for Android reliability
+            setTimeout(() => {
+              if (mediaDisplay.stopVideo) {
+                mediaDisplay.stopVideo();
+              }
+            }, 100);
+          }
+          
+          // Step 3: Global audio cleanup attempts
+          setTimeout(() => {
+            try {
+              wx.stopBackgroundAudio();
+            } catch (bgError) {
+            }
+            
+            try {
+              const bgAudioManager = wx.getBackgroundAudioManager();
+              if (bgAudioManager) {
+                bgAudioManager.stop();
+                bgAudioManager.src = '';
+              }
+            } catch (bgManagerError) {
+            }
+          }, 200);
+          
+        } else {
+          // iOS: Standard cleanup
+          if (mediaDisplay.stopVideo) {
+            mediaDisplay.stopVideo();
+          }
+          
+          if (mediaDisplay.destroyUploadedAudio) {
+            mediaDisplay.destroyUploadedAudio();
+          }
+        }
+      }
+    }
+    
+  },
+  
+  /**
+   * Stop all posts except the currently active one
+   */
+  stopAllPostsExceptCurrent: function(currentIndex) {
+    const { posts } = this.data;
+    
+    
+    posts.forEach((post, index) => {
+      if (index !== currentIndex) {
+        const mediaPlayer = this.selectComponent(`#media-player-${index}`);
+        if (mediaPlayer) {
+          // Pause the media player
+          if (mediaPlayer.pauseMedia) {
+            mediaPlayer.pauseMedia();
+          }
+          
+          // Get media-display component and stop all media
+          const mediaDisplay = mediaPlayer.selectComponent('.media-display');
+          if (mediaDisplay) {
+            // WeChat Doc: Use centralized video management to prevent conflicts
+            
+            // Use media-display's centralized video control
+            if (mediaDisplay.stopVideo) {
+              mediaDisplay.stopVideo();
+            }
+            
+            // Destroy audio components
+            if (mediaDisplay.destroyUploadedAudio) {
+              mediaDisplay.destroyUploadedAudio();
+            }
+          }
+        }
+      }
+    });
+    
+    
+    // Android-specific: Global audio cleanup using WeChat API
+    const systemInfo = wx.getSystemInfoSync();
+    if (systemInfo.platform === 'android') {
+      // WeChat Doc: Stop all background audio to prevent overlap
+      try {
+        wx.stopBackgroundAudio();
+      } catch (error) {
+        // Background audio API might not be available
+      }
+      
+      // Additional cleanup delay for Android
+      setTimeout(() => {
+      }, 200);
+    }
+  },
 
   navigateToUserProfile: function(e) {
     const { username } = e.detail;
@@ -451,69 +758,39 @@ Page({
     const { currentIndex, posts } = this.data;
     
     if (currentIndex < posts.length - 1) {
-      const newIndex = currentIndex + 1;
-      
-      // Pause ALL media players first
-      posts.forEach((post, index) => {
-        const mediaPlayer = this.selectComponent(`#media-player-${index}`);
-        if (mediaPlayer && mediaPlayer.pauseMedia) {
-          mediaPlayer.pauseMedia();
-        }
+      // Set flag to prevent bounce back
+      this.setData({ 
+        isAutoAdvancing: true,
+        currentIndex: currentIndex + 1 
       });
       
-      this.setData({ currentIndex: newIndex });
-      
-      // Play the new current media player to maintain play state
-      const newMediaPlayer = this.selectComponent(`#media-player-${newIndex}`);
-      if (newMediaPlayer) {
-        setTimeout(() => {
-          newMediaPlayer.playMedia && newMediaPlayer.playMedia();
-        }, 200);
-      }
-      
+      // Load more posts if needed
       if (currentIndex === posts.length - 2) {
         this.loadNextPost();
       }
+    } else {
+      // At last post, try to load more
+      this.loadNextPost();
     }
   },
 
   handleImageSlideEnded: function(e) {
     const { currentIndex, posts } = this.data;
     
-    console.log('handleImageSlideEnded called', {
-      currentIndex,
-      totalPosts: posts.length,
-      canAdvance: currentIndex < posts.length - 1
-    });
-    
     if (currentIndex < posts.length - 1) {
-      const newIndex = currentIndex + 1;
-      console.log('Advancing to next post:', newIndex);
-      
-      // Pause ALL media players first
-      posts.forEach((post, index) => {
-        const mediaPlayer = this.selectComponent(`#media-player-${index}`);
-        if (mediaPlayer && mediaPlayer.pauseMedia) {
-          mediaPlayer.pauseMedia();
-        }
+      // Set flag to prevent bounce back
+      this.setData({ 
+        isAutoAdvancing: true,
+        currentIndex: currentIndex + 1 
       });
       
-      this.setData({ currentIndex: newIndex });
-      
-      // Play the new current media player to maintain play state
-      const newMediaPlayer = this.selectComponent(`#media-player-${newIndex}`);
-      if (newMediaPlayer) {
-        setTimeout(() => {
-          newMediaPlayer.playMedia && newMediaPlayer.playMedia();
-        }, 200);
-      }
-      
+      // Load more posts if needed
       if (currentIndex === posts.length - 2) {
-        console.log('Loading next post batch');
         this.loadNextPost();
       }
     } else {
-      console.log('Already at last post, cannot advance');
+      // At last post, try to load more
+      this.loadNextPost();
     }
   },
 

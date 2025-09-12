@@ -35,8 +35,13 @@ Page({
     // Global auto-continue state
     globalIsContinue: false,
     
+    // Flag to prevent swiper bounce back
+    isAutoAdvancing: false,
+    
     // WeChat Doc: Global media state tracking for Android
     activeMediaIndex: -1,
+    
+    // Removed caches - let components handle their own loading
     
     // UI messages (Chinese for user interface)
     messages: {
@@ -153,11 +158,12 @@ Page({
       this.stopPostAtIndex(index);
     });
     
+    // No cache to clear
+    
     this.unsubscribeFromGlobalEvents();
   },
   
   onHide: function() {
-    console.log('[Page Hide] Stopping all media for page hide');
     
     // WeChat Doc: Complete media cleanup on page hide
     const { posts } = this.data;
@@ -170,7 +176,6 @@ Page({
       try {
         wx.stopBackgroundAudio();
       } catch (error) {
-        console.warn('Background audio stop failed:', error);
       }
       
       // Stop all posts with extra cleanup
@@ -250,35 +255,17 @@ Page({
         // Hide loading after initial load
         app.hideGlobalLoading();
         
-        // Immediately ensure only current post can load media
-        setTimeout(() => {
-          console.log(`[Post Detail] Setting up posts - current index: ${currentIndex}`);
+        // No preloading - let components handle their own loading
+        
+        // Initialize all loaded posts immediately for instant rendering
+        wx.nextTick(() => {
+          // Initialize all posts so they're ready before swiping
+          // Media players will initialize themselves via post property observer
+          // No need to call loadPost manually
           
-          // Force all posts to respect their playing state
-          posts.forEach((post, index) => {
-            const mediaPlayer = this.selectComponent(`#media-player-${index}`);
-            if (mediaPlayer) {
-              const isCurrentPost = index === currentIndex;
-              console.log(`[Post Detail] Post ${index} - isCurrentPost: ${isCurrentPost}`);
-              
-              if (!isCurrentPost) {
-                // Force non-current posts to stop completely
-                this.stopPostAtIndex(index);
-              }
-            }
-          });
-          
-          // CRITICAL: Set activeMediaIndex before starting current post
+          // Set activeMediaIndex for current post
           this.setData({ activeMediaIndex: currentIndex });
-          console.log(`[Post Detail] Set activeMediaIndex to: ${currentIndex}`);
-          
-          // Start the current post
-          const currentMediaPlayer = this.selectComponent(`#media-player-${currentIndex}`);
-          if (currentMediaPlayer && currentMediaPlayer.playMedia) {
-            console.log(`[Post Detail] Starting current post: ${currentIndex}`);
-            currentMediaPlayer.playMedia();
-          }
-        }, 300);
+        });
       } else {
         app.hideGlobalLoading();
         this.showError(this.data.messages.noPostFound);
@@ -318,10 +305,26 @@ Page({
         header: requestHeaders,
         success: (response) => {
           if (response.statusCode === 200 && response.data.status === "success") {
+            // Clean media URLs for all posts
+            const cleanPost = (post) => {
+              if (!post) return post;
+              if (post.media && Array.isArray(post.media)) {
+                post.media = post.media.map(item => {
+                  if (item && item.url) {
+                    // Remove #devtools_no_referrer and any other hash fragments
+                    const cleanUrl = item.url.split('#')[0];
+                    return { ...item, url: cleanUrl };
+                  }
+                  return item;
+                });
+              }
+              return post;
+            };
+            
             resolve({
-              current: response.data.current || response.data.post,
-              next: response.data.next,
-              previous: response.data.previous
+              current: cleanPost(response.data.current || response.data.post),
+              next: cleanPost(response.data.next),
+              previous: cleanPost(response.data.previous)
             });
           } else {
             reject(new Error(response.data?.message || "Failed to load"));
@@ -336,79 +339,63 @@ Page({
   onSwiperChange: function(e) {
     const newIndex = e.detail.current;
     const oldIndex = this.data.currentIndex;
-    const { posts, activeMediaIndex } = this.data;
+    const { posts, isAutoAdvancing } = this.data;
     
-    console.log(`[Swiper Change] ${oldIndex} → ${newIndex}, activeMedia: ${activeMediaIndex}`);
-    
-    // Prevent redundant updates
     if (newIndex === oldIndex) return;
     
-    // WeChat Doc: Strict media control with global state tracking
-    const systemInfo = wx.getSystemInfoSync();
-    const isAndroid = systemInfo.platform === 'android';
+    // Prevent rapid swiping - throttle swipe events
+    const now = Date.now();
+    if (this._lastSwipeTime && (now - this._lastSwipeTime) < 500) {
+      // Too fast - ignore this swipe
+      return;
+    }
+    this._lastSwipeTime = now;
     
-    // Step 1: Stop ALL media immediately, including previously active
-    if (activeMediaIndex !== -1 && activeMediaIndex !== newIndex) {
-      console.log(`[Android Media] Force stopping previously active: ${activeMediaIndex}`);
-      this.stopPostAtIndex(activeMediaIndex);
+    // If we're auto-advancing, don't do anything here
+    // The state has already been updated
+    if (isAutoAdvancing) {
+      // Reset the flag after a short delay
+      setTimeout(() => {
+        this.setData({ isAutoAdvancing: false });
+      }, 500);
+      return;
     }
     
-    // Step 2: Stop all other posts
-    this.stopAllPostsExceptCurrent(newIndex);
+    // Update current index
+    this.setData({ currentIndex: newIndex });
     
-    // Step 3: CRITICAL - Immediately claim the new index to prevent audio conflicts
-    this.setData({ 
-      currentIndex: newIndex,
-      activeMediaIndex: newIndex  // Immediately set to prevent other posts from starting audio
-    });
+    // Initialize current media player only
+    // Media player will update itself via post property observer
+    // No need to manually call loadPost
     
-    console.log(`[Media Control] IMMEDIATELY claimed activeMediaIndex: ${newIndex}`);
-    
-    // Step 4: Start new media with minimal delay
-    const startDelay = isAndroid ? 300 : 200;  // Reduced delays
-    setTimeout(() => {
-      // Double-check that we still own this index
-      if (this.data.currentIndex === newIndex && this.data.activeMediaIndex === newIndex) {
-        if (newIndex >= 0 && newIndex < posts.length) {
-          const newMediaPlayer = this.selectComponent(`#media-player-${newIndex}`);
-          if (newMediaPlayer && newMediaPlayer.playMedia) {
-            console.log(`[Media Control] Starting media for confirmed active index ${newIndex}`);
-            newMediaPlayer.playMedia();
-          }
-        }
-      } else {
-        console.log(`[Media Control] Index ownership changed during delay - aborting start`);
-      }
-    }, startDelay);
-    
-    // Check if we need to load more posts
-    // posts variable already declared above
-    
-    // Load previous posts when reaching first item
-    if (newIndex === 0 && oldIndex > 0) {
+    // Load more posts if needed - preload when approaching edges
+    if (newIndex <= 1 && oldIndex > newIndex) {
+      // Moving backwards and approaching the beginning
       this.loadPreviousPost();
-    }
-    // Load next posts when reaching last item
-    else if (newIndex === posts.length - 1 && newIndex > oldIndex) {
+    } else if (newIndex >= posts.length - 2 && newIndex > oldIndex) {
+      // Moving forward and approaching the end
       this.loadNextPost();
     }
   },
+  
+  // Removed all preload methods - keep it simple
 
   // Load previous post for infinite scroll
   loadPreviousPost: async function() {
     if (this.data.isLoadingPrev) return;
     
     const { posts, currentIndex } = this.data;
-    const currentPost = posts[currentIndex];
+    // Use the first post in array to get its previous, not current post
+    const firstPost = posts[0];
     
-    // Check if current post has previous_post_id
-    if (!currentPost || !currentPost.id) return;
+    // Check if first post exists
+    if (!firstPost || !firstPost.id) return;
     
     this.setData({ isLoadingPrev: true });
     
     try {
-      // Load the previous post's data
-      const data = await this.loadPostWithNeighbors(currentPost.id);
+      // Load the previous post's data from the first post in array
+      const data = await this.loadPostWithNeighbors(firstPost.id);
       
       if (data && data.previous) {
         // Check if the previous post is already in the array to prevent loops
@@ -422,22 +409,20 @@ Page({
         // Add previous post to beginning of array
         const newPosts = [data.previous, ...posts];
         
-        // Keep array size manageable (max 5 posts)
-        if (newPosts.length > 5) {
+        // Keep array size manageable (max 10 posts) - increased to prevent destruction
+        if (newPosts.length > 10) {
           newPosts.pop(); // Remove last post
         }
         
+        // First update posts array
         this.setData({
           posts: newPosts,
           currentIndex: currentIndex + 1, // Adjust index since we added at beginning
           isLoadingPrev: false
+        }, () => {
+          // Initialize the new post immediately after DOM update
+          // Media player will initialize itself via post property observer
         });
-        
-        // Stop the newly loaded previous post immediately
-        setTimeout(() => {
-          const newPostIndex = 0; // Previous post is at index 0
-          this.stopPostAtIndex(newPostIndex);
-        }, 100);
       } else {
         // This should rarely happen now with loop navigation
         wx.showToast({
@@ -457,15 +442,16 @@ Page({
     if (this.data.isLoadingNext) return;
     
     const { posts, currentIndex } = this.data;
-    const currentPost = posts[currentIndex];
+    // Use the last post in array to get its next, not current post
+    const lastPost = posts[posts.length - 1];
     
-    if (!currentPost || !currentPost.id) return;
+    if (!lastPost || !lastPost.id) return;
     
     this.setData({ isLoadingNext: true });
     
     try {
-      // Load the next post's data
-      const data = await this.loadPostWithNeighbors(currentPost.id);
+      // Load the next post's data from the last post in array
+      const data = await this.loadPostWithNeighbors(lastPost.id);
       
       if (data && data.next) {
         // Check if the next post is already in the array to prevent loops
@@ -479,29 +465,31 @@ Page({
         // Add next post to end of array
         const newPosts = [...posts, data.next];
         
-        // Keep array size manageable (max 5 posts)
-        if (newPosts.length > 5) {
+        // Keep array size manageable (max 10 posts) - increased to prevent destruction
+        if (newPosts.length > 10) {
           newPosts.shift(); // Remove first post
           // Adjust current index since we removed from beginning
           this.setData({
             posts: newPosts,
             currentIndex: currentIndex - 1,
             isLoadingNext: false
+          }, () => {
+            // Initialize the new post immediately
+            wx.nextTick(() => {
+              // Media player will initialize itself via post property observer
+            });
           });
         } else {
           this.setData({
             posts: newPosts,
             isLoadingNext: false
+          }, () => {
+            // Initialize the new post immediately
+            wx.nextTick(() => {
+              // Media player will initialize itself via post property observer
+            });
           });
         }
-        
-        // Stop the newly loaded next post immediately
-        setTimeout(() => {
-          const newPostIndex = newPosts.length - 1;
-          if (newPostIndex !== this.data.currentIndex) {
-            this.stopPostAtIndex(newPostIndex);
-          }
-        }, 100);
       } else {
         // This should rarely happen now with loop navigation
         wx.showToast({
@@ -518,22 +506,29 @@ Page({
 
   // Animation finish handler
   onAnimationFinish: function(e) {
+    const { isAutoAdvancing } = this.data;
+    
+    // Reset auto-advancing flag after animation completes
+    if (isAutoAdvancing) {
+      this.setData({ isAutoAdvancing: false });
+    }
+    
     // Clean up posts array if needed after animation completes
     const { posts, currentIndex } = this.data;
     
-    // Maintain a window of 5 posts maximum for performance
-    if (posts.length > 5) {
+    // Maintain a window of 10 posts maximum for performance
+    if (posts.length > 10) {
       let newPosts = [...posts];
       let newIndex = currentIndex;
       
       // Remove posts that are too far from current position
-      if (currentIndex > 3) {
+      if (currentIndex > 7) {
         // Remove from beginning
-        newPosts = newPosts.slice(-5);
-        newIndex = currentIndex - (posts.length - 5);
-      } else if (currentIndex < 2 && posts.length > 5) {
+        newPosts = newPosts.slice(-10);
+        newIndex = currentIndex - (posts.length - 10);
+      } else if (currentIndex < 3 && posts.length > 10) {
         // Remove from end
-        newPosts = newPosts.slice(0, 5);
+        newPosts = newPosts.slice(0, 10);
       }
       
       if (newPosts.length !== posts.length) {
@@ -619,7 +614,6 @@ Page({
     const systemInfo = wx.getSystemInfoSync();
     const isAndroid = systemInfo.platform === 'android';
     
-    console.log(`[${systemInfo.platform} Page] Stopping post at index ${index}`);
     
     const mediaPlayer = this.selectComponent(`#media-player-${index}`);
     if (mediaPlayer) {
@@ -639,7 +633,6 @@ Page({
       if (mediaDisplay) {
         if (isAndroid) {
           // Android: Aggressive cleanup sequence
-          console.log(`[Android Page] Starting aggressive cleanup for post ${index}`);
           
           // Step 1: Immediate audio destruction
           if (mediaDisplay.destroyUploadedAudio) {
@@ -663,7 +656,6 @@ Page({
             try {
               wx.stopBackgroundAudio();
             } catch (bgError) {
-              console.warn('Background audio stop error:', bgError);
             }
             
             try {
@@ -673,7 +665,6 @@ Page({
                 bgAudioManager.src = '';
               }
             } catch (bgManagerError) {
-              console.warn('Background audio manager error:', bgManagerError);
             }
           }, 200);
           
@@ -690,7 +681,6 @@ Page({
       }
     }
     
-    console.log(`[${systemInfo.platform} Page] Completed stopping post at index ${index}`);
   },
   
   /**
@@ -699,7 +689,6 @@ Page({
   stopAllPostsExceptCurrent: function(currentIndex) {
     const { posts } = this.data;
     
-    console.log(`[Post Detail] Stopping all posts except index ${currentIndex}`);
     
     posts.forEach((post, index) => {
       if (index !== currentIndex) {
@@ -714,7 +703,6 @@ Page({
           const mediaDisplay = mediaPlayer.selectComponent('.media-display');
           if (mediaDisplay) {
             // WeChat Doc: Use centralized video management to prevent conflicts
-            console.log(`[Post Detail] Stopping video for post ${index} via media-display`);
             
             // Use media-display's centralized video control
             if (mediaDisplay.stopVideo) {
@@ -730,24 +718,19 @@ Page({
       }
     });
     
-    console.log(`[Post Detail] All posts except ${currentIndex} have been stopped`);
     
     // Android-specific: Global audio cleanup using WeChat API
     const systemInfo = wx.getSystemInfoSync();
     if (systemInfo.platform === 'android') {
-      console.log('[Android Global] Performing additional media cleanup');
-      
       // WeChat Doc: Stop all background audio to prevent overlap
       try {
         wx.stopBackgroundAudio();
       } catch (error) {
         // Background audio API might not be available
-        console.warn('Background audio stop failed:', error);
       }
       
       // Additional cleanup delay for Android
       setTimeout(() => {
-        console.log('[Android Global] Final cleanup completed');
       }, 200);
     }
   },
@@ -765,69 +748,39 @@ Page({
     const { currentIndex, posts } = this.data;
     
     if (currentIndex < posts.length - 1) {
-      const newIndex = currentIndex + 1;
-      
-      // Pause ALL media players first
-      posts.forEach((post, index) => {
-        const mediaPlayer = this.selectComponent(`#media-player-${index}`);
-        if (mediaPlayer && mediaPlayer.pauseMedia) {
-          mediaPlayer.pauseMedia();
-        }
+      // Set flag to prevent bounce back
+      this.setData({ 
+        isAutoAdvancing: true,
+        currentIndex: currentIndex + 1 
       });
       
-      this.setData({ currentIndex: newIndex });
-      
-      // Play the new current media player to maintain play state
-      const newMediaPlayer = this.selectComponent(`#media-player-${newIndex}`);
-      if (newMediaPlayer) {
-        setTimeout(() => {
-          newMediaPlayer.playMedia && newMediaPlayer.playMedia();
-        }, 200);
-      }
-      
+      // Load more posts if needed
       if (currentIndex === posts.length - 2) {
         this.loadNextPost();
       }
+    } else {
+      // At last post, try to load more
+      this.loadNextPost();
     }
   },
 
   handleImageSlideEnded: function(e) {
     const { currentIndex, posts } = this.data;
     
-    console.log('handleImageSlideEnded called', {
-      currentIndex,
-      totalPosts: posts.length,
-      canAdvance: currentIndex < posts.length - 1
-    });
-    
     if (currentIndex < posts.length - 1) {
-      const newIndex = currentIndex + 1;
-      console.log('Advancing to next post:', newIndex);
-      
-      // Pause ALL media players first
-      posts.forEach((post, index) => {
-        const mediaPlayer = this.selectComponent(`#media-player-${index}`);
-        if (mediaPlayer && mediaPlayer.pauseMedia) {
-          mediaPlayer.pauseMedia();
-        }
+      // Set flag to prevent bounce back
+      this.setData({ 
+        isAutoAdvancing: true,
+        currentIndex: currentIndex + 1 
       });
       
-      this.setData({ currentIndex: newIndex });
-      
-      // Play the new current media player to maintain play state
-      const newMediaPlayer = this.selectComponent(`#media-player-${newIndex}`);
-      if (newMediaPlayer) {
-        setTimeout(() => {
-          newMediaPlayer.playMedia && newMediaPlayer.playMedia();
-        }, 200);
-      }
-      
+      // Load more posts if needed
       if (currentIndex === posts.length - 2) {
-        console.log('Loading next post batch');
         this.loadNextPost();
       }
     } else {
-      console.log('Already at last post, cannot advance');
+      // At last post, try to load more
+      this.loadNextPost();
     }
   },
 
