@@ -29,7 +29,7 @@
           authUser="{{ userInfo }}"
           eventId="{{ eventId }}"
           isEventExpired="{{ isEventExpired }}"
-          isPlaying="{{ index === currentIndex }}"
+          isPlaying="{{ index === currentIndex && !isPaused }}"
           isContinue="{{ globalIsContinue }}"
           bind:likeUpdated="handleLikeUpdated"
           bind:favoriteUpdated="handleFavoriteUpdated"
@@ -40,6 +40,7 @@
           bind:continueToggled="handleContinueToggled"
           bind:videoEnded="handleVideoEnded"
           bind:imageSlideEnded="handleImageSlideEnded"
+          bind:togglePlayPause="handleTogglePlayPause"
         >
         </media-player>
       </swiper-item>

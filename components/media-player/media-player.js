@@ -345,8 +345,8 @@ Component({
      */
     togglePlayPause() {
       const newState = !this.properties.isPlaying;
-      // Don't set isPlaying - it should be controlled by parent
-      this.handlePlayStateChange(newState);
+      // Trigger event to parent to change play state
+      this.triggerEvent('togglePlayPause', { isPlaying: newState });
       this.showPlayIndicatorBriefly();
     },
 
@@ -367,7 +367,6 @@ Component({
       if (currentPost.type !== "image") return;
 
       this.togglePlayPause();
-      this.showPlayIndicatorBriefly();
     },
 
     onSlideChange(e) {

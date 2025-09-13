@@ -41,6 +41,9 @@ Page({
     // WeChat Doc: Global media state tracking for Android
     activeMediaIndex: -1,
     
+    // Manual pause state for image posts
+    isPaused: false,
+    
     // Removed caches - let components handle their own loading
     
     // UI messages (Chinese for user interface)
@@ -343,22 +346,27 @@ Page({
     
     if (newIndex === oldIndex) return;
     
-    // Prevent rapid swiping - throttle swipe events
-    const now = Date.now();
-    if (this._lastSwipeTime && (now - this._lastSwipeTime) < 500) {
-      // Too fast - ignore this swipe
-      return;
-    }
-    this._lastSwipeTime = now;
+    // Reset pause state when changing posts
+    this.setData({ isPaused: false });
     
-    // If we're auto-advancing, don't do anything here
-    // The state has already been updated
+    // If we're auto-advancing, don't throttle
     if (isAutoAdvancing) {
       // Reset the flag after a short delay
       setTimeout(() => {
         this.setData({ isAutoAdvancing: false });
       }, 500);
-      return;
+      // Continue with the swipe
+    } else {
+      // Only throttle manual swipes
+      const now = Date.now();
+      if (this._lastSwipeTime && (now - this._lastSwipeTime) < 800) {
+        // Too fast - revert to previous index
+        setTimeout(() => {
+          this.setData({ currentIndex: oldIndex });
+        }, 10);
+        return;
+      }
+      this._lastSwipeTime = now;
     }
     
     // Update current index
@@ -762,6 +770,14 @@ Page({
       // At last post, try to load more
       this.loadNextPost();
     }
+  },
+
+  handleTogglePlayPause: function(e) {
+    const { isPlaying } = e.detail;
+    // Toggle the pause state
+    this.setData({ 
+      isPaused: !isPlaying 
+    });
   },
 
   handleImageSlideEnded: function(e) {

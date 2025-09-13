@@ -46,53 +46,65 @@ catchtap="onScreenTap"
         </view>
       </view>
     </swiper-item>
-  </swiper>  <!-- Video display with all loading indicators disabled -->
-  <video
-    wx:elif="{{ currentPost.type === 'video' }}"
-    id="media-video"
-    class="media-video"
-    src="{{ videoSrc }}"
-    controls="{{ true }}"
-    show-controls="{{ true }}"
-    enable-progress-gesture="{{ true }}"
-    show-play-btn="{{ true }}"
-    autoplay="{{ false }}"
-    loop="{{ true }}"
-    muted="{{ !isPlaying }}"
-    initial-time="0"
-    poster="{{ urlCleaner.cleanUrl(currentMedia[0].preview_url || currentMedia[0].thumbnail_url || '') }}"
-    auto-pause-if-navigate="{{ true }}"
-    auto-pause-if-open-native="{{ true }}"
-    show-loading="{{ false }}"
-    show-fullscreen-btn="{{ true }}"
-    show-center-play-btn="{{ false }}"
-    show-progress="{{ true }}"
-    show-casting-button="{{ false }}"
-    show-snapshot-button="{{ false }}"
-    show-screen-lock-button="{{ false }}"
-    show-mute-btn="{{ false }}"
-    show-background-playback-button="{{ false }}"
-    enable-play-in-background="{{ false }}"
-    enable-auto-rotation="{{ false }}"
-    enable-danmu="{{ false }}"
-    enable-play-gesture="{{ false }}"
-    vslide-gesture="{{ false }}"
-    vslide-gesture-in-fullscreen="{{ false }}"
-    object-fit="contain"
-    initial-time="{{ 0 }}"
-    catch:tap="onVideoTap"
-    bindplay="onVideoPlay"
-    bindpause="onVideoPause"
-    bindended="onVideoEnded"
-    binderror="onVideoError"
-    bindloadstart="onVideoLoadStart"
-    bindcanplay="onVideoCanPlay"
-    bindwaiting="onVideoWaiting"
-    bindloadeddata="onVideoLoadedData"
-    bindloadedmetadata="onVideoLoadedMetadata"
-    bindtimeupdate="onVideoTimeUpdate"
-  >
-  </video>
+  </swiper>  <!-- Video display with thumbnail background -->
+  <view wx:elif="{{ currentPost.type === 'video' }}" class="video-wrapper">
+    <!-- Thumbnail background -->
+    <image
+      class="video-thumbnail-background"
+      src="{{ urlCleaner.cleanUrl(currentMedia[0].preview_url || currentMedia[0].thumbnail_url || currentMedia[0].url) }}"
+      mode="aspectFill"
+      lazy-load="{{ true }}"
+    />
+    
+    <!-- Video container for proper sizing -->
+    <view class="video-container">
+      <video
+        id="media-video"
+        class="media-video"
+        src="{{ videoSrc }}"
+        poster="{{ urlCleaner.cleanUrl(currentMedia[0].preview_url || currentMedia[0].thumbnail_url || currentMedia[0].url) }}"
+        controls="{{ true }}"
+        show-controls="{{ true }}"
+        enable-progress-gesture="{{ true }}"
+        show-play-btn="{{ true }}"
+        autoplay="{{ false }}"
+        loop="{{ true }}"
+        muted="{{ !isPlaying }}"
+        initial-time="0"
+        auto-pause-if-navigate="{{ true }}"
+        auto-pause-if-open-native="{{ true }}"
+        show-loading="{{ false }}"
+        show-fullscreen-btn="{{ true }}"
+        show-center-play-btn="{{ false }}"
+        show-progress="{{ true }}"
+        show-casting-button="{{ false }}"
+        show-snapshot-button="{{ false }}"
+        show-screen-lock-button="{{ false }}"
+        show-mute-btn="{{ false }}"
+        show-background-playback-button="{{ false }}"
+        enable-play-in-background="{{ false }}"
+        enable-auto-rotation="{{ false }}"
+        enable-danmu="{{ false }}"
+        enable-play-gesture="{{ false }}"
+        vslide-gesture="{{ false }}"
+        vslide-gesture-in-fullscreen="{{ false }}"
+        object-fit="cover"
+        initial-time="{{ 0 }}"
+        catch:tap="onVideoTap"
+        bindplay="onVideoPlay"
+        bindpause="onVideoPause"
+        bindended="onVideoEnded"
+        binderror="onVideoError"
+        bindloadstart="onVideoLoadStart"
+        bindcanplay="onVideoCanPlay"
+        bindwaiting="onVideoWaiting"
+        bindloadeddata="onVideoLoadedData"
+        bindloadedmetadata="onVideoLoadedMetadata"
+        bindtimeupdate="onVideoTimeUpdate"
+      >
+      </video>
+    </view>
+  </view>
 
   <!-- Play/Pause overlay indicator -->
   <view
