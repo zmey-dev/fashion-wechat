@@ -324,7 +324,7 @@
 
       <!-- Academic Information -->
       <view class="form-section">
-        <view class="section-title">学术信息</view>
+        <view class="section-title">学校信息</view>
         
         <!-- ID Number -->
         <view class="form-field">

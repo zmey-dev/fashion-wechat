@@ -882,48 +882,58 @@ Page({
     });
   },
 
-  // Format message timestamp
+  // Format message timestamp - Douyin style
   formatTime(timestamp) {
     if (!timestamp) return "";
 
     const date = new Date(timestamp);
     const now = new Date();
     const diff = now - date;
+    const diffInSeconds = Math.floor(diff / 1000);
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    const diffInDays = Math.floor(diffInHours / 24);
 
-    if (diff < 86400000) {
-      // Less than a day
-      return date.toLocaleTimeString("zh-CN", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-      });
+    // Simple time format helper
+    const getTimeStr = (d) => {
+      const hours = d.getHours().toString().padStart(2, '0');
+      const minutes = d.getMinutes().toString().padStart(2, '0');
+      return `${hours}:${minutes}`;
+    };
+
+    // Today - show time only
+    if (diffInDays === 0) {
+      return getTimeStr(date);
     }
 
-    if (diff < 172800000) {
-      // Less than 2 days
-      return (
-        this.data.uiTexts.yesterday +
-        " " +
-        date.toLocaleTimeString("zh-CN", {
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: false,
-        })
-      );
+    // Yesterday
+    if (diffInDays === 1) {
+      return "昨天";
     }
 
-    return (
-      date.toLocaleDateString("zh-CN", {
-        month: "short",
-        day: "numeric",
-      }) +
-      " " +
-      date.toLocaleTimeString("zh-CN", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-      })
-    );
+    // Within a week - show day of week
+    if (diffInDays < 7) {
+      const weekDays = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
+      return weekDays[date.getDay()];
+    }
+
+    // Within a month - show X days ago
+    if (diffInDays < 30) {
+      return `${diffInDays}天前`;
+    }
+
+    // Within a year - show month-day
+    if (diffInDays < 365) {
+      const month = (date.getMonth() + 1).toString();
+      const day = date.getDate().toString();
+      return `${month}月${day}日`;
+    }
+
+    // Over a year - show year-month-day
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString();
+    const day = date.getDate().toString();
+    return `${year}年${month}月${day}日`;
   },
 
   // Handle read message event from socket

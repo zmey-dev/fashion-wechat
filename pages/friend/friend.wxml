@@ -32,7 +32,7 @@
         <avatar class="user-avatar" avatar="{{item.avatar}}" user="{{item}}" size="{{70}}"></avatar>
         <view class="user-info">
           <text class="user-nickname">{{userUtils.getShortDisplayName(item, 10)}}<text wx:if="{{userUtils.isCompany(item)}}" class="company-badge-small">企业</text></text>
-          <text class="user-followers">粉丝 {{item.followers}}人</text>
+          <text class="user-followers">获赞 {{item.like_number || 0}} · 粉丝 {{item.follower_number || 0}} · 朋友 {{item.friends_count || 0}}</text>
         </view>
         <view class="user-arrow">
           <image class="back-icon" src="/images/icons/chevron-right.svg"></image>

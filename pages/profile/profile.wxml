@@ -561,7 +561,7 @@
         </view>
 
         <!-- Academic Information for non-company users only -->
-        <view class="section-title">学术信息</view>
+        <view class="section-title">学校信息</view>
           <!-- ID Number -->
         <view class="form-field" id="id-number-field">
           <label class="field-label">身份证号</label>
