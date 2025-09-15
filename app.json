@@ -39,10 +39,10 @@
   },
   "permission": {
       "scope.userLocation": {
-        "desc": "This is needed to use your location information to find nearby events and friends."
+        "desc": "我们需要使用您的位置信息来查找附近的活动和朋友。"
       },
       "scope.userLocationBackground": {
-        "desc": "This is needed to access location information in the background."
+        "desc": "我们需要在后台访问您的位置信息。"
       }
     },
   "requiredPrivateInfos": [
