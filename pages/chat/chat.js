@@ -467,7 +467,7 @@ Page({
     this.setData({
       isLoadingMessages: true
     });
-    getApp().showGlobalLoading('加载中...');
+    getApp().showGlobalLoading();
 
     wx.request({
       url: `${config.BACKEND_URL}/messages/get_message/${userId}`,
@@ -591,7 +591,7 @@ Page({
   getFriends: function() {
     // Set loading state to true
     this.setData({ isLoadingFriends: true });
-    getApp().showGlobalLoading('加载中...');
+    getApp().showGlobalLoading();
     
     try {
       wx.request({

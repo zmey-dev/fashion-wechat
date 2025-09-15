@@ -122,7 +122,7 @@ Page({
     }
 
     this.setData({ loading: true });
-    getApp().showGlobalLoading('加载中...');
+    getApp().showGlobalLoading();
 
     const requestData = {
       limit: this.data.pageSize,

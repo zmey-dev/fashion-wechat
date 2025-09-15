@@ -163,7 +163,7 @@ Page({
     
     // Show loading only for initial load
     const app = getApp();
-    app.showGlobalLoading('加载中...');
+    app.showGlobalLoading();
 
     try {
       // For recommend page, first get the list of recommended posts

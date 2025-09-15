@@ -219,7 +219,7 @@ Page({
     
     // Show loading only for initial load
     const app = getApp();
-    app.showGlobalLoading('加载中...');
+    app.showGlobalLoading();
 
     try {
       // Load current post with neighbors

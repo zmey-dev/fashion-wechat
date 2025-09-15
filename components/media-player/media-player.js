@@ -77,6 +77,14 @@ Component({
     displayContent: "",
     displayLikes: "",
     displayComments: "",
+    
+    // Loading states for API calls
+    isLiking: false,
+    isFavoriting: false,
+    isFollowing: false,
+    isSharing: false,
+    isCommentLiking: false,
+    isCommentDeleting: false,
     displayFavorites: "",
     displayShares: "",
     displayFollowerCount: "",
@@ -453,6 +461,13 @@ Component({
         app.setState("showLoginModal", true);
         return;
       }
+      
+      // Prevent duplicate requests
+      if (this.data.isLiking) return;
+      
+      this.setData({ isLiking: true });
+      const app = getApp();
+      app.showGlobalLoading();
 
       wx.request({
         url: `${config.BACKEND_URL}/post/add_like`,
@@ -502,6 +517,11 @@ Component({
             duration: 1500,
           });
         },
+        complete: () => {
+          this.setData({ isLiking: false });
+          const app = getApp();
+          app.hideGlobalLoading();
+        }
       });
     },
 
@@ -511,6 +531,13 @@ Component({
         app.setState("showLoginModal", true);
         return;
       }
+      
+      // Prevent duplicate requests
+      if (this.data.isFavoriting) return;
+      
+      this.setData({ isFavoriting: true });
+      const app = getApp();
+      app.showGlobalLoading();
 
       wx.request({
         url: `${config.BACKEND_URL}/post/save_favorite`,
@@ -560,6 +587,11 @@ Component({
             duration: 1500,
           });
         },
+        complete: () => {
+          this.setData({ isFavoriting: false });
+          const app = getApp();
+          app.hideGlobalLoading();
+        }
       });
     },
 
@@ -611,6 +643,13 @@ Component({
         app.setState("showLoginModal", true);
         return;
       }
+      
+      // Prevent duplicate requests
+      if (this.data.isFollowing) return;
+      
+      this.setData({ isFollowing: true });
+      const app = getApp();
+      app.showGlobalLoading();
 
       wx.request({
         url: `${config.BACKEND_URL}/post/save_follow`,
@@ -659,6 +698,11 @@ Component({
             duration: 1500,
           });
         },
+        complete: () => {
+          this.setData({ isFollowing: false });
+          const app = getApp();
+          app.hideGlobalLoading();
+        }
       });
     },
     onToggleDetail() {
@@ -720,6 +764,8 @@ Component({
         return;
       }
       const { commentId, state_flag } = e.detail;
+      const app = getApp();
+      app.showGlobalLoading();
       wx.request({
         url: `${config.BACKEND_URL}/comment/like`,
         method: "POST",
@@ -772,6 +818,10 @@ Component({
             duration: 1500,
           });
         },
+        complete: () => {
+          const app = getApp();
+          app.hideGlobalLoading();
+        }
       });
     },
 
@@ -818,8 +868,15 @@ Component({
     },
 
     onCommentDelete(e) {
+      // Prevent duplicate requests
+      if (this.data.isCommentDeleting) return;
+      
       const { commentId } = e.detail;
       const { userComments } = this.data;
+      this.setData({ isCommentDeleting: true });
+      const app = getApp();
+      app.showGlobalLoading();
+      
       wx.request({
         url: `${config.BACKEND_URL}/post/delete_comment`,
         method: "DELETE",
@@ -859,6 +916,11 @@ Component({
             duration: 1500,
           });
         },
+        complete: () => {
+          this.setData({ isCommentDeleting: false });
+          const app = getApp();
+          app.hideGlobalLoading();
+        }
       });
     },
 

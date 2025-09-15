@@ -31,8 +31,8 @@ Page({
     imageLoading: false,
     activeTab: "media", // 'media' or 'form'
     showInstructions: true,
-    isSubmitting: false,
     uploadingFiles: [],
+    isSubmitting: false, // Prevent duplicate submissions
 
     // Update mode
     isUpdateMode: false,
@@ -190,6 +190,7 @@ Page({
       wx.showToast({
         title: this.data.messages.errors.videoLimit,
         icon: "none",
+        duration: 2000
       });
       return;
     }
@@ -199,6 +200,7 @@ Page({
       wx.showToast({
         title: `${this.data.messages.errors.maxFilesLimit} ${this.data.maxFiles} 个文件`,
         icon: "none",
+        duration: 2000
       });
       return;
     }
@@ -347,6 +349,7 @@ Page({
       wx.showToast({
         title: this.data.messages.errors.videoImageConflict,
         icon: "none",
+        duration: 2000
       });
       return;
     }
@@ -363,7 +366,7 @@ Page({
           wx.showToast({
             title: "无法选择该图片",  // "Unable to select this image"
             icon: "none",
-            duration: 3000
+            duration: 2000
           });
           return;
         }
@@ -396,7 +399,7 @@ Page({
           wx.showToast({
             title: firstError,
             icon: "none",
-            duration: 3000
+            duration: 2000
           });
           
           // If all files are invalid, return early
@@ -431,6 +434,7 @@ Page({
         wx.showToast({
           title: `${this.data.messages.success.filesAdded} ${newFiles.length} 个文件`,
           icon: "success",
+          duration: 2000
         });
 
         // Start background upload sequentially
@@ -451,6 +455,7 @@ Page({
       wx.showToast({
         title: this.data.messages.errors.videoLimit,
         icon: "none",
+        duration: 2000
       });
       return;
     }
@@ -470,7 +475,7 @@ Page({
           wx.showToast({
             title: "无法选择该视频",  // "Unable to select this video"
             icon: "none",
-            duration: 3000
+            duration: 2000
           });
           return;
         }
@@ -481,7 +486,7 @@ Page({
           wx.showToast({
             title: "视频文件无效",
             icon: "none",
-            duration: 3000
+            duration: 2000
           });
           return;
         }
@@ -497,7 +502,7 @@ Page({
           wx.showToast({
             title: validation.error,
             icon: "none",
-            duration: 3000
+            duration: 2000
           });
           return;
         }
@@ -546,6 +551,7 @@ Page({
         wx.showToast({
           title: this.data.messages.success.videoAdded,
           icon: "success",
+          duration: 2000
         });
 
         if (thumbnailPath) {
@@ -577,6 +583,7 @@ Page({
         wx.showToast({
           title: errorMessage,
           icon: "none",
+          duration: 2000
         });
       },
     });
@@ -634,6 +641,7 @@ Page({
           wx.showToast({
             title: this.data.messages.success.fileDeleted,
             icon: "success",
+            duration: 2000
           });
         }
       },
@@ -717,6 +725,7 @@ Page({
     wx.showToast({
       title: this.data.messages.success.dotAdded,
       icon: "success",
+      duration: 2000
     });
   },
 
@@ -764,6 +773,7 @@ Page({
           wx.showToast({
             title: this.data.messages.success.dotDeleted,
             icon: "success",
+            duration: 2000
           });
         }
       },
@@ -779,7 +789,7 @@ Page({
       wx.showToast({
         title: "请避免使用不当语言",
         icon: "none",
-        duration: 2000,
+        duration: 2000
       });
       return;
     }
@@ -797,7 +807,7 @@ Page({
       wx.showToast({
         title: "请避免使用不当语言",
         icon: "none",
-        duration: 2000,
+        duration: 2000
       });
       return;
     }
@@ -828,6 +838,7 @@ Page({
     wx.showToast({
       title: this.data.messages.success.dotUpdated,
       icon: "success",
+      duration: 2000
     });
   },
 
@@ -898,7 +909,7 @@ Page({
             wx.showToast({
               title: `危险文件类型 (.${fileExt}) 被拒绝`,
               icon: "none",
-              duration: 3000
+              duration: 2000
             });
             return;
           }
@@ -907,7 +918,7 @@ Page({
             wx.showToast({
               title: `不支持的音频格式 (.${fileExt})。仅支持: MP3, WAV, AAC, M4A, FLAC, OGG`,
               icon: "none",
-              duration: 3000
+              duration: 2000
             });
             return;
           }
@@ -933,6 +944,7 @@ Page({
             wx.showToast({
               title: this.data.messages.errors.chooseAudioFailed,
               icon: "none",
+              duration: 2000
             });
           }
         },
@@ -974,7 +986,6 @@ Page({
       wx.showToast({
         title: validation.error,
         icon: "none",
-        duration: 3000
       });
       return;
     }
@@ -988,7 +999,7 @@ Page({
       wx.showToast({
         title: `不支持的音频格式。支持的格式: ${supportedFormats.audio.displayText}`,
         icon: "none",
-        duration: 3000
+        duration: 2000
       });
       return;
     }
@@ -1014,6 +1025,7 @@ Page({
     wx.showToast({
       title: this.data.messages.success.audioSelected,
       icon: "success",
+      duration: 2000
     });
 
     // Start background upload for audio
@@ -1037,7 +1049,7 @@ Page({
       wx.showToast({
         title: "请避免使用不当语言",
         icon: "none",
-        duration: 2000,
+        duration: 2000
       });
       return;
     }
@@ -1055,7 +1067,7 @@ Page({
       wx.showToast({
         title: "请避免使用不当语言",
         icon: "none",
-        duration: 2000,
+        duration: 2000
       });
       return;
     }
@@ -1102,6 +1114,7 @@ Page({
       wx.showToast({
         title: this.data.messages.errors.titleRequired,
         icon: "none",
+        duration: 2000
       });
       return false;
     }
@@ -1110,6 +1123,7 @@ Page({
       wx.showToast({
         title: this.data.messages.errors.contentRequired,
         icon: "none",
+        duration: 2000
       });
       return false;
     }
@@ -1118,6 +1132,7 @@ Page({
       wx.showToast({
         title: this.data.messages.errors.filesRequired,
         icon: "none",
+        duration: 2000
       });
       return false;
     }
@@ -1126,25 +1141,42 @@ Page({
   },
 
   // Submit form
-  async submitForm() {
+  async submitForm(e) {
+    // Prevent duplicate submissions
+    if (this.data.isSubmitting) {
+      console.log("Already submitting, ignoring duplicate click");
+      return;
+    }
+    
+    // Set submitting flag immediately
+    this.setData({ isSubmitting: true });
+    
+    // Show global loading immediately
+    const app = getApp();
+    app.showGlobalLoading();
+
     // Validate form fields
     const { title, content, files, imageDots } = this.data;
 
     // Check for swear words in title and content
     if (isContainSword(title)) {
+      this.setData({ isSubmitting: false });
+      app.hideGlobalLoading();
       wx.showToast({
         title: "标题包含不当语言，请修改后再上传",
         icon: "none",
-        duration: 3000,
+        duration: 2000
       });
       return;
     }
 
     if (isContainSword(content)) {
+      this.setData({ isSubmitting: false });
+      app.hideGlobalLoading();
       wx.showToast({
         title: "内容包含不当语言，请修改后再上传",
         icon: "none",
-        duration: 3000,
+        duration: 2000
       });
       return;
     }
@@ -1155,18 +1187,22 @@ Page({
       if (dots && Array.isArray(dots)) {
         for (const dot of dots) {
           if (dot.title && isContainSword(dot.title)) {
+            this.setData({ isSubmitting: false });
+            app.hideGlobalLoading();
             wx.showToast({
               title: "图片标记标题包含不当语言，请修改后再上传",
               icon: "none",
-              duration: 3000,
+              duration: 2000
             });
             return;
           }
           if (dot.description && isContainSword(dot.description)) {
+            this.setData({ isSubmitting: false });
+            app.hideGlobalLoading();
             wx.showToast({
               title: "图片标记描述包含不当语言，请修改后再上传",
               icon: "none",
-              duration: 3000,
+              duration: 2000
             });
             return;
           }
@@ -1175,25 +1211,34 @@ Page({
     }
 
     if (!title || !title.trim()) {
+      this.setData({ isSubmitting: false });
+      app.hideGlobalLoading();
       wx.showToast({
         title: "请输入标题 (不能只有空格)",
         icon: "none",
+        duration: 2000
       });
       return;
     }
 
     if (!content || !content.trim()) {
+      this.setData({ isSubmitting: false });
+      app.hideGlobalLoading();
       wx.showToast({
         title: "请输入内容 (不能只有空格)",
         icon: "none",
+        duration: 2000
       });
       return;
     }
 
     if (!files || files.length === 0) {
+      this.setData({ isSubmitting: false });
+      app.hideGlobalLoading();
       wx.showToast({
         title: "请上传图片或视频",
         icon: "none",
+        duration: 2000
       });
       return;
     }
@@ -1204,12 +1249,11 @@ Page({
 
     if (uploadingFiles.length > 0 || audioUploading) {
       // Show full screen loading overlay
-      this.setData({ isSubmitting: true, loading: true });
       this.setData({ 
-        isSubmitting: true, 
         loading: true,
         loadingMessage: "等待文件上传完成..."
       });
+      // App loading already shown at the beginning
 
       // Wait for all file uploads to complete with timeout
       if (uploadingFiles.length > 0) {
@@ -1228,20 +1272,24 @@ Page({
           }
           
           if (waitCount >= maxWait) {
-            this.setData({ isSubmitting: false, loading: false });
+            this.setData({ loading: false });
+            app.hideGlobalLoading();
             wx.showToast({
               title: "文件上传超时，请检查网络后重试",
               icon: "none",
+              duration: 2000
             });
             return;
           }
           
           console.log("All file uploads completed");
         } catch (error) {
-          this.setData({ isSubmitting: false, loading: false });
+          this.setData({ loading: false });
+          app.hideGlobalLoading();
           wx.showToast({
             title: "文件上传过程中发生错误，请重试",
             icon: "none",
+            duration: 2000
           });
           return;
         }
@@ -1260,20 +1308,24 @@ Page({
           }
           
           if (audioWaitCount >= maxAudioWait) {
-            this.setData({ isSubmitting: false, loading: false });
+            this.setData({ loading: false, isSubmitting: false });
+            app.hideGlobalLoading();
             wx.showToast({
               title: "音频上传超时，请重试",
               icon: "none",
+              duration: 2000
             });
             return;
           }
           
           console.log("Audio upload completed");
         } catch (error) {
-          this.setData({ isSubmitting: false, loading: false });
+          this.setData({ loading: false, isSubmitting: false });
+          app.hideGlobalLoading();
           wx.showToast({
             title: "音频上传过程中发生错误，请重试",
             icon: "none",
+            duration: 2000
           });
           return;
         }
@@ -1350,7 +1402,7 @@ Page({
     const audioStillFailed = this.data.audio && this.data.audio.uploadError;
 
     if (stillFailedFiles.length > 0 || audioStillFailed) {
-      this.setData({ loading: false });
+      this.setData({ loading: false, isSubmitting: false });
       
       // Show specific error message based on error type
       let errorMsg = "文件上传失败";
@@ -1378,10 +1430,11 @@ Page({
         }
       }
       
+      app.hideGlobalLoading();
       wx.showToast({
         title: errorMsg,
         icon: "none",
-        duration: 3000,
+        duration: 2000
       });
       return;
     }
@@ -1462,10 +1515,12 @@ Page({
 
       if (formattedFileUrls.length === 0) {
         wx.hideLoading();
-        this.setData({ loading: false });
+        this.setData({ loading: false, isSubmitting: false });
+        app.hideGlobalLoading();
         wx.showToast({
           title: "没有可提交的文件URL，请重新上传文件",
           icon: "none",
+          duration: 2000
         });
         return;
       }
@@ -1537,6 +1592,8 @@ Page({
       console.log("Request data being sent to backend:", requestData);
       console.log("Request data keys:", Object.keys(requestData));
 
+      // App loading already shown at the beginning of submitForm
+
       // Submit to backend using the same endpoint as web version
       wx.request({
         url: `${config.BACKEND_URL}/post/create`,
@@ -1547,27 +1604,40 @@ Page({
           Authorization: `Bearer ${getApp().globalData.userInfo.token}`,
         },
         success: (res) => {
-          this.setData({ loading: false });
           if (res.statusCode === 200 && res.data.status === "success") {
+            // Save redirect info before resetting form
+            const isEventPost = this.data.eventId || requestData.event_id;
+            const eventIdForRedirect = this.data.eventId || requestData.event_id;
+            const wasUpdateMode = this.data.isUpdateMode;
+            
+            // Reset form immediately after success
+            this.resetForm();
+            
+            // Keep loading state active to prevent re-submission (after resetForm)
+            this.setData({ loading: true, isSubmitting: true });
+            
             wx.showToast({
-              title: this.data.isUpdateMode
+              title: wasUpdateMode
                 ? this.data.messages.success.updateSuccess
                 : this.data.messages.success.createSuccess,
               icon: "success",
+              duration: 2000
             });
 
+            // Delay before redirect, keep loading bar active
             setTimeout(() => {
               // Debug: Check values
-              console.log('eventId:', this.data.eventId);
-              console.log('mediaCreateType:', this.data.mediaCreateType);
-              console.log('requestData.event_id:', requestData.event_id);
+              console.log('isEventPost:', isEventPost);
+              console.log('eventIdForRedirect:', eventIdForRedirect);
               
-              // Check if this is an event post - use multiple conditions to be sure
-              if (this.data.eventId || requestData.event_id) {
+              // DO NOT hide loading bar on success - let the new page handle it
+              // app.hideGlobalLoading(); // Removed to keep loading bar active
+              
+              // Check if this is an event post
+              if (isEventPost) {
                 // Navigate back to the event detail page
-                const eventId = this.data.eventId || requestData.event_id;
                 wx.redirectTo({
-                  url: `/pages/event-detail/event-detail?eventId=${eventId}`,
+                  url: `/pages/event-detail/event-detail?eventId=${eventIdForRedirect}`,
                 });
               } else {
                 // Navigate to me page for regular posts
@@ -1575,16 +1645,21 @@ Page({
                   url: `/pages/me/me`,
                 });
               }
-            }, 500);
+            }, 1500);
           } else {
+            // On failure, stop loading
+            this.setData({ loading: false, isSubmitting: false });
+            app.hideGlobalLoading();
             wx.showToast({
               title: res.data.msg || this.data.messages.errors.operationFailed,
               icon: "none",
+              duration: 2000
             });
           }
         },
         fail: (error) => {
-          this.setData({ loading: false });
+          this.setData({ loading: false, isSubmitting: false });
+          app.hideGlobalLoading();
           console.error("Form submission error:", error);
           
           // Show specific error message based on error type
@@ -1602,10 +1677,12 @@ Page({
           wx.showToast({
             title: errorMsg,
             icon: "none",
+            duration: 2000
           });
         },
         complete: () => {
-          this.setData({ loading: false, isSubmitting: false });
+          // Don't hide loading or reset loading state here
+          // It will be handled in success or fail callbacks
         },
       });
     } catch (error) {
@@ -1618,41 +1695,69 @@ Page({
         wx.showToast({
           title: errorMsg,
           icon: "none",
+          duration: 2000
         });
       } else if (errorMsg.includes('编码')) {
         wx.showToast({
           title: "视频文件编码格式不支持，请转换为标准 H.264 编码后重试",
           icon: "none",
+          duration: 2000
         });
       } else if (errorMsg.includes('格式')) {
         wx.showToast({
           title: "文件格式不受支持，请选择其他文件",
           icon: "none",
+          duration: 2000
         });
       } else if (errorMsg.includes('网络')) {
         wx.showToast({
           title: "网络连接异常，请检查网络后重试",
           icon: "none",
+          duration: 2000
         });
       } else if (errorMsg.includes('超时')) {
         wx.showToast({
           title: "上传超时，请检查网络或减小文件大小",
           icon: "none",
+          duration: 2000
         });
       } else {
         wx.showToast({
           title: this.data.messages.errors.operationFailed,
           icon: "none",
+          duration: 2000,
         });
       }
       
       this.setData({ loading: false, isSubmitting: false });
+      app.hideGlobalLoading();
     } finally {
-      // Ensure loading is always stopped
-      if (this.data.isSubmitting || this.data.loading) {
-        this.setData({ loading: false, isSubmitting: false });
-      }
+      // Don't do anything here - loading state is managed in success/fail/catch blocks
     }
+  },
+
+  // Reset form to initial state
+  resetForm() {
+    this.setData({
+      title: "",
+      content: "",
+      files: [],
+      audio: null,
+      audioName: "",
+      selectedImageIndex: null,
+      imageDots: {},
+      editingDot: null,
+      showDotEditor: false,
+      loading: false,
+      isLoading: false,
+      loadingMessage: "",
+      imageLoading: false,
+      activeTab: "media",
+      uploadingFiles: [],
+      deletedFiles: [],
+      thumbnailCapture: null,
+      isSubmitting: false
+    });
   },
 
   // Close modal/page

@@ -244,7 +244,7 @@ Page({
 
   loadStudents: function () {
     this.setData({ loading: true });
-    getApp().showGlobalLoading('加载中...');
+    getApp().showGlobalLoading();
 
     // Build query parameters with filters
     const params = { ...this.data.activeFilters };

@@ -175,7 +175,7 @@ Page({
       isSubmitting: true,
       isLoading: true 
     });
-    getApp().showGlobalLoading('提交中...');
+    getApp().showGlobalLoading();
 
     try {
       // Upload images first if any

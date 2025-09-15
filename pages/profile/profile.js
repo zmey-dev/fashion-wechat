@@ -168,7 +168,7 @@ Page({
 
   // Load university information including faculties
   loadUniversityInfo: function () {
-    getApp().showGlobalLoading('加载中...');
+    getApp().showGlobalLoading();
     wx.request({
       url: `${config.BACKEND_URL}/myuniversity`,
       method: "GET",
@@ -688,7 +688,7 @@ Page({
     const requestTimeout = 15000; // 15 second timeout
     let timeoutId;
 
-    getApp().showGlobalLoading('更新中...');
+    getApp().showGlobalLoading();
 
     // Set up timeout
     timeoutId = setTimeout(() => {

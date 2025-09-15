@@ -75,7 +75,7 @@ Page({
       isLoading: true,
       loadingMessage: this.data.messages.loading
     });
-    getApp().showGlobalLoading('加载中...');
+    getApp().showGlobalLoading();
     wx.request({
       url: `${config.BACKEND_URL}/user/get_my_follow_users`,
       method: "GET",
@@ -170,7 +170,7 @@ Page({
     if (!this.data.hasMore || this.data.loading) return;
 
     this.setData({ loading: true });
-    getApp().showGlobalLoading('加载中...');
+    getApp().showGlobalLoading();
 
     wx.request({
       url: `${config.BACKEND_URL}/v2/post/by-user-id`,
@@ -255,6 +255,11 @@ Page({
    * Handle follow/unfollow action
    */
   handleFollowToggle: function () {
+    // Prevent duplicate requests
+    if (this.data.isLoading) {
+      return;
+    }
+
     const currentUser = this.data.currentUser;
     const newFollowStatus = !currentUser.isFollowed;
 
@@ -356,6 +361,11 @@ Page({
    * Update friend status with API
    */
   updateFriendStatus: function (addFriend) {
+    // Prevent duplicate requests
+    if (this.data.isLoading) {
+      return;
+    }
+
     const currentUser = this.data.currentUser;
 
     this.setData({

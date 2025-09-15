@@ -635,6 +635,16 @@ Page({
 
   // Form submission
   handleSubmit() {
+    // Prevent duplicate submissions
+    if (this.data.isUploading || this.data.isLoading) {
+      wx.showToast({
+        title: "正在提交中，请稍候...",
+        icon: "none",
+        duration: 2000
+      });
+      return;
+    }
+
     if (!this.validateForm()) return;
 
     this.setData({ isUploading: true });
@@ -854,7 +864,7 @@ Page({
   },
 
   loadEventFromAPI(eventId, callbacks) {
-    getApp().showGlobalLoading('加载中...');
+    getApp().showGlobalLoading();
     wx.request({
       url: `${config.BACKEND_URL}/teacher/event/${eventId}`,
       method: "GET",
@@ -891,7 +901,7 @@ Page({
       ? `${config.BACKEND_URL}/teacher/event/${this.data.eventId}`
       : `${config.BACKEND_URL}/teacher/event`;
 
-    getApp().showGlobalLoading('提交中...');
+    getApp().showGlobalLoading();
     wx.request({
       url: url,
       method: "POST",

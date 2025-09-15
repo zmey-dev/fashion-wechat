@@ -295,11 +295,11 @@
 
       <view class="submit-section" wx:if="{{activeTab !== 'annotation'}}">
         <button 
-          class="submit-btn {{loading ? 'loading' : ''}}"
+          class="submit-btn {{loading || isSubmitting ? 'loading' : ''}}"
           bindtap="submitForm"
-          disabled="{{loading}}"
+          disabled="{{loading || isSubmitting}}"
         >
-          <text wx:if="{{loading}}">{{isUpdateMode ? messages.updating : messages.loading}}</text>
+          <text wx:if="{{loading || isSubmitting}}">{{isUpdateMode ? messages.updating : messages.loading}}</text>
           <text wx:else>{{isUpdateMode ? '💾 更新作品' : '🚀 创建作品'}}</text>
         </button>
       </view>

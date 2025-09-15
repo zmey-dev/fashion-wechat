@@ -122,7 +122,7 @@ Page({
   // Fetch event data from API
   fetchEvents() {
     this.setData({ loading: true });
-    getApp().showGlobalLoading('加载中...');
+    getApp().showGlobalLoading();
 
     wx.request({
       url: `${config.BACKEND_URL}/event`,

@@ -108,7 +108,7 @@ Page({
   },
 
   loadEventInfo: function () {
-    getApp().showGlobalLoading('加载中...');
+    getApp().showGlobalLoading();
     wx.request({
       url: `${config.BACKEND_URL}/event`,
       method: 'GET',
@@ -197,7 +197,7 @@ Page({
     if (this.data.loading) return;
     
     this.setData({ loading: true });
-    getApp().showGlobalLoading('加载中...');
+    getApp().showGlobalLoading();
 
     const requestData = {
       scope: this.data.pageSize,

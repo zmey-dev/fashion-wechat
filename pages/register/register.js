@@ -732,6 +732,16 @@ Page({
   },
   // Handle form submission
   handleSubmit: function() {
+    // Prevent duplicate submissions
+    if (this.data.isLoading) {
+      wx.showToast({
+        title: "正在提交中，请稍候...",
+        icon: "none",
+        duration: 2000
+      });
+      return;
+    }
+
     // Check if terms are agreed
     if (!this.data.termsAgreed) {
       wx.showToast({
@@ -764,6 +774,11 @@ Page({
 
   // Handle normal registration
   handleNormalRegistration: function(form) {
+    // Prevent duplicate submissions
+    if (this.data.isLoading) {
+      return;
+    }
+
     // Generate default student ID instead of using id_number
     const studentId = this.generateDefaultStudentId();
     
@@ -805,6 +820,11 @@ Page({
 
   // Handle WeChat registration with fresh code
   handleWechatRegistration: function(form, wechatData) {
+    // Prevent duplicate submissions
+    if (this.data.isLoading) {
+      return;
+    }
+
     // Get fresh WeChat code for registration
     wx.login({
       success: (loginRes) => {

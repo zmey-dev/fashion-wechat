@@ -132,7 +132,7 @@ Page({
 
   getNotifications() {
     this.setData({ loading: true });
-    getApp().showGlobalLoading('加载中...');
+    getApp().showGlobalLoading();
 
     wx.request({
       url: `${config.BACKEND_URL}/notify/get_notifications`,

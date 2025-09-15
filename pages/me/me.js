@@ -124,7 +124,7 @@ Page({  data: {
       return;
     }
 
-    app.showGlobalLoading('加载中...');
+    app.showGlobalLoading();
     wx.request({
       url: `${config.BACKEND_URL}/get_my_profile`,
       method: "GET",
@@ -280,7 +280,7 @@ Page({  data: {
 
   // Load university information including faculties
   loadUniversityInfo: function () {
-    getApp().showGlobalLoading('加载中...');
+    getApp().showGlobalLoading();
     wx.request({
       url: `${config.BACKEND_URL}/myuniversity`,
       method: "GET",
@@ -889,7 +889,7 @@ Page({  data: {
       loading: true,
       posts: [], // Reset posts for refresh
     });
-    getApp().showGlobalLoading('加载中...');
+    getApp().showGlobalLoading();
 
     // Use web version API pattern
     const apiUrl = this.getApiUrl(this.data.currentTab);
@@ -958,7 +958,7 @@ Page({  data: {
     if (this.data.loading || !this.data.hasMore) return;
 
     this.setData({ loading: true });
-    getApp().showGlobalLoading('加载中...');
+    getApp().showGlobalLoading();
 
     // Use web version API pattern
     const apiUrl = this.getApiUrl(this.data.currentTab);

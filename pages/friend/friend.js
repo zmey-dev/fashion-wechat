@@ -74,7 +74,7 @@ Page({
   // Load user list from API
   loadUserList: function () {
     this.setData({ loading: true });
-    getApp().showGlobalLoading('加载中...');
+    getApp().showGlobalLoading();
     wx.request({
       url: `${config.BACKEND_URL}/friend/get_friends`,
       method: "GET",
@@ -178,7 +178,7 @@ Page({
     this.setData({ loading: true });
     
     const app = getApp();
-    app.showGlobalLoading('加载更多...');
+    app.showGlobalLoading();
 
     wx.request({
       url: `${config.BACKEND_URL}/v2/post/by-user-id`,
@@ -261,6 +261,11 @@ Page({
    * Handle follow/unfollow action
    */
   handleFollowToggle: function () {
+    // Prevent duplicate requests
+    if (this.data.isFollowLoading) {
+      return;
+    }
+
     if (!this.data.currentUser) {
       wx.showToast({
         title: this.data.messages.errors.operationFailed,
@@ -374,6 +379,11 @@ Page({
    * Update friend status with API
    */
   updateFriendStatus: function (addFriend) {
+    // Prevent duplicate requests
+    if (this.data.isFriendLoading) {
+      return;
+    }
+
     if (!this.data.currentUser) {
       wx.showToast({
         title: this.data.messages.errors.operationFailed,
