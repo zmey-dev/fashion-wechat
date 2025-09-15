@@ -116,7 +116,7 @@
       <view wx:if="{{pastEvents.length > 0}}" class="past-grid">
         <view wx:for="{{pastEvents}}" wx:key="id" class="past-card" data-id="{{item.id}}" bindtap="onPastEventClick">
           <view class="past-image-wrapper">
-            <image class="past-image" src="{{item.poster_image}}" mode="widthFix"></image>
+            <image class="past-image" src="{{item.poster_image}}" mode="aspectFill"></image>
             <view class="past-status">已结束</view>
           </view>
           <view class="past-info">

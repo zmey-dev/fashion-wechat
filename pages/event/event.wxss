@@ -452,13 +452,15 @@ swiper-item {
 .past-image-wrapper {
   position: relative;
   width: 100%;
+  aspect-ratio: 4/5;
   overflow: hidden;
   border-radius: 16rpx 16rpx 0 0;
 }
 
 .past-image {
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: cover;
   display: block;
   border-radius: 16rpx 16rpx 0 0;
 }
