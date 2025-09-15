@@ -1140,5 +1140,16 @@ action-buttons.hidden {
 }
 
 .post-info-overlay.hidden {
-  opacity: 0;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+  display: none !important;
+}
+
+/* Audio Mode Container Hiding */
+.audio-mode-container.hidden {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+  display: none !important;
 }
