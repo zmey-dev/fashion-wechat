@@ -569,9 +569,35 @@ Component({
 
       // Close modal and navigate
       this.closeModal();
-      wx.redirectTo({
-        url: "/pages/index/index",
-      });
+      
+      // Check if there's a pending page navigation
+      if (app.globalData.pendingPageNavigation) {
+        const { page, path } = app.globalData.pendingPageNavigation;
+        // Clear the pending navigation
+        app.globalData.pendingPageNavigation = null;
+        
+        // Navigate to the intended page
+        if (page === "upload") {
+          // Special handling for upload page
+          wx.redirectTo({
+            url: "/pages/upload/upload",
+          });
+        } else if (path) {
+          wx.redirectTo({
+            url: path,
+          });
+        } else {
+          // Fallback to index if no path is specified
+          wx.redirectTo({
+            url: "/pages/index/index",
+          });
+        }
+      } else {
+        // Default to index page if no pending navigation
+        wx.redirectTo({
+          url: "/pages/index/index",
+        });
+      }
     },    // Handle registration required for WeChat users
     handleRegistrationRequired(result) {
 

@@ -385,6 +385,11 @@ Component({
       if (needLoginPages.includes(page)) {
         const userInfo = app.globalData.userInfo;
         if (!userInfo || !userInfo.token) {
+          // Store the intended page for redirect after login
+          app.globalData.pendingPageNavigation = {
+            page: page,
+            path: pageConfig.path
+          };
           // Show login modal
           app.setState("showLoginModal", true);
           return;
