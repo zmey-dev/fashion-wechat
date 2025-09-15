@@ -22,16 +22,16 @@
 /* Content Area */
 .terms-content {
   flex: 1;
-  padding: 40rpx;
+  height: 100%;
   background-color: #fff;
-  margin: 20rpx;
   border-radius: 16rpx;
 }
 
 .terms-text {
   display: flex;
   flex-direction: column;
-  gap: 20rpx;
+  padding: 40rpx;
+  padding-bottom: 100rpx;
 }
 
 .welcome {
@@ -110,22 +110,22 @@
   padding: 30rpx;
   border-radius: 12rpx;
   margin-top: 40rpx;
-  border-left: 6rpx solid #FF6B6B;
+  border-left: 6rpx solid #ff6b6b;
 }
 
 .douyin-style .section-title {
-  color: #FF6B6B;
+  color: #ff6b6b;
   font-weight: bold;
   font-size: 34rpx;
 }
 
 .douyin-style .section-subtitle {
-  color: #FF6B6B;
+  color: #ff6b6b;
   font-weight: 600;
 }
 
 .douyin-style .important {
-  color: #FF6B6B !important;
+  color: #ff6b6b !important;
   font-weight: bold;
 }
 
@@ -162,7 +162,7 @@
 .continue-button {
   width: 100%;
   height: 88rpx;
-  background-color: #007AFF;
+  background-color: #007aff;
   color: #fff;
   font-size: 32rpx;
   font-weight: 500;
