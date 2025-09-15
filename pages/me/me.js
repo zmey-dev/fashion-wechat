@@ -1372,7 +1372,7 @@ Page({  data: {
     });
   },
 
-  async submitContact() {
+  submitContact() {
     const { title, description } = this.data.contactForm;
     
     if (!title || !description) {
@@ -1388,44 +1388,49 @@ Page({  data: {
       loadingMessage: '提交中...'
     });
 
-    try {
-      const res = await wx.request({
-        url: config.BASE_URL + '/api/add-contact',
-        method: 'POST',
-        header: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + wx.getStorageSync('token')
-        },
-        data: {
-          title,
-          description
+    wx.request({
+      url: config.BACKEND_URL + '/contact/create',
+      method: 'POST',
+      header: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${getApp().globalData.userInfo.token}`
+      },
+      data: {
+        title: title,
+        description: description,
+        image_urls: []  // WeChat version doesn't support images yet
+      },
+      success: (res) => {
+        if (res.data && res.data.status === 'success') {
+          wx.showToast({
+            title: '提交成功',
+            icon: 'success'
+          });
+          
+          // Clear form
+          this.setData({
+            contactForm: {
+              title: '',
+              description: ''
+            }
+          });
+        } else {
+          wx.showToast({
+            title: res.data?.message || '提交失败',
+            icon: 'none'
+          });
         }
-      });
-
-      if (res.data.status === 'success') {
+      },
+      fail: (error) => {
+        console.error('Submit contact error:', error);
         wx.showToast({
-          title: '提交成功',
-          icon: 'success'
+          title: '网络错误，请重试',
+          icon: 'none'
         });
-        
-        // Clear form
-        this.setData({
-          contactForm: {
-            title: '',
-            description: ''
-          }
-        });
-      } else {
-        throw new Error(res.data.message || '提交失败');
+      },
+      complete: () => {
+        this.setData({ isLoading: false });
       }
-    } catch (error) {
-      console.error('Submit contact error:', error);
-      wx.showToast({
-        title: error.message || '提交失败',
-        icon: 'none'
-      });
-    } finally {
-      this.setData({ isLoading: false });
-    }
+    });
   },
 });
