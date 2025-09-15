@@ -1203,30 +1203,7 @@ declare var wx: {
          * 接口调用结束的回调函数（调用成功、失败都会执行）
          */
         complete?: Function;
-    }): void;
-                    
-    /**
-     * 打开地图选择位置
-     */
-    chooseLocation(obj: {
-        /**
-         * 接口调用成功的回调函数，返回内容详见返回参数说明。
-         */
-        success: Function;
-        /**
-         * 用户取消时调用
-         */
-        cancel?: Function;
-        /**
-         * 接口调用失败的回调函数
-         */
-        fail?: Function;
-        /**
-         * 接口调用结束的回调函数（调用成功、失败都会执行）
-         */
-        complete?: Function;
-    }): void;
-                    
+    }): void;                    
     /**
      * ​    使用微信内置地图查看位置
      */

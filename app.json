@@ -37,18 +37,6 @@
     "animationType": "none",
     "animationDuration": 0
   },
-  "permission": {
-      "scope.userLocation": {
-        "desc": "我们需要使用您的位置信息来查找附近的活动和朋友。"
-      },
-      "scope.userLocationBackground": {
-        "desc": "我们需要在后台访问您的位置信息。"
-      }
-    },
-  "requiredPrivateInfos": [
-      "chooseLocation",
-      "getLocation"
-    ],
   "networkTimeout": {
     "request": 60000,
     "downloadFile": 60000

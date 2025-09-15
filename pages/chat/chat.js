@@ -1078,29 +1078,6 @@ Page({
       showEmojiPicker: !this.data.showEmojiPicker,
     });
   },
-  onMoreActions() {
-    if (this.data.isSending) return; // Prevent more actions during sending
-
-    wx.showActionSheet({
-      itemList: ["拍照", "从相册选择", "位置", "文件"],
-      success: (res) => {
-        switch (res.tapIndex) {
-          case 0:
-            this.takePhoto();
-            break;
-          case 1:
-            this.chooseImage();
-            break;
-          case 2:
-            this.shareLocation();
-            break;
-          case 3:
-            this.chooseFile();
-            break;
-        }
-      },
-    });
-  },
   takePhoto() {
     if (this.data.isSending) return; // Prevent photo taking during sending
 
@@ -1241,17 +1218,6 @@ Page({
           this.setData({ chatMessages });
           this.scrollToBottom();
         }
-      },
-    });
-  },
-  // Share location
-  shareLocation() {
-    if (this.data.isSending) return; // Prevent location sharing during sending
-
-    wx.chooseLocation({
-      success: (res) => {
-        const locationMessage = `位置: ${res.name}\n地址: ${res.address}`;
-        this.sendLocationMessage(locationMessage, res.latitude, res.longitude);
       },
     });
   },
