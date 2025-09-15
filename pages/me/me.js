@@ -133,10 +133,10 @@ Page({  data: {
         Authorization: `Bearer ${currentToken}`,
       },
       success: (res) => {
-        console.log("fetchUserInfo API response:", res.data);
+
         if (res.statusCode === 200 && res.data.status === "success") {
           const userInfo = { ...res.data.profile, token: currentToken };
-          console.log("Updated userInfo:", userInfo);
+
           
           // Update global state using setUserInfo method
           app.setUserInfo(userInfo);
@@ -268,7 +268,7 @@ Page({  data: {
     wx.navigateTo({
       url: '/pages/profile/profile',
       fail: (error) => {
-        console.error('Failed to navigate to profile page:', error);
+
         wx.showToast({
           title: '页面跳转失败',
           icon: 'none',
@@ -303,7 +303,7 @@ Page({  data: {
         }
       },
       fail: () => {
-        console.error("Failed to load university info");
+
         // Set some default data for testing
         this.setData({
           faculties: [
@@ -438,7 +438,7 @@ Page({  data: {
         this.uploadAvatarInBackground(tempFile);
       },
       fail: (err) => {
-        console.error("选择图片失败:", err);
+
         if (err.errMsg.includes("cancel")) {
           return;
         }
@@ -937,7 +937,7 @@ Page({  data: {
         },
       });
     } catch (error) {
-      console.error("Failed to load posts:", error);
+
       this.setData({ loading: false });
       getApp().hideGlobalLoading();
     }
@@ -1064,7 +1064,7 @@ Page({  data: {
         },
       });
     } catch (error) {
-      console.error("Error deleting post:", error);
+
       wx.showToast({
         title: this.data.messages.errors.loadFailed,
         icon: "none",
@@ -1142,7 +1142,7 @@ Page({  data: {
         throw new Error(response.msg || '绑定失败');
       }
     } catch (error) {
-      console.error('WeChat linking error:', error);
+
       wx.showToast({
         title: error.message || '微信绑定失败',
         icon: 'none'
@@ -1186,7 +1186,7 @@ Page({  data: {
         throw new Error(response.msg || '解除绑定失败');
       }
     } catch (error) {
-      console.error('WeChat unlinking error:', error);
+
       wx.showToast({
         title: error.message || '解除绑定失败',
         icon: 'none'
@@ -1271,7 +1271,7 @@ Page({  data: {
     wx.navigateTo({
       url: '/pages/profile/profile',
       fail: (error) => {
-        console.error('Failed to navigate to profile page:', error);
+
         wx.showToast({
           title: '页面跳转失败',
           icon: 'none',
@@ -1283,7 +1283,7 @@ Page({  data: {
   
   // Background upload avatar to UCloud
   async uploadAvatarInBackground(tempFile) {
-    console.log("Starting background avatar upload:", tempFile);
+
     
     try {
       // Progress callback
@@ -1294,14 +1294,14 @@ Page({  data: {
       };
       
       // Use uploadImageSimple for direct upload without blur
-      console.log("Uploading avatar image...");
+
       const uploadResult = await ucloudUpload.uploadImageSimple(
         tempFile.tempFilePath,
         progressCallback,
         'student_avatars'  // upload folder
       );
       
-      console.log("Avatar upload result:", uploadResult);
+
       
       if (uploadResult && uploadResult.url) {
         this.setData({
@@ -1320,7 +1320,7 @@ Page({  data: {
         throw new Error("上传结果无效");
       }
     } catch (error) {
-      console.error("Avatar upload failed:", error);
+
       
       this.setData({
         avatarUploading: false,
@@ -1422,7 +1422,7 @@ Page({  data: {
         }
       },
       fail: (error) => {
-        console.error('Submit contact error:', error);
+
         wx.showToast({
           title: '网络错误，请重试',
           icon: 'none'

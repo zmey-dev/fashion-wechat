@@ -203,7 +203,7 @@ Page({
         }
       },
       fail: () => {
-        console.error("Failed to load university info");
+
         getApp().hideGlobalLoading();
       },
       complete: () => {
@@ -336,7 +336,7 @@ Page({
         this.uploadAvatarInBackground(tempFile);
       },
       fail: (err) => {
-        console.error("选择图片失败:", err);
+
         if (err.errMsg.includes("cancel")) {
           return;
         }
@@ -598,7 +598,7 @@ Page({
 
   // Background upload avatar to UCloud
   async uploadAvatarInBackground(tempFile) {
-    console.log("Starting background avatar upload:", tempFile);
+
     
     try {
       // Progress callback
@@ -609,14 +609,14 @@ Page({
       };
       
       // Use uploadImageSimple for direct upload without blur
-      console.log("Uploading avatar image...");
+
       const uploadResult = await ucloudUpload.uploadImageSimple(
         tempFile.tempFilePath,
         progressCallback,
         'avatars'  // upload folder
       );
       
-      console.log("Avatar upload result:", uploadResult);
+
       
       if (uploadResult && uploadResult.url) {
         this.setData({
@@ -640,7 +640,7 @@ Page({
         throw new Error("上传结果无效");
       }
     } catch (error) {
-      console.error("Avatar upload failed:", error);
+
       
       this.setData({
         avatarUploading: false,
@@ -903,7 +903,7 @@ Page({
       }
     } catch (error) {
       this.setData({ isLoading: false });
-      console.error("Save company avatar failed:", error);
+
       wx.showToast({
         title: "头像保存失败",
         icon: "none",
@@ -1403,7 +1403,7 @@ Page({
         throw new Error(response.msg || response.error || '绑定失败');
       }
     } catch (error) {
-      console.error('WeChat linking error:', error);
+
       wx.showToast({
         title: error.message || '微信绑定失败',
         icon: 'none'
@@ -1446,7 +1446,7 @@ Page({
         throw new Error(response.msg || response.error || '解除绑定失败');
       }
     } catch (error) {
-      console.error('WeChat unlinking error:', error);
+
       wx.showToast({
         title: error.message || '解除绑定失败',
         icon: 'none'
@@ -1576,7 +1576,7 @@ Page({
     const { old_password, new_password, new_password_confirmation } = this.data.passwordForm;
     const userInfo = getApp().globalData.userInfo;
     
-    console.log('Token for password change:', userInfo?.token);
+
     
     // Make API request using web version API
     wx.request({
@@ -1592,7 +1592,7 @@ Page({
         new_password_confirmation
       },
       success: (response) => {
-        console.log('Password change response:', response);
+
         
         if (response.statusCode === 200 && response.data.status === 'success') {
           this.setData({
@@ -1651,7 +1651,7 @@ Page({
         }
       },
       fail: (error) => {
-        console.error('Password change network error:', error);
+
         let errorMessage = "网络连接失败";
         
         if (error.errMsg) {

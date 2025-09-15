@@ -1512,7 +1512,7 @@ Page({
         this.uploadAvatarInBackground(tempFile);
       },
       fail: (err) => {
-        console.error("选择图片失败:", err);
+
         if (err.errMsg.includes("cancel")) {
           return;
         }
@@ -1566,7 +1566,7 @@ Page({
         this.uploadCredentialInBackground(file);
       },
       fail: (err) => {
-        console.error("选择文件失败:", err);
+
         if (err.errMsg.includes("cancel")) {
           return;
         }
@@ -1658,7 +1658,7 @@ Page({
 
   // Background upload avatar to UCloud
   async uploadAvatarInBackground(tempFile) {
-    console.log("Starting background avatar upload:", tempFile);
+
 
     try {
       // Progress callback
@@ -1669,14 +1669,14 @@ Page({
       };
 
       // Use uploadImageSimple for direct upload without blur
-      console.log("Uploading avatar image...");
+
       const uploadResult = await ucloudUpload.uploadImageSimple(
         tempFile.tempFilePath,
         progressCallback,
         "teacher_avatars" // upload folder
       );
 
-      console.log("Avatar upload result:", uploadResult);
+
 
       if (uploadResult && uploadResult.url) {
         this.setData({
@@ -1696,7 +1696,7 @@ Page({
         throw new Error("上传结果无效");
       }
     } catch (error) {
-      console.error("Avatar upload failed:", error);
+
 
       this.setData({
         avatarUploading: false,
@@ -1715,7 +1715,7 @@ Page({
 
   // Background upload credential to UCloud
   async uploadCredentialInBackground(file) {
-    console.log("Starting background credential upload:", file);
+
 
     try {
       // Progress callback
@@ -1752,7 +1752,7 @@ Page({
         );
       }
 
-      console.log("Credential upload result:", uploadResult);
+
 
       const finalUrl =
         uploadResult.url || uploadResult.uploadUrl || uploadResult.fileUrl;
@@ -1775,7 +1775,7 @@ Page({
         throw new Error("上传结果无效");
       }
     } catch (error) {
-      console.error("Credential upload failed:", error);
+
 
       this.setData({
         credentialUploading: false,
@@ -2104,7 +2104,7 @@ Page({
         throw new Error(response.msg || "绑定失败");
       }
     } catch (error) {
-      console.error("WeChat linking error:", error);
+
       wx.showToast({
         title: error.message || "微信绑定失败",
         icon: "none",
@@ -2149,7 +2149,7 @@ Page({
         throw new Error(response.msg || "解除绑定失败");
       }
     } catch (error) {
-      console.error("WeChat unlinking error:", error);
+
       wx.showToast({
         title: error.message || "解除绑定失败",
         icon: "none",
@@ -2285,7 +2285,7 @@ Page({
         throw new Error(res.data.message || "提交失败");
       }
     } catch (error) {
-      console.error("Submit contact error:", error);
+
       wx.showToast({
         title: error.message || "提交失败",
         icon: "none",

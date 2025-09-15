@@ -91,7 +91,6 @@ Page({
         }
       }
     } catch (error) {
-      console.log('Error loading stored data:', error);
     }
   },
 
@@ -329,7 +328,6 @@ Page({
         }
       },
       fail: (error) => {
-        console.log('Send phone code error:', error);
         this.setData({
           'errors.phone': "网络错误，请检查网络连接"
         });
@@ -417,7 +415,6 @@ Page({
         }
       },
       fail: (error) => {
-        console.log('Send email code error:', error);
         this.setData({
           'errors.email': "网络错误，请检查网络连接"
         });
@@ -477,7 +474,6 @@ Page({
           }
         },
         fail: (error) => {
-          console.log('Verify phone code error:', error);
           this.setData({
             'errors.phone': "验证失败，请重试"
           });
@@ -520,7 +516,6 @@ Page({
           }
         },
         fail: (error) => {
-          console.log('Verify email code error:', error);
           this.setData({
             'errors.email': "验证失败，请重试"
           });
@@ -577,7 +572,6 @@ Page({
           }
         },
         fail: (error) => {
-          console.log('Reset password error:', error);
           this.setData({
             'errors.password': "重置密码失败，请重试"
           });
@@ -609,7 +603,6 @@ Page({
           }
         },
         fail: (error) => {
-          console.log('Reset password error:', error);
           this.setData({
             'errors.password': "重置密码失败，请重试"
           });

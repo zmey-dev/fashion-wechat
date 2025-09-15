@@ -138,10 +138,10 @@ Page({
             this.editorCtx.setContents({
               html: eventData.description,
               success: () => {
-                console.log("Editor content set successfully");
+
               },
               fail: (error) => {
-                console.error("Failed to set editor content:", error);
+
               },
             });
           }
@@ -172,7 +172,7 @@ Page({
           icon: "none",
           duration: 2000,
         });
-        console.error("加载活动信息失败:", error);
+
       },
     });
   },
@@ -320,7 +320,7 @@ Page({
             that.uploadPosterInBackground(tempFile);
           },
           fail: (err) => {
-            console.error("选择图片失败:", err);
+
             if (err.errMsg.includes("cancel")) {
               return;
             }
@@ -533,10 +533,10 @@ Page({
           that.editorCtx.setContents({
             html: that.data.description,
             success: () => {
-              console.log("Editor content set successfully");
+
             },
             fail: (error) => {
-              console.error("Failed to set editor content:", error);
+
             },
           });
         }
@@ -739,7 +739,7 @@ Page({
             icon: "none",
             duration: 2000,
           });
-          console.error("提交活动失败:", error);
+
           this.setData({ isUploading: false });
         },
       });
@@ -748,7 +748,7 @@ Page({
 
   // Background upload poster to UCloud
   async uploadPosterInBackground(tempFile) {
-    console.log("Starting background poster upload:", tempFile);
+
     
     try {
       // Progress callback
@@ -759,14 +759,14 @@ Page({
       };
       
       // Use uploadImageSimple for direct upload without blur
-      console.log("Uploading poster image...");
+
       const uploadResult = await ucloudUpload.uploadImageSimple(
         tempFile.tempFilePath,
         progressCallback,
         'event_posters'  // upload folder
       );
       
-      console.log("Poster upload result:", uploadResult);
+
       
       if (uploadResult && uploadResult.url) {
         this.setData({
@@ -785,7 +785,7 @@ Page({
         throw new Error("上传结果无效");
       }
     } catch (error) {
-      console.error("Poster upload failed:", error);
+
       
       this.setData({
         posterUploading: false,
@@ -857,7 +857,7 @@ Page({
           icon: "none",
           duration: 2000,
         });
-        console.error("提交活动失败:", error);
+
         this.setData({ isUploading: false });
       },
     });
@@ -884,7 +884,7 @@ Page({
         }
       },
       fail: (error) => {
-        console.error("Load event API error:", error);
+
         getApp().hideGlobalLoading();
         if (callbacks.fail) {
           callbacks.fail(error);
@@ -926,7 +926,7 @@ Page({
         }
       },
       fail: (error) => {
-        console.error("Submit event API error:", error);
+
         getApp().hideGlobalLoading();
         if (callbacks.fail) {
           callbacks.fail(error);
@@ -1033,7 +1033,7 @@ Page({
         });
       }
     } catch (e) {
-      console.error("加载草稿失败:", e);
+
     }
   },
 });

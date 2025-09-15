@@ -377,7 +377,7 @@ Page({
 
         res.tempFiles.forEach(file => {
           if (!file) {
-            console.warn("Invalid file object in tempFiles");
+
             return;
           }
           // Ensure file has size property for validation
@@ -521,7 +521,7 @@ Page({
               }
             },
             fail: (error) => {
-              console.error("Thumbnail file verification failed:", error);
+
               thumbnailPath = null;
             },
           });
@@ -556,21 +556,17 @@ Page({
 
         if (thumbnailPath) {
         } else {
-          console.log(
-            "Video added without thumbnail - will generate placeholder"
-          );
+
         }
 
         // Start background upload with thumbnail
-        console.log(
-          "Starting sequential upload for video file with thumbnail support"
-        );
+          
         this.startSequentialUploads([newFile], 0);
 
       },
       fail: (error) => {
-        console.error("Video selection failed:", error);
-        console.error("Error details:", JSON.stringify(error));
+
+
 
         // Provide more specific error messages
         let errorMessage = "视频选择失败";
@@ -868,12 +864,7 @@ Page({
     const isPC =
       systemInfo.platform === "windows" || systemInfo.platform === "mac";
 
-    console.log(
-      "Choosing audio - Platform:",
-      systemInfo.platform,
-      "isPC:",
-      isPC
-    );
+      
 
     // Try chooseMessageFile with all type for better compatibility
     const tryChooseMessageFile = () => {
@@ -882,7 +873,7 @@ Page({
         type: "all", // Change from "file" to "all" for better mobile compatibility
         success: (res) => {
           const audioFile = res.tempFiles[0];
-          console.log("File selected via chooseMessageFile:", audioFile);
+
 
           // STRICT: Check if it's an audio file
           const fileName = audioFile.name || audioFile.path || "";
@@ -926,7 +917,7 @@ Page({
           this.handleAudioSelected(audioFile);
         },
         fail: (err) => {
-          console.error("Failed to choose file:", err);
+
 
           // Show helpful instructions
           if (!isPC) {
@@ -957,7 +948,7 @@ Page({
 
   // Handle audio file selection
   handleAudioSelected(audioFile) {
-    console.log("handleAudioSelected called with:", audioFile);
+
     
     // Ensure audio file has size property for validation
     if (!audioFile.size) {
@@ -1004,8 +995,8 @@ Page({
       return;
     }
 
-    console.log("Audio file name:", fileName);
-    console.log("Audio file extension:", fileExt);
+
+
 
     const newAudio = {
       ...audioFile,
@@ -1144,7 +1135,7 @@ Page({
   async submitForm(e) {
     // Prevent duplicate submissions
     if (this.data.isSubmitting) {
-      console.log("Already submitting, ignoring duplicate click");
+
       return;
     }
     
@@ -1262,11 +1253,7 @@ Page({
           const maxWait = 1200; // Maximum 120 seconds (1200 * 100ms)
           
           while (this.data.files.some((file) => file.uploading) && waitCount < maxWait) {
-            console.log(
-              `Waiting for file uploads... (${
-                this.data.files.filter((file) => file.uploading).length
-              } still uploading)`
-            );
+              
             await new Promise((resolve) => setTimeout(resolve, 100));
             waitCount++;
           }
@@ -1282,7 +1269,7 @@ Page({
             return;
           }
           
-          console.log("All file uploads completed");
+
         } catch (error) {
           this.setData({ loading: false });
           app.hideGlobalLoading();
@@ -1297,7 +1284,7 @@ Page({
 
       // Wait for audio upload to complete with timeout
       if (audioUploading) {
-        console.log("Waiting for audio upload to complete...");
+
         try {
           let audioWaitCount = 0;
           const maxAudioWait = 600; // Maximum 60 seconds for audio
@@ -1318,7 +1305,7 @@ Page({
             return;
           }
           
-          console.log("Audio upload completed");
+
         } catch (error) {
           this.setData({ loading: false, isSubmitting: false });
           app.hideGlobalLoading();
@@ -1340,7 +1327,7 @@ Page({
 
     // Retry failed uploads before final submission
     if (failedFiles.length > 0) {
-      console.log(`Retrying ${failedFiles.length} failed file uploads...`);
+
       try {
         this.setData({ loading: true });
         this.setData({ 
@@ -1371,13 +1358,13 @@ Page({
 
         this.setData({ loading: false });
       } catch (error) {
-        console.error("Failed to retry file uploads:", error);
+
         this.setData({ loading: false });
       }
     }
 
     if (audioFailed) {
-      console.log("Retrying failed audio upload...");
+
       try {
         const updatedAudio = {
           ...this.data.audio,
@@ -1393,7 +1380,7 @@ Page({
           await new Promise((resolve) => setTimeout(resolve, 100));
         }
       } catch (error) {
-        console.error("Audio retry failed:", error);
+
       }
     }
 
@@ -1589,8 +1576,8 @@ Page({
       }
 
       // Debug: Log the request data to see what we're sending
-      console.log("Request data being sent to backend:", requestData);
-      console.log("Request data keys:", Object.keys(requestData));
+
+
 
       // App loading already shown at the beginning of submitForm
 
@@ -1627,8 +1614,8 @@ Page({
             // Delay before redirect, keep loading bar active
             setTimeout(() => {
               // Debug: Check values
-              console.log('isEventPost:', isEventPost);
-              console.log('eventIdForRedirect:', eventIdForRedirect);
+
+
               
               // DO NOT hide loading bar on success - let the new page handle it
               // app.hideGlobalLoading(); // Removed to keep loading bar active
@@ -1660,7 +1647,7 @@ Page({
         fail: (error) => {
           this.setData({ loading: false, isSubmitting: false });
           app.hideGlobalLoading();
-          console.error("Form submission error:", error);
+
           
           // Show specific error message based on error type
           let errorMsg = this.data.messages.errors.requestFailed;
@@ -1687,7 +1674,7 @@ Page({
       });
     } catch (error) {
       this.setData({ loading: false });
-      console.error("Form submission error:", error);
+
       
       // Show specific error message based on error type  
       const errorMsg = error.message || '';
@@ -1769,18 +1756,13 @@ Page({
 
   // Background upload functions
   async uploadFileInBackground(file, fileIndex) {
-    console.log(
-      "Starting background upload for file:",
-      file,
-      "at index:",
-      fileIndex
-    );
+      
     let retryCount = 0;
     const maxRetries = 2;
 
     const attemptUpload = async () => {
       try {
-        console.log("Attempting upload, retry count:", retryCount);
+
 
         // Prepare file object for upload service with proper name handling
         const tempFilePath = file.file ? file.file.tempFilePath : file.url;
@@ -1815,8 +1797,8 @@ Page({
           duration: file.duration || (file.file ? file.file.duration : 0),
         };
 
-        console.log("Prepared file for upload:", fileForUpload);
-        console.log("Real thumbnail path available:", !!thumbnailPath);
+
+
 
         if (thumbnailPath && file.type === "video") {
           try {
@@ -1827,13 +1809,8 @@ Page({
                 fail: reject,
               });
             });
-            console.log(
-              "Thumbnail validation - size:",
-              thumbInfo.size,
-              "bytes"
-            );
           } catch (thumbError) {
-            console.warn("Thumbnail validation failed:", thumbError);
+
           }
         }
 
@@ -1841,7 +1818,7 @@ Page({
           fileForUpload,
           (progress) => {
             // Update progress internally but don't show in UI for background uploads
-            console.log("Upload progress:", progress, "%");
+
             const files = this.data.files;
             if (files[fileIndex]) {
               files[fileIndex].uploadProgress = progress;
@@ -1850,7 +1827,7 @@ Page({
           }
         );
 
-        console.log("Upload successful:", uploadResult);
+
 
         // Update file status
         const files = this.data.files;
@@ -1865,22 +1842,17 @@ Page({
           );
           this.setData({ files, uploadingFiles });
 
-          console.log(`File ${fileIndex} upload completed successfully`);
+
           if (uploadResult.thumbnailUrl) {
-            console.log(
-              `Thumbnail uploaded successfully: ${uploadResult.thumbnailUrl}`
-            );
+             
           }
         }
       } catch (error) {
-        console.error(
-          `Upload failed for file ${fileIndex} (attempt ${retryCount + 1}):`,
-          error
-        );
+          
 
         if (retryCount < maxRetries) {
           retryCount++;
-          console.log(`Retrying upload for file ${fileIndex}...`);
+
           await new Promise((resolve) =>
             setTimeout(resolve, 1000 * retryCount)
           );
@@ -1920,10 +1892,7 @@ Page({
             );
             this.setData({ files, uploadingFiles });
 
-            console.error(
-              `File ${fileIndex} upload failed permanently:`,
-              error.message
-            );
+              
           }
         }
       }
@@ -1956,7 +1925,7 @@ Page({
 
     const attemptUpload = async () => {
       try {
-        console.log("Starting audio upload attempt:", retryCount + 1);
+
 
         // Prepare audio file for upload with proper name handling
         const tempFilePath = audioFile.path || audioFile.tempFilePath;
@@ -1980,13 +1949,13 @@ Page({
           type: "audio",
         };
 
-        console.log("Prepared audio for upload:", audioForUpload);
+
 
         const uploadResult = await ucloudUpload.uploadMedia(
           audioForUpload,
           (progress) => {
             // Update progress internally but don't show in UI for background uploads
-            console.log("Audio upload progress:", progress, "%");
+
             const audio = this.data.audio;
             if (audio) {
               audio.uploadProgress = progress;
@@ -1995,7 +1964,7 @@ Page({
           }
         );
 
-        console.log("Audio upload successful:", uploadResult);
+
 
         // Update audio status
         const audio = this.data.audio;
@@ -2005,17 +1974,14 @@ Page({
           audio.uploadResult = uploadResult;
           this.setData({ audio });
 
-          console.log("Audio upload completed successfully");
+
         }
       } catch (error) {
-        console.error(
-          `Audio upload failed (attempt ${retryCount + 1}):`,
-          error
-        );
+         
 
         if (retryCount < maxRetries) {
           retryCount++;
-          console.log(`Retrying audio upload...`);
+
           await new Promise((resolve) =>
             setTimeout(resolve, 1000 * retryCount)
           );
@@ -2037,7 +2003,7 @@ Page({
             audio.uploadError = error.message || "音频文件上传失败，请重试";  // "Audio file upload failed, please try again"
             this.setData({ audio });
 
-            console.error("Audio upload failed permanently:", error.message);
+
           }
         }
       }
@@ -2048,29 +2014,25 @@ Page({
 
   // Sequential upload manager to prevent connection limit issues
   async startSequentialUploads(files, startIndex) {
-    console.log(`Starting sequential uploads for ${files.length} files`);
+
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const fileIndex = startIndex + i;
 
-      console.log(
-        `Uploading file ${i + 1}/${files.length} at index ${fileIndex}`
-      );
-
       // Wait a bit before starting each upload to ensure connections are properly closed
       if (i > 0) {
-        console.log("Waiting 1000ms before next upload...");
+
         await new Promise((resolve) => setTimeout(resolve, 1000));
       }
 
       // Upload the file and wait for it to complete before moving to next
       await this.uploadFileInBackground(file, fileIndex);
 
-      console.log(`File ${i + 1}/${files.length} upload process completed`);
+
     }
 
-    console.log("All files upload process completed");
+
   },
 
   // Handle download toggle switch

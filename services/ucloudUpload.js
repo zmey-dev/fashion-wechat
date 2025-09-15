@@ -791,12 +791,10 @@ const uploadVideo = async (filePath, onProgress = null, videoFolder = 'videos', 
             let optimizedThumbnailPath = providedThumbnailPath;
             
             try {
-              console.log('MANDATORY thumbnail compression...');
               optimizedThumbnailPath = await compressImage(providedThumbnailPath, {
                 quality: 0.4, // Higher compression for thumbnails - 40% quality
                 maxWidthOrHeight: 800 // Smaller dimensions for thumbnails - max 800px
               });
-              console.log('MANDATORY thumbnail compression complete');
               
               // Verify thumbnail compression
               try {
@@ -807,12 +805,9 @@ const uploadVideo = async (filePath, onProgress = null, videoFolder = 'videos', 
                   wx.getFileInfo({ filePath: optimizedThumbnailPath, success: (info) => resolve(info.size), fail: () => resolve(0) });
                 });
                 const compressionRatio = originalSize > 0 ? ((originalSize - compressedSize) / originalSize * 100).toFixed(1) : 0;
-                console.log(`Thumbnail compression: ${originalSize} -> ${compressedSize} bytes (${compressionRatio}% reduction)`);
               } catch (error) {
-                console.warn('Could not verify thumbnail compression ratio:', error);
               }
             } catch (optimizationError) {
-              console.error('MANDATORY thumbnail compression failed:', optimizationError);
               throw new Error('Thumbnail compression is mandatory but failed');
             }
             
@@ -820,7 +815,6 @@ const uploadVideo = async (filePath, onProgress = null, videoFolder = 'videos', 
             const thumbnailResult = await uploadToUCloud(optimizedThumbnailPath, thumbnailName, progressCallback);
             thumbnailUrl = thumbnailResult.url;
             uploadedCount++;
-            console.log('Real thumbnail uploaded successfully:', thumbnailUrl);
             
             await new Promise(resolve => setTimeout(resolve, 1000));
           } else {

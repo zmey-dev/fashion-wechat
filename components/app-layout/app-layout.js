@@ -19,9 +19,6 @@ Component({
       type: Object,
       value: {},
       observer: function (newParams, oldParams) {
-        console.log('=== app-layout searchParams observer ===');
-        console.log('newParams:', newParams);
-        console.log('oldParams:', oldParams);
         // The actual logic is handled by the 'currentPage, searchParams' observer
       },
     },
@@ -618,12 +615,10 @@ Component({
               const app = getApp();
               app.updateNotifications(notifications);
             } else {
-              console.error("Failed to fetch notifications:", res.data.message);
             }
           }
         },
         fail: (err) => {
-          console.error("Network error fetching notifications:", err);
         },
       });
     },

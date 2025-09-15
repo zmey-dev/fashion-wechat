@@ -42,7 +42,7 @@ Page({
     
     // Subscribe to notification updates
     this.notificationHandler = (notifications) => {
-      console.log("Notification page received global notification update:", notifications.length);
+
       this.processNotifications(notifications);
     };
     app.subscribe("notifications", this.notificationHandler);
@@ -70,7 +70,7 @@ Page({
 
   // Pull down to refresh
   onPullDownRefresh() {
-    console.log("Refreshing notifications...");
+
     
     // Fetch fresh notifications
     wx.request({
@@ -101,7 +101,7 @@ Page({
         wx.stopPullDownRefresh();
       },
       fail: (err) => {
-        console.error("Failed to refresh notifications:", err);
+
         wx.showToast({
           title: this.data.messages.errors.networkError,
           icon: "none",
@@ -163,7 +163,7 @@ Page({
         }
       },
       fail: (err) => {
-        console.error("Failed to fetch notifications:", err);
+
         this.setData({
           loading: false,
           error: this.data.messages.errors.networkError,
@@ -202,7 +202,7 @@ Page({
 
   // Handle friend request (accept/reject)
   handleFriendRequest(e) {
-    console.log(e);
+
     
     const { action, notifyId } = e.currentTarget.dataset;
 
@@ -219,8 +219,8 @@ Page({
       return;
     }
 
-    console.log("Notification found:", notification);
-    console.log("Current user:", this.data.userInfo);
+
+
 
     this.setData({
       isProcessing: true
@@ -284,7 +284,7 @@ Page({
   },
 
   requestFriendAction(data) {
-    console.log("Sending friend action request:", data);
+
     
     wx.request({
       url: `${config.BACKEND_URL}/friend/handle_friend`,
@@ -314,7 +314,7 @@ Page({
 
           this.removeNotification(data.notify_id);
         } else {
-          console.error("Friend action failed:", res.data);
+
           if (res.data.msg)
             wx.showToast({
               title: res.data.msg,
@@ -326,7 +326,7 @@ Page({
         this.setData({
           isProcessing: false
         });
-        console.error("Friend action request failed:", err);
+
 
         wx.showToast({
           title: this.data.messages.errors.networkError,

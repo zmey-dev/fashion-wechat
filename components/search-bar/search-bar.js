@@ -10,20 +10,15 @@ Component({
       type: Object,
       value: {},
       observer: function(newParams, oldParams) {
-        console.log('searchParams observer - newParams:', newParams, 'oldParams:', oldParams);
-        console.log('newParams has content:', !!(newParams && (newParams.search || newParams.university_id)));
         
         // Only call setSearchParams if newParams actually contains search data
         if (newParams && (newParams.search || newParams.university_id)) {
           // Only update if params actually changed
           if (JSON.stringify(newParams) !== JSON.stringify(oldParams)) {
-            console.log('Search params changed, calling setSearchParams');
             this.setSearchParams(newParams);
           } else {
-            console.log('Search params unchanged, skipping update');
           }
         } else {
-          console.log('No search params to apply, keeping current user input');
         }
       }
     },
@@ -46,13 +41,6 @@ Component({
 
   lifetimes: {
     attached() {
-      console.log('=== search-bar attached ===');
-      console.log('Initial data state:', {
-        filter: this.data.filter,
-        selectedUniversity: this.data.selectedUniversity,
-        selectedUniversityName: this.data.selectedUniversityName,
-        currentPage: this.data.currentPage
-      });
       
       // Load universities data when component is attached
       this.loadUniversities();
@@ -61,13 +49,6 @@ Component({
     },
 
     ready() {
-      console.log('=== search-bar ready ===');
-      console.log('Ready state:', {
-        filter: this.data.filter,
-        selectedUniversity: this.data.selectedUniversity,
-        selectedUniversityName: this.data.selectedUniversityName,
-        universities: this.data.universities.length
-      });
     }
   },
 
@@ -127,21 +108,17 @@ Component({
           
           // If there's a pending university ID, update the name
           if (this.pendingUniversityId) {
-            console.log('Processing pendingUniversityId:', this.pendingUniversityId);
             const university = universities.find(u => u.id == this.pendingUniversityId);
             if (university) {
-              console.log('Found pending university:', university.name);
               this.setData({
                 selectedUniversityName: university.name
               });
             } else {
-              console.log('Pending university not found in loaded universities');
             }
             this.pendingUniversityId = null;
           }
         }
       } catch (error) {
-        console.error("Failed to load universities:", error);
       }
     },
 
@@ -157,11 +134,9 @@ Component({
     },
 
     onFilterInput(e) {
-      console.log('onFilterInput called with value:', e.detail.value);
       this.setData({
         filter: e.detail.value
       });
-      console.log('Filter updated to:', this.data.filter);
     },
 
     onUniversityTap() {
@@ -172,7 +147,6 @@ Component({
 
     onUniversitySelect(e) {
       const universityId = e.currentTarget.dataset.id || "";
-      console.log('onUniversitySelect called with ID:', universityId);
       
       this.setData({
         selectedUniversity: universityId,
@@ -182,10 +156,6 @@ Component({
       // Update university name
       this.updateSelectedUniversityName();
       
-      console.log('University selection updated:', {
-        selectedUniversity: this.data.selectedUniversity,
-        selectedUniversityName: this.data.selectedUniversityName
-      });
     },
 
     onDropdownMaskTap() {
@@ -207,17 +177,12 @@ Component({
     handleSearch() {
       const { filter, selectedUniversity, selectedUniversityName } = this.data;
       
-      console.log('handleSearch called with current search-bar state:');
-      console.log('  filter:', filter);
-      console.log('  selectedUniversity:', selectedUniversity);
-      console.log('  selectedUniversityName:', selectedUniversityName);
       
       // Build search parameters
       const params = {};
       if (filter) params.search = filter;
       if (selectedUniversity) params.university_id = selectedUniversity;
       
-      console.log('Built search params to emit:', params);
       
       // Always emit search event to app-layout (unified handling)
       this.triggerEvent('search', params);
@@ -230,25 +195,16 @@ Component({
 
     // Set search parameters from external source (e.g., pending search)
     setSearchParams(params) {
-      console.log('setSearchParams called with:', params);
-      console.log('Current universities:', this.data.universities.length);
-      console.log('Current state before update:', {
-        filter: this.data.filter,
-        selectedUniversity: this.data.selectedUniversity,
-        selectedUniversityName: this.data.selectedUniversityName
-      });
       
       const updateData = {};
       
       // Only update if values are provided, otherwise keep current values
       if (params.search !== undefined) {
         updateData.filter = params.search || "";
-        console.log('Setting filter to:', updateData.filter);
       }
       
       if (params.university_id !== undefined) {
         updateData.selectedUniversity = params.university_id || "";
-        console.log('Setting selectedUniversity to:', updateData.selectedUniversity);
         
         if (params.university_id) {
           // Find university name if universities are loaded
@@ -256,15 +212,12 @@ Component({
             const university = this.data.universities.find(u => u.id == params.university_id);
             if (university) {
               updateData.selectedUniversityName = university.name;
-              console.log('Found university name:', university.name);
             } else {
-              console.log('University not found in list for ID:', params.university_id);
               updateData.selectedUniversityName = "全部学校";
             }
           } else {
             // If universities not loaded yet, set a flag to update name later
             this.pendingUniversityId = params.university_id;
-            console.log('Universities not loaded, setting pendingUniversityId:', params.university_id);
           }
         } else {
           updateData.selectedUniversityName = "全部学校";
@@ -277,12 +230,6 @@ Component({
       updateData.hasFilters = !!(hasSearch || hasUniversity);
       
       this.setData(updateData);
-      console.log('Search bar updated with final data:', updateData);
-      console.log('Current search bar state after update:', {
-        filter: this.data.filter,
-        selectedUniversity: this.data.selectedUniversity,
-        selectedUniversityName: this.data.selectedUniversityName
-      });
     },
 
     // Filter universities based on search text (show top 5 results)
@@ -303,7 +250,6 @@ Component({
     // Handle university search input
     onUniversitySearchInput(e) {
       const searchText = e.detail.value;
-      console.log('University search input:', searchText);
       
       this.setData({
         universitySearchText: searchText,

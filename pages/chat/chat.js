@@ -397,7 +397,7 @@ Page({
         }
       },
       fail: (err) => {
-        console.error("Failed to check user status:", err);
+
       },
     });
   },
@@ -528,7 +528,7 @@ Page({
           isLoadingMessages: false
         });
         getApp().hideGlobalLoading();
-        console.error("Failed to fetch messages:", err);
+
         wx.showToast({
           title: this.data.uiTexts.networkError,
           icon: "none",
@@ -642,7 +642,7 @@ Page({
         },
       });
     } catch (error) {
-      console.error("Error fetching friends:", error);
+
     }
   },
 
@@ -831,7 +831,7 @@ Page({
         }
       },
       fail: (err) => {
-        console.error("Failed to send message:", err);
+
         wx.showToast({
           title: this.data.uiTexts.sendFailed,
           icon: "none",
@@ -1029,7 +1029,7 @@ Page({
         }
       },
       fail: (err) => {
-        console.error("Failed to mark messages as read:", err);
+
       },
     });
   },
@@ -1171,7 +1171,7 @@ Page({
         throw new Error("上传结果无效");
       }
     } catch (error) {
-      console.error("Image upload failed:", error);
+
       
       this.setData({
         isUploadingFile: false
@@ -1345,7 +1345,7 @@ Page({
         throw new Error("上传结果无效");
       }
     } catch (error) {
-      console.error("File upload failed:", error);
+
       
       this.setData({
         isUploadingFile: false

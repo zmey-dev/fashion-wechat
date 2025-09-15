@@ -52,13 +52,13 @@ Page({
       const searchParams = {};
       if (options.search) searchParams.search = decodeURIComponent(options.search);
       
-      console.log('onLoad - URL search params:', searchParams);
-      console.log('onLoad - Raw options:', options);
+
+
       this.setData({ searchParams });
       
       // Clear any existing pendingSearch since URL params take priority
       if (app.globalData.pendingSearch) {
-        console.log('onLoad - Clearing pendingSearch due to URL params:', app.globalData.pendingSearch);
+
         app.globalData.pendingSearch = null;
       }
     }
@@ -72,21 +72,21 @@ Page({
     // If so, don't process pendingSearch to avoid overriding URL params
     const hasUrlParams = this.data.searchParams && this.data.searchParams.search;
     
-    console.log('onShow - hasUrlParams:', hasUrlParams);
-    console.log('onShow - current searchParams:', this.data.searchParams);
-    console.log('onShow - pendingSearch:', app.globalData.pendingSearch);
+
+
+
     
     if (!hasUrlParams && app.globalData.pendingSearch) {
       // Only use pendingSearch if we don't have URL params
       const searchParams = app.globalData.pendingSearch;
-      console.log('Processing pendingSearch:', searchParams);
+
       this.setData({ searchParams });
       this.handleRefresh();
       // Clear the pending search
       app.globalData.pendingSearch = null;
     } else if (hasUrlParams) {
       // URL params take priority, clear pendingSearch and refresh
-      console.log('URL params found, clearing pendingSearch and refreshing');
+
       app.globalData.pendingSearch = null;
       this.handleRefresh();
     }
@@ -112,7 +112,7 @@ Page({
   },
 
   onSearch: function (e) {
-    console.log('Search event received:', e.detail);
+
     const searchParams = e.detail;
     this.setData({ searchParams });
     this.handleRefresh();

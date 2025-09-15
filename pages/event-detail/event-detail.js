@@ -118,8 +118,6 @@ Page({
       },
       success: (res) => {
         if (res.statusCode === 200 && res.data.status === 'success') {
-          console.log("Event data loaded successfully:", res.data.events);
-          console.log("Event ID:", this.data.eventId);
           
             const event = res.data.events.find(e => e.id == this.data.eventId);
           if (!event) {

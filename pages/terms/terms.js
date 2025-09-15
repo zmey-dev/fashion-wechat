@@ -64,6 +64,6 @@ Page({
   // Handle scroll
   onScroll: function (e) {
     // Optional: Track scroll progress
-    // console.log('Scroll progress:', e.detail.scrollTop);
+
   },
 });

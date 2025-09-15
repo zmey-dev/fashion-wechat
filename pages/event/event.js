@@ -53,11 +53,7 @@ Page({
     const app = getApp();
     const userInfo = app.globalData.userInfo || {};
 
-    console.log("Event page - User info:", userInfo);
-    console.log(
-      "Event page - Is teacher:",
-      userInfo.role === USER_ROLES.TEACHER
-    );
+
 
     this.setData({
       userInfo: userInfo,
@@ -193,7 +189,7 @@ Page({
         }
       },
       fail: (err) => {
-        console.error("Failed to fetch events:", err);
+
         this.setData({
           loading: false,
           error: this.data.messages.errors.networkError,
@@ -226,10 +222,10 @@ Page({
         selectedEvent: processedEvent,
       });
 
-      console.log("Swiper changed to event:", selectedEvent?.title);
-      console.log("Can manage this event:", this.canManageEvent(selectedEvent));
+
+
     } else {
-      console.error("Invalid swiper index:", currentIndex);
+
     }
   }, // Handle event card selection
   onEventSelect(e) {
@@ -248,10 +244,10 @@ Page({
         selectedEvent: processedEvent,
       });
 
-      console.log("Event selected:", selectedEvent?.title);
-      console.log("Can manage this event:", this.canManageEvent(selectedEvent));
+
+
     } else {
-      console.error("Invalid event index:", index);
+
     }
   }, // Handle participate button click
   onParticipate() {
@@ -354,7 +350,7 @@ Page({
         this.setData({
           loading: false
         });
-        console.error('Teacher join event failed:', err);
+
         
         wx.showToast({
           title: '参与活动失败，请重试',
@@ -506,7 +502,7 @@ Page({
         }
       },
       fail: (err) => {
-        console.error("Delete event failed:", err);
+
         this.setData({
           loading: false,
         });

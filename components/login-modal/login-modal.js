@@ -243,7 +243,6 @@ Component({
 
         this.handleLoginSuccess(authResult);
       } catch (error) {
-        console.error("WeChat login error:", error);
         
         // Extract more specific error message
         let errorMessage = this.data.messages.errors.wechatLoginFailed;
@@ -381,7 +380,6 @@ Component({
           }
         },
         fail: (err) => {
-          console.error("Phone login request failed:", err);
           this.setData({
             phoneError: "",
             codeError: this.data.messages.errors.phoneLoginFailed,
@@ -524,7 +522,6 @@ Component({
           }
         },
         fail: (err) => {
-          console.error("Error fetching user info:", err);
           app.logout();
         },
       });
@@ -544,7 +541,6 @@ Component({
           }
         },
         fail: (err) => {
-          console.error("Error fetching followed users:", err);
           app.logout();
         },
       });
@@ -564,7 +560,6 @@ Component({
           }
         },
         fail: (err) => {
-          console.error("Error fetching friends:", err);
           app.logout();
         },
       });
