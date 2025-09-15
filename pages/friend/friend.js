@@ -415,6 +415,13 @@ Page({
             this.setData({
               currentUser: updatedUser,
             });
+            
+            // Update the friends list immediately
+            this.updateFriendInList(currentUser.id, true);
+            
+            // Refresh the friends list from server
+            this.fetchFriends();
+            
             wx.showToast({
               title: this.data.messages.actions.friendAdded,
               icon: "success",
@@ -454,6 +461,13 @@ Page({
             this.setData({
               currentUser: updatedUser,
             });
+            
+            // Remove from friends list immediately
+            this.removeFriendFromList(currentUser.id);
+            
+            // Refresh the friends list from server
+            this.fetchFriends();
+            
             wx.showToast({
               title: this.data.messages.actions.friendRemoved,
               icon: "success",
@@ -477,6 +491,58 @@ Page({
         },
       });
   },
+  
+  /**
+   * Update friend status in the list
+   */
+  updateFriendInList: function(friendId, isFriend) {
+    // Update userList
+    const userList = this.data.userList.map(user => {
+      if (user.id === friendId) {
+        return { ...user, isFriend: isFriend };
+      }
+      return user;
+    });
+    
+    // Update filteredUserList
+    const filteredUserList = this.data.filteredUserList.map(user => {
+      if (user.id === friendId) {
+        return { ...user, isFriend: isFriend };
+      }
+      return user;
+    });
+    
+    // Update friends list if exists
+    const friends = this.data.friends ? this.data.friends.map(friend => {
+      if (friend.id === friendId) {
+        return { ...friend, isFriend: isFriend };
+      }
+      return friend;
+    }) : [];
+    
+    this.setData({ 
+      userList,
+      filteredUserList,
+      friends 
+    });
+  },
+  
+  /**
+   * Remove friend from the list
+   */
+  removeFriendFromList: function(friendId) {
+    // If user is removed as friend, they should be removed from the friend list
+    const userList = this.data.userList.filter(user => user.id !== friendId);
+    const filteredUserList = this.data.filteredUserList.filter(user => user.id !== friendId);
+    const friends = this.data.friends ? this.data.friends.filter(friend => friend.id !== friendId) : [];
+    
+    this.setData({ 
+      userList,
+      filteredUserList,
+      friends 
+    });
+  },
+  
   /**
    * Navigate to message page
    */
