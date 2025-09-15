@@ -37,6 +37,18 @@
     "animationType": "none",
     "animationDuration": 0
   },
+  "permission": {
+      "scope.userLocation": {
+        "desc": "This is needed to use your location information to find nearby events and friends."
+      },
+      "scope.userLocationBackground": {
+        "desc": "This is needed to access location information in the background."
+      }
+    },
+  "requiredPrivateInfos": [
+      "chooseLocation",
+      "getLocation"
+    ],
   "networkTimeout": {
     "request": 60000,
     "downloadFile": 60000
