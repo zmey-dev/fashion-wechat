@@ -276,11 +276,12 @@ Component({
 
       // Stop notification polling
       this.stopNotificationPolling();
-    },
-  }
+    }
+  },
+  
   /**
    * Component methods
-   */,
+   */
   methods: {
     /**
      * Search icon tap handler - show search UI with animation
@@ -366,7 +367,9 @@ Component({
 
       // Find page configuration
       const pageConfig = this.data.pages.find((item) => item.key === page);
-      if (!pageConfig) return;      // Pages that require login authentication (except index)
+      if (!pageConfig) return;
+      
+      // Pages that require login authentication (except index)
       const needLoginPages = [
         "recommend",
         "follow",
@@ -391,41 +394,35 @@ Component({
         }
       }
 
-      // Check if clicking on currently active page
-      // Only allow redirection for "index" page when already active
-      if (this.data.currentPage === page && page !== "index") {
-        // Don't navigate if it's the same page and not index page
-        return;
-      }
-
-      // Update current page
+      // Always redirect to the page regardless of current page
+      // This ensures page refresh/reinitialization behavior for all pages
       this.setData({
         currentPage: page,
       });
 
-      // Navigate to the page
+      // Always use redirectTo for all pages to ensure complete reinitialization
       if (pageConfig.path) {
         // Special handling for upload page when coming from event pages
         if (page === "upload") {
           this.handleUploadNavigation();
-        } else if (page === "index") {
-          this.redirectToPage(pageConfig.path);
         } else {
-          this.navigateToPage(pageConfig.path);
+          // Always redirect for all pages
+          this.redirectToPage(pageConfig.path);
         }
+      }
 
-        // If it's notification page, clear notification count
-        if (page === "notification") {
-          this.clearNotificationCount();
-        }
+      // If it's notification page, clear notification count
+      if (page === "notification") {
+        this.clearNotificationCount();
       }
 
       // Trigger page change event to parent component
       this.triggerEvent("pageChange", { page, type: pageConfig.type });
-    }
+    },
+    
     /**
      * Page navigation handler
-     */,
+     */
     navigateToPage: function (path) {
       // Hide any loading indicators before navigation
       wx.hideLoading();
@@ -506,10 +503,11 @@ Component({
           this.showToast(this.data.messages.navigationError);
         },
       });
-    }
+    },
+    
     /**
      * Auto scroll to current page
-     */,
+     */
     scrollToCurrentPage: function () {
       const currentPage = this.data.currentPage;
       if (!currentPage) return;
@@ -664,14 +662,16 @@ Component({
 
     /**
      * Login modal close event handler
-     */ onLoginModalClose: function () {
+     */
+    onLoginModalClose: function () {
       const app = getApp();
       app.setState("showLoginModal", false);
     },
 
     /**
      * Login success event handler
-     */    onLoginSuccess: function (e) {
+     */
+    onLoginSuccess: function (e) {
       const app = getApp();
       const userInfo = e.detail;
 
@@ -683,11 +683,11 @@ Component({
       if (userInfo.role !== 'teacher') {
         this.startNotificationPolling();
       }
-
-    }
+    },
+    
     /**
      * Calculate and set optimal page tab widths
-     */,
+     */
     calculatePageTabWidths: function () {
       const filterPages = this.data.pages.filter(
         (page) => page.type === "filter"
@@ -700,10 +700,11 @@ Component({
       });
 
       // Filter pages computed for layout
-    }
+    },
+    
     /**
      * Update layout based on user role
-     */,
+     */
     updateLayoutForUserRole: function (userInfo) {
       const isTeacher = userInfo && userInfo.role === "teacher";
 
