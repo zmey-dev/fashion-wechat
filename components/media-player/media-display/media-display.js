@@ -600,6 +600,23 @@ Component({
     },
 
     onVideoTap(e){
+      // Toggle play/pause on video tap
+      const videoContext = this.getVideoContext();
+      if (!videoContext) return;
+      
+      if (this._isPlaying) {
+        // Currently playing, so pause
+        videoContext.pause();
+        this._isPlaying = false;
+        // Notify parent component
+        this.triggerEvent('videopaused');
+      } else {
+        // Currently paused, so play
+        videoContext.play();
+        this._isPlaying = true;
+        // Notify parent component  
+        this.triggerEvent('videoplaying');
+      }
     },
     
     onVideoPlay() {
