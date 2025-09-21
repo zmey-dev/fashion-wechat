@@ -40,7 +40,9 @@ Component({
     videoReady: true, // Always true to prevent black screen
     videoSrc: '', // Dynamic video source
     imageDimensions: {}, // Store image dimensions for dot calculation
-    lastLoadedVideoUrl: '' // Track last loaded video to prevent duplicates
+    lastLoadedVideoUrl: '', // Track last loaded video to prevent duplicates
+    isVideoPaused: false, // Track video pause state for play button
+    showVideoPlayButton: false // Control video play button visibility
   },
 
   // WeChat Doc: Single VideoContext instance management
@@ -130,7 +132,7 @@ Component({
     isPlaying: function(isPlaying) {
       const systemInfo = wx.getSystemInfoSync();
       const isAndroid = systemInfo.platform === 'android';
-      
+
       if (isPlaying === false) {
         // Reset playing flag
         this._isPlaying = false;
@@ -139,12 +141,25 @@ Component({
         if (this._videoContext) {
           this._videoContext.pause();
         }
+        // Show play button for paused video
+        if (this.properties.currentPost && this.properties.currentPost.type === 'video') {
+          this.setData({
+            isVideoPaused: true,
+            showVideoPlayButton: true
+          });
+        }
         // Stop audio
         this.destroyUploadedAudio();
       } else if (isPlaying === true && this.properties.currentPost && this.properties.currentPost.type === 'video') {
         // Mark that we should play this video
         this._shouldAutoPlay = true;
-        
+
+        // Hide play button when playing
+        this.setData({
+          isVideoPaused: false,
+          showVideoPlayButton: false
+        });
+
         // If video source is already set, start playing immediately
         if (this.data.videoSrc && !this._isPlaying) {
           const autoplayDelay = isAndroid ? 150 : 100;
@@ -622,22 +637,26 @@ Component({
     onVideoPlay() {
       // Mark as playing
       this._isPlaying = true;
-      
-      // Clear user pause flag since video is now playing
-      this.setData({ userPausedVideo: false });
-      
+
+      // Hide video play button when playing
+      this.setData({
+        userPausedVideo: false,
+        isVideoPaused: false,
+        showVideoPlayButton: false
+      });
+
       // WeChat Doc: Don't directly modify parent state to prevent observer loops
       // Only trigger event to notify parent
-      this.triggerEvent('videoplaying', { 
+      this.triggerEvent('videoplaying', {
         isLoading: false,
-        isWaitingForApi: false 
+        isWaitingForApi: false
       });
-      
+
       // Apply audio mode after a delay to ensure this is the actively playing post
       setTimeout(() => {
         // Only apply audio mode if this post is still active and playing
-        if (this.properties.isPlaying && 
-            this.properties.currentPost && 
+        if (this.properties.isPlaying &&
+            this.properties.currentPost &&
             this.properties.currentPost.type === 'video') {
           const videoContext = this.getVideoContext();
           if (videoContext) {
@@ -650,11 +669,33 @@ Component({
     onVideoPause() {
       // Mark as not playing
       this._isPlaying = false;
+
+      // Show video play button when paused
+      this.setData({
+        isVideoPaused: true,
+        showVideoPlayButton: true
+      });
+
       this.triggerEvent('videopaused');
-    },    onVideoEnded() {
+    },
+
+    onVideoEnded() {
       // Always trigger video ended event to move to next post
       // Parent component will handle navigation
       this.triggerEvent('videoended');
+    },
+
+    onVideoPlayButtonTap() {
+      // Resume video playback when play button is tapped
+      const videoContext = this.getVideoContext();
+      if (videoContext) {
+        videoContext.play();
+        // Hide the play button immediately
+        this.setData({
+          showVideoPlayButton: false,
+          isVideoPaused: false
+        });
+      }
     },
 
 

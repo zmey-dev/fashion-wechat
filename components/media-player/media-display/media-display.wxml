@@ -104,9 +104,22 @@ catchtap="onScreenTap"
       >
       </video>
     </view>
+
+    <!-- Douyin-style video play button overlay -->
+    <view
+      wx:if="{{ showVideoPlayButton }}"
+      class="video-play-button"
+      catchtap="onVideoPlayButtonTap"
+    >
+      <image
+        src="/images/play.png"
+        class="play-button-image"
+        mode="aspectFit"
+      />
+    </view>
   </view>
 
-  <!-- Play/Pause overlay indicator -->
+  <!-- Play/Pause overlay indicator for image posts only -->
   <view
     class="play-indicator {{ showPlayIndicator ? 'show' : '' }}"
     wx:if="{{ currentPost.type === 'image' }}"

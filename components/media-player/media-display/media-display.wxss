@@ -42,6 +42,28 @@
   justify-content: center;
 }
 
+/* Douyin-style video play button */
+.video-play-button {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100px;
+  height: 100px;
+}
+
+.play-button-image {
+  width: 100%;
+  height: 100%;
+  opacity: 0.85;
+  filter: drop-shadow(0 0 25px rgba(0, 0, 0, 0.4));
+}
+
 .media-swiper {
   width: 100%;
   height: 100%;

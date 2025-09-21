@@ -24,6 +24,7 @@
   >
     <!-- Media Display Component -->
     <media-display
+      id="media-display"
       current-post="{{ currentPost }}"
       current-media="{{ currentMedia }}"
       current-slide-index="{{ currentSlideIndex }}"
@@ -37,6 +38,8 @@
       bind:slidechange="onSlideChange"
       bind:dottap="onDotTap"
       bind:videoended="onVideoEnded"
+      bind:showplayindicator="onShowPlayIndicator"
+      bind:hideplayindicator="onHidePlayIndicator"
     />
     <media-controls
       wx:if="{{ currentPost.type === 'image' }}"

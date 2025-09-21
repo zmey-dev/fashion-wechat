@@ -372,9 +372,33 @@ Component({
     // Media Display Events
     onScreenTap() {
       const { currentPost } = this.data;
-      if (currentPost.type !== "image") return;
 
-      this.togglePlayPause();
+      // Handle both image and video posts
+      if (currentPost.type === "image") {
+        this.togglePlayPause();
+      } else if (currentPost.type === "video") {
+        // For video, toggle play/pause
+        const videoComponent = this.selectComponent('#media-display');
+        if (videoComponent) {
+          // Get video context and toggle play state
+          const videoContext = videoComponent.getVideoContext ? videoComponent.getVideoContext() : null;
+          if (videoContext) {
+            if (this.properties.isPlaying) {
+              videoContext.pause();
+            } else {
+              videoContext.play();
+            }
+          }
+        }
+      }
+    },
+
+    onShowPlayIndicator() {
+      this.setData({ showPlayIndicator: true });
+    },
+
+    onHidePlayIndicator() {
+      this.setData({ showPlayIndicator: false });
     },
 
     onSlideChange(e) {
