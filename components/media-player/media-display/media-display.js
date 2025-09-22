@@ -135,6 +135,7 @@ Component({
     isPlaying: function(isPlaying) {
       const systemInfo = wx.getSystemInfoSync();
       const isAndroid = systemInfo.platform === 'android';
+      const postType = this.properties.currentPost?.type;
 
       if (isPlaying === false) {
         // Reset playing flag
@@ -145,10 +146,30 @@ Component({
           this._videoContext.pause();
         }
         // Show play button for paused video
-        if (this.properties.currentPost && this.properties.currentPost.type === 'video') {
+        if (postType === 'video') {
           this.setData({
             isVideoPaused: true,
             showVideoPlayButton: true
+          });
+        }
+        // Show play button briefly for paused image posts
+        else if (postType === 'image') {
+          // Clear existing timer first
+          if (this.imagePlayButtonTimer) {
+            clearTimeout(this.imagePlayButtonTimer);
+            this.imagePlayButtonTimer = null;
+          }
+
+          this.setData({
+            showImagePlayButton: true
+          }, () => {
+            // Hide after 1.5 seconds
+            this.imagePlayButtonTimer = setTimeout(() => {
+              this.setData({
+                showImagePlayButton: false
+              });
+              this.imagePlayButtonTimer = null;
+            }, 1500);
           });
         }
         // Stop audio
@@ -600,28 +621,61 @@ Component({
 
       this.setData({ calculatedDots });
     },onScreenTap() {
-      // Handle screen tap for both image and video posts
+      // Handle screen tap for video posts
       const postType = this.properties.currentPost?.type;
 
-      if (postType === 'image') {
-        // Show play/pause button for images briefly when tapped
-        this.setData({
-          showImagePlayButton: true
-        });
+      // Only trigger screentap for video posts
+      if (postType !== 'image') {
+        this.triggerEvent('screentap');
+      }
+    },
 
-        // Clear existing timer if any
-        if (this.imagePlayButtonTimer) {
-          clearTimeout(this.imagePlayButtonTimer);
-        }
+    onImageAreaTap() {
+      // Handle tap on image area specifically
+      // Clear existing timer first to prevent conflicts
+      if (this.imagePlayButtonTimer) {
+        clearTimeout(this.imagePlayButtonTimer);
+        this.imagePlayButtonTimer = null;
+      }
 
-        // Hide play/pause button after 1.5 seconds with fade
+      // Force show play/pause button for images
+      this.setData({
+        showImagePlayButton: true
+      }, () => {
+        // Set new timer after state is updated
         this.imagePlayButtonTimer = setTimeout(() => {
           this.setData({
             showImagePlayButton: false
           });
+          this.imagePlayButtonTimer = null;
         }, 1500);
+      });
+
+      // Trigger screentap event for parent to handle play/pause
+      this.triggerEvent('screentap');
+    },
+
+    onImagePlayButtonTap() {
+      // Handle tap on the play/pause button itself
+      // Clear existing timer if any
+      if (this.imagePlayButtonTimer) {
+        clearTimeout(this.imagePlayButtonTimer);
+        this.imagePlayButtonTimer = null;
       }
 
+      // Keep button visible for another 1.5 seconds
+      this.setData({
+        showImagePlayButton: true
+      }, () => {
+        this.imagePlayButtonTimer = setTimeout(() => {
+          this.setData({
+            showImagePlayButton: false
+          });
+          this.imagePlayButtonTimer = null;
+        }, 1500);
+      });
+
+      // Trigger screentap to toggle play/pause
       this.triggerEvent('screentap');
     },
 

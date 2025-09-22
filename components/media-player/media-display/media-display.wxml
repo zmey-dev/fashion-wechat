@@ -14,9 +14,10 @@ catchtap="onScreenTap"
     indicator-dots="{{ mediaLength > 1 }}"
     indicator-color="rgba(255,255,255,0.3)"
     indicator-active-color="#ffffff"
+    catchtap="onImageAreaTap"
   >
     <swiper-item wx:for="{{ currentMedia }}" wx:key="id" class="media-item">
-      <view class="media-wrapper">
+      <view class="media-wrapper" catchtap="onImageAreaTap">
         <image
           class="media-image"
           id="media-image"
@@ -25,6 +26,7 @@ catchtap="onScreenTap"
           mode="aspectFit"
           lazy-load="{{ true }}"
           bindload="onImageLoad"
+          catchtap="onImageAreaTap"
         />
       </view>
       <view
@@ -107,8 +109,8 @@ catchtap="onScreenTap"
 
     <!-- Douyin-style video play button overlay -->
     <view
-      wx:if="{{ showVideoPlayButton }}"
-      class="video-play-button fade-animation"
+      wx:if="{{ currentPost.type === 'video' }}"
+      class="video-play-button {{ showVideoPlayButton ? 'show' : '' }}"
       catchtap="onVideoPlayButtonTap"
     >
       <image
@@ -121,9 +123,9 @@ catchtap="onScreenTap"
 
   <!-- Play/Pause button overlay for image posts -->
   <view
-    wx:if="{{ currentPost.type === 'image' && showImagePlayButton }}"
-    class="video-play-button fade-animation"
-    catchtap="onScreenTap"
+    wx:if="{{ currentPost.type === 'image' }}"
+    class="video-play-button {{ showImagePlayButton ? 'show' : '' }}"
+    catchtap="onImagePlayButtonTap"
   >
     <image
       src="{{ isPlaying ? '/images/pause.png' : '/images/play.png' }}"
