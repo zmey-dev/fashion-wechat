@@ -9,7 +9,7 @@
 }
 */
 
-/* Aggressively hide all native video loading indicators */
+/* Hide video loading indicators and buffering progress */
 .media-video::-webkit-media-controls-loading-panel,
 .media-video::-webkit-media-controls-overlay-loading-container,
 .media-video::-webkit-media-controls-overlay-enclosure,
@@ -20,10 +20,20 @@
   opacity: 0 !important;
 }
 
-/* Override WeChat's loading styles */
+/* Hide buffering/download progress bar specifically */
+.media-video::-webkit-progress-bar,
+.media-video::-webkit-progress-value,
+.media-video::-webkit-media-controls-timeline::-webkit-media-slider-container::before {
+  display: none !important;
+  opacity: 0 !important;
+}
+
+/* Override WeChat's loading styles and gradients */
 .media-video::before,
 .media-video::after {
   display: none !important;
+  background: none !important;
+  background-image: none !important;
 }
 
 /* Ensure video container doesn't show loading backgrounds */
@@ -118,6 +128,15 @@
   overflow: hidden;
 }
 
+/* Remove any gradients or shadows from video wrapper */
+.video-wrapper::before,
+.video-wrapper::after {
+  display: none !important;
+  background: none !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
 .video-thumbnail-background {
   position: absolute;
   top: 50%;
@@ -144,12 +163,28 @@
   align-items: center;
 }
 
+/* Remove any gradients from video container */
+.video-container::before,
+.video-container::after {
+  display: none !important;
+  background: none !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
 .media-video {
   width: 100%;
   height: 100%;
   position: relative;
   background-color: transparent !important;
   object-fit: cover;
+}
+
+/* Disable all video overlay gradients and shadows */
+.media-video video::-webkit-media-text-track-container,
+.media-video video::-webkit-media-text-track-background,
+.media-video video::-webkit-media-text-track-display {
+  display: none !important;
 }
 
 /* Play Indicator Overlay */
