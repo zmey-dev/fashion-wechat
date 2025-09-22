@@ -108,7 +108,7 @@ catchtap="onScreenTap"
     <!-- Douyin-style video play button overlay -->
     <view
       wx:if="{{ showVideoPlayButton }}"
-      class="video-play-button"
+      class="video-play-button fade-animation"
       catchtap="onVideoPlayButtonTap"
     >
       <image
@@ -119,10 +119,23 @@ catchtap="onScreenTap"
     </view>
   </view>
 
+  <!-- Play/Pause button overlay for image posts -->
+  <view
+    wx:if="{{ currentPost.type === 'image' && showImagePlayButton }}"
+    class="video-play-button fade-animation"
+    catchtap="onScreenTap"
+  >
+    <image
+      src="{{ isPlaying ? '/images/pause.png' : '/images/play.png' }}"
+      class="play-button-image"
+      mode="aspectFit"
+    />
+  </view>
+
   <!-- Play/Pause overlay indicator for image posts only -->
   <view
     class="play-indicator {{ showPlayIndicator ? 'show' : '' }}"
-    wx:if="{{ currentPost.type === 'image' }}"
+    wx:if="{{ currentPost.type === 'image' && false }}"
   >
     <view class="play-icon-container">
       <view wx:if="{{ isPlaying }}" class="svg-icon pause-icon">

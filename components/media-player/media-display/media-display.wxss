@@ -55,6 +55,12 @@
   justify-content: center;
   width: 100px;
   height: 100px;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.video-play-button.fade-animation {
+  animation: fadeInOut 1.8s ease-in-out;
+  animation-fill-mode: forwards;
 }
 
 .play-button-image {
@@ -506,10 +512,25 @@
 }
 
 @keyframes fadeOut {
-  0% { 
-    opacity: 1; 
+  0% {
+    opacity: 1;
   }
-  100% { 
-    opacity: 0; 
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.85;
+  }
+  80% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
   }
 }

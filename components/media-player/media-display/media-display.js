@@ -42,13 +42,16 @@ Component({
     imageDimensions: {}, // Store image dimensions for dot calculation
     lastLoadedVideoUrl: '', // Track last loaded video to prevent duplicates
     isVideoPaused: false, // Track video pause state for play button
-    showVideoPlayButton: false // Control video play button visibility
+    showVideoPlayButton: false, // Control video play button visibility
+    showImagePlayButton: false // Control image play button visibility
   },
 
   // WeChat Doc: Single VideoContext instance management
   _videoContext: null,
   _isSettingVideo: false, // Flag to prevent recursive video setting
   _shouldAutoPlay: false, // Flag to track if video should auto-play when ready
+  playButtonTimer: null, // Timer for hiding play button
+  imagePlayButtonTimer: null, // Timer for hiding image play button
 
   observers: {
     // Initialize video URL immediately when post changes
@@ -221,12 +224,22 @@ Component({
     if (this.onResizeHandler) {
       wx.offWindowResize && wx.offWindowResize(this.onResizeHandler);
     }
-    
+
     // Clear any pending timers
     if (this.resizeTimer) {
       clearTimeout(this.resizeTimer);
     }
-    
+
+    // Clear play button timers
+    if (this.playButtonTimer) {
+      clearTimeout(this.playButtonTimer);
+      this.playButtonTimer = null;
+    }
+    if (this.imagePlayButtonTimer) {
+      clearTimeout(this.imagePlayButtonTimer);
+      this.imagePlayButtonTimer = null;
+    }
+
     // WeChat Doc: Proper cleanup order
     this.destroyVideoContext();
     this.destroyUploadedAudio();
@@ -587,6 +600,28 @@ Component({
 
       this.setData({ calculatedDots });
     },onScreenTap() {
+      // Handle screen tap for both image and video posts
+      const postType = this.properties.currentPost?.type;
+
+      if (postType === 'image') {
+        // Show play/pause button for images briefly when tapped
+        this.setData({
+          showImagePlayButton: true
+        });
+
+        // Clear existing timer if any
+        if (this.imagePlayButtonTimer) {
+          clearTimeout(this.imagePlayButtonTimer);
+        }
+
+        // Hide play/pause button after 1.5 seconds with fade
+        this.imagePlayButtonTimer = setTimeout(() => {
+          this.setData({
+            showImagePlayButton: false
+          });
+        }, 1500);
+      }
+
       this.triggerEvent('screentap');
     },
 
@@ -638,6 +673,12 @@ Component({
       // Mark as playing
       this._isPlaying = true;
 
+      // Clear timer if exists
+      if (this.playButtonTimer) {
+        clearTimeout(this.playButtonTimer);
+        this.playButtonTimer = null;
+      }
+
       // Hide video play button when playing
       this.setData({
         userPausedVideo: false,
@@ -676,6 +717,18 @@ Component({
         showVideoPlayButton: true
       });
 
+      // Clear existing timer if any
+      if (this.playButtonTimer) {
+        clearTimeout(this.playButtonTimer);
+      }
+
+      // Hide play button after 1.5 seconds with fade
+      this.playButtonTimer = setTimeout(() => {
+        this.setData({
+          showVideoPlayButton: false
+        });
+      }, 1500);
+
       this.triggerEvent('videopaused');
     },
 
@@ -686,6 +739,12 @@ Component({
     },
 
     onVideoPlayButtonTap() {
+      // Clear timer if exists
+      if (this.playButtonTimer) {
+        clearTimeout(this.playButtonTimer);
+        this.playButtonTimer = null;
+      }
+
       // Resume video playback when play button is tapped
       const videoContext = this.getVideoContext();
       if (videoContext) {
