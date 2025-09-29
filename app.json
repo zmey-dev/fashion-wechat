@@ -20,7 +20,8 @@
     "pages/forgot-password/forgot-password",
     "pages/event-detail/event-detail",
     "pages/event-create/event-create",
-    "pages/company-posts/company-posts"
+    "pages/company-posts/company-posts",
+    "pages/maintenance/maintenance"
   ],
   "window": {
     "backgroundTextStyle": "light",

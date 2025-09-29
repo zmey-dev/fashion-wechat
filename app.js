@@ -1,6 +1,7 @@
 const { default: config } = require("./config");
 const { socketManager } = require("./services/socket");
 const { isEmpty } = require("./utils/isEmpty");
+const maintenanceService = require("./utils/maintenanceService");
 
 App({
   globalData: {
@@ -624,18 +625,38 @@ App({
     wx.redirectTo({ url: "/pages/index/index" });
   },
 
+  async checkMaintenanceStatus() {
+    const status = await maintenanceService.checkMaintenanceStatus();
+
+    if (status.isMaintenanceMode) {
+      const pages = getCurrentPages();
+      const currentPage = pages[pages.length - 1];
+      const currentRoute = currentPage ? currentPage.route : '';
+
+      if (currentRoute !== 'pages/maintenance/maintenance') {
+        wx.reLaunch({
+          url: '/pages/maintenance/maintenance'
+        });
+      }
+    }
+  },
+
   onLaunch() {
+    // Check maintenance status on app launch
+    this.checkMaintenanceStatus();
+
     // Hide all loading indicators
     wx.hideNavigationBarLoading();
     wx.hideLoading();
-    
-    // Override wx.request to disable loading
+
+    // Override wx.request to disable loading and check maintenance
     const originalRequest = wx.request;
+    const app = this;
     wx.request = function(options) {
       // Hide any loading before request
       wx.hideLoading();
       wx.hideNavigationBarLoading();
-      
+
       return originalRequest.call(this, {
         ...options,
         success: function(res) {
@@ -644,10 +665,16 @@ App({
           wx.hideNavigationBarLoading();
           if (options.success) options.success(res);
         },
-        fail: function(err) {
+        fail: async function(err) {
           // Hide loading after fail
           wx.hideLoading();
           wx.hideNavigationBarLoading();
+
+          // Check maintenance status on API errors
+          if (err && (err.statusCode >= 500 || err.errMsg === 'request:fail')) {
+            await maintenanceService.checkOnApiError(err);
+          }
+
           if (options.fail) options.fail(err);
         },
         complete: function(res) {
@@ -676,6 +703,9 @@ App({
   },
 
   onShow() {
+    // Check maintenance status when app comes to foreground
+    this.checkMaintenanceStatus();
+
     // Hide navigation bar loading when app becomes visible
     wx.hideNavigationBarLoading();
     // Hide any loading indicators

@@ -1,0 +1,33 @@
+<view class="maintenance-container">
+  <view class="maintenance-content">
+    <view class="icon-wrapper">
+      <image class="icon-image" src="/images/icons/maintenance.svg" mode="aspectFit" />
+    </view>
+
+    <view class="title">{{maintenanceInfo.message}}</view>
+
+    <view class="description">{{maintenanceInfo.description}}</view>
+
+    <view class="time-box">
+      <view class="time-label">维护时间</view>
+      <view class="time-range">{{maintenanceInfo.timeRange}}</view>
+    </view>
+
+    <view class="divider"></view>
+
+    <view class="footer">
+      <text class="footer-text">给您带来的不便，我们深感歉意</text>
+      <text class="footer-text">如有紧急问题，请联系客服</text>
+    </view>
+
+    <view class="loading-dots">
+      <view class="dot dot1"></view>
+      <view class="dot dot2"></view>
+      <view class="dot dot3"></view>
+    </view>
+  </view>
+
+  <view class="bottom-text">
+    <text>页面将在维护结束后自动刷新</text>
+  </view>
+</view>
