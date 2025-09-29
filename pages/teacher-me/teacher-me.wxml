@@ -29,15 +29,6 @@
 
           <!-- Filter Section -->
           <view wx:if="{{showFilters}}" class="filter-section">
-        <view class="filter-header">
-          <text class="filter-title">筛选学生</text>
-          <view wx:if="{{activeFilters.faculty_id || activeFilters.major_id || activeFilters.attend_year}}" 
-                class="clear-all-btn" 
-                bindtap="clearAllFilters">
-            <text>清除所有</text>
-          </view>
-        </view>
-        
         <!-- Filter Dropdowns -->
         <view class="filter-controls">
           <!-- Faculty Filter -->
@@ -187,12 +178,7 @@
       scroll-y="{{true}}"
       enhanced="{{true}}"
       show-scrollbar="{{false}}"
-    >
-      <!-- Student List -->
-      <view class="card section-title">
-        <text>我校学生</text>
-      </view>
-      
+    >   
       <view class="student-list">
         <block wx:if="{{students.length > 0}}">
           <view 
