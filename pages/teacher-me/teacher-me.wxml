@@ -16,24 +16,19 @@
         </view>
       </view>    </view>
 
-    <!-- Scroll container for all content below header -->
-    <scroll-view 
-      class="scroll-content" 
-      scroll-y="{{true}}" 
-      enhanced="{{true}}" 
-      show-scrollbar="{{false}}"
-    >
-      <!-- Student Management Tab -->
-      <block wx:if="{{currentTab === 0}}">
-    <block wx:if="{{!selectedStudent}}">
-      <!-- Filter Toggle Button -->
-      <view class="filter-toggle-btn" bindtap="toggleFilters">
-        <image src="../../images/icons/filter.svg" mode="aspectFit" class="filter-icon"></image>
-        <text>{{showFilters ? '隐藏筛选' : '显示筛选'}}</text>
-      </view>
-      
-      <!-- Filter Section -->
-      <view wx:if="{{showFilters}}" class="filter-section">
+    <!-- Student Management Tab -->
+    <block wx:if="{{currentTab === 0}}">
+      <block wx:if="{{!selectedStudent}}">
+        <!-- Fixed Filter Section -->
+        <view class="fixed-filter-container">
+          <!-- Filter Toggle Button -->
+          <view class="filter-toggle-btn" bindtap="toggleFilters">
+            <image src="../../images/icons/filter.svg" mode="aspectFit" class="filter-icon"></image>
+            <text>{{showFilters ? '隐藏筛选' : '显示筛选'}}</text>
+          </view>
+
+          <!-- Filter Section -->
+          <view wx:if="{{showFilters}}" class="filter-section">
         <view class="filter-header">
           <text class="filter-title">筛选学生</text>
           <view wx:if="{{activeFilters.faculty_id || activeFilters.major_id || activeFilters.attend_year}}" 
@@ -184,7 +179,15 @@
           </view>
         </view>
       </view>
-      
+    </view>
+
+    <!-- Scroll container for student list -->
+    <scroll-view
+      class="scroll-content-students"
+      scroll-y="{{true}}"
+      enhanced="{{true}}"
+      show-scrollbar="{{false}}"
+    >
       <!-- Student List -->
       <view class="card section-title">
         <text>我校学生</text>
@@ -222,10 +225,17 @@
           <text>{{messages.noStudents}}</text>
         </view>
       </view>
-    </block>
-    
-    <block wx:else>
-      <!-- Student Detail View -->
+    </scroll-view>
+  </block>
+
+  <block wx:else>
+    <!-- Student Detail View -->
+    <scroll-view
+      class="scroll-content"
+      scroll-y="{{true}}"
+      enhanced="{{true}}"
+      show-scrollbar="{{false}}"
+    >
       <view class="action-bar">
         <view class="back-btn" bindtap="backToStudentList">
           <image src="../../images/icons/chevron-left.svg" mode="aspectFit"></image>
@@ -392,12 +402,18 @@
           <text>{{messages.noPosts}}</text>
         </view>
       </view>
-      
-    </block>
+    </scroll-view>
   </block>
+</block>
 
-  <!-- University Management Tab -->
-  <block wx:if="{{currentTab === 1}}">
+<!-- University Management Tab -->
+<scroll-view
+  wx:if="{{currentTab === 1}}"
+  class="scroll-content"
+  scroll-y="{{true}}"
+  enhanced="{{true}}"
+  show-scrollbar="{{false}}"
+>
     <block wx:if="{{!selectedFaculty}}">
       <!-- Faculty List View -->
       <view class="card section-title">
@@ -600,11 +616,17 @@
         </view>
       </view>
     </block>
-  </block>
+</scroll-view>
 
-  <!-- Teacher Profile Tab -->
-  <block wx:if="{{currentTab === 2}}">
-    <view class="profile-tab-container">
+<!-- Teacher Profile Tab -->
+<scroll-view
+  wx:if="{{currentTab === 2}}"
+  class="scroll-content"
+  scroll-y="{{true}}"
+  enhanced="{{true}}"
+  show-scrollbar="{{false}}"
+>
+  <view class="profile-tab-container">
       <!-- Profile Header Actions -->
       <view class="profile-actions">
         <view class="left-actions">
@@ -979,12 +1001,18 @@
           </view>
         </view>
       </view>
-    </view>      
-  </block>
+    </view>
+</scroll-view>
 
-  <!-- Contact Tab -->
-  <block wx:if="{{currentTab === 3}}">
-    <view class="contact-container">
+<!-- Contact Tab -->
+<scroll-view
+  wx:if="{{currentTab === 3}}"
+  class="scroll-content"
+  scroll-y="{{true}}"
+  enhanced="{{true}}"
+  show-scrollbar="{{false}}"
+>
+  <view class="contact-container">
       <view class="content">
         <view class="form-section">
           <view class="form-item">
@@ -1015,19 +1043,18 @@
           <text>提交建议</text>
         </button>
       </view>
-    </view>
-  </block>
-    </scroll-view>
-    
-    <!-- Image Preview Modal -->
-    <view wx:if="{{showImageModal}}" class="modal-overlay" bindtap="closeImageModal">
-    <view class="modal-content" catchtap>
-      <image src="{{previewImageUrl}}" mode="aspectFit" class="preview-image"></image>
-      <view class="close-modal" bindtap="closeImageModal">
-        <image src="../../images/icons/close.svg" mode="aspectFit"></image>
-      </view>
+  </view>
+</scroll-view>
+
+<!-- Image Preview Modal -->
+<view wx:if="{{showImageModal}}" class="modal-overlay" bindtap="closeImageModal">
+  <view class="modal-content" catchtap>
+    <image src="{{previewImageUrl}}" mode="aspectFit" class="preview-image"></image>
+    <view class="close-modal" bindtap="closeImageModal">
+      <image src="../../images/icons/close.svg" mode="aspectFit"></image>
     </view>
   </view>
-  
-  </view>
+</view>
+
+</view>
 </app-layout>

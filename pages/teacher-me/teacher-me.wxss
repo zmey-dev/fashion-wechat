@@ -17,6 +17,14 @@ page {
 }
 
 /* Filter Styles */
+.fixed-filter-container {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: #121212;
+  padding-bottom: 10rpx;
+}
+
 .filter-toggle-btn {
   display: flex;
   align-items: center;
@@ -229,6 +237,13 @@ page {
 .scroll-content {
   width: 100%;
   height: 100%;
+  overflow-y: auto;
+  background: transparent;
+}
+
+.scroll-content-students {
+  width: 100%;
+  height: calc(100vh - 200rpx); /* Adjust based on header and filter height */
   overflow-y: auto;
   background: transparent;
 }
