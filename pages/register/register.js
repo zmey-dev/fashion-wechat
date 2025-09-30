@@ -52,8 +52,7 @@ Page({
     isLoading: false,
     loadingMessage: "",
     errors: {},
-    termsAgreed: false,
-    
+
     // Universities data
     universities: [],
     
@@ -742,17 +741,17 @@ Page({
       return;
     }
 
-    // Check if terms are agreed
-    if (!this.data.termsAgreed) {
-      wx.showToast({
-        title: "请先同意用户协议和隐私政策",
-        icon: "none",
-        duration: 2000
-      });
-      return;
-    }
-
     if (!this.validateForm()) {
+      // Show validation error
+      const errors = this.data.errors;
+      if (Object.keys(errors).length > 0) {
+        const firstError = errors[Object.keys(errors)[0]];
+        wx.showToast({
+          title: firstError,
+          icon: 'none',
+          duration: 3000
+        });
+      }
       return;
     }
 
@@ -774,11 +773,6 @@ Page({
 
   // Handle normal registration
   handleNormalRegistration: function(form) {
-    // Prevent duplicate submissions
-    if (this.data.isLoading) {
-      return;
-    }
-
     // Generate default student ID instead of using id_number
     const studentId = this.generateDefaultStudentId();
     
@@ -796,7 +790,7 @@ Page({
       class: form.class,
       attend_year: form.attend_year,
       faculty: form.faculty?.name,
-      major: form.major?.name
+      major: form.major?.name,
     };
 
     wx.request({
@@ -820,11 +814,6 @@ Page({
 
   // Handle WeChat registration with fresh code
   handleWechatRegistration: function(form, wechatData) {
-    // Prevent duplicate submissions
-    if (this.data.isLoading) {
-      return;
-    }
-
     // Get fresh WeChat code for registration
     wx.login({
       success: (loginRes) => {
@@ -846,7 +835,7 @@ Page({
             class: form.class,
             attend_year: form.attend_year,
             faculty: form.faculty?.name,
-            major: form.major?.name
+            major: form.major?.name,
           };
 
           wx.request({
@@ -1012,9 +1001,4 @@ Page({
   },
 
   // Handle agreement checkbox change
-  onAgreeChange: function(e) {
-    this.setData({
-      termsAgreed: e.detail.value.length > 0
-    });
-  }
 });

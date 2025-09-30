@@ -402,19 +402,28 @@
         </view>
 
         <!-- Username/User ID -->
-        <view class="form-field" id="username-field" wx:if="{{userInfo.is_id_changed === false}}">
-          <label class="field-label">用户ID (仅能修改一次)</label>
+        <view class="form-field" id="username-field">
+          <label class="field-label">
+            用户ID
+            <text wx:if="{{!userInfo.is_id_changed}}" class="edit-hint"> (仅能修改一次)</text>
+            <text wx:else class="changed-hint"> (已修改)</text>
+          </label>
           <view class="input-wrapper">
-            <!-- View mode -->
-            <view wx:if="{{!isEditingUsername}}" class="username-display">
+            <!-- View mode - can edit -->
+            <view wx:if="{{!isEditingUsername && !userInfo.is_id_changed}}" class="username-display">
               <text class="username-text">{{userInfo.username}}</text>
               <view class="username-edit-btn" bindtap="startEditUsername">
                 <text class="edit-btn-text">编辑</text>
               </view>
             </view>
+            <!-- View mode - already changed, read-only -->
+            <view wx:elif="{{!isEditingUsername && userInfo.is_id_changed}}" class="username-display-readonly">
+              <text class="username-text-readonly">{{userInfo.username}}</text>
+              <text class="readonly-hint">✅ 已修改，不可再次更改</text>
+            </view>
             <!-- Edit mode -->
             <view wx:else class="username-edit-container">
-              <input 
+              <input
                 class="field-input {{usernameError ? 'error' : ''}}"
                 value="{{tempUsername}}"
                 placeholder="输入用户ID (仅限英文)"
@@ -432,7 +441,7 @@
             </view>
           </view>
           <text class="error-text" wx:if="{{usernameError}}">{{usernameError}}</text>
-          <text class="hint-text">只能使用英文字母、数字、下划线(_)、连字符(-)和点(.)</text>
+          <text class="hint-text" wx:if="{{!userInfo.is_id_changed}}">只能使用英文字母、数字、下划线(_)、连字符(-)和点(.)</text>
         </view>
 
         <!-- Phone -->

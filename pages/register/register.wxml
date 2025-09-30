@@ -1,12 +1,7 @@
 <view class="register-container">
   <!-- Header -->
   <view class="register-header">
-    <view class="header-content">
-      <text class="register-title">学生注册</text>
-      <view class="register-subtitle">
-        <text>创建您的学生账户</text>
-      </view>
-    </view>
+    <text class="register-title">学生注册</text>
   </view>
 
   <!-- Progress Indicator -->
@@ -34,12 +29,13 @@
     </view>
   </view>
 
-  <!-- Form Content -->
-  <view class="form-container">
-    <!-- Step Title -->
-    <view class="step-title">
-      <text>{{messages.stepTitles[formStep - 1]}}</text>
-    </view>    <!-- Step 1: Student Information -->
+  <!-- Form Content (Scrollable) -->
+  <scroll-view class="form-scroll-container" scroll-y="true" enhanced="true" show-scrollbar="false">
+    <view class="form-container">
+      <!-- Step Title -->
+      <view class="step-title">
+        <text>{{messages.stepTitles[formStep - 1]}}</text>
+      </view>    <!-- Step 1: Student Information -->
     <view wx:if="{{formStep === 1}}" class="form-step">
       <!-- School -->
       <view class="form-field">
@@ -311,37 +307,23 @@
         <button class="nav-btn secondary-btn" bindtap="prevStep">
           上一步
         </button>
-        <button 
-          class="nav-btn submit-btn {{isLoading ? 'loading' : ''}} {{!termsAgreed ? 'disabled' : ''}}" 
+        <button
+          class="nav-btn submit-btn {{isLoading ? 'loading' : ''}}"
           bindtap="handleSubmit"
-          disabled="{{isLoading || !termsAgreed}}"
+          disabled="{{isLoading}}"
         >
           <text wx:if="{{isLoading}}">注册中...</text>
           <text wx:else>完成注册</text>
         </button>
       </view>
     </view>
-  </view>
 
-  <!-- Login Link -->
-  <view class="login-link">
-    <text class="login-text">已有账号？</text>
-    <text class="login-btn" bindtap="goToLogin">立即登录</text>
-  </view>
-
-  <!-- Terms Agreement Checkbox -->
-  <view class="terms-agreement">
-    <checkbox-group bindchange="onAgreeChange">
-      <label class="agreement-label">
-        <checkbox value="agree" checked="{{termsAgreed}}" color="#667eea" />
-        <text class="agreement-text">
-          <text class="agreement-prefix">注册即代表同意</text>
-          <text class="agreement-link" bindtap="goToTerms">《用户协议》</text>
-          <text class="agreement-and">和</text>
-          <text class="agreement-link" bindtap="goToPrivacy">《隐私政策》</text>
-        </text>
-      </label>
-    </checkbox-group>
-  </view>
+    <!-- Login Link -->
+    <view class="login-link">
+      <text class="login-text">已有账号？</text>
+      <text class="login-btn" bindtap="goToLogin">立即登录</text>
+    </view>
+    </view>
+  </scroll-view>
 
 </view>
