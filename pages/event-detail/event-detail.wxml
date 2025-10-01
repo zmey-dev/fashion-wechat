@@ -1,7 +1,7 @@
 <app-layout current-page="event">
   <view class="event-detail-container {{userInfo.role === 'teacher' ? 'teacher-layout' : ''}} {{isExpired ? 'index-bg' : ''}}">
     <!-- Content Container -->
-    <view class="content-wrapper">
+    <scroll-view class="content-wrapper" scroll-y="{{true}}" bindscrolltolower="onReachBottom" lower-threshold="100">
       <!-- Event Header with Poster -->
       <view wx:if="{{event.poster_image}}" class="event-header">
         <image class="header-image" src="{{event.poster_image}}" mode="widthFix"></image>
@@ -166,7 +166,7 @@
           <text class="end-text">已经到底了</text>
         </view>
       </view>
-    </view>
+    </scroll-view>
 
     <!-- Floating Action Buttons -->
     <view class="floating-actions">

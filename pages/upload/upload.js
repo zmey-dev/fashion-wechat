@@ -1620,6 +1620,10 @@ Page({
               // DO NOT hide loading bar on success - let the new page handle it
               // app.hideGlobalLoading(); // Removed to keep loading bar active
               
+              // Set refresh flag for posts
+              const app = getApp();
+              app.globalData.refreshPosts = true;
+
               // Check if this is an event post
               if (isEventPost) {
                 // Navigate back to the event detail page

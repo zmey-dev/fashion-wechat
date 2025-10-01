@@ -57,7 +57,12 @@ Page({
 
   onShow: function () {
     this.updateCurrentTime();
-    this.onRefresh();
+
+    const app = getApp();
+    if (app.globalData.refreshPosts) {
+      this.onRefresh();
+      app.globalData.refreshPosts = false;
+    }
   },
 
   initializePage: function () {
@@ -193,28 +198,17 @@ Page({
 
   loadPosts: function (refresh = false) {
     if (this.data.loading) return;
-    
+
     this.setData({ loading: true });
     getApp().showGlobalLoading();
-
-    const requestData = {
-      scope: this.data.pageSize,
-      eventId: this.data.eventId,
-      isDiscover: true
-    };
-
-    // Add exist_post_ids for pagination (not refresh)
-    if (!refresh && this.data.posts.length > 0) {
-      requestData.exist_post_ids = this.data.posts.map(post => post.id);
-    }
 
     wx.request({
       url: `${config.BACKEND_URL}/v2/post/by-event-id`,
       method: 'GET',
       data: {
         event_id: this.data.eventId,
-        limit: requestData.limit || 20,
-        offset: requestData.offset || 0
+        limit: this.data.pageSize,
+        offset: refresh ? 0 : this.data.posts.length
       },
       header: {
         'Content-Type': 'application/json',
@@ -223,7 +217,7 @@ Page({
       success: (res) => {
         if (res.statusCode === 200 && res.data.status === 'success') {
           const newPosts = res.data.posts || [];
-          
+
           // Format timestamps
           newPosts.forEach(post => {
             post.timeAgo = this.formatTimeAgo(post.created_at);
@@ -233,15 +227,13 @@ Page({
             // Reset data for refresh
             this.setData({
               posts: newPosts,
-              hasMore: res.data.has_more || false,
-              currentPage: 1
+              hasMore: res.data.has_more || false
             });
           } else {
             // Append new posts for pagination
             this.setData({
               posts: [...this.data.posts, ...newPosts],
-              hasMore: res.data.has_more || false,
-              currentPage: this.data.currentPage + 1
+              hasMore: res.data.has_more || false
             });
           }
         } else {
