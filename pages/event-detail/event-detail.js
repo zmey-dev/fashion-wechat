@@ -140,10 +140,12 @@ Page({
           };
           
           const canJoin = this.checkCanJoinEvent(event);
-          
-          // Check if event has expired (same logic as Frontend)
+
+          // Check if event has expired (same logic as event.js)
           const now = new Date();
+          now.setHours(0, 0, 0, 0); // Start of today
           const endDate = new Date(event.end_date);
+          endDate.setHours(23, 59, 59, 999); // End of end_date day
           const isEventExpired = endDate < now;
           
           // Keep viewOnly separate from isExpired
@@ -179,7 +181,9 @@ Page({
     
     // Check if event has ended
     const now = new Date();
+    now.setHours(0, 0, 0, 0);
     const endDate = new Date(event.end_date);
+    endDate.setHours(23, 59, 59, 999);
     if (endDate < now) return false;
     
     if (userInfo.role !== 'user') return false;
