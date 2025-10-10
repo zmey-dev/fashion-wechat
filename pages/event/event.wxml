@@ -17,7 +17,7 @@
   </view>
 
   <!-- Main Content -->
-  <view class="main-container">
+  <scroll-view class="main-container" scroll-y="{{true}}" bindscrolltolower="onReachBottom" lower-threshold="100">
     <!-- Featured Event Section -->
     <view class="featured-section">
       <view class="section-header">
@@ -141,17 +141,20 @@
         <text class="empty-title">暂无往期活动</text>
         <text class="empty-description">已完成的活动将在这里显示</text>
       </view>
+
+      <!-- End Message -->
+      <view wx:if="{{!hasMore && pastEvents.length > 0}}" class="end-message">
+        <text class="end-text">已经到底了</text>
+      </view>
     </view>
-  </view>
 
-
-  <!-- Error state -->
-  <view wx:if="{{error}}" class="error-container">
-    <icon type="warn" size="64" color="#E53E3E"></icon>
-    <text class="error-text">{{error}}</text>
-    <button class="retry-button" bindtap="fetchEvents">重试</button>
-  </view>
-
+    <!-- Error state -->
+    <view wx:if="{{error}}" class="error-container">
+      <icon type="warn" size="64" color="#E53E3E"></icon>
+      <text class="error-text">{{error}}</text>
+      <button class="retry-button" bindtap="fetchEvents">重试</button>
+    </view>
+  </scroll-view>
 
   <!-- Event Rules Modal -->
   <view wx:if="{{showRulesModal}}" class="modal-backdrop" bindtap="onCloseRulesModal">
@@ -310,27 +313,6 @@
     </view>
   </view>
 
-  <!-- Page content -->
-  <view class="container">
-    <!-- Show error state -->
-    <block wx:if="{{error}}">
-      <view class="error-container">
-        <text class="error-text">{{error}}</text>
-        <button class="retry-button" bindtap="fetchEvents">重试</button>
-      </view>
-    </block>
-    
-    <!-- Show empty state -->
-    <block wx:elif="{{!loading && events.length === 0 && pastEvents.length === 0}}">
-      <view class="empty-container">
-        <text class="empty-text">暂无活动</text>
-      </view>
-    </block>
-      <block wx:else>
-      <!-- Event display content here -->
-    </block>  </view>  </view>
-  <!-- Custom delete modal has been removed as we now use wx.showModal instead -->
-
   <!-- Floating Action Button for Teachers -->
   <view class="fab-container" wx:if="{{isTeacher}}">
     <button class="fab" bindtap="onCreateEvent">
@@ -339,5 +321,6 @@
       </view>
       <text class="fab-text">创建活动</text>
     </button>
+  </view>
   </view>
 </app-layout>

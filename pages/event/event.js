@@ -13,7 +13,9 @@ Page({
     loading: false,
     error: null,
     isTeacher: false, // Teacher role flag
-    userInfo: null, // Chinese messages for UI text
+    userInfo: null,
+    hasMore: true,
+    pageSize: 20, // Chinese messages for UI text
     messages: {
       loading: "加载中...",
       processing: "处理中...",
@@ -98,11 +100,14 @@ Page({
       userInfo: userInfo,
       isTeacher: userInfo.role === USER_ROLES.TEACHER,
     });
-    
+
     // Start auto rotation when page is shown
     this.startAutoRotation();
 
-    this.fetchEvents();
+    if (app.globalData.refreshPosts) {
+      this.fetchEvents(true);
+      app.globalData.refreshPosts = false;
+    }
   },
 
   onHide() {
@@ -116,20 +121,26 @@ Page({
   },
 
   // Fetch event data from API
-  fetchEvents() {
+  fetchEvents(refresh = false) {
+    if (this.data.loading) return;
+
     this.setData({ loading: true });
     getApp().showGlobalLoading();
 
     wx.request({
       url: `${config.BACKEND_URL}/event`,
       method: "GET",
+      data: {
+        limit: this.data.pageSize,
+        offset: refresh ? 0 : this.data.events.length + this.data.pastEvents.length
+      },
       header: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${getApp().globalData.userInfo?.token}`,
       },
       success: (res) => {
         if (res.data && res.data.status === "success") {
-          const allEvents = res.data.events || [];
+          const newEvents = res.data.events || [];
 
           // Current date at start of day for comparison
           const now = new Date();
@@ -137,33 +148,47 @@ Page({
 
           // Separate active and past events
           // Events are active until the end of their end_date (inclusive)
-          const activeEvents = allEvents.filter((event) => {
+          const newActiveEvents = newEvents.filter((event) => {
             const endDate = new Date(event.end_date);
             endDate.setHours(23, 59, 59, 999); // Set to end of day
             return endDate >= now;
           });
 
-          const pastEvents = allEvents.filter((event) => {
+          const newPastEvents = newEvents.filter((event) => {
             const endDate = new Date(event.end_date);
             endDate.setHours(23, 59, 59, 999); // Set to end of day
             return endDate < now;
           });
-          this.setData({
-            events: activeEvents,
-            pastEvents: pastEvents,
-            loading: false,
-            error: null,
-          });
-          
+
+          if (refresh) {
+            this.setData({
+              events: newActiveEvents,
+              pastEvents: newPastEvents,
+              loading: false,
+              error: null,
+              hasMore: res.data.has_more || false
+            });
+          } else {
+            this.setData({
+              events: [...this.data.events, ...newActiveEvents],
+              pastEvents: [...this.data.pastEvents, ...newPastEvents],
+              loading: false,
+              error: null,
+              hasMore: res.data.has_more || false
+            });
+          }
+
           // Start auto rotation after events are loaded
-          this.startAutoRotation();          // Initialize selected event
-          if (activeEvents.length > 0) {
+          this.startAutoRotation();
+
+          // Initialize selected event
+          if (this.data.events.length > 0) {
             // Process HTML content for the first event
             const processedEvent = {
-              ...activeEvents[0],
-              description: this.processHtmlContent(activeEvents[0].description)
+              ...this.data.events[0],
+              description: this.processHtmlContent(this.data.events[0].description)
             };
-            
+
             this.setData({
               currentEventIndex: 0,
               selectedEvent: processedEvent,
@@ -644,6 +669,12 @@ Page({
     );
     
     return processedHtml;
+  },
+
+  onReachBottom() {
+    if (this.data.hasMore && !this.data.loading) {
+      this.fetchEvents(false);
+    }
   },
 
 });

@@ -114,14 +114,6 @@
                 lazy-load="{{true}}"
                 mode="aspectFill"
               />
-              <!-- Video indicator -->
-              <view wx:if="{{item.type === 'video'}}" class="video-indicator">
-                <image class="video-icon" src="/images/icons/play.svg"></image>
-              </view>
-              <!-- Multiple media indicator -->
-              <view wx:if="{{item.media && item.media.length > 1}}" class="multiple-indicator">
-                <image class="multiple-icon" src="/images/icons/multiple.svg"></image>
-              </view>
             </view>
             
             <!-- User Section (same as index page) - Only for expired events -->
