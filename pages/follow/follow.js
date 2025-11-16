@@ -1,5 +1,6 @@
 const { default: config } = require("../../config");
 const app = getApp();
+const shareHelper = require("../../utils/shareHelper");
 
 Page({
   data: {
@@ -465,5 +466,20 @@ Page({
       url: `/pages/chat/chat?username=${currentUser.username}`,
     });
   },
+
+  // Share to friends/groups
+  onShareAppMessage: function() {
+    return shareHelper.getShareConfig({
+      title: '校Show - 关注动态',
+      path: '/pages/follow/follow'
+    });
+  },
+
+  // Share to WeChat Moments
+  onShareTimeline: function() {
+    return shareHelper.getTimelineConfig({
+      title: '校Show - 关注动态'
+    });
+  }
 
 });

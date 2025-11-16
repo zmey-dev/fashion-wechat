@@ -126,6 +126,12 @@ Component({
       wx.offWindowResize(this.onScreenResize);
     }
   },
+
+  pageLifetimes: {
+    show() {},
+    hide() {},
+  },
+
   /**
    * Component observers
    */
@@ -619,31 +625,10 @@ Component({
       });
     },
 
-    handleShare() {
-      wx.setClipboardData({
-        data: `查看这个帖子: ${
-          this.data.currentPost.media[this.data.currentSlideIndex].url
-        }`,
-        success: () => {
-          const { currentPost } = this.data;
-          this.setData({
-            "currentPost.shares": currentPost.shares + 1,
-            displayShares: this.formatNumber(currentPost.shares + 1),
-          });
-          wx.showToast({
-            title: "链接已复制到剪贴板",
-            icon: "success",
-            duration: 1000,
-          });
-        },
-        fail: (err) => {
-          wx.showToast({
-            title: "复制链接失败",
-            icon: "none",
-            duration: 1500,
-          });
-        },
-      });
+    // Increment share count on backend
+    incrementShareCount() {
+      if (!this.data.currentPost) return;
+
       wx.request({
         url: `${config.BACKEND_URL}/post/save_share`,
         method: "POST",
@@ -653,10 +638,12 @@ Component({
         },
         success: (res) => {
           if (res.statusCode === 200 && res.data.status === "success") {
+            const { currentPost } = this.data;
+            this.setData({
+              "currentPost.shares": currentPost.shares + 1,
+              displayShares: this.formatNumber(currentPost.shares + 1),
+            });
           }
-        },
-        fail: (err) => {
-          // Share request failed
         },
       });
     },
@@ -1073,6 +1060,29 @@ Component({
       } else if (state === "closed" && this.data.isPlaying && this.data.currentPost?.type === "image") {
         this.resumeAutoPlay();
       }
+    },
+
+    onShareAppMessage() {
+      const { currentPost } = this.data;
+
+      if (!currentPost) {
+        return {
+          title: '校Show - 发现精彩内容',
+          path: '/pages/index/index'
+        };
+      }
+
+      this.incrementShareCount();
+
+      const shareImage = currentPost.media && currentPost.media.length > 0
+        ? currentPost.media[0].preview_url || currentPost.media[0].url
+        : '';
+
+      return {
+        title: currentPost.title || '查看这个精彩内容',
+        path: `/pages/post-detail/post-detail?postId=${currentPost.id}`,
+        imageUrl: shareImage
+      };
     },
 
   },

@@ -1374,7 +1374,7 @@ Page({  data: {
 
   submitContact() {
     const { title, description } = this.data.contactForm;
-    
+
     if (!title || !description) {
       wx.showToast({
         title: '请填写标题和描述',
@@ -1406,7 +1406,7 @@ Page({  data: {
             title: '提交成功',
             icon: 'success'
           });
-          
+
           // Clear form
           this.setData({
             contactForm: {
@@ -1433,4 +1433,21 @@ Page({  data: {
       }
     });
   },
+
+  // Share to friends/groups
+  onShareAppMessage: function() {
+    const shareHelper = require("../../utils/shareHelper");
+    return shareHelper.getShareConfig({
+      title: '校Show - 我的',
+      path: '/pages/index/index'
+    });
+  },
+
+  // Share to WeChat Moments
+  onShareTimeline: function() {
+    const shareHelper = require("../../utils/shareHelper");
+    return shareHelper.getTimelineConfig({
+      title: '校Show - 我的'
+    });
+  }
 });

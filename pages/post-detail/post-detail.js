@@ -1,5 +1,6 @@
 const { default: config } = require("../../config");
 const app = getApp();
+const shareHelper = require("../../utils/shareHelper");
 
 Page({
   data: {
@@ -802,7 +803,7 @@ Page({
 
   handleContinueToggled: function(e) {
     this.setData({ globalIsContinue: e.detail.value });
-    
+
     // Update all media players with new continue value
     const { posts } = this.data;
     posts.forEach((post, index) => {
@@ -810,6 +811,46 @@ Page({
       if (mediaPlayer) {
         mediaPlayer.setData({ isContinue: e.detail.value });
       }
+    });
+  },
+
+  // Share to friends/groups
+  onShareAppMessage: function() {
+    const { posts, currentIndex } = this.data;
+    const currentPost = posts[currentIndex];
+
+    // Share current post if available
+    if (currentPost) {
+      return shareHelper.getShareConfig({
+        post: currentPost
+      });
+    }
+
+    // Fallback to default
+    return shareHelper.getShareConfig({
+      title: '校Show - 发现精彩内容',
+      path: '/pages/index/index'
+    });
+  },
+
+  // Share to WeChat Moments
+  onShareTimeline: function() {
+    const { posts, currentIndex } = this.data;
+    const currentPost = posts[currentIndex];
+
+    if (currentPost) {
+      const shareImage = currentPost.media && currentPost.media.length > 0
+        ? currentPost.media[0].preview_url || currentPost.media[0].url
+        : '';
+
+      return shareHelper.getTimelineConfig({
+        title: currentPost.title || '查看这个精彩内容',
+        imageUrl: shareImage
+      });
+    }
+
+    return shareHelper.getTimelineConfig({
+      title: '校Show - 发现精彩内容'
     });
   }
 });

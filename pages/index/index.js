@@ -1,5 +1,6 @@
 const app = getApp();
 const { default: config } = require("../../config");
+const shareHelper = require("../../utils/shareHelper");
 
 Page({
   data: {
@@ -339,4 +340,19 @@ Page({
       duration: 2000,
     });
   },
+
+  // Share to friends/groups
+  onShareAppMessage: function() {
+    return shareHelper.getShareConfig({
+      title: '校Show - 发现精彩内容',
+      path: '/pages/index/index'
+    });
+  },
+
+  // Share to WeChat Moments
+  onShareTimeline: function() {
+    return shareHelper.getTimelineConfig({
+      title: '校Show - 发现精彩内容'
+    });
+  }
 });

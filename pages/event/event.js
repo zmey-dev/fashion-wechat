@@ -677,4 +677,21 @@ Page({
     }
   },
 
+  // Share to friends/groups
+  onShareAppMessage: function() {
+    const shareHelper = require("../../utils/shareHelper");
+    return shareHelper.getShareConfig({
+      title: '校Show - 活动',
+      path: '/pages/event/event'
+    });
+  },
+
+  // Share to WeChat Moments
+  onShareTimeline: function() {
+    const shareHelper = require("../../utils/shareHelper");
+    return shareHelper.getTimelineConfig({
+      title: '校Show - 活动'
+    });
+  }
+
 });

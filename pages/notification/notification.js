@@ -366,4 +366,21 @@ Page({
       url: `/pages/post/post-detail?postId=${postId}`,
     });
   },
+
+  // Share to friends/groups
+  onShareAppMessage: function() {
+    const shareHelper = require("../../utils/shareHelper");
+    return shareHelper.getShareConfig({
+      title: '校Show - 通知',
+      path: '/pages/notification/notification'
+    });
+  },
+
+  // Share to WeChat Moments
+  onShareTimeline: function() {
+    const shareHelper = require("../../utils/shareHelper");
+    return shareHelper.getTimelineConfig({
+      title: '校Show - 通知'
+    });
+  }
 });

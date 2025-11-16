@@ -254,4 +254,21 @@ Page({
       url: "/pages/search/search",
     });
   },
+
+  // Share to friends/groups
+  onShareAppMessage: function() {
+    const shareHelper = require("../../utils/shareHelper");
+    return shareHelper.getShareConfig({
+      title: '校Show - 公司动态',
+      path: '/pages/company-posts/company-posts'
+    });
+  },
+
+  // Share to WeChat Moments
+  onShareTimeline: function() {
+    const shareHelper = require("../../utils/shareHelper");
+    return shareHelper.getTimelineConfig({
+      title: '校Show - 公司动态'
+    });
+  }
 });

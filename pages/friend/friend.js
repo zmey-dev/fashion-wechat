@@ -561,4 +561,21 @@ Page({
       url: `/pages/chat/chat?username=${currentUser.username}`,
     });
   },
+
+  // Share to friends/groups
+  onShareAppMessage: function() {
+    const shareHelper = require("../../utils/shareHelper");
+    return shareHelper.getShareConfig({
+      title: '校Show - 好友',
+      path: '/pages/friend/friend'
+    });
+  },
+
+  // Share to WeChat Moments
+  onShareTimeline: function() {
+    const shareHelper = require("../../utils/shareHelper");
+    return shareHelper.getTimelineConfig({
+      title: '校Show - 好友'
+    });
+  }
 });

@@ -350,18 +350,18 @@ Page({
   },
 
   startBackgroundUploads: async function(tempFiles) {
-    
+
     for (let i = 0; i < tempFiles.length; i++) {
       const file = tempFiles[i];
       const uploadId = `${Date.now()}_${i}`;
-      
-      
+
+
       // Add to uploading list
       this.setData({
         uploadingImages: [...this.data.uploadingImages, uploadId],
         [`imageUploadProgress.${uploadId}`]: 0
       });
-      
+
       try {
         // Progress callback
         const progressCallback = (progress) => {
@@ -369,15 +369,15 @@ Page({
             [`imageUploadProgress.${uploadId}`]: progress
           });
         };
-        
+
         // Upload using UCloud
         const uploadResult = await ucloudUpload.uploadImageSimple(
           file.tempFilePath,
           progressCallback,
           'contact_images'
         );
-        
-        
+
+
         if (uploadResult && uploadResult.url) {
           // Update the corresponding image with upload result
           const images = [...this.data.images];
@@ -386,31 +386,31 @@ Page({
             images[imageIndex].uploadResult = uploadResult;
             images[imageIndex].uploaded = true;
           }
-          
+
           // Remove from uploading list
           const updatedUploading = this.data.uploadingImages.filter(id => id !== uploadId);
-          this.setData({ 
+          this.setData({
             images: images,
-            uploadingImages: updatedUploading 
+            uploadingImages: updatedUploading
           });
-          
+
         } else {
           throw new Error("failed upload");
         }
-        
+
         // Add delay between uploads
         if (i < tempFiles.length - 1) {
           await new Promise(resolve => setTimeout(resolve, 1000));
         }
       } catch (error) {
-        
+
         // Remove from uploading list and add error
         const updatedUploading = this.data.uploadingImages.filter(id => id !== uploadId);
         this.setData({
           uploadingImages: updatedUploading,
           [`imageUploadErrors.${uploadId}`]: error.message || "업로드 실패"
         });
-        
+
         // Show error toast
         wx.showToast({
           title: `图片 ${i + 1} 上传失败`,
@@ -419,6 +419,23 @@ Page({
         });
       }
     }
-    
+
   },
+
+  // Share to friends/groups
+  onShareAppMessage: function() {
+    const shareHelper = require("../../utils/shareHelper");
+    return shareHelper.getShareConfig({
+      title: '校Show - 消息',
+      path: '/pages/index/index'
+    });
+  },
+
+  // Share to WeChat Moments
+  onShareTimeline: function() {
+    const shareHelper = require("../../utils/shareHelper");
+    return shareHelper.getTimelineConfig({
+      title: '校Show - 消息'
+    });
+  }
 });
