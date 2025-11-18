@@ -88,6 +88,20 @@
     <text class="action-count">{{ displayFavorites }}</text>
   </view>
 
+  <!-- Share button -->
+  <button class="action-item share-btn" open-type="share">
+    <view class="action-icon">
+      <view class="svg-icon">
+        <image
+          src="/images/icons/share.svg"
+          class="svg-icon"
+          mode="aspectFit"
+        ></image>
+      </view>
+    </view>
+    <text class="action-count">{{ displayShares }}</text>
+  </button>
+
   <!-- Report button - Hidden only for active events -->
   <view wx:if="{{ !shouldHideUserInfo }}" class="action-item" bindtap="onShowReportModal">
     <view class="action-icon">

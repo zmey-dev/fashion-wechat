@@ -158,11 +158,35 @@ function getDefaultShareConfig() {
   };
 }
 
+/**
+ * Increment share count for a post
+ * @param {number} postId - Post ID to increment share count
+ */
+function incrementShareCount(postId) {
+  if (!postId) return;
+
+  wx.request({
+    url: `${config.BACKEND_URL}/post/save_share`,
+    method: "POST",
+    data: { post_id: postId },
+    header: {
+      "Content-Type": "application/json"
+    },
+    success: (res) => {
+      console.log("Share count incremented:", res.data);
+    },
+    fail: (err) => {
+      console.error("Failed to increment share count:", err);
+    }
+  });
+}
+
 module.exports = {
   getShareConfig,
   getTimelineConfig,
   getCurrentPageInfo,
   buildSharePath,
   getDefaultShareConfig,
+  incrementShareCount,
   PAGE_SHARE_CONFIGS
 };

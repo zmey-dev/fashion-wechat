@@ -436,3 +436,29 @@
     box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
   }
 }
+
+/* Share button - Remove default button styles and min-width */
+.share-btn {
+  background: transparent !important;
+  border: none !important;
+  padding: 10rpx;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: all 0.3s ease;
+  line-height: normal;
+  color: inherit;
+  font-size: inherit;
+  box-sizing: border-box;
+  min-width: 0 !important;
+  width: auto !important;
+}
+
+.share-btn::after {
+  border: none !important;
+}
+
+.share-btn:active {
+  transform: scale(0.95);
+}
