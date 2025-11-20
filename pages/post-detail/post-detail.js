@@ -140,10 +140,20 @@ Page({
       userInfo: app.globalData.userInfo || null,
       showLoginModal: app.globalData.showLoginModal || false,
     });
-    
+
+    // Hide share menu for active (non-expired) events
+    if (eventId && !isEventExpired) {
+      wx.hideShareMenu();
+    } else {
+      wx.showShareMenu({
+        withShareTicket: true,
+        menus: ['shareAppMessage', 'shareTimeline']
+      });
+    }
+
     // Subscribe to global events
     this.subscribeToGlobalEvents();
-    
+
     // Initialize with current post
     this.initializeInfiniteScroll(postId);
   },
