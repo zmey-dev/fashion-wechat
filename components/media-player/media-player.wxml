@@ -1,6 +1,7 @@
 <!-- components/media-player/media-player.wxml -->
-<view 
-  class="media-player"
+<view
+  class="media-player {{ orientation === 'horizontal' ? 'horizontal-mode' : '' }}"
+  style="{{ orientation === 'horizontal' && horizontalWidth > 0 ? 'width: ' + horizontalWidth + 'px; height: ' + horizontalHeight + 'px;' : '' }}"
 >
   <!-- Blur Background -->
   <view class="blur-background-container">
@@ -13,12 +14,31 @@
     <view class="blur-overlay"></view>
   </view>
   
+  <!-- Orientation Toggle Button -->
+  <view
+    class="orientation-toggle-btn"
+    catchtap="onOrientationToggle"
+  >
+    <image
+      wx:if="{{ orientation === 'vertical' }}"
+      src="/images/icons/orientation-horizontal.svg"
+      class="orientation-icon"
+      mode="aspectFit"
+    />
+    <image
+      wx:else
+      src="/images/icons/orientation-vertical.svg"
+      class="orientation-icon"
+      mode="aspectFit"
+    />
+  </view>
+
   <report-modal
     visible="{{ showReportModal }}"
     postId="{{ currentPost.id }}"
     bind:close="onCloseReportModal"
     bind:submit="onSubmitReport"
-  />    
+  />
   <view 
     class="media-content {{ detailPanelState === 'half' ? 'detail-half' : '' }} {{ detailPanelState === 'full' ? 'detail-full' : '' }}"
   >
@@ -34,6 +54,7 @@
       selected-dot="{{ selectedDot }}"
       detailPanelState="{{ detailPanelState }}"
       is-waiting-for-api="{{ isWaitingForApi }}"
+      orientation="{{ orientation }}"
       bind:screentap="onScreenTap"
       bind:slidechange="onSlideChange"
       bind:dottap="onDotTap"
@@ -57,6 +78,7 @@
       class="post-info-overlay {{ detailPanelState !== 'closed' ? 'hidden' : '' }}"
       display-title="{{ displayTitle }}"
       display-content="{{ displayContent }}"
+      orientation="{{ orientation }}"
     />
     
     <action-buttons

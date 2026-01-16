@@ -10,6 +10,7 @@ Component({
     selectedDot: { type: Object, value: null },
     isWaitingForApi: { type: Boolean, value: false },
     isContinue: { type: Boolean, value: true },
+    orientation: { type: String, value: 'vertical' },
     detailPanelState: {
       type: String,
       value: 'closed',

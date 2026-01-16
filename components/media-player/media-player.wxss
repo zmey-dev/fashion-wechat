@@ -8,6 +8,44 @@
   overflow: hidden;
 }
 
+/* Orientation Toggle Button */
+.orientation-toggle-btn {
+  position: absolute;
+  top: 24rpx;
+  left: 24rpx;
+  width: 72rpx;
+  height: 72rpx;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 400;
+  backdrop-filter: blur(10rpx);
+  border: 2rpx solid rgba(255, 255, 255, 0.15);
+  transition: all 0.2s ease;
+}
+
+.orientation-toggle-btn:active {
+  background: rgba(0, 0, 0, 0.7);
+  transform: scale(0.95);
+}
+
+.orientation-icon {
+  width: 40rpx;
+  height: 40rpx;
+  filter: brightness(0) invert(1);
+}
+
+/* ========== Horizontal Mode Styles ========== */
+.media-player.horizontal-mode {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(90deg);
+  transform-origin: center center;
+}
+
 /* Main content container - Full parent size */
 .media-content {
   position: absolute;

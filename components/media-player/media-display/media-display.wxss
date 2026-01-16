@@ -190,7 +190,7 @@ video::after {
   height: calc(100% + 2px);
   position: relative;
   background-color: transparent !important;
-  object-fit: cover;
+  object-fit: contain;
   /* Ensure controls are not hidden */
   pointer-events: auto !important;
   -webkit-user-select: none;
@@ -622,4 +622,15 @@ video {
   100% {
     opacity: 0;
   }
+}
+
+/* ========== Horizontal Mode Styles ========== */
+.media-image.horizontal-mode {
+  max-width: none;
+  max-height: none;
+  object-fit: contain;
+}
+
+.media-video.horizontal-mode {
+  object-fit: contain;
 }

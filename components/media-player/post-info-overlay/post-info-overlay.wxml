@@ -1,32 +1,46 @@
 <!-- components/post-info-overlay/post-info-overlay.wxml -->
-<view class="post-info">
-  <view class="post-title">{{ displayTitle }}</view>
-  
-  <!-- Collapsed state -->
-  <view 
-    wx:if="{{ displayContent && !isExpanded }}"
-    class="post-content-container"
-    bindtap="toggleExpand"
+<view class="post-info {{ isExpanded ? 'expanded' : 'collapsed' }} {{ orientation === 'horizontal' ? 'horizontal-mode' : '' }}">
+  <!-- Collapsed state: Only show expand icon -->
+  <view
+    wx:if="{{ !isExpanded }}"
+    class="collapse-icon-btn"
+    catchtap="toggleExpand"
   >
-    <text class="post-content collapsed">{{ truncatedContent }}</text>
+    <image
+      src="/images/icons/chevron-up.svg"
+      class="collapse-icon"
+      mode="aspectFit"
+    />
   </view>
-  
-  <!-- Expanded state with scroll-view -->
-  <scroll-view
-    wx:if="{{ displayContent && isExpanded }}"
-    class="post-content-scroll expanded"
-    scroll-y="true"
-    bindtap="toggleExpand"
-    catchtouchmove="onTouchMove"
-  >
-    <text class="post-content-expanded">{{ fullContent }}</text>
-  </scroll-view>
-  
-  <view 
-    class="expand-indicator" 
-    wx:if="{{ displayContent && showExpandIndicator }}"
-    bindtap="toggleExpand"
-  >
-    {{ isExpanded ? '收起' : '展开' }}
+
+  <!-- Expanded state: Show full info content -->
+  <view wx:if="{{ isExpanded }}" class="expanded-content">
+    <view class="expanded-header">
+      <view class="post-title">{{ displayTitle }}</view>
+      <view class="collapse-btn" catchtap="toggleExpand">
+        <image
+          src="/images/icons/chevron-down.svg"
+          class="collapse-btn-icon"
+          mode="aspectFit"
+        />
+      </view>
+    </view>
+
+    <scroll-view
+      wx:if="{{ displayContent && orientation === 'vertical' }}"
+      class="post-content-scroll"
+      scroll-y="true"
+      enhanced="true"
+      show-scrollbar="true"
+      bounces="true"
+    >
+      <view class="post-content-expanded">{{ fullContent }}</view>
+    </scroll-view>
+    <view
+      wx:if="{{ displayContent && orientation === 'horizontal' }}"
+      class="post-content-native-scroll"
+    >
+      <view class="post-content-expanded">{{ fullContent }}</view>
+    </view>
   </view>
 </view>

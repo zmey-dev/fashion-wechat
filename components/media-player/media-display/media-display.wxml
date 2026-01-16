@@ -19,7 +19,7 @@ catchtap="onScreenTap"
     <swiper-item wx:for="{{ currentMedia }}" wx:key="id" class="media-item">
       <view class="media-wrapper" catchtap="onImageAreaTap">
         <image
-          class="media-image"
+          class="media-image {{ orientation === 'horizontal' ? 'horizontal-mode' : '' }}"
           id="media-image"
           src="{{ urlCleaner.cleanUrl(item.url) }}"
           data-src="{{ urlCleaner.cleanUrl(item.url) }}"
@@ -62,7 +62,7 @@ catchtap="onScreenTap"
     <view class="video-container">
       <video
         id="media-video"
-        class="media-video"
+        class="media-video {{ orientation === 'horizontal' ? 'horizontal-mode' : '' }}"
         src="{{ videoSrc }}"
         poster="{{ urlCleaner.cleanUrl(currentMedia[0].preview_url || currentMedia[0].thumbnail_url || currentMedia[0].url) }}"
         controls="{{ true }}"
@@ -90,7 +90,7 @@ catchtap="onScreenTap"
         enable-play-gesture="{{ false }}"
         vslide-gesture="{{ false }}"
         vslide-gesture-in-fullscreen="{{ false }}"
-        object-fit="cover"
+        object-fit="contain"
         initial-time="{{ 0 }}"
         catch:tap="onVideoTap"
         bindplay="onVideoPlay"

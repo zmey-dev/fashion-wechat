@@ -97,6 +97,11 @@ Component({
     windowHeight: 0,
     containerWidth: 0,
     containerHeight: 0,
+
+    // Orientation
+    orientation: 'vertical',
+    horizontalWidth: 0,
+    horizontalHeight: 0
   },
   /**
    * Component lifecycle
@@ -1085,5 +1090,29 @@ Component({
       };
     },
 
+    onOrientationToggle() {
+      const newOrientation = this.data.orientation === 'vertical' ? 'horizontal' : 'vertical';
+
+      if (newOrientation === 'horizontal') {
+        const query = this.createSelectorQuery();
+        query.select('.media-player').boundingClientRect((rect) => {
+          if (rect) {
+            this.setData({
+              orientation: newOrientation,
+              horizontalWidth: rect.height,
+              horizontalHeight: rect.width
+            });
+          } else {
+            this.setData({ orientation: newOrientation });
+          }
+        }).exec();
+      } else {
+        this.setData({
+          orientation: newOrientation,
+          horizontalWidth: 0,
+          horizontalHeight: 0
+        });
+      }
+    }
   },
 });
