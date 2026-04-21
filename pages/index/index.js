@@ -1,6 +1,7 @@
 const app = getApp();
 const { default: config } = require("../../config");
 const shareHelper = require("../../utils/shareHelper");
+const { requestSubscription, hasAskedRecently } = require("../../utils/subscriptionHelper");
 
 Page({
   data: {
@@ -14,7 +15,7 @@ Page({
     showScrollTop: false,
     scrollTopAnimating: false,
     existPostIds: [],
-    // Search parameters
+    categoryFilter: null,
     searchParams: {},
     messages: {
       loading: "加载中...",
@@ -48,7 +49,10 @@ Page({
     };
     app.subscribe("showLoginModal", this.loginModalHandler);
 
-    // Check if there are search parameters in URL
+    if (options.category) {
+      this.setData({ categoryFilter: decodeURIComponent(options.category) });
+    }
+
     if (options.search || options.university_id) {
       const searchParams = {};
       if (options.search) searchParams.search = decodeURIComponent(options.search);
@@ -70,6 +74,10 @@ Page({
   },
 
   onShow: function () {
+    if (app.globalData.userInfo && !hasAskedRecently()) {
+      requestSubscription();
+    }
+
     // Check if we already have searchParams from URL (onLoad)
     // If so, don't process pendingSearch to avoid overriding URL params
     const hasUrlParams = this.data.searchParams && (this.data.searchParams.search || this.data.searchParams.university_id);
@@ -130,13 +138,15 @@ Page({
       offset: refresh ? 0 : this.data.posts.length,
     };
 
-    // Add search parameters if they exist
-    const { searchParams } = this.data;
+    const { searchParams, categoryFilter } = this.data;
     if (searchParams.search) {
       requestData.search = searchParams.search;
     }
     if (searchParams.university_id) {
       requestData.university_id = searchParams.university_id;
+    }
+    if (categoryFilter) {
+      requestData.category = categoryFilter;
     }
 
     wx.request({

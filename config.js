@@ -6,6 +6,7 @@ export default {
   APP_PUSHER_APP_CLUSTER: "us3",
   PROFILE_LINK: "http://backend.xiaoshow.com/",
   SOCKET_SERVER_URL: "http://backend.xiaoshow.com",
+  WECHAT_SUBSCRIPTION_TEMPLATE_ID: "",
   
   // UCloud configuration
   UCLOUD_REGION: "cn-wlcb",
