@@ -125,38 +125,38 @@
       <text class="empty-text">暂无动态通知</text>
     </view>
     
-    <view 
-      wx:for="{{postNotifications}}" 
-      wx:key="notify_id" 
+    <view
+      wx:for="{{postNotifications}}"
+      wx:key="notify_id"
       class="notification-item"
     >
-      <view 
+      <view
         class="notification-content {{expandedItems[item.notify_id] ? 'expanded' : ''}}"
-        bindtap="toggleItem"
-        data-id="{{item.notify_id}}"
+        bindtap="onPostNotificationTap"
+        data-post-id="{{item.post_id}}"
+        data-notify-id="{{item.notify_id}}"
       >
         <view class="notification-header">
           <view class="avatar-container">
-            <avatar 
-              avatar="{{item.sender_avatar}}" 
+            <avatar
+              avatar="{{item.sender_avatar}}"
               name="{{item.sender_name}}"
               mode="aspectFill"
               size="80"
             ></avatar>
           </view>
-          
+
           <view class="notification-info">
             <text class="sender-name">{{item.sender_name}}</text>
-            <text class="notification-type">新动态</text>
+            <text class="notification-type">{{item.event_type === 'company_new_post' ? '企业动态' : '新动态'}}</text>
             <text class="notification-time">{{formatDate(item.updated_at)}}</text>
           </view>
-          
+
           <view class="action-buttons">
-            <view 
+            <view
               class="action-btn remove-btn"
-              bindtap="handlePostNotification"
+              catchtap="handlePostNotification"
               data-notify-id="{{item.notify_id}}"
-              catchtap="true"
             >
               <image src="/images/icons/check.svg" class="action-icon" mode="aspectFit"></image>
             </view>

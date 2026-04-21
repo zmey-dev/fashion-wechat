@@ -305,6 +305,10 @@ class WeChatSocketManager {
         this.triggerHandler("new_comment", data);
         break;
 
+      case "company_new_post":
+        this.triggerHandler("company_new_post", data);
+        break;
+
       case "update_swear_words":
         this.triggerHandler("update_swear_words", data);
         break;

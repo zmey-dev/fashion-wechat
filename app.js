@@ -252,12 +252,37 @@ App({
       // When someone reads our messages, we don't need to update unread counts
       // as unread counts are for messages WE haven't read
     });
+
+    // Handle company new post broadcasts
+    socketManager.on("company_new_post", (data) => {
+      const currentUserId = this.globalData.userInfo?.id || this.globalData.userInfo?.user_id;
+      if (!currentUserId || currentUserId == data.sender_id) {
+        return;
+      }
+
+      const newNotification = {
+        notify_id: `company_${data.post_id}_${Date.now()}`,
+        sender_id: data.sender_id,
+        receiver_id: currentUserId,
+        sender_name: data.sender_name,
+        sender_avatar: data.sender_avatar,
+        updated_at: data.updated_at || new Date().toISOString(),
+        event_type: "company_new_post",
+        type: "company_new_post",
+        message: data.message,
+        post_id: data.post_id,
+      };
+
+      const current = this.globalData.notifications || [];
+      this.updateNotifications([newNotification, ...current]);
+    });
   },
 
   // Remove socket listeners
   cleanupUnreadMessageSocketListeners() {
     socketManager.off("new_message");
     socketManager.off("read_message");
+    socketManager.off("company_new_post");
   },
 
   // Set current path

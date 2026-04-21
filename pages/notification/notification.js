@@ -114,12 +114,10 @@ Page({
   },
 
   processNotifications(notifications) {
-    const friendNotifications = notifications.filter(
-      (item) => item.event_type !== "new_post"
-    );
-    const postNotifications = notifications.filter(
-      (item) => item.event_type === "new_post"
-    );
+    const isPostEvent = (item) =>
+      item.event_type === "new_post" || item.event_type === "company_new_post";
+    const friendNotifications = notifications.filter((item) => !isPostEvent(item));
+    const postNotifications = notifications.filter(isPostEvent);
 
     this.setData({
       notifications,
@@ -128,6 +126,19 @@ Page({
       loading: false,
       error: null,
     });
+  },
+
+  onPostNotificationTap(e) {
+    const { postId, notifyId } = e.currentTarget.dataset;
+
+    if (postId) {
+      wx.navigateTo({
+        url: `/pages/post-detail/post-detail?postId=${postId}`,
+      });
+      return;
+    }
+
+    this.toggleItem({ currentTarget: { dataset: { id: notifyId } } });
   },
 
   getNotifications() {
@@ -242,7 +253,7 @@ Page({
 
     // Find the notification to get sender and receiver info
     const notification = this.data.postNotifications.find(
-      item => item.notify_id === parseInt(notifyId)
+      item => String(item.notify_id) === String(notifyId)
     );
 
     if (!notification) {
@@ -250,6 +261,14 @@ Page({
         title: this.data.messages.errors.networkError,
         icon: "none",
       });
+      return;
+    }
+
+    const isPersistedId = typeof notifyId === "number" ||
+      (typeof notifyId === "string" && /^\d+$/.test(notifyId));
+
+    if (!isPersistedId) {
+      this.removeNotification(notifyId);
       return;
     }
 
@@ -263,15 +282,13 @@ Page({
 
   // Remove notification from local data
   removeNotification(notifyId) {
+    const isPostEvent = (item) =>
+      item.event_type === "new_post" || item.event_type === "company_new_post";
     const notifications = this.data.notifications.filter(
-      (item) => item.notify_id !== parseInt(notifyId)
+      (item) => String(item.notify_id) !== String(notifyId)
     );
-    const friendNotifications = notifications.filter(
-      (item) => item.event_type !== "new_post"
-    );
-    const postNotifications = notifications.filter(
-      (item) => item.event_type === "new_post"
-    );
+    const friendNotifications = notifications.filter((item) => !isPostEvent(item));
+    const postNotifications = notifications.filter(isPostEvent);
 
     this.setData({
       notifications,
