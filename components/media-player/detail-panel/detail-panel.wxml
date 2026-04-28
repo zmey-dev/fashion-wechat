@@ -39,6 +39,7 @@
         <text>评论</text>
       </view>
       <view
+        wx:if="{{ currentPost.type !== 'text' && currentPost.media && currentPost.media.length > 0 }}"
         class="tab-item {{ tabIndex === 2 ? 'active' : '' }}"
         data-index="2"
         bindtap="onTabChange"

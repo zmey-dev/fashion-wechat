@@ -257,6 +257,46 @@ action-buttons.hidden {
   height: 100%;
 }
 
+.text-post-display {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60rpx 48rpx;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+}
+
+.text-post-content {
+  width: 100%;
+  max-height: 100%;
+  overflow-y: auto;
+  text-align: center;
+}
+
+.text-post-title {
+  display: block;
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 32rpx;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.text-post-body {
+  display: block;
+  font-size: 30rpx;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.8;
+  word-break: break-all;
+  text-align: center;
+}
+
+
 /* Loading */
 .loading-container {
   position: absolute;

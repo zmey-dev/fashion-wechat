@@ -3,10 +3,9 @@
   class="media-player {{ orientation === 'horizontal' ? 'horizontal-mode' : '' }}"
   style="{{ orientation === 'horizontal' && horizontalWidth > 0 ? 'width: ' + horizontalWidth + 'px; height: ' + horizontalHeight + 'px;' : '' }}"
 >
-  <!-- Blur Background -->
-  <view class="blur-background-container">
-    <image 
-      wx:if="{{ currentPost && currentPost.media && currentPost.media.length > 0 }}"
+  <!-- Blur Background (hidden for text-only posts) -->
+  <view class="blur-background-container" wx:if="{{ currentPost.type !== 'text' && currentPost.media && currentPost.media.length > 0 }}">
+    <image
       class="blur-background"
       src="{{ currentPost.media[currentSlideIndex || 0].preview_url || currentPost.media[currentSlideIndex || 0].url }}"
       mode="aspectFill"
@@ -14,8 +13,9 @@
     <view class="blur-overlay"></view>
   </view>
   
-  <!-- Orientation Toggle Button -->
+  <!-- Orientation Toggle Button (hidden for text-only posts) -->
   <view
+    wx:if="{{ currentPost.type !== 'text' && currentPost.media && currentPost.media.length > 0 }}"
     class="orientation-toggle-btn"
     catchtap="onOrientationToggle"
   >
@@ -42,8 +42,17 @@
   <view 
     class="media-content {{ detailPanelState === 'half' ? 'detail-half' : '' }} {{ detailPanelState === 'full' ? 'detail-full' : '' }}"
   >
+    <!-- Text-only post display -->
+    <view wx:if="{{ currentPost.type === 'text' || (!currentPost.media || currentPost.media.length === 0) }}" class="text-post-display" catchtap="onScreenTap">
+      <view class="text-post-content">
+        <text class="text-post-title" wx:if="{{ currentPost.title }}">{{ currentPost.title }}</text>
+        <text class="text-post-body">{{ currentPost.content }}</text>
+      </view>
+    </view>
+
     <!-- Media Display Component -->
     <media-display
+      wx:else
       id="media-display"
       current-post="{{ currentPost }}"
       current-media="{{ currentMedia }}"
@@ -73,8 +82,9 @@
       bind:continuetoggle="onContinueToggle"
       bind:progresstap="onProgressTap"
     />
-    <!-- Post Info Overlay -->
+    <!-- Post Info Overlay (hidden for text-only posts) -->
     <post-info-overlay
+      wx:if="{{ currentPost.type !== 'text' && currentPost.media && currentPost.media.length > 0 }}"
       class="post-info-overlay {{ detailPanelState !== 'closed' ? 'hidden' : '' }}"
       display-title="{{ displayTitle }}"
       display-content="{{ displayContent }}"

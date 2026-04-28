@@ -13,6 +13,7 @@ Page({
     filter: "",
     search: "",
     universityId: "",
+    category: "",
     
     // Source page for navigation context
     sourcePage: "discover",
@@ -68,7 +69,8 @@ Page({
     const filter = options.filter || "";
     const search = options.search || "";
     const universityId = options.university_id || "";
-    const source = options.source || ""; // Add source parameter
+    const category = options.category ? decodeURIComponent(options.category) : "";
+    const source = options.source || "";
     
     if (!postId) {
       this.showError(this.data.messages.noPostId);
@@ -136,6 +138,7 @@ Page({
       filter: filter,
       search: search,
       universityId: universityId,
+      category: category,
       sourcePage: sourcePage,
       userInfo: app.globalData.userInfo || null,
       showLoginModal: app.globalData.showLoginModal || false,
@@ -303,6 +306,7 @@ Page({
       if (this.data.filter) apiParams.filter = this.data.filter;
       if (this.data.search) apiParams.search = this.data.search;
       if (this.data.universityId) apiParams.university_id = this.data.universityId;
+      if (this.data.category) apiParams.category = this.data.category;
       
       const requestHeaders = {
         "Content-Type": "application/json"

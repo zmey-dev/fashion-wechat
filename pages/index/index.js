@@ -247,7 +247,10 @@ Page({
 
     let url = `/pages/post-detail/post-detail?postId=${postId}&type=discover&source=${this.data.layoutCurrentPage}`;
 
-    const { searchParams } = this.data;
+    const { searchParams, categoryFilter } = this.data;
+    if (categoryFilter) {
+      url += `&category=${encodeURIComponent(categoryFilter)}`;
+    }
     if (searchParams.search) {
       url += `&search=${encodeURIComponent(searchParams.search)}`;
     }
