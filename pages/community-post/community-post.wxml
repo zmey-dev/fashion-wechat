@@ -66,15 +66,15 @@
       <view class="section">
         <text class="section-label">添加图片/视频 <text class="optional-hint">（非必选，最多10张）</text></text>
         <view class="media-grid">
-          <view wx:for="{{mediaFiles}}" wx:key="index" class="media-item {{item.uploaded ? 'uploaded' : ''}} {{item.uploadError ? 'upload-error' : ''}}">
+          <view wx:for="{{files}}" wx:key="index" class="media-item {{item.uploaded ? 'uploaded' : ''}} {{item.uploadError ? 'upload-error' : ''}}">
             <image
               wx:if="{{item.type === 'image'}}"
-              src="{{item.tempFilePath}}"
+              src="{{item.url}}"
               mode="aspectFill"
               class="media-preview"
             />
             <view wx:if="{{item.type === 'video'}}" class="media-preview video-preview">
-              <image src="{{item.thumbTempFilePath || ''}}" mode="aspectFill" class="media-preview" />
+              <image src="{{item.thumbnail || item.file.thumbTempFilePath || ''}}" mode="aspectFill" class="media-preview" />
               <view class="video-play-icon">▶</view>
             </view>
             <view class="upload-status" wx:if="{{item.uploaded}}">
@@ -91,7 +91,7 @@
           <view
             class="media-add"
             bindtap="onAddMedia"
-            wx:if="{{mediaFiles.length < 10}}"
+            wx:if="{{files.length < 10}}"
           >
             <text class="media-add-icon">+</text>
           </view>
@@ -100,6 +100,20 @@
 
       <view class="bottom-spacer"></view>
     </scroll-view>
+
+    <!-- Hidden canvases for image processing (required by ucloudUpload) -->
+    <canvas
+      canvas-id="blurCanvas"
+      style="position: fixed; top: -1000px; left: -1000px; width: 200px; height: 200px; opacity: 0; pointer-events: none;"
+    ></canvas>
+    <canvas
+      canvas-id="compressCanvas"
+      style="position: fixed; top: -1000px; left: -1000px; width: 1920px; height: 1920px; opacity: 0; pointer-events: none;"
+    ></canvas>
+    <canvas
+      canvas-id="thumbnailCanvas"
+      style="position: fixed; top: -1000px; left: -1000px; width: 320px; height: 180px; opacity: 0; pointer-events: none;"
+    ></canvas>
 
     <view class="submit-area">
       <button class="submit-btn {{canSubmit ? '' : 'disabled'}}" bindtap="onSubmit" disabled="{{!canSubmit || isSubmitting}}">

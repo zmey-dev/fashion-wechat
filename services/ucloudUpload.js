@@ -1166,6 +1166,11 @@ const testUpload = async (filePath) => {
 };
 
 // Export functions
+const resetUploadState = () => {
+  globalUploadLock = false;
+  activeUploads = 0;
+};
+
 module.exports = {
   uploadImage,
   uploadImageSimple,
@@ -1179,5 +1184,6 @@ module.exports = {
   compressAudio,
   createBlurImage,
   generateVideoThumbnail,
-  testUpload
+  testUpload,
+  resetUploadState
 };

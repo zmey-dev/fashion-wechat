@@ -92,6 +92,7 @@ Page({
   },
 
   onLoad: function (options) {
+    ucloudUpload.resetUploadState();
     const app = getApp();
 
     this.userInfoHandler = (userInfo) => {
