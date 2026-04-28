@@ -244,10 +244,9 @@ Page({
 
   onPostTap: function (e) {
     const postId = e.currentTarget.dataset.postId;
-    
-    // Build URL with search parameters if they exist
-    let url = `/pages/post-detail/post-detail?postId=${postId}&type=discover`;
-    
+
+    let url = `/pages/post-detail/post-detail?postId=${postId}&type=discover&source=${this.data.layoutCurrentPage}`;
+
     const { searchParams } = this.data;
     if (searchParams.search) {
       url += `&search=${encodeURIComponent(searchParams.search)}`;
@@ -255,7 +254,7 @@ Page({
     if (searchParams.university_id) {
       url += `&university_id=${searchParams.university_id}`;
     }
-    
+
     wx.navigateTo({
       url: url,
     });
