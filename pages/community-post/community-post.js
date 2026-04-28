@@ -107,10 +107,8 @@ Page({
         const updated = [...this.data.mediaFiles, ...newFiles];
         this.setData({ mediaFiles: updated });
 
-        const startIndex = this.data.mediaFiles.length - newFiles.length;
-        newFiles.forEach((file, i) => {
-          this.uploadFileInBackground(file, startIndex + i);
-        });
+        const startIndex = updated.length - newFiles.length;
+        this.startSequentialUploads(newFiles, startIndex);
       },
     });
   },
@@ -120,6 +118,15 @@ Page({
     const files = [...this.data.mediaFiles];
     files.splice(index, 1);
     this.setData({ mediaFiles: files });
+  },
+
+  async startSequentialUploads(newFiles, startIndex) {
+    for (let i = 0; i < newFiles.length; i++) {
+      const fileIndex = startIndex + i;
+      if (this.data.mediaFiles[fileIndex]) {
+        await this.uploadFileInBackground(this.data.mediaFiles[fileIndex], fileIndex);
+      }
+    }
   },
 
   async uploadFileInBackground(file, fileIndex) {
