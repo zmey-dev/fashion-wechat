@@ -1,5 +1,5 @@
 <wxs src="../../utils/userDisplayName.wxs" module="userUtils" />
-<app-layout current-page="index" search-params="{{searchParams}}" bind:search="onSearch">
+<app-layout current-page="{{layoutCurrentPage}}" search-params="{{searchParams}}" bind:search="onSearch">
   <!-- Main Content Area with Scroll View for infinite scroll -->
   <scroll-view 
     class="content-area" 

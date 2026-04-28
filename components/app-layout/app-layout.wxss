@@ -121,47 +121,24 @@
 }
 
 .filter-tabs {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: flex-start;
   padding: 0 30rpx;
   height: 100%;
-  overflow-x: auto;
-}
-
-.filter-tabs.expanded-mode {
-  justify-content: space-between;
-}
-
-.filter-tabs.compact-mode {
-  justify-content: space-evenly;
-  flex-wrap: nowrap;
-}
-
-.filter-tabs.compact-mode .filter-tab {
-  flex: none;
-  margin: 0 5rpx;
-}
-
-.filter-tabs.expanded-mode .filter-tab {
-  flex: 1;
-  min-width: 0;
 }
 
 .filter-tab {
-  flex: 1;
+  flex: none;
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 8rpx;
-  padding: 10rpx 15rpx;
+  padding: 10rpx 24rpx;
   border-radius: 20rpx;
-  transition: none;
   text-align: center;
-  min-width: 0;
   position: relative;
-  overflow: hidden;
   background-color: transparent;
+  white-space: nowrap;
 }
 
 .filter-tab:first-child {

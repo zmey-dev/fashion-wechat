@@ -29,7 +29,7 @@ Component({
    */
   data: {
     filterScrollLeft: 0,
-    dynamicTabStyle: "expanded", // 'expanded' or 'compact'
+    dynamicTabStyle: "compact", // 'expanded' or 'compact'
     isTeacher: false, // Flag to determine if current user is a teacher
     showSearch: false, // Flag to control search UI visibility
     // All pages list - unified structure for regular users
@@ -472,17 +472,21 @@ Component({
      * Page redirect handler (for index page)
      */
     redirectToPage: function (path) {
-      // Hide any loading indicators before navigation
       wx.hideLoading();
       wx.redirectTo({
         url: path,
         success: () => {
-          // Hide loading after successful navigation
           wx.hideLoading();
         },
-        fail: () => {
-          wx.hideLoading();
-          this.showToast(this.data.messages.navigationError);
+        fail: (err) => {
+          console.warn("redirectTo failed, trying reLaunch:", path, err);
+          wx.reLaunch({
+            url: path,
+            fail: () => {
+              wx.hideLoading();
+              this.showToast(this.data.messages.navigationError);
+            },
+          });
         },
       });
     },
