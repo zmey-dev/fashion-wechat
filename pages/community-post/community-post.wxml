@@ -1,102 +1,101 @@
-<view class="community-post-page">
-  <view class="header">
-    <view class="header-content">
-      <text class="header-title">社区发布</text>
-      <view class="close-btn" bindtap="onClose">✕</view>
-    </view>
-  </view>
-
-  <view class="section">
-    <text class="section-label">选择主题分类</text>
-    <view class="category-grid">
-      <view
-        wx:for="{{categories}}"
-        wx:key="value"
-        class="category-item {{selectedCategory === item.value ? 'selected' : ''}}"
-        bindtap="onCategoryTap"
-        data-value="{{item.value}}"
-      >
-        <text>{{item.label}}</text>
-      </view>
-    </view>
-  </view>
-
-  <view class="section">
-    <text class="section-label">选择校区 <text class="optional-hint">（非必选）</text></text>
-    <view class="campus-list" wx:if="{{campusData.length > 0}}">
-      <view wx:for="{{campusData}}" wx:key="id" class="campus-group">
-        <text class="campus-university-name">{{item.name}}</text>
-        <view class="campus-items">
+<app-layout current-page="upload" background="#1a1a1a">
+  <view class="community-post-page">
+    <scroll-view class="community-scroll" scroll-y="true">
+      <view class="section">
+        <text class="section-label">选择主题分类</text>
+        <view class="category-grid">
           <view
-            wx:for="{{item.campuses}}"
-            wx:for-item="campus"
-            wx:key="id"
-            class="campus-item {{selectedCampusId === campus.id ? 'selected' : ''}}"
-            bindtap="onCampusTap"
-            data-id="{{campus.id}}"
+            wx:for="{{categories}}"
+            wx:key="value"
+            class="category-item {{selectedCategory === item.value ? 'selected' : ''}}"
+            bindtap="onCategoryTap"
+            data-value="{{item.value}}"
           >
-            <text>{{campus.name}}</text>
+            <text>{{item.label}}</text>
           </view>
         </view>
       </view>
-    </view>
-    <view wx:else class="campus-empty">
-      <text>暂无校区信息</text>
-    </view>
-  </view>
 
-  <view class="section">
-    <text class="section-label">标题</text>
-    <input
-      class="title-input"
-      placeholder="请输入标题"
-      maxlength="100"
-      value="{{title}}"
-      bindinput="onTitleInput"
-    />
-  </view>
-
-  <view class="section">
-    <text class="section-label">内容</text>
-    <textarea
-      class="content-input"
-      placeholder="说点什么吧~"
-      maxlength="5000"
-      value="{{content}}"
-      bindinput="onContentInput"
-      auto-height="true"
-    />
-  </view>
-
-  <view class="section">
-    <text class="section-label">添加图片/视频 <text class="optional-hint">（非必选，最多10张）</text></text>
-    <view class="media-grid">
-      <view wx:for="{{mediaFiles}}" wx:key="index" class="media-item">
-        <image
-          wx:if="{{item.type === 'image'}}"
-          src="{{item.tempFilePath}}"
-          mode="aspectFill"
-          class="media-preview"
-        />
-        <view wx:if="{{item.type === 'video'}}" class="media-preview video-preview">
-          <image src="{{item.thumbTempFilePath || ''}}" mode="aspectFill" class="media-preview" />
-          <view class="video-play-icon">▶</view>
+      <view class="section">
+        <text class="section-label">选择校区 <text class="optional-hint">（非必选）</text></text>
+        <view class="campus-list" wx:if="{{campusData.length > 0}}">
+          <view wx:for="{{campusData}}" wx:key="id" class="campus-group">
+            <text class="campus-university-name">{{item.name}}</text>
+            <view class="campus-items">
+              <view
+                wx:for="{{item.campuses}}"
+                wx:for-item="campus"
+                wx:key="id"
+                class="campus-item {{selectedCampusId === campus.id ? 'selected' : ''}}"
+                bindtap="onCampusTap"
+                data-id="{{campus.id}}"
+              >
+                <text>{{campus.name}}</text>
+              </view>
+            </view>
+          </view>
         </view>
-        <view class="media-remove" catchtap="onRemoveMedia" data-index="{{index}}">✕</view>
+        <view wx:else class="campus-empty">
+          <text>暂无校区信息</text>
+        </view>
       </view>
-      <view
-        class="media-add"
-        bindtap="onAddMedia"
-        wx:if="{{mediaFiles.length < 10}}"
-      >
-        <text class="media-add-icon">+</text>
+
+      <view class="section">
+        <text class="section-label">标题</text>
+        <input
+          class="title-input"
+          placeholder="请输入标题"
+          maxlength="100"
+          value="{{title}}"
+          bindinput="onTitleInput"
+        />
       </view>
+
+      <view class="section">
+        <text class="section-label">内容</text>
+        <textarea
+          class="content-input"
+          placeholder="说点什么吧~"
+          maxlength="5000"
+          value="{{content}}"
+          bindinput="onContentInput"
+          auto-height="true"
+        />
+      </view>
+
+      <view class="section">
+        <text class="section-label">添加图片/视频 <text class="optional-hint">（非必选，最多10张）</text></text>
+        <view class="media-grid">
+          <view wx:for="{{mediaFiles}}" wx:key="index" class="media-item">
+            <image
+              wx:if="{{item.type === 'image'}}"
+              src="{{item.tempFilePath}}"
+              mode="aspectFill"
+              class="media-preview"
+            />
+            <view wx:if="{{item.type === 'video'}}" class="media-preview video-preview">
+              <image src="{{item.thumbTempFilePath || ''}}" mode="aspectFill" class="media-preview" />
+              <view class="video-play-icon">▶</view>
+            </view>
+            <view class="media-remove" catchtap="onRemoveMedia" data-index="{{index}}">✕</view>
+          </view>
+          <view
+            class="media-add"
+            bindtap="onAddMedia"
+            wx:if="{{mediaFiles.length < 10}}"
+          >
+            <text class="media-add-icon">+</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="bottom-spacer"></view>
+    </scroll-view>
+
+    <view class="submit-area">
+      <button class="submit-btn {{canSubmit ? '' : 'disabled'}}" bindtap="onSubmit" disabled="{{!canSubmit || isSubmitting}}">
+        {{isSubmitting ? '发布中...' : '发布'}}
+      </button>
     </view>
   </view>
-
-  <view class="submit-area">
-    <button class="submit-btn {{canSubmit ? '' : 'disabled'}}" bindtap="onSubmit" disabled="{{!canSubmit || isSubmitting}}">
-      {{isSubmitting ? '发布中...' : '发布'}}
-    </button>
-  </view>
-</view>
+</app-layout>

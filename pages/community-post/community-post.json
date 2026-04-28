@@ -1,5 +1,10 @@
 {
-  "usingComponents": {},
-  "disableScroll": false,
-  "navigationBarTitleText": "社区发帖"
+  "usingComponents": {
+    "app-layout": "/components/app-layout/app-layout"
+  },
+  "navigationBarTitleText": "社区发帖",
+  "backgroundColor": "#1a1a1a",
+  "backgroundTextStyle": "light",
+  "disableScroll": true,
+  "enablePullDownRefresh": false
 }
