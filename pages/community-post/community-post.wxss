@@ -186,6 +186,43 @@
   font-size: 48rpx;
 }
 
+.media-item.uploaded {
+  border-color: rgba(0, 212, 255, 0.4);
+}
+
+.media-item.upload-error {
+  border-color: rgba(255, 71, 87, 0.6);
+}
+
+.upload-status {
+  position: absolute;
+  bottom: 8rpx;
+  left: 8rpx;
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.status-icon {
+  font-size: 24rpx;
+}
+
+.status-icon.success {
+  color: #00d4ff;
+}
+
+.status-icon.error {
+  color: #ff4757;
+}
+
+.status-icon.uploading {
+  color: #fbbf24;
+}
+
 .media-remove {
   position: absolute;
   top: 8rpx;
