@@ -36,9 +36,27 @@ Component({
     pages: [
       // Filter pages (top navigation)
       {
+        key: "category_news",
+        name: "新鲜事",
+        path: "/pages/index/index?category=新鲜事",
+        type: "filter",
+      },
+      {
         key: "index",
         name: "精选",
         path: "/pages/index/index",
+        type: "filter",
+      },
+      {
+        key: "category_daily",
+        name: "日常投稿",
+        path: "/pages/index/index?category=日常投稿",
+        type: "filter",
+      },
+      {
+        key: "category_market",
+        name: "二手闲置",
+        path: "/pages/index/index?category=二手闲置",
         type: "filter",
       },
       {
@@ -150,7 +168,7 @@ Component({
     messages: {
       navigationError: "页面跳转失败",
     },
-    // Unread counts
+    showPostModal: false,
     showLoginModal: false,
     userInfo: {},
     totalUnreadCount: 0,
@@ -404,9 +422,9 @@ Component({
 
       // Always use redirectTo for all pages to ensure complete reinitialization
       if (pageConfig.path) {
-        // Special handling for upload page when coming from event pages
         if (page === "upload") {
-          this.handleUploadNavigation();
+          this.setData({ showPostModal: true });
+          return;
         } else {
           // Always redirect for all pages
           this.redirectToPage(pageConfig.path);
@@ -663,6 +681,23 @@ Component({
     /**
      * Login modal close event handler
      */
+    onPostModalClose: function () {
+      this.setData({ showPostModal: false });
+    },
+
+    onPostOptionTap: function (e) {
+      const { type } = e.currentTarget.dataset;
+      this.setData({ showPostModal: false });
+
+      if (type === 'portfolio') {
+        this.handleUploadNavigation();
+      } else if (type === 'community') {
+        wx.navigateTo({
+          url: '/pages/community-post/community-post',
+        });
+      }
+    },
+
     onLoginModalClose: function () {
       const app = getApp();
       app.setState("showLoginModal", false);

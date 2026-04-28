@@ -81,14 +81,42 @@
     </view>
   </view>
   
+  <!-- Post Type Selection Modal -->
+  <view class="post-modal-mask {{showPostModal ? 'visible' : ''}}" bindtap="onPostModalClose">
+    <view class="post-modal-sheet" catchtap="">
+      <view class="post-modal-header">
+        <text class="post-modal-title">选择发布类型</text>
+        <view class="post-modal-close" bindtap="onPostModalClose">
+          <image src="/images/icons/close.svg" mode="aspectFit" class="post-modal-close-icon" />
+        </view>
+      </view>
+      <view class="post-modal-options">
+        <view class="post-modal-option" bindtap="onPostOptionTap" data-type="portfolio">
+          <image src="/images/icons/camera.svg" mode="aspectFit" class="post-modal-option-icon" />
+          <view class="post-modal-option-info">
+            <text class="post-modal-option-title">作品投稿</text>
+            <text class="post-modal-option-desc">上传图片或视频作品</text>
+          </view>
+        </view>
+        <view class="post-modal-option" bindtap="onPostOptionTap" data-type="community">
+          <image src="/images/icons/message.svg" mode="aspectFit" class="post-modal-option-icon" />
+          <view class="post-modal-option-info">
+            <text class="post-modal-option-title">社区发帖</text>
+            <text class="post-modal-option-desc">新鲜事、日常、二手闲置</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
   <!-- Login Modal -->
-  <login-modal 
+  <login-modal
     wx:if="{{showLoginModal}}"
     bind:close="onLoginModalClose"
     bind:success="onLoginSuccess"
   >
   </login-modal>
-  
+
   <!-- Global Loading Overlay -->
   <loading-overlay />
 </view>

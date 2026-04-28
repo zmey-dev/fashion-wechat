@@ -21,6 +21,7 @@
     "pages/event-detail/event-detail",
     "pages/event-create/event-create",
     "pages/company-posts/company-posts",
+    "pages/community-post/community-post",
     "pages/maintenance/maintenance"
   ],
   "window": {
