@@ -19,13 +19,17 @@
         bindtap="onPostTap"
       >
         <!-- Media Container -->
-        <view class="media-container">
-          <image 
+        <view class="media-container" wx:if="{{item.media && item.media.length > 0}}">
+          <image
             class="post-image"
             src="{{item.type === 'video' ? item.media[0].preview_url : item.media[0].url}}"
             lazy-load="{{true}}"
             mode="aspectFill"
           />
+        </view>
+        <!-- Text-only Preview -->
+        <view class="text-preview-container" wx:else>
+          <text class="text-preview-title">{{item.title}}</text>
         </view>
         
         <!-- User Section -->
