@@ -39,7 +39,7 @@
     "ignoreUploadUnusedFiles": false
   },
   "compileType": "miniprogram",
-  "libVersion": "3.8.9",
+  "libVersion": "3.15.2",
   "appid": "wx5247084ab8d78608",
   "projectname": "XiaoShow-platform",
   "condition": {

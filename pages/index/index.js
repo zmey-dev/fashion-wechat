@@ -50,19 +50,6 @@ Page({
     };
     app.subscribe("showLoginModal", this.loginModalHandler);
 
-    if (options.category) {
-      const category = decodeURIComponent(options.category);
-      const categoryKeyMap = {
-        '新鲜事': 'category_news',
-        '日常投稿': 'category_daily',
-        '二手闲置': 'category_market',
-      };
-      this.setData({
-        categoryFilter: category,
-        layoutCurrentPage: categoryKeyMap[category] || 'index',
-      });
-    }
-
     if (options.search || options.university_id) {
       const searchParams = {};
       if (options.search) searchParams.search = decodeURIComponent(options.search);

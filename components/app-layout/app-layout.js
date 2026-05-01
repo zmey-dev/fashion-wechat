@@ -38,7 +38,7 @@ Component({
       {
         key: "category_news",
         name: "新鲜事",
-        path: "/pages/index/index?category=新鲜事",
+        path: "/pages/community-feed/community-feed?category=新鲜事",
         type: "filter",
       },
       {
@@ -50,13 +50,13 @@ Component({
       {
         key: "category_daily",
         name: "日常投稿",
-        path: "/pages/index/index?category=日常投稿",
+        path: "/pages/community-feed/community-feed?category=日常投稿",
         type: "filter",
       },
       {
         key: "category_market",
         name: "二手闲置",
-        path: "/pages/index/index?category=二手闲置",
+        path: "/pages/community-feed/community-feed?category=二手闲置",
         type: "filter",
       },
       {
