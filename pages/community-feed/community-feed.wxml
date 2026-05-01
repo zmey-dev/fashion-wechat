@@ -28,7 +28,7 @@
           <view class="feed-media" wx:if="{{item.media && item.media.length > 0}}">
             <image
               wx:if="{{item.type === 'video'}}"
-              class="feed-image {{item.media.length === 1 ? 'single' : ''}}"
+              class="feed-image"
               src="{{item.media[0].preview_url}}"
               mode="aspectFill"
               lazy-load="{{true}}"
@@ -40,7 +40,7 @@
                 wx:for-index="mIdx"
                 wx:key="id"
                 wx:if="{{mIdx < 3}}"
-                class="feed-image {{item.media.length === 1 ? 'single' : item.media.length === 2 ? 'double' : 'triple'}}"
+                class="feed-image"
                 src="{{media.url}}"
                 mode="aspectFill"
                 lazy-load="{{true}}"
