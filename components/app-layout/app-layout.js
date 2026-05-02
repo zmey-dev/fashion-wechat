@@ -423,6 +423,11 @@ Component({
       // Always use redirectTo for all pages to ensure complete reinitialization
       if (pageConfig.path) {
         if (page === "upload") {
+          const userInfo = this.data.userInfo || getApp().globalData.userInfo;
+          if (userInfo && userInfo.role === "company") {
+            this.navigateToUpload();
+            return;
+          }
           this.setData({ showPostModal: true });
           return;
         } else {
