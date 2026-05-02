@@ -86,9 +86,9 @@ Page({
   },
 
   onPostTap(e) {
-    const { postId, index } = e.currentTarget.dataset;
+    const { postId } = e.currentTarget.dataset;
     wx.navigateTo({
-      url: `/pages/post-detail/post-detail?postId=${postId}&type=discover&source=${this.data.layoutCurrentPage}&filter=category&search=${encodeURIComponent(this.data.category)}`,
+      url: `/pages/community-detail/community-detail?postId=${postId}&source=${this.data.layoutCurrentPage}`,
     });
   },
 

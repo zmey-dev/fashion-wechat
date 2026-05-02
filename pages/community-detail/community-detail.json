@@ -1,0 +1,9 @@
+{
+  "usingComponents": {
+    "comment-tree": "/components/media-player/comment-tree/comment-tree"
+  },
+  "navigationBarTitleText": "",
+  "backgroundColor": "#000000",
+  "backgroundTextStyle": "light",
+  "disableScroll": true
+}

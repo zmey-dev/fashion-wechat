@@ -1,0 +1,92 @@
+<wxs src="../../utils/userDisplayName.wxs" module="userUtils" />
+<app-layout current-page="{{sourcePage}}">
+  <view class="community-detail-page" wx:if="{{post}}">
+    <view class="fixed-top">
+      <view class="post-header-sticky">
+        <view class="post-user" bindtap="onUserTap">
+          <avatar avatar="{{post.user.avatar}}" user="{{post.user}}" size="56"></avatar>
+          <view class="post-user-info">
+            <text class="post-username">{{userUtils.getDisplayName(post.user)}}</text>
+            <view class="post-meta-row">
+              <text class="post-time">{{timeDisplay}}</text>
+              <text class="post-campus" wx:if="{{post.campus}}">· {{post.campus.name}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <view class="post-body">
+        <text class="post-title" wx:if="{{post.title}}">{{post.title}}</text>
+        <text class="post-content">{{post.content}}</text>
+
+        <view class="post-media" wx:if="{{post.media && post.media.length > 0}}">
+          <block wx:if="{{post.type === 'video'}}">
+            <video
+              class="post-video"
+              src="{{post.media[0].url}}"
+              poster="{{post.media[0].preview_url}}"
+              controls="{{true}}"
+              object-fit="contain"
+            />
+          </block>
+          <block wx:else>
+            <image
+              wx:for="{{post.media}}"
+              wx:key="id"
+              class="post-image"
+              src="{{item.url}}"
+              mode="aspectFill"
+              bindtap="onImagePreview"
+              data-url="{{item.url}}"
+              lazy-load="{{true}}"
+            />
+          </block>
+        </view>
+
+        <view class="post-tag" wx:if="{{post.category}}">
+          <text class="tag-icon">#</text>
+          <text>{{post.category}}</text>
+        </view>
+      </view>
+
+      <view class="post-actions">
+        <view class="action-item {{isLiked ? 'active' : ''}}" bindtap="onLikeTap">
+          <image class="action-icon" src="/images/icons/heart.svg" mode="aspectFit" />
+          <text class="action-text">{{post.likes || 0}}</text>
+        </view>
+        <view class="action-item {{isFavorited ? 'active' : ''}}" bindtap="onFavoriteTap">
+          <image class="action-icon" src="/images/icons/star.svg" mode="aspectFit" />
+          <text class="action-text">收藏</text>
+        </view>
+        <view class="action-item" bindtap="onShareTap">
+          <image class="action-icon" src="/images/icons/share.svg" mode="aspectFit" />
+          <text class="action-text">分享</text>
+        </view>
+        <view class="action-item">
+          <image class="action-icon" src="/images/icons/message.svg" mode="aspectFit" />
+          <text class="action-text">{{comments.length || 0}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="comment-area">
+      <comment-tree
+        comments="{{comments}}"
+        logged-user="{{userInfo}}"
+        auth-user="{{userInfo}}"
+        selected-post="{{postForComments}}"
+        bind:commentsent="onCommentSent"
+        bind:delete="onCommentDeleted"
+        bind:like="onCommentLiked"
+      />
+    </view>
+  </view>
+
+  <view class="loading-state" wx:elif="{{loading}}">
+    <text>加载中...</text>
+  </view>
+
+  <view class="error-state" wx:elif="{{errorMessage}}">
+    <text>{{errorMessage}}</text>
+  </view>
+</app-layout>

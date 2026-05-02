@@ -23,6 +23,7 @@
     "pages/company-posts/company-posts",
     "pages/community-post/community-post",
     "pages/community-feed/community-feed",
+    "pages/community-detail/community-detail",
     "pages/maintenance/maintenance"
   ],
   "window": {
