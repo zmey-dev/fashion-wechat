@@ -158,7 +158,7 @@
               catchtap="handlePostNotification"
               data-notify-id="{{item.notify_id}}"
             >
-              <image src="/images/icons/check.svg" class="action-icon" mode="aspectFit"></image>
+              <image src="/images/icons/close.svg" class="action-icon" mode="aspectFit"></image>
             </view>
           </view>
         </view>

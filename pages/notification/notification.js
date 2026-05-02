@@ -247,11 +247,9 @@ Page({
     });
   },
 
-  // Handle post notification
   handlePostNotification(e) {
     const { notifyId } = e.currentTarget.dataset;
 
-    // Find the notification to get sender and receiver info
     const notification = this.data.postNotifications.find(
       item => String(item.notify_id) === String(notifyId)
     );
@@ -264,19 +262,30 @@ Page({
       return;
     }
 
-    const isPersistedId = typeof notifyId === "number" ||
-      (typeof notifyId === "string" && /^\d+$/.test(notifyId));
+    wx.showModal({
+      title: "删除通知",
+      content: "确定要删除这条通知吗？",
+      confirmText: "删除",
+      confirmColor: "#ff4757",
+      cancelText: "取消",
+      success: (res) => {
+        if (!res.confirm) return;
 
-    if (!isPersistedId) {
-      this.removeNotification(notifyId);
-      return;
-    }
+        const isPersistedId = typeof notifyId === "number" ||
+          (typeof notifyId === "string" && /^\d+$/.test(notifyId));
 
-    this.requestFriendAction({
-      status: "removed",
-      notify_id: parseInt(notifyId),
-      sender_id: notification.sender_id,
-      receiver_id: this.data.userInfo.id || this.data.userInfo.user_id
+        if (!isPersistedId) {
+          this.removeNotification(notifyId);
+          return;
+        }
+
+        this.requestFriendAction({
+          status: "removed",
+          notify_id: parseInt(notifyId),
+          sender_id: notification.sender_id,
+          receiver_id: this.data.userInfo.id || this.data.userInfo.user_id
+        });
+      },
     });
   },
 
