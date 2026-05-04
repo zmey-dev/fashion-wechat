@@ -289,3 +289,55 @@
   font-size: 28rpx;
   text-align: center;
 }
+
+/* Read/Unread states */
+.notification-item.unread .notification-content {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.notification-item.read .notification-content {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.notification-item.read .sender-name {
+  font-size: 24rpx;
+  font-weight: 400;
+  color: #888888;
+}
+
+.notification-item.read .notification-type {
+  font-size: 20rpx;
+  color: #666666;
+}
+
+.notification-item.read .notification-time {
+  font-size: 18rpx;
+  color: #555555;
+}
+
+.notification-item.read .avatar-container {
+  width: 64rpx;
+  height: 64rpx;
+  opacity: 0.6;
+}
+
+/* Lock button */
+.lock-btn {
+  background: rgba(255, 193, 7, 0.15);
+  border: 2rpx solid rgba(255, 193, 7, 0.3);
+}
+
+.lock-btn.locked {
+  background: rgba(255, 193, 7, 0.3);
+  border-color: rgba(255, 193, 7, 0.6);
+}
+
+.lock-icon {
+  font-size: 24rpx;
+}
+
+.notification-item.read .lock-btn {
+  opacity: 0.6;
+}

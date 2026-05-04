@@ -177,11 +177,20 @@ App({
   // Update notifications globally
   updateNotifications(notifications) {
     this.globalData.notifications = notifications || [];
-    this.globalData.notificationCount = notifications ? notifications.length : 0;
-    
-    // Notify observers
+
+    let readIds = [];
+    try {
+      readIds = wx.getStorageSync("read_notifications") || [];
+    } catch (e) {}
+    const readSet = new Set(readIds.map(String));
+    const unreadCount = (notifications || []).filter(
+      (n) => !readSet.has(String(n.notify_id))
+    ).length;
+
+    this.globalData.notificationCount = unreadCount;
+
     this.setState("notifications", this.globalData.notifications);
-    this.setState("notificationCount", this.globalData.notificationCount);
+    this.setState("notificationCount", unreadCount);
   },
 
   // Get current notifications

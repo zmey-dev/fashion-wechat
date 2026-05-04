@@ -425,7 +425,7 @@ Component({
         if (page === "upload") {
           const userInfo = this.data.userInfo || getApp().globalData.userInfo;
           if (userInfo && userInfo.role === "company") {
-            this.navigateToUpload();
+            this.handleUploadNavigation();
             return;
           }
           this.setData({ showPostModal: true });
@@ -638,9 +638,16 @@ Component({
             if (res.data.status === "success") {
               const notifications =
                 res.data.message || res.data.notifications || [];
-              const notificationCount = notifications.length;
+              let readIds = [];
+              try {
+                readIds = wx.getStorageSync("read_notifications") || [];
+              } catch (e) {}
+              const readSet = new Set(readIds.map(String));
+              const unreadCount = notifications.filter(
+                (n) => !readSet.has(String(n.notify_id))
+              ).length;
               this.setData({
-                notificationCount: notificationCount,
+                notificationCount: unreadCount,
               });
 
               // Update global state so notification page can react

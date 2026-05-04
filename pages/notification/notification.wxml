@@ -17,12 +17,12 @@
         <image src="/images/icons/user-icon.svg" class="icon" mode="aspectFit"></image>
       </view>
       <text class="tab-text">好友</text>
-      <view class="tab-badge" wx:if="{{friendNotifications.length > 0}}">
-        {{friendNotifications.length}}
+      <view class="tab-badge" wx:if="{{unreadFriendCount > 0}}">
+        {{unreadFriendCount}}
       </view>
     </view>
-    
-    <view 
+
+    <view
       class="tab-item {{activeTab === 1 ? 'active' : ''}}"
       bindtap="switchTab"
       data-index="1"
@@ -31,8 +31,8 @@
         <image src="/images/icons/message.svg" class="icon" mode="aspectFit"></image>
       </view>
       <text class="tab-text">动态</text>
-      <view class="tab-badge" wx:if="{{postNotifications.length > 0}}">
-        {{postNotifications.length}}
+      <view class="tab-badge" wx:if="{{unreadPostCount > 0}}">
+        {{unreadPostCount}}
       </view>
     </view>
   </view>
@@ -128,7 +128,7 @@
     <view
       wx:for="{{postNotifications}}"
       wx:key="notify_id"
-      class="notification-item"
+      class="notification-item {{readNotifications[item.notify_id] ? 'read' : 'unread'}}"
     >
       <view
         class="notification-content {{expandedItems[item.notify_id] ? 'expanded' : ''}}"
@@ -153,6 +153,13 @@
           </view>
 
           <view class="action-buttons">
+            <view
+              class="action-btn lock-btn {{lockedNotifications[item.notify_id] ? 'locked' : ''}}"
+              catchtap="onLockTap"
+              data-notify-id="{{item.notify_id}}"
+            >
+              <text class="lock-icon">{{lockedNotifications[item.notify_id] ? '🔒' : '🔓'}}</text>
+            </view>
             <view
               class="action-btn remove-btn"
               catchtap="handlePostNotification"

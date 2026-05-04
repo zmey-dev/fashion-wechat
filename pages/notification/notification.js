@@ -9,7 +9,11 @@ Page({
     notifications: [],
     friendNotifications: [],
     postNotifications: [],
-    expandedItems: {}, // Track which items are expanded
+    expandedItems: {},
+    readNotifications: {},
+    lockedNotifications: {},
+    unreadFriendCount: 0,
+    unreadPostCount: 0,
     loading: false,
     error: null,
     isProcessing: false, // Loading state for actions
@@ -47,12 +51,14 @@ Page({
     };
     app.subscribe("notifications", this.notificationHandler);
     
-    // Get initial notifications
+    this.loadReadStatus();
+    this.loadLockedStatus();
     this.getNotifications();
   },
 
   onShow() {
-    // Check if there are global notifications available
+    this.loadReadStatus();
+    this.loadLockedStatus();
     const globalNotifications = app.getNotifications();
     if (globalNotifications && globalNotifications.length > 0) {
       this.processNotifications(globalNotifications);
@@ -119,10 +125,26 @@ Page({
     const friendNotifications = notifications.filter((item) => !isPostEvent(item));
     const postNotifications = notifications.filter(isPostEvent);
 
+    const lockedSet = {};
+    notifications.forEach((n) => {
+      if (n.locked_at) lockedSet[String(n.notify_id)] = true;
+    });
+
+    const readSet = this.data.readNotifications || {};
+    const unreadFriendCount = friendNotifications.filter(
+      (n) => !readSet[String(n.notify_id)]
+    ).length;
+    const unreadPostCount = postNotifications.filter(
+      (n) => !readSet[String(n.notify_id)]
+    ).length;
+
     this.setData({
       notifications,
       friendNotifications,
       postNotifications,
+      lockedNotifications: lockedSet,
+      unreadFriendCount,
+      unreadPostCount,
       loading: false,
       error: null,
     });
@@ -132,6 +154,7 @@ Page({
     const { postId, notifyId } = e.currentTarget.dataset;
 
     if (postId) {
+      this.markAsRead(notifyId);
       wx.navigateTo({
         url: `/pages/post-detail/post-detail?postId=${postId}`,
       });
@@ -139,6 +162,116 @@ Page({
     }
 
     this.toggleItem({ currentTarget: { dataset: { id: notifyId } } });
+  },
+
+  markAsRead(notifyId) {
+    try {
+      const readIds = wx.getStorageSync("read_notifications") || [];
+      const id = String(notifyId);
+      if (!readIds.includes(id)) {
+        readIds.push(id);
+        wx.setStorageSync("read_notifications", readIds);
+
+        const currentCount = app.getNotificationCount() || 0;
+        if (currentCount > 0) {
+          app.updateNotifications(this.data.notifications);
+          app.globalData.notificationCount = currentCount - 1;
+          app.setState("notificationCount", currentCount - 1);
+        }
+      }
+      const readSet = {};
+      readIds.forEach((rid) => { readSet[rid] = true; });
+      this.updateUnreadCounts(readSet);
+    } catch (e) {}
+  },
+
+  loadReadStatus() {
+    try {
+      const readIds = wx.getStorageSync("read_notifications") || [];
+      const readSet = {};
+      readIds.forEach((rid) => { readSet[rid] = true; });
+      this.setData({ readNotifications: readSet });
+    } catch (e) {}
+  },
+
+  updateUnreadCounts(readSet) {
+    const unreadFriendCount = this.data.friendNotifications.filter(
+      (n) => !readSet[String(n.notify_id)]
+    ).length;
+    const unreadPostCount = this.data.postNotifications.filter(
+      (n) => !readSet[String(n.notify_id)]
+    ).length;
+    this.setData({ readNotifications: readSet, unreadFriendCount, unreadPostCount });
+  },
+
+  onLockTap(e) {
+    const { notifyId } = e.currentTarget.dataset;
+    const id = String(notifyId);
+    const isLocked = !!this.data.lockedNotifications[id];
+
+    if (isLocked) {
+      wx.showModal({
+        title: "解锁消息",
+        content: "解锁后该消息将在30天后自动删除，确定要解锁吗？",
+        confirmText: "解锁",
+        cancelText: "取消",
+        success: (res) => {
+          if (res.confirm) {
+            this.toggleLock(id, false);
+          }
+        },
+      });
+    } else {
+      wx.showModal({
+        title: "锁定消息",
+        content: "锁定后该消息将永久保留，不会被自动删除。确定要锁定吗？",
+        confirmText: "锁定",
+        cancelText: "取消",
+        success: (res) => {
+          if (res.confirm) {
+            this.toggleLock(id, true);
+          }
+        },
+      });
+    }
+  },
+
+  toggleLock(notifyId, lock) {
+    const token = this.data.userInfo?.token;
+    if (!token) return;
+
+    wx.request({
+      url: `${config.BACKEND_URL}/notify/toggle_lock`,
+      method: "POST",
+      header: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      data: { notify_id: parseInt(notifyId), locked: lock },
+      success: (res) => {
+        if (res.data.status === "success") {
+          const lockedSet = { ...this.data.lockedNotifications };
+          if (lock) {
+            lockedSet[notifyId] = true;
+          } else {
+            delete lockedSet[notifyId];
+          }
+          this.setData({ lockedNotifications: lockedSet });
+          wx.showToast({ title: lock ? "已锁定" : "已解锁", icon: "success" });
+        } else if (res.data.msg) {
+          wx.showToast({ title: res.data.msg, icon: "none" });
+        }
+      },
+    });
+  },
+
+  loadLockedStatus() {
+    const notifications = this.data.notifications || [];
+    const lockedSet = {};
+    notifications.forEach((n) => {
+      if (n.locked_at) lockedSet[String(n.notify_id)] = true;
+    });
+    this.setData({ lockedNotifications: lockedSet });
   },
 
   getNotifications() {
