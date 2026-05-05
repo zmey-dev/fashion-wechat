@@ -497,11 +497,61 @@
         </view>
       </view>
       
+      <!-- Campus Management Section -->
+      <view class="card section-title">
+        <text>校区管理</text>
+        <view class="add-button" bindtap="toggleCampusInput">
+          <image src="../../images/icons/plus.svg" mode="aspectFit"></image>
+        </view>
+      </view>
+
+      <view wx:if="{{showCampusInput}}" class="input-section">
+        <view class="input-row">
+          <input
+            class="mobile-input"
+            placeholder="输入校区名称..."
+            value="{{newCampusInput}}"
+            bindinput="onCampusInput"
+          />
+          <view class="input-actions">
+            <view class="confirm-btn" bindtap="addCampus">
+              <image src="../../images/icons/check.svg" mode="aspectFit"></image>
+            </view>
+            <view class="cancel-btn" bindtap="toggleCampusInput">
+              <image src="../../images/icons/close.svg" mode="aspectFit"></image>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <view class="faculty-list">
+        <block wx:if="{{campuses.length > 0}}">
+          <view
+            wx:for="{{campuses}}"
+            wx:key="id"
+            class="faculty-item"
+          >
+            <view class="faculty-info">
+              <view class="faculty-name">{{item.name}}</view>
+            </view>
+            <view class="faculty-actions">
+              <view class="delete-btn" catchtap="deleteCampus" data-id="{{item.id}}" data-name="{{item.name}}">
+                <image src="../../images/icons/trash.svg" mode="aspectFit"></image>
+              </view>
+            </view>
+          </view>
+        </block>
+        <view wx:else class="empty-state">
+          <image src="../../images/icons/graduation-cap.svg" mode="aspectFit"></image>
+          <text>暂无校区信息</text>
+        </view>
+      </view>
+
       <!-- Save Button -->
       <view class="save-section">
-        <button 
-          class="save-button {{loading || hasValidationIssues ? 'disabled' : ''}}" 
-          bindtap="saveUniversityData" 
+        <button
+          class="save-button {{loading || hasValidationIssues ? 'disabled' : ''}}"
+          bindtap="saveUniversityData"
           disabled="{{loading || hasValidationIssues}}"
         >
           <block wx:if="{{loading}}">

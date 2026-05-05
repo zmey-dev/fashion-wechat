@@ -234,6 +234,7 @@ Component({
           this.startNotificationPolling();
         } else {
           this.stopNotificationPolling();
+          this.setData({ notificationCount: 0 });
         }
       };
 

@@ -246,45 +246,54 @@
           
           <view class="form-field">
             <label class="field-label">当前密码</label>
-            <view class="input-wrapper">
-              <input 
+            <view class="input-wrapper password-wrapper">
+              <input
                 class="field-input {{passwordErrors.old_password ? 'error' : ''}}"
-                password="{{true}}"
+                password="{{!showOldPassword}}"
                 value="{{passwordForm.old_password}}"
                 placeholder="请输入当前密码"
                 data-field="old_password"
                 bindinput="onPasswordInputChange"
               />
+              <view class="password-toggle" catchtap="togglePasswordVisibility" data-field="showOldPassword">
+                <image src="/images/icons/eye.svg" class="toggle-icon {{showOldPassword ? 'visible' : ''}}" mode="aspectFit" />
+              </view>
             </view>
             <text class="error-text" wx:if="{{passwordErrors.old_password}}">{{passwordErrors.old_password}}</text>
           </view>
 
           <view class="form-field">
             <label class="field-label">新密码</label>
-            <view class="input-wrapper">
-              <input 
+            <view class="input-wrapper password-wrapper">
+              <input
                 class="field-input {{passwordErrors.new_password ? 'error' : ''}}"
-                password="{{true}}"
+                password="{{!showNewPassword}}"
                 value="{{passwordForm.new_password}}"
                 placeholder="请输入新密码 (6-20位)"
                 data-field="new_password"
                 bindinput="onPasswordInputChange"
               />
+              <view class="password-toggle" catchtap="togglePasswordVisibility" data-field="showNewPassword">
+                <image src="/images/icons/eye.svg" class="toggle-icon {{showNewPassword ? 'visible' : ''}}" mode="aspectFit" />
+              </view>
             </view>
             <text class="error-text" wx:if="{{passwordErrors.new_password}}">{{passwordErrors.new_password}}</text>
           </view>
 
           <view class="form-field">
             <label class="field-label">确认新密码</label>
-            <view class="input-wrapper">
-              <input 
+            <view class="input-wrapper password-wrapper">
+              <input
                 class="field-input {{passwordErrors.new_password_confirmation ? 'error' : ''}}"
-                password="{{true}}"
+                password="{{!showConfirmPassword}}"
                 value="{{passwordForm.new_password_confirmation}}"
                 placeholder="请再次输入新密码"
                 data-field="new_password_confirmation"
                 bindinput="onPasswordInputChange"
               />
+              <view class="password-toggle" catchtap="togglePasswordVisibility" data-field="showConfirmPassword">
+                <image src="/images/icons/eye.svg" class="toggle-icon {{showConfirmPassword ? 'visible' : ''}}" mode="aspectFit" />
+              </view>
             </view>
             <text class="error-text" wx:if="{{passwordErrors.new_password_confirmation}}">{{passwordErrors.new_password_confirmation}}</text>
           </view>
@@ -697,48 +706,57 @@
       <!-- Password Change Section for non-company users -->
       <view wx:if="{{userInfo.role !== 'company'}}" class="form-section">
         <view class="section-title">密码管理</view>
-        
+
         <view class="form-field">
           <label class="field-label">当前密码</label>
-          <view class="input-wrapper">
-            <input 
+          <view class="input-wrapper password-wrapper">
+            <input
               class="field-input {{passwordErrors.old_password ? 'error' : ''}}"
-              password="{{true}}"
+              password="{{!showOldPassword}}"
               value="{{passwordForm.old_password}}"
               placeholder="请输入当前密码"
               data-field="old_password"
               bindinput="onPasswordInputChange"
             />
+            <view class="password-toggle" catchtap="togglePasswordVisibility" data-field="showOldPassword">
+              <image src="/images/icons/eye.svg" class="toggle-icon {{showOldPassword ? 'visible' : ''}}" mode="aspectFit" />
+            </view>
           </view>
           <text class="error-text" wx:if="{{passwordErrors.old_password}}">{{passwordErrors.old_password}}</text>
         </view>
 
         <view class="form-field">
           <label class="field-label">新密码</label>
-          <view class="input-wrapper">
-            <input 
+          <view class="input-wrapper password-wrapper">
+            <input
               class="field-input {{passwordErrors.new_password ? 'error' : ''}}"
-              password="{{true}}"
+              password="{{!showNewPassword}}"
               value="{{passwordForm.new_password}}"
               placeholder="请输入新密码 (6-20位)"
               data-field="new_password"
               bindinput="onPasswordInputChange"
             />
+            <view class="password-toggle" catchtap="togglePasswordVisibility" data-field="showNewPassword">
+              <image src="/images/icons/eye.svg" class="toggle-icon {{showNewPassword ? 'visible' : ''}}" mode="aspectFit" />
+            </view>
           </view>
           <text class="error-text" wx:if="{{passwordErrors.new_password}}">{{passwordErrors.new_password}}</text>
         </view>
 
         <view class="form-field">
           <label class="field-label">确认新密码</label>
-          <view class="input-wrapper">
-            <input 
+          <view class="input-wrapper password-wrapper">
+            <input
               class="field-input {{passwordErrors.new_password_confirmation ? 'error' : ''}}"
-              password="{{true}}"
+              password="{{!showConfirmPassword}}"
               value="{{passwordForm.new_password_confirmation}}"
               placeholder="请再次输入新密码"
               data-field="new_password_confirmation"
               bindinput="onPasswordInputChange"
             />
+            <view class="password-toggle" catchtap="togglePasswordVisibility" data-field="showConfirmPassword">
+              <image src="/images/icons/eye.svg" class="toggle-icon {{showConfirmPassword ? 'visible' : ''}}" mode="aspectFit" />
+            </view>
           </view>
           <text class="error-text" wx:if="{{passwordErrors.new_password_confirmation}}">{{passwordErrors.new_password_confirmation}}</text>
         </view>

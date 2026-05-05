@@ -878,6 +878,38 @@
   border-radius: 8rpx;
 }
 
+/* Password Toggle */
+.password-wrapper {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.password-wrapper .field-input {
+  flex: 1;
+  padding-right: 70rpx;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 16rpx;
+  width: 44rpx;
+  height: 44rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toggle-icon {
+  width: 36rpx;
+  height: 36rpx;
+  opacity: 0.3;
+}
+
+.toggle-icon.visible {
+  opacity: 0.8;
+}
+
 /* Password Change Styles */
 .password-actions {
   display: flex;

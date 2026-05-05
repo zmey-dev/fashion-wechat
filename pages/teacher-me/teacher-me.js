@@ -64,8 +64,11 @@ Page({
     // Input states for adding new items
     newFacultyInput: "",
     newMajorInput: "",
+    newCampusInput: "",
     showFacultyInput: false,
     showMajorInput: false,
+    showCampusInput: false,
+    campuses: [],
     // Validation status
     hasValidationIssues: true,
 
@@ -699,7 +702,7 @@ Page({
           this.updateValidationStatus();
         }
 
-        // Load available faculties and majors
+        this.loadCampuses();
         this.loadExistsFacultiesAndMajors();
       },
       fail: () => {
@@ -863,6 +866,97 @@ Page({
     
     // Update validation status
     this.updateValidationStatus();
+  },
+
+  // Campus management
+  loadCampuses: function () {
+    wx.request({
+      url: `${config.BACKEND_URL}/campus`,
+      method: "GET",
+      success: (res) => {
+        if (res.data.status === "success") {
+          const universityId = this.data.university?.id;
+          const myUniversity = (res.data.data || []).find(
+            (u) => u.id === universityId
+          );
+          this.setData({ campuses: myUniversity?.campuses || [] });
+        }
+      },
+    });
+  },
+
+  toggleCampusInput: function () {
+    this.setData({
+      showCampusInput: !this.data.showCampusInput,
+      newCampusInput: "",
+    });
+  },
+
+  onCampusInput: function (e) {
+    this.setData({ newCampusInput: e.detail.value });
+  },
+
+  addCampus: function () {
+    const name = this.data.newCampusInput.trim();
+    if (!name) {
+      wx.showToast({ title: "请输入校区名称", icon: "none" });
+      return;
+    }
+
+    const token = getApp().globalData.userInfo?.token;
+    const universityId = this.data.university?.id;
+    if (!token || !universityId) return;
+
+    wx.request({
+      url: `${config.BACKEND_URL}/teacher/campus`,
+      method: "POST",
+      header: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      data: { university_id: universityId, name },
+      success: (res) => {
+        if (res.data.status === "success") {
+          wx.showToast({ title: "校区添加成功", icon: "success" });
+          this.setData({ showCampusInput: false, newCampusInput: "" });
+          this.loadCampuses();
+        } else if (res.data.msg) {
+          wx.showToast({ title: res.data.msg, icon: "none" });
+        }
+      },
+    });
+  },
+
+  deleteCampus: function (e) {
+    const { id, name } = e.currentTarget.dataset;
+    const token = getApp().globalData.userInfo?.token;
+    if (!token) return;
+
+    wx.showModal({
+      title: "删除校区",
+      content: `确定要删除"${name}"吗？`,
+      confirmText: "删除",
+      confirmColor: "#ff4757",
+      success: (res) => {
+        if (!res.confirm) return;
+        wx.request({
+          url: `${config.BACKEND_URL}/teacher/campus/${id}`,
+          method: "DELETE",
+          header: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          success: (res) => {
+            if (res.data.status === "success") {
+              wx.showToast({ title: "校区已删除", icon: "success" });
+              this.loadCampuses();
+            } else if (res.data.msg) {
+              wx.showToast({ title: res.data.msg, icon: "none" });
+            }
+          },
+        });
+      },
+    });
   },
 
   // Show/hide major input

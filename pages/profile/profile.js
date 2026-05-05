@@ -62,6 +62,9 @@ Page({
     passwordChanging: false,
     passwordMessage: "",
     passwordError: "",
+    showOldPassword: false,
+    showNewPassword: false,
+    showConfirmPassword: false,
     
     // Countdown for SMS resend
     phoneCountdown: 0,
@@ -1519,7 +1522,11 @@ Page({
     });
   },
 
-  // Password change input handler
+  togglePasswordVisibility: function (e) {
+    const { field } = e.currentTarget.dataset;
+    this.setData({ [field]: !this.data[field] });
+  },
+
   onPasswordInputChange: function (e) {
     const { field } = e.currentTarget.dataset;
     const value = e.detail.value;
