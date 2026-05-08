@@ -480,10 +480,35 @@ App({
   setUserInfo(userInfo) {
     this.globalData.userInfo = userInfo;
     wx.setStorageSync("userInfo", userInfo);
-    // Initialize socket when user info changes
     this.initializeSocket();
-    // Fetch unread messages when user logs in
     this.fetchUnreadMessages();
+    this.checkIdNumberInvalid(userInfo);
+  },
+
+  checkIdNumberInvalid(userInfo) {
+    if (!userInfo?.token) return;
+    wx.request({
+      url: `${config.BACKEND_URL}/get_my_profile`,
+      method: "GET",
+      header: { Authorization: `Bearer ${userInfo.token}` },
+      success: (res) => {
+        if (res.statusCode === 200 && (res.data?.profile?.id_number_invalid || res.data?.user?.id_number_invalid)) {
+          setTimeout(() => {
+            wx.showModal({
+              title: "身份证信息异常",
+              content: "您的身份证信息不正确，请尽快前往个人中心更新身份证信息，否则账号功能将受到限制。",
+              confirmText: "去更新",
+              cancelText: "稍后再说",
+              success: (modalRes) => {
+                if (modalRes.confirm) {
+                  wx.navigateTo({ url: "/pages/profile/profile" });
+                }
+              },
+            });
+          }, 1000);
+        }
+      },
+    });
   },
 
   // Handle force disconnect event
@@ -521,7 +546,8 @@ App({
       if (userInfo) {
         this.globalData.userInfo = userInfo;
 
-        // Fetch unread messages after setting user info
+        this.checkIdNumberInvalid(userInfo);
+
         this.fetchUnreadMessages();
 
         wx.request({
@@ -643,17 +669,20 @@ App({
   },
 
   async logout() {
-    // Clear unread messages
     this.clearAllUnreadMessages();
 
     this.globalData.userInfo = null;
+    this.globalData.notifications = [];
+    this.globalData.notificationCount = 0;
+    this.setState("notifications", []);
+    this.setState("notificationCount", 0);
+
     await wx.setStorageSync("userInfo", null);
 
     if (this.globalData.socketManager) {
       this.globalData.socketManager.disconnect();
     }
 
-    // Cleanup unread message socket listeners
     this.cleanupUnreadMessageSocketListeners();
 
     wx.redirectTo({ url: "/pages/index/index" });

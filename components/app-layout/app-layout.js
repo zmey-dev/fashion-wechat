@@ -415,14 +415,19 @@ Component({
         }
       }
 
-      // Always redirect to the page regardless of current page
-      // This ensures page refresh/reinitialization behavior for all pages
       this.setData({
         currentPage: page,
       });
 
-      // Always use redirectTo for all pages to ensure complete reinitialization
-      if (pageConfig.path) {
+      let targetPath = pageConfig.path;
+      if (page === "me") {
+        const userInfo = this.data.userInfo || getApp().globalData.userInfo;
+        if (userInfo && userInfo.role === "teacher") {
+          targetPath = "/pages/teacher-me/teacher-me";
+        }
+      }
+
+      if (targetPath) {
         if (page === "upload") {
           const userInfo = this.data.userInfo || getApp().globalData.userInfo;
           if (userInfo && userInfo.role === "company") {
@@ -433,7 +438,7 @@ Component({
           return;
         } else {
           // Always redirect for all pages
-          this.redirectToPage(pageConfig.path);
+          this.redirectToPage(targetPath);
         }
       }
 

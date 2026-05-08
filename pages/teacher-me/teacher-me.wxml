@@ -276,6 +276,14 @@
           
           <view class="detail-row">
             <view class="detail-icon">
+              <image src="../../images/icons/user-icon.svg" mode="aspectFit"></image>
+            </view>
+            <view class="detail-label">真实姓名:</view>
+            <view class="detail-value">{{selectedStudent.name || '未设置'}}</view>
+          </view>
+
+          <view class="detail-row">
+            <view class="detail-icon">
               <image src="../../images/icons/document-text.svg" mode="aspectFit"></image>
             </view>
             <view class="detail-label">身份证:</view>
