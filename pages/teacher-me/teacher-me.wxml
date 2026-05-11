@@ -257,15 +257,7 @@
             <view class="detail-label">学院:</view>
             <view class="detail-value">{{selectedStudent.faculty || '未设置'}}</view>
           </view>
-          
-          <view class="detail-row">
-            <view class="detail-icon">
-              <image src="../../images/icons/book-open.svg" mode="aspectFit"></image>
-            </view>
-            <view class="detail-label">专业:</view>
-            <view class="detail-value">{{selectedStudent.major || '未设置'}}</view>
-          </view>
-          
+
           <view class="detail-row">
             <view class="detail-icon">
               <image src="../../images/icons/users.svg" mode="aspectFit"></image>
@@ -274,6 +266,30 @@
             <view class="detail-value">{{selectedStudent.class || '未设置'}}</view>
           </view>
           
+          <view class="detail-row">
+            <view class="detail-icon">
+              <image src="../../images/icons/document-text.svg" mode="aspectFit"></image>
+            </view>
+            <view class="detail-label">学号:</view>
+            <view class="detail-value">{{selectedStudent.student_number || '未设置'}}</view>
+          </view>
+          
+          <view class="detail-row">
+            <view class="detail-icon">
+              <image src="../../images/icons/calendar.svg" mode="aspectFit"></image>
+            </view>
+            <view class="detail-label">入学年份:</view>
+            <view class="detail-value">{{selectedStudent.attend_year || '未设置'}}</view>
+          </view>
+
+          <view class="detail-row">
+            <view class="detail-icon">
+              <image src="../../images/icons/book-open.svg" mode="aspectFit"></image>
+            </view>
+            <view class="detail-label">专业:</view>
+            <view class="detail-value">{{selectedStudent.major || '未设置'}}</view>
+          </view>
+
           <view class="detail-row">
             <view class="detail-icon">
               <image src="../../images/icons/user-icon.svg" mode="aspectFit"></image>
@@ -288,14 +304,6 @@
             </view>
             <view class="detail-label">身份证:</view>
             <view class="detail-value">{{selectedStudent.id_number || '未设置'}}</view>
-          </view>
-          
-          <view class="detail-row">
-            <view class="detail-icon">
-              <image src="../../images/icons/document-text.svg" mode="aspectFit"></image>
-            </view>
-            <view class="detail-label">学号:</view>
-            <view class="detail-value">{{selectedStudent.student_number || '未设置'}}</view>
           </view>
           
           <view class="detail-row">
@@ -316,13 +324,6 @@
           </view>* 
           -->
           
-          <view class="detail-row">
-            <view class="detail-icon">
-              <image src="../../images/icons/calendar.svg" mode="aspectFit"></image>
-            </view>
-            <view class="detail-label">入学年份:</view>
-            <view class="detail-value">{{selectedStudent.attend_year || '未设置'}}</view>
-          </view>
         </view>
       </view>
       
