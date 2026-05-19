@@ -4,6 +4,9 @@
   <!-- Header -->
   <view class="header">
     <text class="header-title">通知</text>
+    <view class="subscribe-btn" bindtap="onSubscribeTap" wx:if="{{!subscribed}}">
+      <text class="subscribe-text">订阅通知</text>
+    </view>
   </view>
 
   <!-- Tab Navigation -->

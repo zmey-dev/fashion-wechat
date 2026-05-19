@@ -227,9 +227,7 @@ Component({
         this.setData({ showLoginModal });
       };      this.userInfoHandler = (userInfo) => {
         this.setData({ userInfo });
-        // Update layout for user role
         this.updateLayoutForUserRole(userInfo);
-        // Start notification polling when user logs in (but not for teachers)
         if (userInfo && userInfo.token && userInfo.role !== 'teacher') {
           this.startNotificationPolling();
         } else {

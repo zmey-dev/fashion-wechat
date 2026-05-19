@@ -229,7 +229,7 @@
         </view>
         <view class="block-btn-top" catchtap="blockStudent" data-id="{{selectedStudent.id}}">
           <image src="../../images/icons/close.svg" mode="aspectFit"></image>
-          <text>堵塞</text>
+          <text>封禁</text>
         </view>
       </view>
       
@@ -260,36 +260,20 @@
 
           <view class="detail-row">
             <view class="detail-icon">
-              <image src="../../images/icons/users.svg" mode="aspectFit"></image>
-            </view>
-            <view class="detail-label">班级:</view>
-            <view class="detail-value">{{selectedStudent.class || '未设置'}}</view>
-          </view>
-          
-          <view class="detail-row">
-            <view class="detail-icon">
-              <image src="../../images/icons/document-text.svg" mode="aspectFit"></image>
-            </view>
-            <view class="detail-label">学号:</view>
-            <view class="detail-value">{{selectedStudent.student_number || '未设置'}}</view>
-          </view>
-          
-          <view class="detail-row">
-            <view class="detail-icon">
-              <image src="../../images/icons/calendar.svg" mode="aspectFit"></image>
-            </view>
-            <view class="detail-label">入学年份:</view>
-            <view class="detail-value">{{selectedStudent.attend_year || '未设置'}}</view>
-          </view>
-
-          <view class="detail-row">
-            <view class="detail-icon">
               <image src="../../images/icons/book-open.svg" mode="aspectFit"></image>
             </view>
             <view class="detail-label">专业:</view>
             <view class="detail-value">{{selectedStudent.major || '未设置'}}</view>
           </view>
 
+          <view class="detail-row">
+            <view class="detail-icon">
+              <image src="../../images/icons/users.svg" mode="aspectFit"></image>
+            </view>
+            <view class="detail-label">班级:</view>
+            <view class="detail-value">{{selectedStudent.class || '未设置'}}</view>
+          </view>
+          
           <view class="detail-row">
             <view class="detail-icon">
               <image src="../../images/icons/user-icon.svg" mode="aspectFit"></image>
@@ -302,10 +286,26 @@
             <view class="detail-icon">
               <image src="../../images/icons/document-text.svg" mode="aspectFit"></image>
             </view>
+            <view class="detail-label">学号:</view>
+            <view class="detail-value">{{selectedStudent.student_number || '未设置'}}</view>
+          </view>
+          
+          <view class="detail-row">
+            <view class="detail-icon">
+              <image src="../../images/icons/document-text.svg" mode="aspectFit"></image>
+            </view>
             <view class="detail-label">身份证:</view>
             <view class="detail-value">{{selectedStudent.id_number || '未设置'}}</view>
           </view>
           
+          <view class="detail-row">
+            <view class="detail-icon">
+              <image src="../../images/icons/calendar.svg" mode="aspectFit"></image>
+            </view>
+            <view class="detail-label">入学年份:</view>
+            <view class="detail-value">{{selectedStudent.attend_year || '未设置'}}</view>
+          </view>
+
           <view class="detail-row">
             <view class="detail-icon">
               <image src="../../images/icons/phone.svg" mode="aspectFit"></image>

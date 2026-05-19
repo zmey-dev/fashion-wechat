@@ -1,4 +1,5 @@
 const { default: config } = require("../../config");
+const { hasAskedRecently } = require("../../utils/subscriptionHelper");
 
 const app = getApp();
 
@@ -16,7 +17,8 @@ Page({
     unreadPostCount: 0,
     loading: false,
     error: null,
-    isProcessing: false, // Loading state for actions
+    isProcessing: false,
+    subscribed: false,
     // Chinese messages for UI text
     messages: {
       loading: "加载中...",
@@ -57,6 +59,7 @@ Page({
   },
 
   onShow() {
+    this.setData({ subscribed: hasAskedRecently() });
     this.loadReadStatus();
     this.loadLockedStatus();
     const globalNotifications = app.getNotifications();
@@ -326,6 +329,20 @@ Page({
   },
 
   // Switch tabs
+  onSubscribeTap() {
+    wx.requestSubscribeMessage({
+      tmplIds: [config.WECHAT_SUBSCRIPTION_TEMPLATE_ID],
+      success: (res) => {
+        try { wx.setStorageSync('wx_subscription_asked', Date.now()); } catch (e) {}
+        this.setData({ subscribed: true });
+        wx.showToast({ title: '订阅成功', icon: 'success' });
+      },
+      fail: (err) => {
+        wx.showModal({ title: '订阅失败', content: JSON.stringify(err), showCancel: false });
+      },
+    });
+  },
+
   switchTab(e) {
     const { index } = e.currentTarget.dataset;
     this.setData({

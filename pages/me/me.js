@@ -855,11 +855,17 @@ Page({  data: {
     wx.removeStorageSync("userInfo");
 
     // Clear global data
-    getApp().setState("userInfo", null);
+    const app = getApp();
+    app.globalData.userInfo = null;
+    app.globalData.notifications = [];
+    app.globalData.notificationCount = 0;
+    app.setState("notificationCount", 0);
+    app.setState("notifications", []);
+    app.setState("userInfo", null);
 
     // Disconnect socket if exists
-    if (getApp().globalData.socketManager) {
-      getApp().globalData.socketManager.disconnect();
+    if (app.globalData.socketManager) {
+      app.globalData.socketManager.disconnect();
     }
 
     // Clear this page's data
