@@ -255,28 +255,31 @@ Component({
       app.subscribe("userInfo", this.userInfoHandler);
       app.subscribe("totalUnreadCount", this.totalUnreadCountHandler);
       app.subscribe("unreadMessageCount", this.unreadMessageCountHandler);
-      app.subscribe("notificationCount", this.notificationCountHandler); // Set initial data from app's centralized state
+      app.subscribe("notificationCount", this.notificationCountHandler);
+
+      const userInfo = app.globalData.userInfo || {};
+      const isTeacher = userInfo && userInfo.role === "teacher";
+      if (!this.originalPages) {
+        this.originalPages = this.data.pages;
+      }
+
       this.setData({
         showLoginModal: app.globalData.showLoginModal || false,
-        userInfo: app.globalData.userInfo || {},
+        userInfo: userInfo,
         totalUnreadCount: app.getTotalUnreadCount(),
         notificationCount: app.getNotificationCount() || 0,
+        isTeacher: isTeacher,
+        pages: isTeacher ? this.data.teacherPages : this.originalPages,
+        dynamicTabStyle: "compact",
       });
 
-      // Check if user is teacher and update layout accordingly
-      this.updateLayoutForUserRole(app.globalData.userInfo);
-
-      // Start notification polling if user is logged in (but not for teachers)
-      if (app.globalData.userInfo && app.globalData.userInfo.token && app.globalData.userInfo.role !== 'teacher') {
+      if (userInfo && userInfo.token && userInfo.role !== 'teacher') {
         this.startNotificationPolling();
       }
-      // Scroll to current page when component is attached
+
       setTimeout(() => {
         this.scrollToCurrentPage();
       }, 100);
-
-      // Calculate page tab widths for optimal display
-      this.calculatePageTabWidths();
     },
 
     detached: function () {
