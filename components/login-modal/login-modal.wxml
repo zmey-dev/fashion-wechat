@@ -33,7 +33,7 @@
       <view class="form-container {{loginType === 'wechat' ? 'active' : ''}}">
         <view class="wechat-login">
           <view class="wechat-icon">
-            <span class="icon">🔴</span>
+            <image src="/images/icons/wechat.svg" class="wechat-login-icon" mode="aspectFit" />
           </view>
           <span class="wechat-text">微信一键登录</span>
           <span class="wechat-desc">安全便捷</span>

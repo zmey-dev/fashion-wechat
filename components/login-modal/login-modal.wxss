@@ -39,7 +39,7 @@
 }
 
 .modal-title {
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 600;
   color: #ffffff;
 }
@@ -74,7 +74,7 @@
   flex: 1;
   text-align: center;
   padding: 12px 0;
-  font-size: 16px;
+  font-size: 18px;
   color: #888;
   border-bottom: 2px solid transparent;
   cursor: pointer;
@@ -93,7 +93,7 @@
 
 /* Forms */
 .login-forms {
-  padding: 24px;
+  padding: 12px 24px;
 }
 
 .form-container {
@@ -110,22 +110,28 @@
 }
 
 .wechat-icon {
-  font-size: 48px;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: center;
+}
+
+.wechat-login-icon {
+  width: 40px;
+  height: 40px;
 }
 
 .wechat-text {
   display: block;
-  font-size: 18px;
+  font-size: 16px;
   color: #ffffff;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   font-weight: 500;
 }
 
 .wechat-desc {
-  font-size: 14px;
+  font-size: 13px;
   color: #888;
-  margin-bottom: 24px;
+  margin-bottom: 8px;
 }
 
 .wechat-button {
@@ -313,7 +319,7 @@
 
 /* Login Button */
 .login-button-wrapper {
-  padding: 0 24px 20px;
+  padding: 0 24px 12px;
 }
 
 .login-btn {
@@ -346,7 +352,7 @@
 
 /* Register Link */
 .register-link-wrapper {
-  padding: 0 24px 20px;
+  padding: 16px 24px 20px;
   text-align: center;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
@@ -364,13 +370,13 @@
 }
 
 .register-text {
-  font-size: 14px;
+  font-size: 16px;
   color: #888;
   margin-right: 8rpx;
 }
 
 .register-btn-text {
-  font-size: 14px;
+  font-size: 16px;
   color: #f06292;
   font-weight: 600;
   text-decoration: underline;
@@ -392,7 +398,7 @@
 }
 
 .forgot-password-text {
-  font-size: 14px;
+  font-size: 16px;
   color: #667eea;
   font-weight: 600;
   text-decoration: underline;
