@@ -408,7 +408,7 @@ Page({
         const updatedUploading = this.data.uploadingImages.filter(id => id !== uploadId);
         this.setData({
           uploadingImages: updatedUploading,
-          [`imageUploadErrors.${uploadId}`]: error.message || "업로드 실패"
+          [`imageUploadErrors.${uploadId}`]: error.message || "上传失败"
         });
 
         // Show error toast
